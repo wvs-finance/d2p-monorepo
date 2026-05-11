@@ -28,7 +28,7 @@ If everything else fails, this must work: an agent or a human can land on the si
 - [ ] Conversational interface: a chat shell that lets users ask "what is Pair D?" / "what's the current COP/USD hedge?" and get grounded answers from the lab's own corpus
 - [ ] Wallet connection + transact path for deployed instruments (read-first; transact gated behind explicit safety review)
 - [ ] Vercel-hosted deployment with preview environments per PR
-- [ ] Design system grounded in `impeccable` skill + `design-os` process (no SaaS-template slop)
+- [ ] Design system grounded in `impeccable` skill + `design-os` process (no SaaS-template slop). **Style reference:** https://panoptic.xyz/ (structure / typography / spacing only — NOT colors). **Color anchor:** the wvs-finance ∂²Π logo (https://avatars.githubusercontent.com/u/243258665) — monochrome ink-on-cream academic-math register; one accent to be chosen in Phase 2 `/gsd:ui-phase` from the candidate palette (ink-blue / muted-ochre / forest / burgundy)
 - [ ] Responsive: works on phone (frontier-market users are mobile-first), tablet, and desktop
 - [ ] Accessible (WCAG 2.2 AA) and i18n-ready (Spanish + English at minimum — Colombian users are first-class)
 
@@ -100,6 +100,9 @@ The user explicitly questions whether traditional web UI is the right primary su
 | Treat agent-accessibility as a first-class design constraint, not a documentation afterthought | User's instinct that "perhaps not much people are accessing the web interfaces like the way it was done before" — agent surfaces (MCP, structured data, predictable URLs) inform IA and routing | — Pending |
 | Vercel as default deployment target; revisit during research phase | User stated; matches Next.js ecosystem assumption and preview-per-PR workflow | — Pending |
 | Use `impeccable` skill + `design-os` process as authoring tools, not vendored libraries | Both are design-process aids that output project-owned artifacts; vendoring would lock us to their release cadence | — Pending |
+| Borrow style/structure from panoptic.xyz; lock palette to the ∂²Π logo's academic-math register (cream + ink + one muted accent) | Panoptic gets the DeFi-volatility-derivatives editorial register right; the ∂²Π logo IS the brand and IS the product (gamma = second partial derivative of payoff) — palette must honor it, not fight it | — Pending |
+| Accent color decision deferred to Phase 2 `/gsd:ui-phase` | Candidates: ink-blue / muted-ochre / forest / burgundy — all academic-register, all impeccable-compatible. Picking now would short-circuit the UI-SPEC process | — Pending |
+| Phase 2 begins with `/gsd:ui-phase 2` (UI-SPEC contract) BEFORE `/gsd:plan-phase 2` | Lab presence + iteration catalog is the first real UI work; design-os outputs and panoptic-derived tokens must be specified before plans are written | — Pending |
 | Render passes and failures with equal weight | Mirrors the lab's anti-fishing discipline — selecting only passes would betray the science | — Pending |
 | Spanish + English at launch, mobile-first, WCAG 2.2 AA | Frontier-market wage earners are the lab's stated beneficiaries; designing English-desktop-first would exclude them | — Pending |
 
