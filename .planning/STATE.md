@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 01-03-PLAN.md (i18n infrastructure + format wrappers + LanguageSwitcher)
-last_updated: "2026-05-11T20:21:49.872Z"
+stopped_at: Completed 01-08-PLAN.md (CI quality matrix)
+last_updated: "2026-05-11T21:11:57.036Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 8
-  completed_plans: 6
-  percent: 75
+  completed_plans: 8
+  percent: 100
 ---
 
 # Project State: WVS Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-11
 **Session type:** Plan execution (01-01 complete)
-**Stopped at:** Completed 01-03-PLAN.md (i18n infrastructure + format wrappers + LanguageSwitcher)
+**Stopped at:** Completed 01-08-PLAN.md (CI quality matrix)
 
 ---
 
@@ -33,21 +33,20 @@ progress:
 
 ## Current Position
 
-**Active phase:** 01 — Foundation and Scaffold
-**Active plan:** 02 (01 complete)
-**Status:** Plan 01-01 complete; ready for 01-02
+**Active phase:** 02 — Research Lab Presence and Iteration Catalog
+**Active plan:** 01 (Phase 1 complete — 8/8 plans)
+**Status:** Phase 1 complete; ready for Phase 2
 
 **Progress:**
-[████████░░] 75%
-[█░░░░░░░░░] 13% (1/8 plans complete)
-[▓░░░░░░░░░] Phase 1: Foundation and Scaffold (1/8 plans)
+[██████████] 100%
+[██████████] 100% (8/8 plans complete for Phase 1)
+[██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [          ] Phase 2: Research Lab Presence and Iteration Catalog
 [          ] Phase 3: Data Layer and On-Chain Dashboard
 [          ] Phase 4: Agent Surface (MCP)
 [          ] Phase 5: Read-First Wallet and DeFi Surface
 
-Overall: 0/5 phases complete
-```
+Overall: 1/5 phases complete
 
 ---
 
@@ -63,6 +62,7 @@ Overall: 0/5 phases complete
 | Phase 01 P06 | 9 | 3 tasks | 8 files |
 | Phase 01 P02 | 9 | 3 tasks | 8 files |
 | Phase 01 P03 | 10 | 3 tasks | 15 files |
+| Phase 01 P08 | 15 | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -84,6 +84,8 @@ Overall: 0/5 phases complete
 | Message files use nested JSON objects not flat dot keys (Plan 01-03) | next-intl v4 getTranslations('namespace') expects { namespace: { key: value } } — not flat "namespace.key" strings | All message files in messages/{locale}/ use nested object format |
 | LanguageSwitcher uses two adjacent form/button elements (Plan 01-03) | Simpler a11y than dropdown menu: no JS needed, native form submission, keyboard-accessible by default | All locale-switching UI follows this pattern |
 | setLocale server action uses revalidatePath not router.refresh (Plan 01-03) | router.refresh causes stale CDN responses on Vercel preview; revalidatePath flushes cache correctly | All server actions that trigger re-render use revalidatePath |
+| impeccable v2.1.8 has no --fail-on-error flag; CI relies on exit code (Plan 01-08) | Live --help inspection confirmed only --fast and --json flags exist; binary exits non-zero (code 2) on violations in non-JSON mode | impeccable CI job uses `npx --yes impeccable detect app/` without any flag; exit-code-only enforcement |
+| deployment_status event gates test-e2e, a11y, lighthouse (Plan 01-08) | These jobs need the Vercel preview URL; push/PR don't have it. The deployment_status event fires when Vercel preview is ready, providing target_url | Three deployment-dependent jobs only run after successful Vercel preview deploy |
 
 ### Critical Path Summary
 

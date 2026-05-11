@@ -16,9 +16,9 @@ Each maps to exactly one phase in the roadmap.
 - [x] **FOUND-04**: Velite content pipeline with typed iteration schema — `status` is a compile-time enum `'PASS' | 'FAIL' | 'PARKED' | 'IN_PROGRESS'`, `notebook_url`, `dataset_ref`, `analysis_date`, `replication_hash` are required fields
 - [x] **FOUND-05**: wagmi v2 + viem v2 + @tanstack/react-query v5 configured with Celo mainnet (primary), Ethereum mainnet, Base, Arbitrum, Optimism; multi-RPC fallback transport per chain
 - [x] **FOUND-06**: wagmi CLI codegen pipeline reads contract ABIs from `../abrigo/` Foundry artifacts and emits typed TS contract clients
-- [ ] **FOUND-07**: `impeccable detect --fail-on-error` runs in CI on every PR; build fails on any detected anti-pattern
-- [ ] **FOUND-08**: Lighthouse CI performance budget enforces LCP < 2.5s on Moto G Power simulated 3G profile; budget runs on every PR preview
-- [ ] **FOUND-09**: axe-core accessibility tests run in CI; build fails on any WCAG 2.2 AA violation
+- [x] **FOUND-07**: `impeccable detect --fail-on-error` runs in CI on every PR; build fails on any detected anti-pattern
+- [x] **FOUND-08**: Lighthouse CI performance budget enforces LCP < 2.5s on Moto G Power simulated 3G profile; budget runs on every PR preview
+- [x] **FOUND-09**: axe-core accessibility tests run in CI; build fails on any WCAG 2.2 AA violation
 - [x] **FOUND-10**: Vercel environment variables configured for Production, Preview, Development scopes with explicit naming convention (`NEXT_PUBLIC_*` only for safe-to-leak values)
 - [ ] **FOUND-11**: Route group layout structure — `(lab)`, `(dashboard)`, `(defi)` — with RSC pages in `(lab)` never hydrating wallet state
 - [x] **FOUND-12**: Agent-accessibility scaffold in place from day one: `/llms.txt`, `/.well-known/mcp.json`, `/.well-known/openapi.yaml` stub, JSON-LD `Article` and `Dataset` schemas on every content page
@@ -94,10 +94,10 @@ Each maps to exactly one phase in the roadmap.
 
 ### Cross-cutting
 
-- [ ] **CROSS-01**: Every page passes WCAG 2.2 AA conformance (axe-core CI + manual screen-reader audit on top 5 templates)
+- [x] **CROSS-01**: Every page passes WCAG 2.2 AA conformance (axe-core CI + manual screen-reader audit on top 5 templates)
 - [x] **CROSS-02**: Every page renders in es-CO and en; the language switcher is keyboard accessible and persists choice via cookie
-- [ ] **CROSS-03**: Every page hits LCP < 2.5s on Moto G Power 3G profile in Lighthouse CI
-- [ ] **CROSS-04**: No page nests cards inside cards; no purple-to-blue gradients; no oversized italic-serif heroes; no eyebrow chips above h1 — `impeccable detect` confirms in CI
+- [x] **CROSS-03**: Every page hits LCP < 2.5s on Moto G Power 3G profile in Lighthouse CI
+- [x] **CROSS-04**: No page nests cards inside cards; no purple-to-blue gradients; no oversized italic-serif heroes; no eyebrow chips above h1 — `impeccable detect` confirms in CI
 - [x] **CROSS-05**: No page uses pure black or pure gray — all neutrals are tinted toward the lab's accent
 - [x] **CROSS-06**: All currency values display in COP by default for es-CO users, USD by default for en users; user can override via persisted preference
 - [x] **CROSS-07**: All dates use locale-aware formatting (es-CO: `11 de mayo de 2026`; en: `May 11, 2026`); no `en-US` hardcoded
@@ -185,17 +185,17 @@ Populated by gsd-roadmapper — 2026-05-11.
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
-| FOUND-07 | Phase 1 | Pending |
-| FOUND-08 | Phase 1 | Pending |
-| FOUND-09 | Phase 1 | Pending |
+| FOUND-07 | Phase 1 | Complete |
+| FOUND-08 | Phase 1 | Complete |
+| FOUND-09 | Phase 1 | Complete |
 | FOUND-10 | Phase 1 | Complete |
 | FOUND-11 | Phase 1 | Pending |
 | FOUND-12 | Phase 1 | Complete |
 | FOUND-13 | Phase 1 | Complete |
-| CROSS-01 | Phase 1 | Pending |
+| CROSS-01 | Phase 1 | Complete |
 | CROSS-02 | Phase 1 | Complete |
-| CROSS-03 | Phase 1 | Pending |
-| CROSS-04 | Phase 1 | Pending |
+| CROSS-03 | Phase 1 | Complete |
+| CROSS-04 | Phase 1 | Complete |
 | CROSS-05 | Phase 1 | Complete |
 | CROSS-06 | Phase 1 | Complete |
 | CROSS-07 | Phase 1 | Complete |
