@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 01-07-PLAN.md (env validation + agent-accessibility routes)
-last_updated: "2026-05-11T20:20:32.164Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-05-11T20:21:14.205Z"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 8
-  completed_plans: 4
-  percent: 50
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State: WVS Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-11
 **Session type:** Plan execution (01-01 complete)
-**Stopped at:** Completed 01-07-PLAN.md (env validation + agent-accessibility routes)
+**Stopped at:** Completed 01-06-PLAN.md
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Plan 01-01 complete; ready for 01-02
 
 **Progress:**
-[█████░░░░░] 50%
+[████████░░] 75%
 [█░░░░░░░░░] 13% (1/8 plans complete)
 [▓░░░░░░░░░] Phase 1: Foundation and Scaffold (1/8 plans)
 [          ] Phase 2: Research Lab Presence and Iteration Catalog
@@ -76,6 +76,9 @@ Overall: 0/5 phases complete
 | @biomejs/biome@1.9.4 installed (Plan 01-01) | The standalone 'biome' npm package is v0.3.x and unrelated. @biomejs/biome is the correct Biome linter at v1.9.4. | All subsequent plans use pnpm biome check |
 | next.config.ts is FINAL after Plan 01-01 | Plans 03/06/07 only create the files it references (i18n/request.ts, velite.config.ts, lib/env.ts); no parallel-write conflict | Eliminates wave-2 edit conflict risk |
 | Architecture test uses .test.ts not .spec.ts | Vitest collects .test.ts; Playwright testIgnore covers architecture/ dir — both tools correctly handle it | Clean separation of Vitest vs Playwright test collection |
+| iterationSchema exported from velite.config.ts for test isolation | Unit tests import schema directly without triggering Velite build pipeline; @vitest-environment node required due to esbuild TextEncoder invariant in jsdom | Pattern established for all future content schema tests |
+| sync-abrigo-content.yml is manual dispatch only in Phase 1 | workflow_dispatch gating prevents accidental runs; Phase 2 adds repository_dispatch trigger from wvs-finance/abrigo and fills rsync copy step | Phase 2 LAB-04 must fill in copy step before workflow is useful |
+| JSX test files require .tsx extension | TypeScript cannot parse JSX syntax in .ts files; renamed status-pill.test.ts to .tsx | All future component tests must use .tsx extension |
 
 ### Critical Path Summary
 

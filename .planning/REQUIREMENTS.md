@@ -13,7 +13,7 @@ Each maps to exactly one phase in the roadmap.
 - [x] **FOUND-01**: Next.js 16.2 App Router project scaffolded with TypeScript, deploys to Vercel preview-per-PR
 - [ ] **FOUND-02**: Tailwind v4 + shadcn/ui (Feb 2026) installed with OKLCH-based design tokens; `impeccable` design tokens authored in `app/globals.css` via `@theme`
 - [ ] **FOUND-03**: next-intl v4 i18n infrastructure for `es-CO` (Colombian Spanish, primary) and `en` (secondary); translations resolved at RSC render time
-- [ ] **FOUND-04**: Velite content pipeline with typed iteration schema — `status` is a compile-time enum `'PASS' | 'FAIL' | 'PARKED' | 'IN_PROGRESS'`, `notebook_url`, `dataset_ref`, `analysis_date`, `replication_hash` are required fields
+- [x] **FOUND-04**: Velite content pipeline with typed iteration schema — `status` is a compile-time enum `'PASS' | 'FAIL' | 'PARKED' | 'IN_PROGRESS'`, `notebook_url`, `dataset_ref`, `analysis_date`, `replication_hash` are required fields
 - [x] **FOUND-05**: wagmi v2 + viem v2 + @tanstack/react-query v5 configured with Celo mainnet (primary), Ethereum mainnet, Base, Arbitrum, Optimism; multi-RPC fallback transport per chain
 - [x] **FOUND-06**: wagmi CLI codegen pipeline reads contract ABIs from `../abrigo/` Foundry artifacts and emits typed TS contract clients
 - [ ] **FOUND-07**: `impeccable detect --fail-on-error` runs in CI on every PR; build fails on any detected anti-pattern
@@ -182,7 +182,7 @@ Populated by gsd-roadmapper — 2026-05-11.
 | FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
 | FOUND-07 | Phase 1 | Pending |
