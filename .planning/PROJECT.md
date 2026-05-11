@@ -2,15 +2,41 @@
 
 ## What This Is
 
-The public-facing web surface for **WVS Finance / DS2P Labs** — a research lab that designs and ships permissionless convex-hedge instruments on EVM ecosystems, targeting macro-risk exposure for wage earners in frontier and emerging markets (Colombia as the first empirical case). The frontend serves four overlapping audiences from a single application: external researchers and developers exploring the lab's outputs, protocol participants interacting with live hedging instruments (the **Abrigo** family), AI agents that need programmatic and conversational access to protocol state, and the internal team monitoring iteration status across the research pipeline.
+The public-facing web surface for **d2-π (DS2P Labs / WVS Finance)** — a research lab that designs and ships permissionless convex-hedge instruments on EVM ecosystems, targeting macro-risk exposure for wage earners in frontier and emerging markets (Colombia as the first empirical case).
 
-This is the FIRST UI for the org — there is no prior frontend in production. The codebase lives at `~/apps/d2p/frontend/` as a sibling of `~/apps/d2p/abrigo/` (the empirical-validation half).
+**This site is the labs UMBRELLA HOST.** It is not a single product site. The lab incubates multiple hedge-instrument *apps* over time, each with its own subdomain of the site under `/apps/<instrument-family>`. The first and currently sole app is **Abrigo** (∂²Π — gamma; convex hedges targeting Colombian wage-earner macro exposure). Future apps under d2-π will appear as additional entries in the same top-nav "Apps" dropdown without restructuring the site.
+
+The frontend serves four overlapping audiences from a single application: external researchers and developers exploring the lab's outputs, protocol participants interacting with live hedging instruments (currently the **Abrigo** family), AI agents that need programmatic and conversational access to protocol state, and the internal team monitoring iteration status across the research pipeline.
+
+This is the FIRST UI for the org — there is no prior frontend in production. The codebase lives at `~/apps/d2p/frontend/` as a sibling of `~/apps/d2p/abrigo/` (Abrigo's empirical-validation half — Python notebooks).
+
+## Information Architecture
+
+```
+d2-π (the labs umbrella — this site)
+├── /                                    Lab home (mission, current apps, recent iterations across all apps)
+├── /research                            Cross-app publications, decision memos, papers
+├── /team                                Lab contributors
+├── /about                               Anti-fishing discipline, methodology
+├── /apps                                Apps index — all instrument families
+│   └── /apps/abrigo                     Abrigo overview (the FIRST app)
+│       ├── /apps/abrigo/iterations      Abrigo's (Y, M, X) iteration catalog
+│       │   ├── /apps/abrigo/iterations/pair-d/v1           PASS detail
+│       │   └── /apps/abrigo/iterations/fx-vol-.../v1       FAIL detail
+│       ├── /apps/abrigo/instruments     Abrigo's deployed instruments (per chain)
+│       └── /apps/abrigo/dashboard       Abrigo's live on-chain state
+├── /api/mcp/[transport]                 MCP server (scopes tools by app)
+├── /api/dashboard                       BFF aggregating across all apps
+└── /llms.txt, /.well-known/...          Agent discovery (lists all apps)
+```
+
+**Top-nav `Apps` dropdown** is the primary navigation affordance for moving between apps. Today it has one entry (Abrigo); tomorrow it lists each hedge-instrument family the lab ships.
 
 ## Core Value
 
-**Make the lab's research outputs and live hedging instruments accessible — to humans browsing, to participants transacting, and to AI agents consuming — through a single coherent surface that treats agent-first interaction as a primary design constraint, not an afterthought.**
+**Make the lab's research outputs and live hedging instruments accessible — to humans browsing, to participants transacting, and to AI agents consuming — through a single coherent umbrella surface that scopes per-app content cleanly and treats agent-first interaction as a primary design constraint.**
 
-If everything else fails, this must work: an agent or a human can land on the site, understand what Abrigo is, see the current state of every (Y, M, X) iteration, and either interact with a deployed instrument or read the structural evidence that justifies it.
+If everything else fails, this must work: an agent or a human can land on the lab site, navigate via top-nav `Apps → Abrigo`, see the current state of every Abrigo (Y, M, X) iteration, and either interact with a deployed Abrigo instrument or read the structural evidence that justifies it. The same affordance generalizes to any future app the lab incubates.
 
 ## Requirements
 
@@ -20,9 +46,11 @@ If everything else fails, this must work: an agent or a human can land on the si
 
 ### Active
 
-- [ ] Public research-lab presence: lab story, mission, links to org repos, team
-- [ ] Abrigo instrument catalog: every (Y, M, X) iteration with status (PASS / FAIL / PARKED / IN PROGRESS), structural evidence summary, links to notebooks
-- [ ] Live protocol dashboard: deployed contracts, pool state, LP positions, settlement status across chains
+- [ ] **Top-priority: Labs umbrella navigation.** Top-nav with a persistent **Apps dropdown** that today exposes one entry — **Abrigo** → `/apps/abrigo` — and accepts new entries without IA changes. Dropdown also surfaces the Abrigo external presence (Twitter https://x.com/d2pfinabrigo) until the Abrigo app's own external site/handle changes. This is the FIRST design + executable priority because it establishes the umbrella architecture every subsequent screen builds on.
+- [ ] Public research-lab presence: lab story, mission, links to org repos, team — at the umbrella level (NOT scoped to Abrigo)
+- [ ] Abrigo app overview page at `/apps/abrigo`: what Abrigo is, current iteration headline counts, external link to @d2pfinabrigo, links into iterations / instruments / dashboard
+- [ ] Abrigo iteration catalog at `/apps/abrigo/iterations`: every (Y, M, X) iteration with status (PASS / FAIL / PARKED / IN PROGRESS), structural evidence summary, links to notebooks
+- [ ] Abrigo live protocol dashboard at `/apps/abrigo/dashboard`: deployed contracts, pool state, LP positions, settlement status across chains — scoped to Abrigo contracts only (future apps get their own `/apps/<X>/dashboard`)
 - [ ] Econometric results surface: charts, β estimates, confidence intervals, sensitivity bands sourced from `abrigo-analytics`
 - [ ] Agent-accessible API + tool surface: structured endpoints + an MCP server (or equivalent) so AI agents can query iteration state, instrument terms, and on-chain positions
 - [ ] Conversational interface: a chat shell that lets users ask "what is Pair D?" / "what's the current COP/USD hedge?" and get grounded answers from the lab's own corpus
@@ -103,6 +131,9 @@ The user explicitly questions whether traditional web UI is the right primary su
 | Borrow style/structure from panoptic.xyz; lock palette to the ∂²Π logo's academic-math register (cream + ink + one muted accent) | Panoptic gets the DeFi-volatility-derivatives editorial register right; the ∂²Π logo IS the brand and IS the product (gamma = second partial derivative of payoff) — palette must honor it, not fight it | — Pending |
 | Accent color decision deferred to Phase 2 `/gsd:ui-phase` | Candidates: ink-blue / muted-ochre / forest / burgundy — all academic-register, all impeccable-compatible. Picking now would short-circuit the UI-SPEC process | — Pending |
 | Phase 2 begins with `/gsd:ui-phase 2` (UI-SPEC contract) BEFORE `/gsd:plan-phase 2` | Lab presence + iteration catalog is the first real UI work; design-os outputs and panoptic-derived tokens must be specified before plans are written | — Pending |
+| Frontend is the **labs umbrella host**, not a single-product site. Top-nav `Apps` dropdown lists hedge-instrument app families | The lab incubates multiple instruments over time; the IA must accommodate that from day one. Locking the `/apps/<family>/...` URL scheme now is cheap; retrofitting after launch is expensive. | — Pending |
+| Abrigo is the first and currently sole app under the umbrella. All iteration / instrument / dashboard URLs scoped under `/apps/abrigo/` | Abrigo content was previously planned at root `/iterations`, `/dashboard` — this conflated the umbrella with the product. URLs restructured to `/apps/abrigo/iterations`, `/apps/abrigo/dashboard`. | — Pending |
+| Apps dropdown shows external link affordance to @d2pfinabrigo Twitter for Abrigo until that app has its own destination | The Abrigo app has no design yet beyond Twitter; the umbrella must still offer a working outbound link as a placeholder, NOT a dead anchor. | — Pending |
 | Render passes and failures with equal weight | Mirrors the lab's anti-fishing discipline — selecting only passes would betray the science | — Pending |
 | Spanish + English at launch, mobile-first, WCAG 2.2 AA | Frontier-market wage earners are the lab's stated beneficiaries; designing English-desktop-first would exclude them | — Pending |
 

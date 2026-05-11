@@ -24,47 +24,60 @@ Each maps to exactly one phase in the roadmap.
 - [ ] **FOUND-12**: Agent-accessibility scaffold in place from day one: `/llms.txt`, `/.well-known/mcp.json`, `/.well-known/openapi.yaml` stub, JSON-LD `Article` and `Dataset` schemas on every content page
 - [ ] **FOUND-13**: Vitest + Playwright + MSW test infrastructure with hooks for chain mocking via anvil fork
 
-### Research Lab Presence
+### Umbrella Navigation (highest priority — establishes the labs/apps architecture)
 
-- [ ] **LAB-01**: Lab homepage at `/` renders mission statement, "What is Abrigo" explainer, current iteration headline counts (Pass / Fail / Parked / In Progress), and links to wvs-finance org + parent DS2P Labs
+- [ ] **NAV-01**: Persistent top navigation bar present on every page (umbrella + every `/apps/<x>/...`) with a primary **Apps dropdown** menu item
+- [ ] **NAV-02**: Apps dropdown content is data-driven from a typed `lib/apps/registry.ts` file (array of `{ slug, name, description, status, internal_path, external_url }`); adding a new app is a one-line registry change with NO IA / nav restructuring
+- [ ] **NAV-03**: Apps dropdown today contains exactly one entry: **Abrigo** with name, one-line description ("Convex hedges for Colombian wage-earners — ∂²Π gamma"), status badge "Active" (color + icon + text per CROSS-09), primary link to `/apps/abrigo`
+- [ ] **NAV-04**: Each Apps dropdown entry shows a secondary external-link affordance (icon-only, opens in new tab); Abrigo's secondary points to https://x.com/d2pfinabrigo
+- [ ] **NAV-05**: Apps dropdown is keyboard-navigable (Tab focuses, Enter/Space opens, ArrowDown/ArrowUp cycle entries, Enter activates, Escape closes); announces "Apps menu, N entries" + per-entry "Abrigo, active, of N" to screen readers
+- [ ] **NAV-06**: Apps dropdown closes on outside click, Escape, route change, and focus-out; never traps focus
+- [ ] **NAV-07**: Top nav surfaces (in addition to Apps) the lab umbrella links: Research, Team, About, plus the language switcher; on mobile (<768px) the nav collapses to a single menu drawer that contains the Apps dropdown as a nested section
+- [ ] **NAV-08**: `/apps` index page lists all apps (today: Abrigo) with the same registry-driven content; serves as the canonical URL agents can scrape if they don't read the dropdown HTML
+
+### Research Lab Presence (umbrella scope — NOT scoped to Abrigo)
+
+- [ ] **LAB-01**: Lab umbrella homepage at `/` renders mission statement, "What is d2-π" explainer, current Apps overview (today: Abrigo as the sole active app — preview card linking into `/apps/abrigo`), cross-app iteration headline counts (Pass / Fail / Parked / In Progress, aggregated across all apps — currently equals Abrigo's), and links to wvs-finance GitHub org + parent DS2P Labs
 - [ ] **LAB-02**: Team / contributors page at `/team` lists contributors with role, GitHub link, and current iteration ownership
 - [ ] **LAB-03**: Publications page at `/research` indexes papers, decision memos, and iteration write-ups synced from `../abrigo/` `scratch/` and `docs/`
 - [ ] **LAB-04**: Content pipeline CI step syncs `../abrigo/scratch/**/*.md` and `../abrigo/docs/**/*.md` into `frontend/content/iterations/` on every push to abrigo `main`
 - [ ] **LAB-05**: Lab "About" page explains the anti-fishing discipline, pre-committed-spec workflow, and trio-checkpoint method — in author's voice, no marketing slop
 - [ ] **LAB-06**: All lab pages render in es-CO and en with author-quality translations (not machine-translated)
 
-### Iteration Catalog
+### Abrigo App — Overview + Iteration Catalog (scoped under `/apps/abrigo/`)
 
-- [ ] **ITER-01**: Iteration catalog at `/iterations` lists every (Y, M, X) iteration regardless of status; no filter excludes FAIL or PARKED by default
+- [ ] **APP-01**: Abrigo app overview page at `/apps/abrigo` renders the app's mission (∂²Π gamma — convex hedges for Colombian wage-earner macro exposure), current iteration headline counts, links to iterations / instruments / dashboard sub-routes, prominent external link to https://x.com/d2pfinabrigo, and the app's status (Active)
+- [ ] **ITER-01**: Iteration catalog at `/apps/abrigo/iterations` lists every Abrigo (Y, M, X) iteration regardless of status; no filter excludes FAIL or PARKED by default
 - [ ] **ITER-02**: Catalog cards render status with equal visual weight — same dimensions, same typography hierarchy, same prominence for PASS / FAIL / PARKED / IN_PROGRESS
-- [ ] **ITER-03**: Iteration detail page at `/iterations/{slug}/v{n}` shows spec → data → estimation → tests → disposition narrative with full evidence chain
+- [ ] **ITER-03**: Iteration detail page at `/apps/abrigo/iterations/{slug}/v{n}` shows spec → data → estimation → tests → disposition narrative with full evidence chain
 - [ ] **ITER-04**: Each iteration detail displays β estimate, 95% confidence interval, p-value, sample size N, and replication hash with a working link to `make verify` instructions
-- [ ] **ITER-05**: Pair D iteration detail page (PASS, Colombian young-worker services × COP/USD lagged 6–12mo, β = +0.137) renders fully with chart, evidence chain, and notebook links
-- [ ] **ITER-06**: FX-vol-on-CPI-surprise iteration detail page (CLOSED FAIL, β̂ = −0.000685, 90% CI ⊃ 0) renders with same visual weight as PASS pages, includes failure disposition memo
+- [ ] **ITER-05**: Pair D iteration detail page at `/apps/abrigo/iterations/pair-d/v1` (PASS, Colombian young-worker services × COP/USD lagged 6–12mo, β = +0.137) renders fully with chart, evidence chain, and notebook links
+- [ ] **ITER-06**: FX-vol-on-CPI-surprise iteration detail page at `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` (CLOSED FAIL, β̂ = −0.000685, 90% CI ⊃ 0) renders with same visual weight as PASS pages, includes failure disposition memo
 - [ ] **ITER-07**: Iteration status pill component (`<StatusPill status={...}>`) encodes state with color, icon, AND text label — no color-only state encoding
-- [ ] **ITER-08**: Iteration URLs are content-addressable, human-readable slugs (`/iterations/pair-d/v1`), never UUIDs or numeric IDs
-- [ ] **ITER-09**: Each iteration page emits JSON-LD `Dataset` + `ScholarlyArticle` structured data and an OpenGraph card
+- [ ] **ITER-08**: Iteration URLs are content-addressable, human-readable slugs scoped under `/apps/abrigo/iterations/{slug}/v{n}`, never UUIDs or numeric IDs
+- [ ] **ITER-09**: Each iteration page emits JSON-LD `Dataset` + `ScholarlyArticle` structured data (with `isPartOf` pointing to the Abrigo app and the d2-π umbrella) and an OpenGraph card
 
-### On-Chain Dashboard
+### Abrigo App — On-Chain Dashboard (scoped under `/apps/abrigo/`)
 
-- [ ] **DASH-01**: BFF API route `/api/dashboard` aggregates deployed contract state across configured chains using viem multicall + Vercel KV cache (30s TTL for chain reads, 5min for historical aggregations)
-- [ ] **DASH-02**: BFF API route `/api/econometrics` reads from HuggingFace dataset, parses Parquet server-side, returns typed JSON to the client
-- [ ] **DASH-03**: Dashboard page at `/dashboard` shows live state for every deployed Abrigo instrument: pool balances, settlement events count, LP positions count, last block synced — per chain
+- [ ] **DASH-01**: BFF API route `/api/dashboard?app=abrigo` aggregates deployed Abrigo contract state across configured chains using viem multicall + Vercel KV cache (30s TTL for chain reads, 5min for historical aggregations); `app` parameter scopes which app's contracts are queried (today only Abrigo)
+- [ ] **DASH-02**: BFF API route `/api/econometrics?app=abrigo` reads from HuggingFace dataset, parses Parquet server-side, returns typed JSON to the client
+- [ ] **DASH-03**: Dashboard page at `/apps/abrigo/dashboard` shows live state for every deployed Abrigo instrument: pool balances, settlement events count, LP positions count, last block synced — per chain
 - [ ] **DASH-04**: Chain selector uses URL search params via `nuqs` so dashboard state is shareable and agent-readable
 - [ ] **DASH-05**: Visx-based econometric charts render β estimate with 95% confidence band, time-series panels, and replication-evidence overlays
 - [ ] **DASH-06**: Every chart has `aria-label` summarizing the core finding plus a `sr-only` data table for screen-reader users
 - [ ] **DASH-07**: Dashboard renders correctly with no chain connection (read-first), no wallet, and on first paint without JavaScript hydration
-- [ ] **DASH-08**: Status page at `/status` shows RPC health per chain, indexer freshness, HuggingFace dataset version, and build hash
+- [ ] **DASH-08**: Status page at `/status` (umbrella-scoped) shows RPC health per chain, indexer freshness, HuggingFace dataset version, build hash, AND per-app health rollup (today: just Abrigo)
 
 ### Agent Surface
 
 - [ ] **AGENT-01**: `lib/mcp-tools/` directory exports all agent tool definitions; both the MCP route handler and the chat API import from this module — no duplication
 - [ ] **AGENT-02**: MCP server hosted as Next.js App Router route at `/api/mcp/[transport]` via `@vercel/mcp-handler`
-- [ ] **AGENT-03**: MCP tool `list_iterations(filter?)` returns all iterations with status, slug, version, β, p-value
-- [ ] **AGENT-04**: MCP tool `get_iteration_state(slug, version)` returns full iteration detail including replication hash + notebook URL
-- [ ] **AGENT-05**: MCP tool `get_instrument_terms(instrument_id, chain)` returns instrument parameters, payoff function, and current pool state
-- [ ] **AGENT-06**: MCP tool `get_pool_state(chain, pool_address)` returns live pool reserves, LP count, recent settlement events
-- [ ] **AGENT-07**: MCP tool `query_econometric_panel(panel, filters)` returns rows from HuggingFace panel dataset with paging
+- [ ] **AGENT-03**: MCP tool `list_apps()` returns the apps registry — today returns `[{ slug: "abrigo", name: "Abrigo", status: "active", description: "...", external_url: "https://x.com/d2pfinabrigo" }]`
+- [ ] **AGENT-04**: MCP tool `list_iterations(app, filter?)` returns all iterations within the named app with status, slug, version, β, p-value; `app` defaults to `"abrigo"` if omitted (since today there's only one app)
+- [ ] **AGENT-05**: MCP tool `get_iteration_state(app, slug, version)` returns full iteration detail including replication hash + notebook URL
+- [ ] **AGENT-06**: MCP tool `get_instrument_terms(app, instrument_id, chain)` returns instrument parameters, payoff function, and current pool state
+- [ ] **AGENT-07-pool**: MCP tool `get_pool_state(app, chain, pool_address)` returns live pool reserves, LP count, recent settlement events
+- [ ] **AGENT-07**: MCP tool `query_econometric_panel(app, panel, filters)` returns rows from HuggingFace panel dataset (scoped to the app's panels) with paging
 - [ ] **AGENT-08**: OpenAPI spec at `/.well-known/openapi.yaml` documents every public REST endpoint with examples
 - [ ] **AGENT-09**: `/llms.txt` at site root lists primary entry URLs, content licensing, and pointer to MCP endpoint
 - [ ] **AGENT-10**: Every iteration / instrument / dashboard page emits JSON-LD structured data that mirrors the MCP tool output schema
@@ -73,9 +86,9 @@ Each maps to exactly one phase in the roadmap.
 
 - [ ] **DEFI-01**: RainbowKit v2 wallet connect integrated; supports mobile wallets via WalletConnect v2 (MetaMask Mobile, Rainbow, Coinbase Wallet, Valora for Celo)
 - [ ] **DEFI-02**: Wallet state machine has 4 explicit states — DISCONNECTED / CONNECTED_WRONG_CHAIN / CONNECTED_READY / CONNECTING — each with distinct UI affordance
-- [ ] **DEFI-03**: Per-instrument page at `/instruments/{id}/{chain}` shows parameters, payoff diagram, current pool state, recent participants — fully accessible without wallet connection
+- [ ] **DEFI-03**: Per-instrument page at `/apps/abrigo/instruments/{id}/{chain}` shows parameters, payoff diagram, current pool state, recent participants — fully accessible without wallet connection
 - [ ] **DEFI-04**: Payoff diagram component renders CFMM payoff curve with axis labels in user's locale, showing strike, slope, current price marker
-- [ ] **DEFI-05**: Risk disclosure surfaces explicitly label every instrument as "hedging product, not leverage" in both es-CO and en
+- [ ] **DEFI-05**: Risk disclosure surfaces explicitly label every Abrigo instrument as "hedging product, not leverage" in both es-CO and en, visible without scrolling at 360px viewport on `/apps/abrigo/instruments/{id}/{chain}` pages
 - [ ] **DEFI-06**: Wallet connect modal is fully keyboard-navigable, has no focus trap on close, and announces state changes to screen readers
 - [ ] **DEFI-07**: Wallet UI distinguishes "wrong chain" from "unsupported chain" — user on Polygon sees a chain-switch CTA; user on a chain we don't deploy on sees an explanatory message
 
@@ -189,6 +202,15 @@ Populated by gsd-roadmapper — 2026-05-11.
 | CROSS-08 | Phase 1 | Pending |
 | CROSS-09 | Phase 1 | Pending |
 | CROSS-10 | Phase 1 | Pending |
+| NAV-01 | Phase 2 | Pending |
+| NAV-02 | Phase 2 | Pending |
+| NAV-03 | Phase 2 | Pending |
+| NAV-04 | Phase 2 | Pending |
+| NAV-05 | Phase 2 | Pending |
+| NAV-06 | Phase 2 | Pending |
+| NAV-07 | Phase 2 | Pending |
+| NAV-08 | Phase 2 | Pending |
+| APP-01 | Phase 2 | Pending |
 | LAB-01 | Phase 2 | Pending |
 | LAB-02 | Phase 2 | Pending |
 | LAB-03 | Phase 2 | Pending |
@@ -231,8 +253,8 @@ Populated by gsd-roadmapper — 2026-05-11.
 | DEFI-07 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 60 total
-- Mapped to phases: 60/60
+- v1 requirements: 69 total (was 60; +8 NAV-* for umbrella nav + 1 APP-01 Abrigo overview page; renumbered AGENT-07 → AGENT-07-pool because `query_econometric_panel` re-used the slot)
+- Mapped to phases: 69/69
 - Unmapped: 0
 
 | Phase | Requirements | Count |
