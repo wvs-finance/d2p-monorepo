@@ -93,7 +93,7 @@ Wave 0 sets up the testing infrastructure that every subsequent task depends on:
   - [ ] `tests/api/health.test.ts`
   - [ ] `tests/architecture/no-wallet-in-lab.test.ts` (renamed from .spec.ts — Vitest runs it; Playwright excludes tests/architecture/)
   - [ ] `tests/a11y/homepage.spec.ts`
-  - [ ] `tests/visual/anti-patterns.spec.ts`
+  - [ ] `tests/unit/anti-patterns.test.ts` (planted-fixture impeccable detector test; lives in unit/ to avoid Playwright/Vitest collection conflict; fixture HTML at `tests/unit/fixtures/anti-patterns.html`)
 
 ---
 
