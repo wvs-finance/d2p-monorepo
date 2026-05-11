@@ -24,11 +24,14 @@
   --accent-default: oklch(0.55 0.18 165);
   --accent-hover: oklch(0.48 0.2 165);
 
-  /* Status — epistemic-honesty discipline: equal saturation/lightness (CROSS-09 + ITER-02) */
-  --status-pass: oklch(0.55 0.17 145); /* green-leaning */
-  --status-fail: oklch(0.55 0.19 30); /* warm red, NOT pink */
-  --status-parked: oklch(0.6 0.13 60); /* amber */
-  --status-in-progress: oklch(0.55 0.16 230); /* blue, distinct from accent */
+  /* Status — epistemic-honesty discipline: equal saturation/lightness (CROSS-09 + ITER-02)
+     Lightness at 0.38-0.42 ensures WCAG AA 4.5:1 text contrast against near-white canvas
+     (bg-canvas L≈0.985 + /10 opacity tinted pill background ≈ effective L≈0.95).
+     Flagged as needing verification in 01-02-SUMMARY.md; confirmed here with axe results. */
+  --status-pass: oklch(0.38 0.17 145); /* green, darkened for AA contrast */
+  --status-fail: oklch(0.4 0.19 30); /* warm red, darkened for AA contrast */
+  --status-parked: oklch(0.42 0.13 60); /* amber, darkened for AA contrast */
+  --status-in-progress: oklch(0.38 0.16 230); /* blue, darkened for AA contrast */
 
   --destructive: oklch(0.52 0.19 25);
   --ring: oklch(0.55 0.18 165);
@@ -54,10 +57,11 @@
   --accent-default: oklch(0.65 0.18 165);
   --accent-hover: oklch(0.72 0.2 165);
 
-  --status-pass: oklch(0.65 0.17 145);
-  --status-fail: oklch(0.65 0.19 30);
-  --status-parked: oklch(0.7 0.13 60);
-  --status-in-progress: oklch(0.65 0.16 230);
+  /* Dark mode: lightened for readability against dark canvas (L≈0.13) */
+  --status-pass: oklch(0.62 0.17 145);
+  --status-fail: oklch(0.62 0.19 30);
+  --status-parked: oklch(0.65 0.13 60);
+  --status-in-progress: oklch(0.62 0.16 230);
 
   --destructive: oklch(0.62 0.19 25);
   --ring: oklch(0.65 0.18 165);
