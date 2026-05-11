@@ -10,7 +10,7 @@ Each maps to exactly one phase in the roadmap.
 
 ### Foundation
 
-- [ ] **FOUND-01**: Next.js 16.2 App Router project scaffolded with TypeScript, deploys to Vercel preview-per-PR
+- [x] **FOUND-01**: Next.js 16.2 App Router project scaffolded with TypeScript, deploys to Vercel preview-per-PR
 - [ ] **FOUND-02**: Tailwind v4 + shadcn/ui (Feb 2026) installed with OKLCH-based design tokens; `impeccable` design tokens authored in `app/globals.css` via `@theme`
 - [ ] **FOUND-03**: next-intl v4 i18n infrastructure for `es-CO` (Colombian Spanish, primary) and `en` (secondary); translations resolved at RSC render time
 - [ ] **FOUND-04**: Velite content pipeline with typed iteration schema — `status` is a compile-time enum `'PASS' | 'FAIL' | 'PARKED' | 'IN_PROGRESS'`, `notebook_url`, `dataset_ref`, `analysis_date`, `replication_hash` are required fields
@@ -22,7 +22,7 @@ Each maps to exactly one phase in the roadmap.
 - [ ] **FOUND-10**: Vercel environment variables configured for Production, Preview, Development scopes with explicit naming convention (`NEXT_PUBLIC_*` only for safe-to-leak values)
 - [ ] **FOUND-11**: Route group layout structure — `(lab)`, `(dashboard)`, `(defi)` — with RSC pages in `(lab)` never hydrating wallet state
 - [ ] **FOUND-12**: Agent-accessibility scaffold in place from day one: `/llms.txt`, `/.well-known/mcp.json`, `/.well-known/openapi.yaml` stub, JSON-LD `Article` and `Dataset` schemas on every content page
-- [ ] **FOUND-13**: Vitest + Playwright + MSW test infrastructure with hooks for chain mocking via anvil fork
+- [x] **FOUND-13**: Vitest + Playwright + MSW test infrastructure with hooks for chain mocking via anvil fork
 
 ### Umbrella Navigation (highest priority — establishes the labs/apps architecture)
 
@@ -179,7 +179,7 @@ Populated by gsd-roadmapper — 2026-05-11.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Pending |
@@ -191,7 +191,7 @@ Populated by gsd-roadmapper — 2026-05-11.
 | FOUND-10 | Phase 1 | Pending |
 | FOUND-11 | Phase 1 | Pending |
 | FOUND-12 | Phase 1 | Pending |
-| FOUND-13 | Phase 1 | Pending |
+| FOUND-13 | Phase 1 | Complete |
 | CROSS-01 | Phase 1 | Pending |
 | CROSS-02 | Phase 1 | Pending |
 | CROSS-03 | Phase 1 | Pending |

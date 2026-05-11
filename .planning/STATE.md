@@ -1,7 +1,22 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: in_progress
+last_updated: "2026-05-11T20:10:00.000Z"
+progress:
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 8
+  completed_plans: 1
+  percent: 13
+---
+
 # Project State: WVS Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-11
-**Session type:** Roadmap initialization
+**Session type:** Plan execution (01-01 complete)
+**Stopped at:** Completed 01-01-PLAN.md (scaffold + toolchain + Wave 0 stubs)
 
 ---
 
@@ -17,13 +32,14 @@
 
 ## Current Position
 
-**Active phase:** None (roadmap just created — planning not yet started)
-**Active plan:** None
-**Status:** Awaiting Phase 1 planning (`/gsd:plan-phase 1`)
+**Active phase:** 01 — Foundation and Scaffold
+**Active plan:** 02 (01 complete)
+**Status:** Plan 01-01 complete; ready for 01-02
 
 **Progress:**
 ```
-[          ] Phase 1: Foundation and Scaffold
+[█░░░░░░░░░] 13% (1/8 plans complete)
+[▓░░░░░░░░░] Phase 1: Foundation and Scaffold (1/8 plans)
 [          ] Phase 2: Research Lab Presence and Iteration Catalog
 [          ] Phase 3: Data Layer and On-Chain Dashboard
 [          ] Phase 4: Agent Surface (MCP)
@@ -36,12 +52,9 @@ Overall: 0/5 phases complete
 
 ## Performance Metrics
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Requirements mapped | 60/60 | 60/60 |
-| Phases defined | 5 | 5 |
-| Plans created | TBD | 0 |
-| Plans complete | TBD | 0 |
+| Phase | Plan | Duration (min) | Tasks | Files |
+|-------|------|---------------|-------|-------|
+| 01 | 01 | 9 | 3 | 30 |
 
 ---
 
@@ -56,6 +69,9 @@ Overall: 0/5 phases complete
 | Demo critical path gates Phase 2 completion | The Hookathon demo requires `/` + `/iterations` + Pair D detail + FX-vol-fail detail — all of which are Phase 2 deliverables. Phase 2 is non-negotiable before the June 2 deadline. | Phase 2 is the milestone gate |
 | DEFI-* scope is read-first only in v1 | Transact path requires explicit threat-model review (v2). Wallet connection and per-instrument views are safe to ship without that review. | Phase 5 delivers DEFI-01 through DEFI-07 as read-only |
 | Single Next.js app, no monorepo | Per architecture research: monorepo adds cross-package overhead with no isolation benefit at this team size. MCP server is an API route, not a separate service. | Phase 1 scaffolds one app; no workspace bootstrap needed |
+| @biomejs/biome@1.9.4 installed (Plan 01-01) | The standalone 'biome' npm package is v0.3.x and unrelated. @biomejs/biome is the correct Biome linter at v1.9.4. | All subsequent plans use pnpm biome check |
+| next.config.ts is FINAL after Plan 01-01 | Plans 03/06/07 only create the files it references (i18n/request.ts, velite.config.ts, lib/env.ts); no parallel-write conflict | Eliminates wave-2 edit conflict risk |
+| Architecture test uses .test.ts not .spec.ts | Vitest collects .test.ts; Playwright testIgnore covers architecture/ dir — both tools correctly handle it | Clean separation of Vitest vs Playwright test collection |
 
 ### Critical Path Summary
 
@@ -69,7 +85,7 @@ Phase 1 (Foundation) → Phase 2 (Demo path) → [HACKATHON DEMO CUT]
 ### Technical Context
 
 - **Primary chain:** Celo mainnet (deployed instruments); Base, Arbitrum, Optimism as secondary
-- **Stack locked:** Next.js 16.2, React 19, TypeScript 5.8, Tailwind v4, shadcn/ui (Feb 2026), wagmi v2 + viem v2 + RainbowKit v2, next-intl v4, Velite 0.3+, Visx 3.x, mcp-handler (Vercel), Zod v3, Vitest + Playwright + MSW
+- **Stack installed (Plan 01-01):** Next.js 16.2.6, React 19.2.4, TypeScript 5.9.3, Tailwind v4.3.0, wagmi v2.19.5 + viem v2.48.11 + RainbowKit v2.2.11, next-intl v4.11.2, Velite v0.3.1, mcp-handler v1.1.0, @biomejs/biome v1.9.4, vitest v4.1.6, @playwright/test v1.60.0, msw v2.14.6, lefthook v2.1.6
 - **Deployment target:** Vercel (preview-per-PR, Vercel KV for caching)
 - **i18n languages:** `es-CO` (primary, Colombian Spanish) and `en` (secondary)
 - **Content source:** Iteration MDX from `../abrigo/scratch/` and `../abrigo/docs/` synced to `frontend/content/iterations/` by CI
@@ -88,9 +104,14 @@ Phase 1 (Foundation) → Phase 2 (Demo path) → [HACKATHON DEMO CUT]
 - Chat shell (CHAT-*) is v2 scope — not in this milestone
 - Transact path (TXN-*) is v2 scope — not in this milestone
 
+### User Setup Items (Non-blocking Deferred)
+
+- **Vercel project:** Create Vercel project, link to GitHub repo, run `vercel link` to create `.vercel/project.json`
+- **GitHub repo:** Push scaffold commits to `wvs-finance/frontend` (or chosen repo name)
+
 ### Blockers
 
-None currently. Roadmap creation is complete.
+None currently.
 
 ### Open Questions
 
@@ -107,17 +128,20 @@ None currently. Roadmap creation is complete.
 1. Read `/home/jmsbpp/apps/d2p/frontend/.planning/ROADMAP.md` — current phase structure and success criteria
 2. Read this file — current position and accumulated context
 3. Read `/home/jmsbpp/apps/d2p/frontend/.planning/REQUIREMENTS.md` — traceability table shows which requirements belong to the active phase
-4. Run `/gsd:plan-phase 1` to begin planning Phase 1
+4. Run Plan 01-02 next
 
 ### Phase Planning Order
 
 ```
-/gsd:plan-phase 1   # Foundation (do first — gates everything)
-/gsd:plan-phase 2   # Research Lab + Catalog (demo critical path)
-/gsd:plan-phase 3   # Data Layer + Dashboard (gates 4 and 5)
-/gsd:plan-phase 4   # Agent Surface (parallel with 5 after 3)
-/gsd:plan-phase 5   # Wallet + DeFi (parallel with 4 after 3)
+Plan 01-02: Tailwind v4 design tokens (globals.css @theme inline)
+Plan 01-03: next-intl i18n infrastructure
+Plan 01-04: Route group layout + stub homepage
+Plan 01-05: wagmi v2 config + @wagmi/cli scaffold
+Plan 01-06: Velite content pipeline schema
+Plan 01-07: @t3-oss/env-nextjs full schema
+Plan 01-08: CI pipeline (.github/workflows/ci.yml)
 ```
 
 ---
 *State initialized: 2026-05-11 after roadmap creation*
+*Plan 01-01 completed: 2026-05-11*
