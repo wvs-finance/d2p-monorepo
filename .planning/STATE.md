@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-05-12T22:22:33.514Z"
+status: executing
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-05-12T23:36:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 16
-  completed_plans: 9
-  percent: 56
+  completed_plans: 10
+  percent: 63
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-12
-**Session type:** Plan execution (02-01 complete)
-**Stopped at:** Completed 02-01-PLAN.md
+**Session type:** Plan execution (02-04 complete)
+**Stopped at:** Completed 02-04-PLAN.md
 
 ---
 
@@ -34,11 +34,11 @@ progress:
 ## Current Position
 
 **Active phase:** 02 — Research Lab Presence and Iteration Catalog
-**Active plan:** 02 (Plan 02-01 complete — 1/8 plans)
+**Active plan:** 05 (Plan 02-04 complete — 4/8 plans)
 **Status:** Executing
 
 **Progress:**
-[██████░░░░] 56%
+[██████░░░░] 63%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [          ] Phase 2: Research Lab Presence and Iteration Catalog
@@ -64,6 +64,7 @@ Overall: 1/5 phases complete
 | Phase 01 P03 | 10 | 3 tasks | 15 files |
 | Phase 01 P08 | 15 | 3 tasks | 9 files |
 | Phase 02 P01 | 9 | 3 tasks | 30 files |
+| Phase 02 P04 | 7 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Overall: 1/5 phases complete
 | Biome normalizes trailing zeros in OKLCH values (Plan 02-01) | Biome formats 0.10 as 0.1 and 0.40 as 0.4; test regexes must use 0\\.1[0]? pattern to accept both forms | All future CSS token tests must handle biome normalization |
 | tsconfig baseUrl required for @/.velite alias (Plan 02-01) | Non-relative path aliases require baseUrl set; added "baseUrl": "." to tsconfig.json | @/.velite alias works without build warnings |
 | Wave 0 stubs use test.fixme not test.skip (Plan 02-01) | test.fixme appears in Playwright --list output as planned work; test.skip silences them entirely | All Wave 0 stubs use test.fixme pattern for visibility |
+| dev-ai-stage-1-section-j chosen as IN_PROGRESS slug over abrigo-y3-carbon-basket (Plan 02-04) | abrigo README explicitly identifies Section J (ICT) as active Phase 1 analysis; Y3 carbon basket is a separate notebook in a separate directory | Iteration catalog renders correct slug → URL mapping for Section J iteration |
+| velite.config.ts notebook_url/dataset_ref/replication_hash made optional (Plan 02-04) | Plan design intent: omit fields when unknown; schema incorrectly had them required. All abrigo SHA-256 values in source files are 63-char hex (not 64 as required by `/^[a-f0-9]{64}$/`), so replication_hash omitted from all 4 iterations | Future iterations: omit replication_hash if no conforming 64-char sha256 available; never invent |
 
 ### Critical Path Summary
 
