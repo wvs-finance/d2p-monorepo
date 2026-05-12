@@ -69,7 +69,7 @@
 - [ ] 02-03-PLAN.md — Lab homepage (/) + /about methodology page (LAB-01, LAB-05) [wave 3]
 - [ ] 02-04-PLAN.md — Iteration content authoring: Pair D PASS + FX-vol FAIL + 2 placeholder iterations from abrigo source files (ITER-05, ITER-06, ITER-08) [wave 2]
 - [ ] 02-05-PLAN.md — Iteration catalog page /apps/abrigo/iterations with nuqs filter (ITER-01, ITER-02) [wave 3]
-- [ ] 02-06-PLAN.md — Iteration detail page /apps/abrigo/iterations/[slug]/v[version] with Dataset + ScholarlyArticle JSON-LD (ITER-03, ITER-04, ITER-07, ITER-09) [wave 3]
+- [x] 02-06-PLAN.md — Iteration detail page /apps/abrigo/iterations/[slug]/v[version] with Dataset + ScholarlyArticle JSON-LD (ITER-03, ITER-04, ITER-07, ITER-09) [wave 3]
 - [ ] 02-07-PLAN.md — /team + /research pages + locale-coverage e2e (LAB-02, LAB-03, LAB-06) [wave 3]
 - [ ] 02-08-PLAN.md — Content sync workflow expansion + manual-review docs (LAB-04) [wave 4]
 

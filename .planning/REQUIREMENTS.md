@@ -49,13 +49,13 @@ Each maps to exactly one phase in the roadmap.
 - [x] **APP-01**: Abrigo app overview page at `/apps/abrigo` renders the app's mission (∂²Π gamma — convex hedges for Colombian wage-earner macro exposure), current iteration headline counts, links to iterations / instruments / dashboard sub-routes, prominent external link to https://x.com/d2pfinabrigo, and the app's status (Active)
 - [x] **ITER-01**: Iteration catalog at `/apps/abrigo/iterations` lists every Abrigo (Y, M, X) iteration regardless of status; no filter excludes FAIL or PARKED by default
 - [x] **ITER-02**: Catalog cards render status with equal visual weight — same dimensions, same typography hierarchy, same prominence for PASS / FAIL / PARKED / IN_PROGRESS
-- [ ] **ITER-03**: Iteration detail page at `/apps/abrigo/iterations/{slug}/v{n}` shows spec → data → estimation → tests → disposition narrative with full evidence chain
-- [ ] **ITER-04**: Each iteration detail displays β estimate, 95% confidence interval, p-value, sample size N, and replication hash with a working link to `make verify` instructions
+- [x] **ITER-03**: Iteration detail page at `/apps/abrigo/iterations/{slug}/v{n}` shows spec → data → estimation → tests → disposition narrative with full evidence chain
+- [x] **ITER-04**: Each iteration detail displays β estimate, 95% confidence interval, p-value, sample size N, and replication hash with a working link to `make verify` instructions
 - [x] **ITER-05**: Pair D iteration detail page at `/apps/abrigo/iterations/pair-d/v1` (PASS, Colombian young-worker services × COP/USD lagged 6–12mo, β = +0.137) renders fully with chart, evidence chain, and notebook links
 - [x] **ITER-06**: FX-vol-on-CPI-surprise iteration detail page at `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` (CLOSED FAIL, β̂ = −0.000685, 90% CI ⊃ 0) renders with same visual weight as PASS pages, includes failure disposition memo
-- [ ] **ITER-07**: Iteration status pill component (`<StatusPill status={...}>`) encodes state with color, icon, AND text label — no color-only state encoding
+- [x] **ITER-07**: Iteration status pill component (`<StatusPill status={...}>`) encodes state with color, icon, AND text label — no color-only state encoding
 - [x] **ITER-08**: Iteration URLs are content-addressable, human-readable slugs scoped under `/apps/abrigo/iterations/{slug}/v{n}`, never UUIDs or numeric IDs
-- [ ] **ITER-09**: Each iteration page emits JSON-LD `Dataset` + `ScholarlyArticle` structured data (with `isPartOf` pointing to the Abrigo app and the d2-π umbrella) and an OpenGraph card
+- [x] **ITER-09**: Each iteration page emits JSON-LD `Dataset` + `ScholarlyArticle` structured data (with `isPartOf` pointing to the Abrigo app and the d2-π umbrella) and an OpenGraph card
 
 ### Abrigo App — On-Chain Dashboard (scoped under `/apps/abrigo/`)
 
@@ -219,13 +219,13 @@ Populated by gsd-roadmapper — 2026-05-11.
 | LAB-06 | Phase 2 | Complete |
 | ITER-01 | Phase 2 | Complete |
 | ITER-02 | Phase 2 | Complete |
-| ITER-03 | Phase 2 | Pending |
-| ITER-04 | Phase 2 | Pending |
+| ITER-03 | Phase 2 | Complete |
+| ITER-04 | Phase 2 | Complete |
 | ITER-05 | Phase 2 | Complete |
 | ITER-06 | Phase 2 | Complete |
-| ITER-07 | Phase 2 | Pending |
+| ITER-07 | Phase 2 | Complete |
 | ITER-08 | Phase 2 | Complete |
-| ITER-09 | Phase 2 | Pending |
+| ITER-09 | Phase 2 | Complete |
 | DASH-01 | Phase 3 | Pending |
 | DASH-02 | Phase 3 | Pending |
 | DASH-03 | Phase 3 | Pending |

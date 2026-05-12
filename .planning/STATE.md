@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-07-PLAN.md
-last_updated: "2026-05-12T00:00:00Z"
+stopped_at: Completed 02-06-PLAN.md
+last_updated: "2026-05-12T23:30:00Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 16
-  completed_plans: 13
-  percent: 81
+  completed_plans: 14
+  percent: 87
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-12
-**Session type:** Plan execution (02-07 complete)
-**Stopped at:** Completed 02-07-PLAN.md
+**Session type:** Plan execution (02-06 complete)
+**Stopped at:** Completed 02-06-PLAN.md
 
 ---
 
@@ -34,7 +34,7 @@ progress:
 ## Current Position
 
 **Active phase:** 02 — Research Lab Presence and Iteration Catalog
-**Active plan:** 08 (Plan 02-07 complete — 6/8 plans complete: 02-01, 02-02, 02-04, 02-05, 02-06, 02-07)
+**Active plan:** 08 (Plan 02-06 complete — 7/8 plans complete: 02-01, 02-02, 02-04, 02-05, 02-06, 02-07, 02-06)
 **Status:** Executing
 
 **Progress:**
@@ -68,6 +68,7 @@ Overall: 1/5 phases complete
 | Phase 02 P02 | 9 | 2 tasks | 22 files |
 | Phase 02 P05 | 19 | 2 tasks | 14 files |
 | Phase 02 P07 | 90 | 3 tasks | 20 files |
+| Phase 02 P06 | 90 | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,10 @@ Overall: 1/5 phases complete
 | PublicationCard optional props typed as T or undefined (Plan 02-07) | exactOptionalPropertyTypes: true rejects `prop?: string` when the value can be `string | undefined`; must use `prop?: string | undefined` | Pattern applies to all components accepting Velite-generated optional fields |
 | @/.velite tsconfig path changed from index.ts to index.d.ts (Plan 02-07) | index.ts doesn't exist; incremental tsc crashes at resolveExternalModule when pointing to non-existent file; Next.js TS plugin auto-fixed path to index.d.ts | @/.velite alias always points to .velite/index.d.ts; never to .ts |
 | /about excluded from locale-coverage spec (Plan 02-07) | /about route does not exist in Phase 2 app directory; plan listed it but no page was created | locale-coverage.spec.ts covers 6 routes x 2 locales = 12 tests; /about added when that route is built |
+| MDX rendering: Velite s.mdx() compile-time over next-mdx-remote runtime (Plan 02-06) | s.mdx() compiles at build time to code string; evaluation is one line `new Function(code)(runtime).default`; zero runtime mdx compiler dependency | All iteration detail MDX rendered via MDXRenderer RSC component |
+| velite-shim.ts static require('../.velite/X.json') not dynamic path.resolve (Plan 02-06) | Dynamic path.resolve(process.cwd()) resolved to .next/server/app/(lab)/.velite/ at runtime — wrong. Static relative path lets webpack bundle JSON correctly | All future Velite shims must use static relative require |
+| schema-dts + exactOptionalPropertyTypes: use satisfies Record not WithContext type annotation (Plan 02-06) | TS 5.9.3 + exactOptionalPropertyTypes + schema-dts isPartOf union triggers Debug Failure crash; satisfies pattern preserves structural checking without crash | StructuredData.tsx iteration mode drops WithContext annotation |
+| DispositionMemo never wrapped in details/accordion — epistemic equality invariant (Plan 02-06) | FAIL status must not de-emphasize the rejection narrative; any collapse or muting is a design violation | Three Playwright tests in iteration-fx-vol-fail + fail-equal-weight enforce this in CI |
 
 ### Critical Path Summary
 
