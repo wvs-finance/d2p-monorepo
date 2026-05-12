@@ -4,10 +4,27 @@ import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { ThemeProvider } from 'next-themes'
+import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google'
 import './globals.css'
 
 // Root layout — no wallet imports (FOUND-11, Pitfall 3).
 // Provides: i18n context, theme context, JSON-LD structured data, global TopNav.
+
+const plexSans = IBM_Plex_Sans({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-plex-sans',
+  preload: true,
+})
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-plex-mono',
+  preload: true,
+})
 
 export const metadata: Metadata = {
   title: 'd2p Finance',
@@ -23,7 +40,11 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={`${plexSans.variable} ${plexMono.variable}`}
+    >
       <body className="bg-bg-canvas text-text-primary antialiased">
         <StructuredData />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>

@@ -3,38 +3,39 @@
 
 /* ============================================================
    Section 1 — Semantic value definitions (light mode = :root)
-   All neutrals are tinted toward the lab accent (teal-green).
+   All neutrals are tinted toward the lab accent (muted ochre, hue 70-80).
    Pure black, pure white, and raw stone/gray/zinc literals are forbidden.
-   Lab accent hue: ~165 (teal-green), aligned with Colombian forest tone.
+   Lab accent hue: ~70 (muted ochre), locked 2026-05-12.
    NOT violet, NOT purple-blue gradient (impeccable anti-pattern).
    ============================================================ */
 :root {
-  /* Neutrals (tinted toward 165° hue, never pure achromatic) */
-  --bg-canvas: oklch(0.985 0.005 165);
-  --bg-surface: oklch(0.965 0.008 165);
-  --bg-elevated: oklch(0.99 0.004 165);
+  /* Neutrals — tinted toward hue 70-80 (warm ochre/parchment register) */
+  --bg-canvas: oklch(0.97 0.005 80);
+  --bg-surface: oklch(0.94 0.008 75);
+  --bg-elevated: oklch(0.99 0.003 80);
 
-  --text-primary: oklch(0.18 0.02 165);
-  --text-secondary: oklch(0.38 0.018 165);
-  --text-muted: oklch(0.55 0.014 165);
+  --text-primary: oklch(0.2 0.01 80);
+  --text-secondary: oklch(0.4 0.01 75);
+  --text-muted: oklch(0.58 0.008 70);
 
-  --border-default: oklch(0.88 0.01 165);
+  --border-default: oklch(0.86 0.012 75);
 
-  /* Accent — lab teal-green (placeholder; Phase 2 UI-SPEC will confirm) */
-  --accent-default: oklch(0.55 0.18 165);
-  --accent-hover: oklch(0.48 0.2 165);
+  /* Accent — LOCKED muted ochre (#a87c3a) */
+  --accent-default: oklch(0.6 0.08 70);
+  --accent-hover: oklch(0.54 0.09 70);
+  --accent-subtle: oklch(0.6 0.08 70 / 0.12);
 
   /* Status — epistemic-honesty discipline: equal saturation/lightness (CROSS-09 + ITER-02)
      Lightness at 0.38-0.42 ensures WCAG AA 4.5:1 text contrast against near-white canvas
-     (bg-canvas L≈0.985 + /10 opacity tinted pill background ≈ effective L≈0.95).
-     Flagged as needing verification in 01-02-SUMMARY.md; confirmed here with axe results. */
+     (bg-canvas L≈0.97 + /10 opacity tinted pill background ≈ effective L≈0.95).
+     Status colors are hue-independent; they carry forward from Phase 1 unchanged. */
   --status-pass: oklch(0.38 0.17 145); /* green, darkened for AA contrast */
   --status-fail: oklch(0.4 0.19 30); /* warm red, darkened for AA contrast */
   --status-parked: oklch(0.42 0.13 60); /* amber, darkened for AA contrast */
   --status-in-progress: oklch(0.38 0.16 230); /* blue, darkened for AA contrast */
 
   --destructive: oklch(0.52 0.19 25);
-  --ring: oklch(0.55 0.18 165);
+  --ring: oklch(0.6 0.08 70);
 
   --radius: 0.5rem;
 }
@@ -42,20 +43,24 @@
 /* ============================================================
    Section 2 — Dark mode parallel set (same semantic names)
    All neutrals remain tinted (nonzero chroma), never pure achromatic.
+   Hue shifted from Phase 1 165° to 70° to align with muted ochre system.
    ============================================================ */
 .dark {
-  --bg-canvas: oklch(0.13 0.015 165);
-  --bg-surface: oklch(0.17 0.013 165);
-  --bg-elevated: oklch(0.21 0.012 165);
+  --bg-canvas: oklch(0.13 0.015 70);
+  --bg-surface: oklch(0.17 0.013 70);
+  --bg-elevated: oklch(0.18 0.013 70);
 
-  --text-primary: oklch(0.94 0.012 165);
-  --text-secondary: oklch(0.78 0.014 165);
-  --text-muted: oklch(0.62 0.012 165);
+  --text-primary: oklch(0.93 0.005 80);
+  --text-secondary: oklch(0.78 0.008 75);
+  --text-muted: oklch(0.68 0.01 75);
 
-  --border-default: oklch(0.3 0.01 165);
+  --border-default: oklch(0.3 0.01 75);
 
-  --accent-default: oklch(0.65 0.18 165);
-  --accent-hover: oklch(0.72 0.2 165);
+  /* Accent — slightly brighter/more saturated for contrast against dark canvas */
+  --accent-default: oklch(0.7 0.1 70);
+  --accent-hover: oklch(0.76 0.11 70);
+  --accent-subtle: oklch(0.7 0.1 70 / 0.18);
+  --ring: oklch(0.7 0.1 70);
 
   /* Dark mode: lightened for readability against dark canvas (L≈0.13) */
   --status-pass: oklch(0.62 0.17 145);
@@ -64,7 +69,6 @@
   --status-in-progress: oklch(0.62 0.16 230);
 
   --destructive: oklch(0.62 0.19 25);
-  --ring: oklch(0.65 0.18 165);
 }
 
 /* ============================================================
@@ -86,6 +90,7 @@
 
   --color-accent-default: var(--accent-default);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
 
   --color-status-pass: var(--status-pass);
   --color-status-fail: var(--status-fail);
@@ -117,15 +122,21 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Typography — IBM Plex font variables wired from next/font/google in app/layout.tsx */
+  --font-sans: var(--font-plex-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "Courier New", monospace;
+
+  /* Spacing — 5xl token for hero section vertical rhythm */
+  --spacing-5xl: 120px;
 }
 
 /* ============================================================
    Base reset — minimal
-   Font stack: system-ui cascade only — banned typefaces not present (CROSS-04)
+   Font stack: IBM Plex Sans via next/font variable; banned typefaces not present (CROSS-04)
    ============================================================ */
 body {
   background: var(--bg-canvas);
   color: var(--text-primary);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(--font-sans);
 }
