@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-08-PLAN.md (CI quality matrix)
-last_updated: "2026-05-11T22:49:15.826Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-05-12T22:22:33.514Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
+  total_plans: 16
+  completed_plans: 9
+  percent: 56
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
-**Last updated:** 2026-05-11
-**Session type:** Plan execution (01-01 complete)
-**Stopped at:** Completed 01-08-PLAN.md (CI quality matrix)
+**Last updated:** 2026-05-12
+**Session type:** Plan execution (02-01 complete)
+**Stopped at:** Completed 02-01-PLAN.md
 
 ---
 
@@ -34,11 +34,11 @@ progress:
 ## Current Position
 
 **Active phase:** 02 — Research Lab Presence and Iteration Catalog
-**Active plan:** 01 (Phase 1 complete — 8/8 plans)
-**Status:** Ready to plan
+**Active plan:** 02 (Plan 02-01 complete — 1/8 plans)
+**Status:** Executing
 
 **Progress:**
-[██████████] 100%
+[██████░░░░] 56%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [          ] Phase 2: Research Lab Presence and Iteration Catalog
@@ -63,6 +63,7 @@ Overall: 1/5 phases complete
 | Phase 01 P02 | 9 | 3 tasks | 8 files |
 | Phase 01 P03 | 10 | 3 tasks | 15 files |
 | Phase 01 P08 | 15 | 3 tasks | 9 files |
+| Phase 02 P01 | 9 | 3 tasks | 30 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Overall: 1/5 phases complete
 | setLocale server action uses revalidatePath not router.refresh (Plan 01-03) | router.refresh causes stale CDN responses on Vercel preview; revalidatePath flushes cache correctly | All server actions that trigger re-render use revalidatePath |
 | impeccable v2.1.8 has no --fail-on-error flag; CI relies on exit code (Plan 01-08) | Live --help inspection confirmed only --fast and --json flags exist; binary exits non-zero (code 2) on violations in non-JSON mode | impeccable CI job uses `npx --yes impeccable detect app/` without any flag; exit-code-only enforcement |
 | deployment_status event gates test-e2e, a11y, lighthouse (Plan 01-08) | These jobs need the Vercel preview URL; push/PR don't have it. The deployment_status event fires when Vercel preview is ready, providing target_url | Three deployment-dependent jobs only run after successful Vercel preview deploy |
+| Biome normalizes trailing zeros in OKLCH values (Plan 02-01) | Biome formats 0.10 as 0.1 and 0.40 as 0.4; test regexes must use 0\\.1[0]? pattern to accept both forms | All future CSS token tests must handle biome normalization |
+| tsconfig baseUrl required for @/.velite alias (Plan 02-01) | Non-relative path aliases require baseUrl set; added "baseUrl": "." to tsconfig.json | @/.velite alias works without build warnings |
+| Wave 0 stubs use test.fixme not test.skip (Plan 02-01) | test.fixme appears in Playwright --list output as planned work; test.skip silences them entirely | All Wave 0 stubs use test.fixme pattern for visibility |
 
 ### Critical Path Summary
 
@@ -100,6 +104,7 @@ Phase 1 (Foundation) → Phase 2 (Demo path) → [HACKATHON DEMO CUT]
 
 - **Primary chain:** Celo mainnet (deployed instruments); Base, Arbitrum, Optimism as secondary
 - **Stack installed (Plan 01-01):** Next.js 16.2.6, React 19.2.4, TypeScript 5.9.3, Tailwind v4.3.0, wagmi v2.19.5 + viem v2.48.11 + RainbowKit v2.2.11, next-intl v4.11.2, Velite v0.3.1, mcp-handler v1.1.0, @biomejs/biome v1.9.4, vitest v4.1.6, @playwright/test v1.60.0, msw v2.14.6, lefthook v2.1.6
+- **Added (Plan 02-01):** nuqs@2.8.9, IBM Plex Sans + IBM Plex Mono (next/font/google)
 - **Deployment target:** Vercel (preview-per-PR, Vercel KV for caching)
 - **i18n languages:** `es-CO` (primary, Colombian Spanish) and `en` (secondary)
 - **Content source:** Iteration MDX from `../abrigo/scratch/` and `../abrigo/docs/` synced to `frontend/content/iterations/` by CI
@@ -142,18 +147,19 @@ None currently.
 1. Read `/home/jmsbpp/apps/d2p/frontend/.planning/ROADMAP.md` — current phase structure and success criteria
 2. Read this file — current position and accumulated context
 3. Read `/home/jmsbpp/apps/d2p/frontend/.planning/REQUIREMENTS.md` — traceability table shows which requirements belong to the active phase
-4. Run Plan 01-02 next
+4. Run Plan 02-02 next
 
-### Phase Planning Order
+### Phase 2 Planning Order
 
 ```
-Plan 01-02: Tailwind v4 design tokens (globals.css @theme inline)
-Plan 01-03: next-intl i18n infrastructure
-Plan 01-04: Route group layout + stub homepage
-Plan 01-05: wagmi v2 config + @wagmi/cli scaffold
-Plan 01-06: Velite content pipeline schema
-Plan 01-07: @t3-oss/env-nextjs full schema
-Plan 01-08: CI pipeline (.github/workflows/ci.yml)
+Plan 02-01: Phase 2 foundation (tokens, fonts, Velite research, nuqs, i18n, Wave 0 stubs) — COMPLETE
+Plan 02-02: Homepage content (real mission/explainer copy, Velite-derived counts)
+Plan 02-03: Iteration catalog page (/apps/abrigo/iterations, nuqs filter)
+Plan 02-04: Iteration detail page (evidence chain, JSON-LD)
+Plan 02-05: Iteration MDX seed files (pair-d/v1 PASS, fx-vol-on-cpi-surprise/v1 FAIL)
+Plan 02-06: Team page (/team, lib/team/contributors.ts)
+Plan 02-07: Publications + About pages (/research, /about)
+Plan 02-08: Content sync workflow (LAB-04, repository_dispatch trigger)
 ```
 
 ---
