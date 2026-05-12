@@ -9,7 +9,7 @@ info:
     Public REST surface for d2p Finance / DS2P Labs.
     Phase 1 ships only /api/health. Phase 3 adds /api/dashboard and /api/econometrics.
 servers:
-  - url: https://wvs.finance
+  - url: https://d2pfinance.xyz
     description: Production
 paths:
   /api/health:
