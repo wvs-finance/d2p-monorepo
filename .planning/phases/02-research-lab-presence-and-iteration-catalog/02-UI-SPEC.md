@@ -1,10 +1,11 @@
 ---
 phase: 2
 slug: research-lab-presence-and-iteration-catalog
-status: draft
+status: approved
 shadcn_initialized: true
 preset: "Tailwind v4 + shadcn/ui (Feb 2026) — components.json present, tokens in app/globals.css @theme inline"
 created: 2026-05-12
+reviewed_at: 2026-05-12
 ---
 
 # Phase 2 — UI Design Contract
