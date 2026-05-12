@@ -36,6 +36,11 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: ['a11y/**/*.spec.ts'],
     },
+    {
+      name: 'visual',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: ['visual/**/*.spec.ts'],
+    },
   ],
   ...(webServer ? { webServer } : {}),
 })
