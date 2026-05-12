@@ -33,10 +33,15 @@ export const iterationSchema = s
     },
   )
 
+// The collection schema extends iterationSchema with the compiled MDX body.
+// s.mdx() compiles the MDX source to a React component function string at build time.
+// iterationSchema (exported above) remains unchanged for unit-test isolation.
+const iterationCollectionSchema = iterationSchema.and(s.object({ code: s.mdx() }))
+
 const iterations = defineCollection({
   name: 'Iteration',
   pattern: 'iterations/**/*.mdx',
-  schema: iterationSchema,
+  schema: iterationCollectionSchema,
 })
 
 // Export the raw Zod schema shape for unit test isolation (no Velite build pipeline).

@@ -11,8 +11,8 @@
     },
     "type_label": {
       "paper": "Artículo",
-      "decision_memo": "Memo",
-      "write_up": "Borrador de trabajo",
+      "decision-memo": "Memo de decisión",
+      "write-up": "Borrador de trabajo",
       "talk": "Charla"
     }
   }

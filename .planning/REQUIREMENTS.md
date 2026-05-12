@@ -47,8 +47,8 @@ Each maps to exactly one phase in the roadmap.
 ### Abrigo App — Overview + Iteration Catalog (scoped under `/apps/abrigo/`)
 
 - [x] **APP-01**: Abrigo app overview page at `/apps/abrigo` renders the app's mission (∂²Π gamma — convex hedges for Colombian wage-earner macro exposure), current iteration headline counts, links to iterations / instruments / dashboard sub-routes, prominent external link to https://x.com/d2pfinabrigo, and the app's status (Active)
-- [ ] **ITER-01**: Iteration catalog at `/apps/abrigo/iterations` lists every Abrigo (Y, M, X) iteration regardless of status; no filter excludes FAIL or PARKED by default
-- [ ] **ITER-02**: Catalog cards render status with equal visual weight — same dimensions, same typography hierarchy, same prominence for PASS / FAIL / PARKED / IN_PROGRESS
+- [x] **ITER-01**: Iteration catalog at `/apps/abrigo/iterations` lists every Abrigo (Y, M, X) iteration regardless of status; no filter excludes FAIL or PARKED by default
+- [x] **ITER-02**: Catalog cards render status with equal visual weight — same dimensions, same typography hierarchy, same prominence for PASS / FAIL / PARKED / IN_PROGRESS
 - [ ] **ITER-03**: Iteration detail page at `/apps/abrigo/iterations/{slug}/v{n}` shows spec → data → estimation → tests → disposition narrative with full evidence chain
 - [ ] **ITER-04**: Each iteration detail displays β estimate, 95% confidence interval, p-value, sample size N, and replication hash with a working link to `make verify` instructions
 - [x] **ITER-05**: Pair D iteration detail page at `/apps/abrigo/iterations/pair-d/v1` (PASS, Colombian young-worker services × COP/USD lagged 6–12mo, β = +0.137) renders fully with chart, evidence chain, and notebook links
@@ -217,8 +217,8 @@ Populated by gsd-roadmapper — 2026-05-11.
 | LAB-04 | Phase 2 | Pending |
 | LAB-05 | Phase 2 | Pending |
 | LAB-06 | Phase 2 | Pending |
-| ITER-01 | Phase 2 | Pending |
-| ITER-02 | Phase 2 | Pending |
+| ITER-01 | Phase 2 | Complete |
+| ITER-02 | Phase 2 | Complete |
 | ITER-03 | Phase 2 | Pending |
 | ITER-04 | Phase 2 | Pending |
 | ITER-05 | Phase 2 | Complete |

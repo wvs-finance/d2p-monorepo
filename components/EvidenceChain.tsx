@@ -8,17 +8,18 @@ export interface EvidenceChainIteration {
   status: 'PASS' | 'FAIL' | 'PARKED' | 'IN_PROGRESS'
   title_es: string
   title_en: string
-  beta?: number
-  ci_lower?: number
-  ci_upper?: number
-  p_value?: number
-  sample_size?: number
-  replication_hash?: string
-  notebook_url?: string
-  dataset_ref?: string
+  beta?: number | undefined
+  ci_lower?: number | undefined
+  ci_upper?: number | undefined
+  p_value?: number | undefined
+  sample_size?: number | undefined
+  replication_hash?: string | undefined
+  notebook_url?: string | undefined
+  dataset_ref?: string | undefined
   analysis_date: Date
-  disposition_memo?: string
-  code: string
+  disposition_memo?: string | undefined
+  /** Compiled MDX code — optional, passed through but not rendered here. */
+  code?: string | undefined
 }
 
 export interface EvidenceChainProps {

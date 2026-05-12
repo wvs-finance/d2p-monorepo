@@ -8,8 +8,9 @@ export interface DispositionMemoIteration {
   title_es: string
   title_en: string
   analysis_date: Date
-  disposition_memo?: string
-  code: string
+  disposition_memo?: string | undefined
+  /** Compiled MDX code — optional, passed through but not rendered here. */
+  code?: string
 }
 
 export interface DispositionMemoProps {

@@ -10,11 +10,11 @@ export interface PublicationCardResearch {
   authors: string[]
   date: Date
   type: 'paper' | 'decision-memo' | 'write-up' | 'talk'
-  external_url?: string
+  external_url?: string | undefined
   summary_es: string
   summary_en: string
   tags: string[]
-  order?: number
+  order?: number | undefined
 }
 
 export interface PublicationCardProps {

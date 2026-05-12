@@ -8,7 +8,7 @@
 //
 // HOW THIS WORKS:
 // - next.config.ts webpack alias: "@/.velite" → this file (runtime values via static require)
-// - tsconfig.json paths: "@/.velite" → ".velite/index.ts" (TypeScript type declarations)
+// - tsconfig.json paths: "@/.velite" → ".velite/index.d.ts" (TypeScript type declarations)
 // - This split gives correct types at compile time + correct values at runtime.
 //
 // Uses relative path from lib/ to .velite/ so webpack can trace it statically.

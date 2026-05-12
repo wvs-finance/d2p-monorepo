@@ -11,8 +11,8 @@
     },
     "type_label": {
       "paper": "Paper",
-      "decision_memo": "Memo",
-      "write_up": "Working draft",
+      "decision-memo": "Decision memo",
+      "write-up": "Working draft",
       "talk": "Talk"
     }
   }

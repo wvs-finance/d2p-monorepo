@@ -25,9 +25,23 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  // TypeScript 5.9.3 on Node 25 triggers "Debug Failure" when the TS worker runs with default
+  // memory limits. ignoreBuildErrors: true allows the build to complete in CI / local dev.
+  // The typecheck is run separately via `pnpm tsc --noEmit` (with NODE_OPTIONS=--max-old-space-size=4096).
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // biome-ignore lint/suspicious/noExplicitAny: webpack config type varies by Next.js internals
   webpack: (config: any) => {
     config.plugins.push(new VeliteWebpackPlugin())
+    // Resolve @/.velite to a committed webpack-compatible shim (lib/velite-shim.ts).
+    // Velite 0.3.x generates .velite/index.js using JSON import assertions ("with" clause)
+    // that webpack 5 does not reliably process. The shim uses require() for stable resolution.
+    // TypeScript types still come from .velite/index.d.ts via tsconfig paths.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@/.velite': require('node:path').resolve(process.cwd(), 'lib/velite-shim.ts'),
+    }
     return config
   },
 }

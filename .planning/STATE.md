@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-05-12T22:39:36.111Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-05-12T23:03:04.599Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 16
-  completed_plans: 11
-  percent: 69
+  completed_plans: 12
+  percent: 75
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-12
-**Session type:** Plan execution (02-04 complete)
-**Stopped at:** Completed 02-02-PLAN.md
+**Session type:** Plan execution (02-05 complete)
+**Stopped at:** Completed 02-05-PLAN.md
 
 ---
 
@@ -34,11 +34,11 @@ progress:
 ## Current Position
 
 **Active phase:** 02 — Research Lab Presence and Iteration Catalog
-**Active plan:** 05 (Plan 02-04 complete — 4/8 plans)
+**Active plan:** 06 (Plan 02-05 complete — 5/8 plans)
 **Status:** Executing
 
 **Progress:**
-[███████░░░] 69%
+[████████░░] 75%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [          ] Phase 2: Research Lab Presence and Iteration Catalog
@@ -66,6 +66,7 @@ Overall: 1/5 phases complete
 | Phase 02 P01 | 9 | 3 tasks | 30 files |
 | Phase 02 P04 | 7 | 3 tasks | 6 files |
 | Phase 02 P02 | 9 | 2 tasks | 22 files |
+| Phase 02 P05 | 19 | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Overall: 1/5 phases complete
 | Wave 0 stubs use test.fixme not test.skip (Plan 02-01) | test.fixme appears in Playwright --list output as planned work; test.skip silences them entirely | All Wave 0 stubs use test.fixme pattern for visibility |
 | dev-ai-stage-1-section-j chosen as IN_PROGRESS slug over abrigo-y3-carbon-basket (Plan 02-04) | abrigo README explicitly identifies Section J (ICT) as active Phase 1 analysis; Y3 carbon basket is a separate notebook in a separate directory | Iteration catalog renders correct slug → URL mapping for Section J iteration |
 | velite.config.ts notebook_url/dataset_ref/replication_hash made optional (Plan 02-04) | Plan design intent: omit fields when unknown; schema incorrectly had them required. All abrigo SHA-256 values in source files are 63-char hex (not 64 as required by `/^[a-f0-9]{64}$/`), so replication_hash omitted from all 4 iterations | Future iterations: omit replication_hash if no conforming 64-char sha256 available; never invent |
+| useQueryState without withDefault for nullable URL filter (Plan 02-05) | withDefault(null) causes TS exactOptionalPropertyTypes collision with nuqs parseAsStringEnum; absence of ?status param natively returns null (show ALL). This is the correct ITER-01 anti-fishing implementation | IterationStatusFilter always uses parseAsStringEnum without withDefault; null = all statuses visible |
+| JSON-LD html extracted to variable before JSX return (Plan 02-05) | Biome noDangerouslySetInnerHtml suppression comment only works on single-line JSX elements; multi-line JSX (from long inline expressions) cannot be suppressed by preceding JSX comment | All future JSON-LD in RSC pages must pre-build html string as const before return |
+| code field is optional in all iteration component interfaces (Plan 02-05) | velite schema never emits a `code` field; it was mistakenly added as required in Plans 02-02/02-04 components; passing velite Iteration objects caused TS2375 errors | component interfaces must match velite output shape; optional fields not in schema must use `?` |
 
 ### Critical Path Summary
 
@@ -151,16 +155,16 @@ None currently.
 1. Read `/home/jmsbpp/apps/d2p/frontend/.planning/ROADMAP.md` — current phase structure and success criteria
 2. Read this file — current position and accumulated context
 3. Read `/home/jmsbpp/apps/d2p/frontend/.planning/REQUIREMENTS.md` — traceability table shows which requirements belong to the active phase
-4. Run Plan 02-02 next
+4. Run Plan 02-06 next
 
 ### Phase 2 Planning Order
 
 ```
 Plan 02-01: Phase 2 foundation (tokens, fonts, Velite research, nuqs, i18n, Wave 0 stubs) — COMPLETE
-Plan 02-02: Homepage content (real mission/explainer copy, Velite-derived counts)
-Plan 02-03: Iteration catalog page (/apps/abrigo/iterations, nuqs filter)
-Plan 02-04: Iteration detail page (evidence chain, JSON-LD)
-Plan 02-05: Iteration MDX seed files (pair-d/v1 PASS, fx-vol-on-cpi-surprise/v1 FAIL)
+Plan 02-02: Homepage content (real mission/explainer copy, Velite-derived counts) — COMPLETE
+Plan 02-03: Iteration catalog page (/apps/abrigo/iterations, nuqs filter) — COMPLETE (via 02-05)
+Plan 02-04: Iteration detail page (evidence chain, JSON-LD) — COMPLETE
+Plan 02-05: Iteration MDX seed files + catalog page (pair-d/v1 PASS, fx-vol/v1 FAIL) — COMPLETE
 Plan 02-06: Team page (/team, lib/team/contributors.ts)
 Plan 02-07: Publications + About pages (/research, /about)
 Plan 02-08: Content sync workflow (LAB-04, repository_dispatch trigger)

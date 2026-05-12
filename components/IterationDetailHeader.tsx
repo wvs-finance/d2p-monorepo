@@ -9,7 +9,8 @@ export interface IterationDetailHeaderIteration {
   title_es: string
   title_en: string
   analysis_date: Date
-  code: string
+  /** Compiled MDX code — optional, passed through but not rendered here. */
+  code?: string
 }
 
 export interface IterationDetailHeaderProps {
