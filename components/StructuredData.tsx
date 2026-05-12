@@ -15,7 +15,7 @@ export function StructuredData(): React.JSX.Element {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'd2p Finance / DS2P Labs',
-    url: 'https://wvs.finance',
+    url: 'https://d2pfinance.xyz',
     description:
       'Research lab designing permissionless convex-hedge instruments for frontier markets',
     sameAs: ['https://github.com/wvs-finance'],
@@ -25,7 +25,7 @@ export function StructuredData(): React.JSX.Element {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'd2p Finance',
-    url: 'https://wvs.finance',
+    url: 'https://d2pfinance.xyz',
   }
 
   const orgHtml = escapeJsonLd(organization)

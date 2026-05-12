@@ -1,0 +1,43 @@
+name: Sync abrigo content
+
+# Phase 1 scaffold — manual dispatch only.
+# Phase 2 enables the repository_dispatch trigger from the wvs-finance/abrigo repo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      abrigo_ref:
+        description: "abrigo commit SHA or branch to sync from"
+        required: false
+        default: "main"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout frontend
+        uses: actions/checkout@v4
+
+      - name: Checkout abrigo
+        uses: actions/checkout@v4
+        with:
+          repository: wvs-finance/abrigo
+          ref: ${{ inputs.abrigo_ref }}
+          path: _abrigo
+
+      - name: Copy markdown files into content/iterations/
+        run: |
+          mkdir -p content/iterations
+          # Phase 2 will populate this step with rsync or a tailored copy.
+          # rsync -av --include='*/' --include='*.md' --include='*.mdx' --exclude='*' _abrigo/scratch/ content/iterations/
+          # rsync -av --include='*/' --include='*.md' --include='*.mdx' --exclude='*' _abrigo/docs/ content/iterations/
+          echo "PHASE 1 SCAFFOLD — copy step is a placeholder. Phase 2 implements it."
+
+      - name: Validate via Velite
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm velite build
+
+      - name: Open PR
+        # Phase 2 wires peter-evans/create-pull-request@v6
+        run: echo "PHASE 1 SCAFFOLD — PR creation will be added in Phase 2."
