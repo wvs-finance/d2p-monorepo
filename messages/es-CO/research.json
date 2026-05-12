@@ -1,0 +1,19 @@
+{
+  "research": {
+    "h1": "Investigación",
+    "subheading": "Memorandos de decisión, borradores de trabajo e iteraciones del laboratorio.",
+    "empty_state": {
+      "heading": "Sin publicaciones aún",
+      "body": "Los documentos aparecerán aquí una vez se sincronice el contenido desde abrigo-analytics."
+    },
+    "cta": {
+      "read_document": "Leer documento"
+    },
+    "type_label": {
+      "paper": "Artículo",
+      "decision_memo": "Memo",
+      "write_up": "Borrador de trabajo",
+      "talk": "Charla"
+    }
+  }
+}

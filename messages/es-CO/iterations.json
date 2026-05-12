@@ -1,0 +1,61 @@
+{
+  "iterations": {
+    "catalog": {
+      "h1": "Catálogo de iteraciones — Abrigo",
+      "subheading": "Todas las iteraciones (Y, M, X), sin filtro por estado. Aprobadas y rechazadas tienen el mismo peso.",
+      "empty_state": {
+        "heading": "No hay iteraciones aún",
+        "body": "Las iteraciones aparecerán aquí una vez se sincronice el contenido desde abrigo-analytics."
+      }
+    },
+    "filter": {
+      "all": "Todas",
+      "aria_label": "Filtrar iteraciones por estado",
+      "pass": "Aprobadas",
+      "fail": "Rechazadas",
+      "parked": "Pausadas",
+      "in_progress": "En progreso"
+    },
+    "detail": {
+      "evidence": {
+        "heading": "Cadena de evidencia",
+        "beta_label": "β",
+        "ci_label": "IC 95%",
+        "pvalue_label": "valor p",
+        "sample_size_label": "N =",
+        "replication_label": "Hash de replicación",
+        "notebook_link_label": "Ver cuaderno de análisis",
+        "dataset_ref_label": "Referencia de datos",
+        "analysis_date_label": "Fecha de análisis"
+      },
+      "replication": {
+        "hash_label": "Hash de replicación",
+        "copy": {
+          "copy_button_aria": "Copiar hash"
+        },
+        "copied_toast": "¡Copiado!"
+      },
+      "verify": {
+        "how_to_verify": "Cómo verificar este hash",
+        "instructions": "Ejecuta el siguiente comando para replicar el análisis y verificar el hash:"
+      },
+      "disposition": {
+        "heading": "Disposición",
+        "fail_notice": "Esta iteración fue rechazada. La disposición completa documenta el hallazgo.",
+        "pass_label": "Resultado: Aprobado"
+      },
+      "version_label": "versión",
+      "loading": "Cargando iteración…",
+      "error": {
+        "heading": "No se pudo cargar la iteración",
+        "body": "Verifica la URL o intenta de nuevo. Si el problema persiste, la iteración puede no estar disponible aún."
+      }
+    },
+    "status": {
+      "pass": { "label": "Aprobado" },
+      "fail": { "label": "Rechazado" },
+      "parked": { "label": "Pausado" },
+      "in_progress": { "label": "En progreso" }
+    }
+  }
+}

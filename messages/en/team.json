@@ -1,0 +1,9 @@
+{
+  "team": {
+    "h1": "Team",
+    "subheading": "Lab contributors and current responsibilities.",
+    "github_link_label": "View GitHub profile",
+    "current_iteration_label": "Current iteration",
+    "no_assignment_label": "No active assignment"
+  }
+}

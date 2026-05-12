@@ -38,6 +38,27 @@ const iterations = defineCollection({
   schema: iterationSchema,
 })
 
+// Export the raw Zod schema shape for unit test isolation (no Velite build pipeline).
+export const researchSchema = s.object({
+  slug: s.string().regex(/^[a-z0-9-]+$/),
+  title_es: s.string().min(1),
+  title_en: s.string().min(1),
+  authors: s.array(s.string()).min(1),
+  date: s.coerce.date(),
+  type: s.enum(['paper', 'decision-memo', 'write-up', 'talk']),
+  external_url: s.string().url().optional(),
+  summary_es: s.string().min(1),
+  summary_en: s.string().min(1),
+  tags: s.array(s.string()).default([]),
+  order: s.number().int().positive().optional(),
+})
+
+const research = defineCollection({
+  name: 'Research',
+  pattern: 'research/*.mdx',
+  schema: researchSchema,
+})
+
 export default defineConfig({
   root: 'content',
   output: {
@@ -47,5 +68,5 @@ export default defineConfig({
     name: '[name]-[hash:6].[ext]',
     clean: true,
   },
-  collections: { iterations },
+  collections: { iterations, research },
 })

@@ -1,0 +1,19 @@
+{
+  "research": {
+    "h1": "Research",
+    "subheading": "Decision memos, working drafts, and lab iteration write-ups.",
+    "empty_state": {
+      "heading": "No publications yet",
+      "body": "Documents will appear here once content is synced from abrigo-analytics."
+    },
+    "cta": {
+      "read_document": "Read document"
+    },
+    "type_label": {
+      "paper": "Paper",
+      "decision_memo": "Memo",
+      "write_up": "Working draft",
+      "talk": "Talk"
+    }
+  }
+}

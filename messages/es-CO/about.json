@@ -1,0 +1,45 @@
+{
+  "about": {
+    "h1": "Metodología",
+    "subheading": "La disciplina anti-fishing del laboratorio: especificaciones pre-comprometidas, flujo de trabajo estructural, y honestidad epistémica.",
+    "intro": {
+      "p1": "El laboratorio diseña y despliega instrumentos de cobertura validados por econometría estructural. Cada iteración sigue un protocolo estricto de cinco pasos para garantizar que los resultados reflejen la evidencia, no el diseño del analista.",
+      "p2": "Las iteraciones rechazadas tienen el mismo peso narrativo que las aprobadas. El registro de iteraciones es público e inmutable."
+    },
+    "steps": {
+      "step_01": {
+        "number": "01",
+        "title": "Especificación",
+        "body": "El bloque de cita de decisión se redacta y registra antes de ejecutar cualquier código. Define Y, M, X, el modelo, las hipótesis nulas, los umbrales de rechazo y los criterios de tamaño de muestra."
+      },
+      "step_02": {
+        "number": "02",
+        "title": "Datos",
+        "body": "Los datos se descargan desde la fuente primaria con hash de verificación. Ningún archivo de datos se modifica manualmente. El trío de verificación (origen, fecha, hash) se registra en el cuaderno."
+      },
+      "step_03": {
+        "number": "03",
+        "title": "Estimación",
+        "body": "Se ejecuta el estimador pre-comprometido. Se registran β, errores estándar, IC y estadísticas de ajuste sin selección post-hoc de especificaciones."
+      },
+      "step_04": {
+        "number": "04",
+        "title": "Pruebas",
+        "body": "Se aplican las pruebas de sensibilidad pre-comprometidas: especificaciones alternativas, subconjuntos de muestra, pruebas de heterocedasticidad y análisis de valor extremo. Cada celda de código va seguida del trío de verificación."
+      },
+      "step_05": {
+        "number": "05",
+        "title": "Disposición",
+        "body": "Se redacta el memo de disposición: PASA si el resultado supera los umbrales pre-comprometidos; FALLA en caso contrario. El FALLA no se archiva ni se minimiza. Se publica con el mismo peso que el PASA."
+      }
+    },
+    "commitments": {
+      "intro": "Compromisos del laboratorio en cada iteración:",
+      "item_1": "El bloque de cita de decisión precede cada prueba",
+      "item_2": "Trío de verificación después de cada celda de código",
+      "item_3": "DETENER si hay conflicto especificación–datos",
+      "item_4": "El rechazo tiene el mismo peso narrativo que la aprobación"
+    },
+    "reference_link_label": "Ver repositorio de referencia"
+  }
+}

@@ -37,8 +37,22 @@ export default getRequestConfig(async () => {
   const commonMessages = (await import(`../messages/${locale}/common.json`)).default as MessageMap
   const labMessages = (await import(`../messages/${locale}/lab.json`)).default as MessageMap
   const navMessages = (await import(`../messages/${locale}/nav.json`)).default as MessageMap
+  const iterationsMessages = (await import(`../messages/${locale}/iterations.json`))
+    .default as MessageMap
+  const researchMessages = (await import(`../messages/${locale}/research.json`))
+    .default as MessageMap
+  const teamMessages = (await import(`../messages/${locale}/team.json`)).default as MessageMap
+  const aboutMessages = (await import(`../messages/${locale}/about.json`)).default as MessageMap
 
-  const messages = mergeMessages(commonMessages, labMessages, navMessages)
+  const messages = mergeMessages(
+    commonMessages,
+    labMessages,
+    navMessages,
+    iterationsMessages,
+    researchMessages,
+    teamMessages,
+    aboutMessages,
+  )
 
   return { locale, messages }
 })
