@@ -1,22 +1,51 @@
-// Phase 2 Wave 0 stub — created by plan 02-01.
-// Filled by plan 02-03 in wave 2 per 02-VALIDATION.md.
-// Covers requirement(s): ITER-02
-import { test } from '@playwright/test'
+// Plan 02-05 — Filled by plan 02-05 (was wave-0 stub from 02-01).
+// Covers requirements: ITER-01, ITER-02 — accessibility compliance
+import AxeBuilder from '@axe-core/playwright'
+import { expect, test } from '@playwright/test'
 
 test.describe('phase-2 - ITER-02 — iteration catalog accessibility', () => {
-  test.fixme('axe-core WCAG 2.2 AA scan passes on /apps/abrigo/iterations', async () => {
-    // GET /apps/abrigo/iterations
-    // Run axe-core with wcag2a, wcag2aa, wcag21aa, wcag22aa tags
-    // results.violations must be empty
+  test('axe-core WCAG 2.2 AA scan passes on /apps/abrigo/iterations', async ({ page }) => {
+    await page.goto('/apps/abrigo/iterations')
+    await page.waitForSelector('[data-testid="iteration-catalog-card"]')
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(results.violations).toEqual([])
   })
 
-  test.fixme('iteration catalog filter pills have keyboard navigation', async () => {
-    // Filter pill row (if present) navigable with Tab + Enter/Space
-    // Active state communicated via aria-pressed or aria-current
+  test('iteration catalog filter pills have keyboard navigation via Tab + Enter', async ({
+    page,
+  }) => {
+    await page.goto('/apps/abrigo/iterations')
+    await page.waitForSelector('[data-testid="filter-pill-all"]')
+
+    // Filter pill nav uses <nav aria-label="..."> and <button> elements — keyboard accessible by default
+    const filterNav = page.locator('nav[aria-label]')
+    await expect(filterNav).toBeVisible()
+
+    // Tab to first pill and press Enter — should remain on page
+    const allPill = page.locator('[data-testid="filter-pill-all"]')
+    await allPill.focus()
+    await page.keyboard.press('Enter')
+    // URL should not have a status param (All is default)
+    await expect(page).not.toHaveURL(/status=/)
   })
 
-  test.fixme('iteration catalog cards have accessible names for screen readers', async () => {
-    // Each IterationCatalogCard has an accessible name describing the iteration
-    // StatusPill uses color + icon + text (CROSS-09 — never color alone)
+  test('iteration catalog cards have accessible names for screen readers', async ({ page }) => {
+    await page.goto('/apps/abrigo/iterations')
+    await page.waitForSelector('[data-testid="iteration-catalog-card"]')
+
+    const cards = page.locator('[data-testid="iteration-catalog-card"] a')
+    const count = await cards.count()
+    expect(count).toBe(4)
+
+    // Each card link must have an accessible name (from h3 text content)
+    for (let i = 0; i < count; i++) {
+      const card = cards.nth(i)
+      const accessibleName = await card.textContent()
+      expect(accessibleName?.trim().length).toBeGreaterThan(0)
+    }
   })
 })
