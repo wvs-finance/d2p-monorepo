@@ -1,0 +1,19 @@
+{
+  "hero": {
+    "wordmark": "d2p Finance",
+    "tagline": "Coberturas convexas verificadas para los riesgos macro del trabajador asalariado en mercados de frontera."
+  },
+  "iteration_counts": {
+    "heading": "Iteraciones publicadas",
+    "pass": "Confirmadas",
+    "fail": "Refutadas",
+    "parked": "Pausadas",
+    "in_progress": "En curso"
+  },
+  "status": {
+    "pass": { "label": "PASA" },
+    "fail": { "label": "FALLA" },
+    "parked": { "label": "PAUSADA" },
+    "in_progress": { "label": "EN CURSO" }
+  }
+}

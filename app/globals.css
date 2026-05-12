@@ -1,0 +1,131 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ============================================================
+   Section 1 — Semantic value definitions (light mode = :root)
+   All neutrals are tinted toward the lab accent (teal-green).
+   Pure black, pure white, and raw stone/gray/zinc literals are forbidden.
+   Lab accent hue: ~165 (teal-green), aligned with Colombian forest tone.
+   NOT violet, NOT purple-blue gradient (impeccable anti-pattern).
+   ============================================================ */
+:root {
+  /* Neutrals (tinted toward 165° hue, never pure achromatic) */
+  --bg-canvas: oklch(0.985 0.005 165);
+  --bg-surface: oklch(0.965 0.008 165);
+  --bg-elevated: oklch(0.99 0.004 165);
+
+  --text-primary: oklch(0.18 0.02 165);
+  --text-secondary: oklch(0.38 0.018 165);
+  --text-muted: oklch(0.55 0.014 165);
+
+  --border-default: oklch(0.88 0.01 165);
+
+  /* Accent — lab teal-green (placeholder; Phase 2 UI-SPEC will confirm) */
+  --accent-default: oklch(0.55 0.18 165);
+  --accent-hover: oklch(0.48 0.2 165);
+
+  /* Status — epistemic-honesty discipline: equal saturation/lightness (CROSS-09 + ITER-02)
+     Lightness at 0.38-0.42 ensures WCAG AA 4.5:1 text contrast against near-white canvas
+     (bg-canvas L≈0.985 + /10 opacity tinted pill background ≈ effective L≈0.95).
+     Flagged as needing verification in 01-02-SUMMARY.md; confirmed here with axe results. */
+  --status-pass: oklch(0.38 0.17 145); /* green, darkened for AA contrast */
+  --status-fail: oklch(0.4 0.19 30); /* warm red, darkened for AA contrast */
+  --status-parked: oklch(0.42 0.13 60); /* amber, darkened for AA contrast */
+  --status-in-progress: oklch(0.38 0.16 230); /* blue, darkened for AA contrast */
+
+  --destructive: oklch(0.52 0.19 25);
+  --ring: oklch(0.55 0.18 165);
+
+  --radius: 0.5rem;
+}
+
+/* ============================================================
+   Section 2 — Dark mode parallel set (same semantic names)
+   All neutrals remain tinted (nonzero chroma), never pure achromatic.
+   ============================================================ */
+.dark {
+  --bg-canvas: oklch(0.13 0.015 165);
+  --bg-surface: oklch(0.17 0.013 165);
+  --bg-elevated: oklch(0.21 0.012 165);
+
+  --text-primary: oklch(0.94 0.012 165);
+  --text-secondary: oklch(0.78 0.014 165);
+  --text-muted: oklch(0.62 0.012 165);
+
+  --border-default: oklch(0.3 0.01 165);
+
+  --accent-default: oklch(0.65 0.18 165);
+  --accent-hover: oklch(0.72 0.2 165);
+
+  /* Dark mode: lightened for readability against dark canvas (L≈0.13) */
+  --status-pass: oklch(0.62 0.17 145);
+  --status-fail: oklch(0.62 0.19 30);
+  --status-parked: oklch(0.65 0.13 60);
+  --status-in-progress: oklch(0.62 0.16 230);
+
+  --destructive: oklch(0.62 0.19 25);
+  --ring: oklch(0.65 0.18 165);
+}
+
+/* ============================================================
+   Section 3 — Tailwind v4 @theme inline bridge
+   The `inline` keyword keeps these as var() references (not build-time-resolved values)
+   so dark mode toggling works without re-emitting duplicate utility classes.
+   (RESEARCH Pattern 1; PITFALLS Pitfall 1 — the `inline` keyword is MANDATORY)
+   ============================================================ */
+@theme inline {
+  --color-bg-canvas: var(--bg-canvas);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-border-default: var(--border-default);
+
+  --color-accent-default: var(--accent-default);
+  --color-accent-hover: var(--accent-hover);
+
+  --color-status-pass: var(--status-pass);
+  --color-status-fail: var(--status-fail);
+  --color-status-parked: var(--status-parked);
+  --color-status-in-progress: var(--status-in-progress);
+
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+
+  /* shadcn/ui semantic aliases — map shadcn's expected token names to our semantic tokens */
+  --color-background: var(--bg-canvas);
+  --color-foreground: var(--text-primary);
+  --color-card: var(--bg-elevated);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--bg-elevated);
+  --color-popover-foreground: var(--text-primary);
+  --color-primary: var(--accent-default);
+  --color-primary-foreground: var(--bg-canvas);
+  --color-secondary: var(--bg-surface);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted: var(--bg-surface);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--bg-surface);
+  --color-accent-foreground: var(--text-primary);
+  --color-border: var(--border-default);
+  --color-input: var(--border-default);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ============================================================
+   Base reset — minimal
+   Font stack: system-ui cascade only — banned typefaces not present (CROSS-04)
+   ============================================================ */
+body {
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}

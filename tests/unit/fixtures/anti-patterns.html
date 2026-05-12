@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-Pattern Fixtures — impeccable detector test</title>
+  <style>
+    /* Anti-pattern 1: Inter (overused font) */
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Anti-pattern 2: Pure black background */
+    .pure-black {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    /* Anti-pattern 3: Purple-to-blue gradient (AI color palette) */
+    .hero {
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+    }
+
+    /* Anti-pattern 4: Oversized italic serif h1 + gradient text */
+    .italic-serif-hero {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 64px;
+      background: linear-gradient(90deg, #f43f5e, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Anti-pattern 5: Eyebrow chip (small uppercase tracking label) */
+    .eyebrow {
+      border-radius: 9999px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-size: 11px;
+      padding: 2px 8px;
+    }
+
+    /* Anti-pattern 6: Card nested in card */
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .card .card {
+      /* nested card — explicit anti-pattern */
+      background: #f5f5f5;
+    }
+
+    /* Anti-pattern 7: Dark glow halo (large blurred box-shadow) */
+    .dark-glow {
+      box-shadow: 0 0 80px rgba(124, 58, 237, 0.4);
+    }
+
+    /* Anti-pattern 8: Side-tab accent border */
+    .accent-side {
+      border-left: 4px solid #7c3aed;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    /* Anti-pattern 9: Gray text on colored background */
+    .gray-on-color {
+      background: #e0e7ff;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Anti-pattern 5: Eyebrow chip above heading -->
+  <section data-pattern="eyebrow-chip">
+    <span class="eyebrow">RESEARCH · FINANCE</span>
+    <h2>Section Title</h2>
+  </section>
+
+  <!-- Anti-pattern 4: Oversized italic serif h1 -->
+  <section data-pattern="oversized-italic-serif-h1">
+    <h1 class="italic-serif-hero">Empower your financial future</h1>
+  </section>
+
+  <!-- Anti-pattern 3: Purple-to-blue gradient hero -->
+  <section data-pattern="purple-to-blue-gradient">
+    <div class="hero" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+      <p style="color: white;">Hero content</p>
+    </div>
+  </section>
+
+  <!-- Anti-pattern 6: Card nested in card -->
+  <section data-pattern="card-nested-in-card">
+    <div class="card">
+      <p>Outer card</p>
+      <div class="card">
+        <p>Nested card — anti-pattern</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Anti-pattern 8: Side-tab accent -->
+  <section data-pattern="side-tab-accent">
+    <div class="accent-side">
+      <p>Aside with left border accent</p>
+    </div>
+  </section>
+
+  <!-- Anti-pattern 9: Gray text on colored background -->
+  <section data-pattern="gray-text-on-colored-background">
+    <div class="gray-on-color">
+      <p>Hard to read: gray text on colored background</p>
+    </div>
+  </section>
+
+  <!-- Anti-pattern 2: Pure black background -->
+  <section data-pattern="pure-black-background">
+    <div class="pure-black" style="padding: 16px;">
+      <p>Pure black background text</p>
+    </div>
+  </section>
+
+  <!-- Anti-pattern 7: Dark glow halo -->
+  <section data-pattern="dark-glow-halo">
+    <div class="card dark-glow" style="padding: 16px;">
+      <p>Card with dark glow shadow</p>
+    </div>
+  </section>
+
+  <!-- Anti-pattern 1: Inter font (referenced via CSS above) -->
+  <!-- body font-family: 'Inter', sans-serif triggers overused-font detector -->
+
+</body>
+</html>

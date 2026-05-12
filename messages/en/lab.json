@@ -1,0 +1,19 @@
+{
+  "hero": {
+    "wordmark": "d2p Finance",
+    "tagline": "Verified convex hedges for wage-earner macro risk in frontier markets."
+  },
+  "iteration_counts": {
+    "heading": "Published iterations",
+    "pass": "Confirmed",
+    "fail": "Refuted",
+    "parked": "Parked",
+    "in_progress": "In progress"
+  },
+  "status": {
+    "pass": { "label": "PASS" },
+    "fail": { "label": "FAIL" },
+    "parked": { "label": "PARKED" },
+    "in_progress": { "label": "IN PROGRESS" }
+  }
+}

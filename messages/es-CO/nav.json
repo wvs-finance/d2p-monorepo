@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "apps": "Aplicaciones",
+    "research": "Investigación",
+    "team": "Equipo",
+    "about": "Acerca de",
+    "language": "Idioma",
+    "menu_open": "Abrir menú",
+    "menu_close": "Cerrar menú"
+  },
+  "apps": {
+    "menu_label": "Menú de aplicaciones",
+    "external_link_label": "Abrir página externa en una nueva pestaña",
+    "status_active": "Activa",
+    "status_coming_soon": "Próximamente",
+    "status_archived": "Archivada",
+    "abrigo": {
+      "description": "Coberturas convexas para trabajadores colombianos — gamma ∂²Π",
+      "mission": "Abrigo diseña y despliega instrumentos de cobertura convexa sin permiso que apuntan a la exposición al riesgo macro de los trabajadores colombianos. La estructura gamma ∂²Π — segunda derivada parcial del pago — brinda protección convexa contra la depreciación COP/USD, sorpresas del IPC y choques del mercado laboral, sin requerir apalancamiento ni especulación.",
+      "headline": "Abrigo — gamma ∂²Π"
+    }
+  }
+}
