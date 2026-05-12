@@ -23,7 +23,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@/.velite": ["./.velite/index.d.ts"]
+      "@/.velite": ["./lib/velite-shim.ts"]
     }
   },
   "include": [

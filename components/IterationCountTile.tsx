@@ -24,7 +24,7 @@ export function IterationCountTile({
   locale,
 }: IterationCountTileProps) {
   return (
-    <div className="flex items-baseline gap-3 py-3">
+    <div data-testid="iteration-count-tile" className="flex items-baseline gap-3 py-3">
       <span className="text-3xl font-semibold text-text-primary tabular-nums">
         {formatNumber(count, locale)}
       </span>

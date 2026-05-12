@@ -15,5 +15,33 @@
     "fail": { "label": "FALLA" },
     "parked": { "label": "PAUSADA" },
     "in_progress": { "label": "EN CURSO" }
+  },
+  "lab": {
+    "hero": {
+      "h1": "DS2P Labs",
+      "subline": "Instrumentos de cobertura para exposición macroeconómica"
+    },
+    "mission": {
+      "body": "Diseñamos y desplegamos instrumentos de cobertura convexa en ecosistemas EVM, validados por econometría estructural antes de su lanzamiento. El primer instrumento: Abrigo, para trabajadores colombianos expuestos al riesgo COP/USD."
+    },
+    "what_is_d2pi": {
+      "heading": "¿Qué es d2-π?",
+      "body": "d2-π (DS2P Labs) es un laboratorio de investigación que diseña instrumentos financieros convexos. La letra π denota el payoff; el operador ∂² captura la convexidad — la curvatura del payoff respecto al subyacente. Cada instrumento que el lab incuba debe primero pasar por evidencia estructural antes de su despliegue."
+    },
+    "apps": {
+      "heading": "Instrumentos activos",
+      "abrigo": {
+        "name": "Abrigo",
+        "description": "Coberturas convexas para trabajadores colombianos — gamma ∂²Π",
+        "cta": "Ver Abrigo"
+      }
+    },
+    "counts": {
+      "heading": "Estado del catálogo",
+      "empty": "Aún no hay iteraciones registradas."
+    },
+    "github": {
+      "label": "wvs-finance en GitHub"
+    }
   }
 }

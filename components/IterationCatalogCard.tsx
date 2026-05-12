@@ -8,9 +8,10 @@ export interface IterationCatalogCardIteration {
   status: IterationStatus
   title_es: string
   title_en: string
-  beta?: number
+  beta?: number | undefined
   analysis_date: Date
-  code: string
+  /** Compiled MDX code — optional, not in velite schema. */
+  code?: string | undefined
 }
 
 export interface IterationCatalogCardProps {

@@ -1,24 +1,36 @@
-// Phase 2 Wave 0 stub — created by plan 02-01.
-// Filled by plan 02-02 in wave 2 per 02-VALIDATION.md.
-// Covers requirement(s): LAB-01
-import { describe, it } from 'vitest'
+// @vitest-environment node
+// Phase 2 Wave 3 — filled by plan 02-03
+// Covers requirement: LAB-01
+import { describe, expect, it } from 'vitest'
 
-describe('phase-2 - LAB-01 — homepage iteration counts', () => {
-  it.todo('homepage iteration counts derive from Velite collection — all 4 statuses present')
+// Import the pure helper from the page file once it exists.
+// Until it does, tests will fail with a module-not-found error (RED phase).
+import { countsByStatus } from '@/lib/iterations/counts'
 
-  it.todo(
-    'IterationCountTile for PASS status shows count matching Velite iterations with status=PASS',
-  )
+describe('countsByStatus', () => {
+  it('returns correct counts for a mixed-status array', () => {
+    const result = countsByStatus([{ status: 'PASS' }, { status: 'FAIL' }, { status: 'PASS' }] as {
+      status: 'PASS' | 'FAIL' | 'PARKED' | 'IN_PROGRESS'
+    }[])
 
-  it.todo(
-    'IterationCountTile for FAIL status shows count matching Velite iterations with status=FAIL',
-  )
+    expect(result).toEqual({
+      PASS: 2,
+      FAIL: 1,
+      PARKED: 0,
+      IN_PROGRESS: 0,
+      total: 3,
+    })
+  })
 
-  it.todo(
-    'IterationCountTile for PARKED status shows count matching Velite iterations with status=PARKED',
-  )
+  it('returns all-zero counts for an empty array', () => {
+    const result = countsByStatus([] as { status: 'PASS' | 'FAIL' | 'PARKED' | 'IN_PROGRESS' }[])
 
-  it.todo(
-    'IterationCountTile for IN_PROGRESS status shows count matching Velite iterations with status=IN_PROGRESS',
-  )
+    expect(result).toEqual({
+      PASS: 0,
+      FAIL: 0,
+      PARKED: 0,
+      IN_PROGRESS: 0,
+      total: 0,
+    })
+  })
 })
