@@ -3,34 +3,34 @@
     "h1": "Methodology",
     "subheading": "The lab's anti-fishing discipline: pre-committed specs, structural workflow, and epistemic honesty.",
     "intro": {
-      "p1": "The lab designs and deploys hedging instruments validated by structural econometrics. Each iteration follows a strict five-step protocol to ensure results reflect the evidence, not the analyst's design choices.",
-      "p2": "Rejected iterations carry equal narrative weight as approved ones. The iteration record is public and immutable."
+      "p1": "We research before we deploy. Every hedging instrument the lab ships must clear structural-econometrics validation — not post-hoc analysis, not favorable-outcome selection, not narrative.",
+      "p2": "This page documents the discipline we apply to every iteration. The five stages and four commitments are live: they apply equally to success and failure."
     },
     "steps": {
-      "step_01": {
+      "01": {
         "number": "01",
         "title": "Spec",
-        "body": "The decision-citation block is drafted and recorded before any code runs. It defines Y, M, X, the model, null hypotheses, rejection thresholds, and sample size criteria."
+        "body": "We pre-commit the hypothesis, data universe, instrumental identifiers, and test thresholds BEFORE looking at results. The spec is published as a citable document."
       },
-      "step_02": {
+      "02": {
         "number": "02",
         "title": "Data",
-        "body": "Data is downloaded from the primary source with a verification hash. No data file is manually edited. The verification trio (source, date, hash) is recorded in the notebook."
+        "body": "We pull the macro and micro panels from the registry fixed in the spec. Any later adjustment — cleaning, imputation, trimming — is documented in a decision-citation block before being applied."
       },
-      "step_03": {
+      "03": {
         "number": "03",
         "title": "Estimation",
-        "body": "The pre-committed estimator is run. β, standard errors, CI, and fit statistics are recorded without post-hoc specification selection."
+        "body": "Structural OLS with HAC standard errors. Robustness checks (window, sub-panel, transform sensitivity) run automatically — they are not optional."
       },
-      "step_04": {
+      "04": {
         "number": "04",
         "title": "Tests",
-        "body": "Pre-committed sensitivity tests are applied: alternative specifications, sample subsets, heteroskedasticity tests, and extreme-value analysis. Each code cell is followed by a verification trio checkpoint."
+        "body": "Every code cell passes a trio checkpoint: the cell runs, the outputs are what we expected, and a reviewer confirms. Without the trio, the cell is not considered resolved."
       },
-      "step_05": {
+      "05": {
         "number": "05",
         "title": "Disposition",
-        "body": "The disposition memo is written: PASS if the result clears pre-committed thresholds; FAIL otherwise. FAIL is not archived or minimized. It is published with the same weight as PASS."
+        "body": "The iteration closes with a disposition memo: pass, fail, or parked. The memo explains the outcome — and, on rejection, what was learned. Rejection carries equal narrative weight as approval."
       }
     },
     "commitments": {
@@ -40,6 +40,9 @@
       "item_3": "HALT on spec–data conflict",
       "item_4": "Rejection carries equal narrative weight as approval"
     },
-    "reference_link_label": "View reference repository"
+    "reference": {
+      "heading": "Methodology reference",
+      "link_label": "Read abrigo-analytics methodology"
+    }
   }
 }

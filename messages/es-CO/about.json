@@ -3,34 +3,34 @@
     "h1": "Metodología",
     "subheading": "La disciplina anti-fishing del laboratorio: especificaciones pre-comprometidas, flujo de trabajo estructural, y honestidad epistémica.",
     "intro": {
-      "p1": "El laboratorio diseña y despliega instrumentos de cobertura validados por econometría estructural. Cada iteración sigue un protocolo estricto de cinco pasos para garantizar que los resultados reflejen la evidencia, no el diseño del analista.",
-      "p2": "Las iteraciones rechazadas tienen el mismo peso narrativo que las aprobadas. El registro de iteraciones es público e inmutable."
+      "p1": "Investigamos antes de desplegar. Cada instrumento de cobertura que el lab pone en producción debe haber sido validado por econometría estructural — no por análisis post-hoc, no por selección de outcomes favorables, no por narrativa.",
+      "p2": "Esta página documenta la disciplina que aplicamos a cada iteración. Las cinco etapas y los cuatro compromisos están vivos: se aplican igualmente al éxito y al fracaso."
     },
     "steps": {
-      "step_01": {
+      "01": {
         "number": "01",
         "title": "Especificación",
-        "body": "El bloque de cita de decisión se redacta y registra antes de ejecutar cualquier código. Define Y, M, X, el modelo, las hipótesis nulas, los umbrales de rechazo y los criterios de tamaño de muestra."
+        "body": "Pre-comprometemos la hipótesis, el universo de datos, los identificadores instrumentales, y los umbrales de prueba ANTES de mirar resultados. La especificación se publica como documento citable."
       },
-      "step_02": {
+      "02": {
         "number": "02",
         "title": "Datos",
-        "body": "Los datos se descargan desde la fuente primaria con hash de verificación. Ningún archivo de datos se modifica manualmente. El trío de verificación (origen, fecha, hash) se registra en el cuaderno."
+        "body": "Extraemos los paneles macro y micro del registro fijado en la especificación. Cualquier ajuste posterior — limpieza, imputación, recorte — se documenta en un bloque de cita de decisión antes de aplicarse."
       },
-      "step_03": {
+      "03": {
         "number": "03",
         "title": "Estimación",
-        "body": "Se ejecuta el estimador pre-comprometido. Se registran β, errores estándar, IC y estadísticas de ajuste sin selección post-hoc de especificaciones."
+        "body": "OLS estructural con errores estándar HAC. Las pruebas de robustez (sensibilidad a la ventana, al sub-panel, a la transformación) se ejecutan automáticamente — no son opcionales."
       },
-      "step_04": {
+      "04": {
         "number": "04",
         "title": "Pruebas",
-        "body": "Se aplican las pruebas de sensibilidad pre-comprometidas: especificaciones alternativas, subconjuntos de muestra, pruebas de heterocedasticidad y análisis de valor extremo. Cada celda de código va seguida del trío de verificación."
+        "body": "Cada celda de código pasa por un trío de verificación: la celda corre, los outputs son los esperados, y un revisor lo confirma. Sin el trío, la celda no se considera resuelta."
       },
-      "step_05": {
+      "05": {
         "number": "05",
         "title": "Disposición",
-        "body": "Se redacta el memo de disposición: PASA si el resultado supera los umbrales pre-comprometidos; FALLA en caso contrario. El FALLA no se archiva ni se minimiza. Se publica con el mismo peso que el PASA."
+        "body": "La iteración cierra con un memo de disposición: aprobado, rechazado, o pausado. El memo explica el resultado — y, en caso de rechazo, qué se aprendió. El rechazo tiene el mismo peso narrativo que la aprobación."
       }
     },
     "commitments": {
@@ -40,6 +40,9 @@
       "item_3": "DETENER si hay conflicto especificación–datos",
       "item_4": "El rechazo tiene el mismo peso narrativo que la aprobación"
     },
-    "reference_link_label": "Ver repositorio de referencia"
+    "reference": {
+      "heading": "Referencia metodológica",
+      "link_label": "Leer la metodología de abrigo-analytics"
+    }
   }
 }
