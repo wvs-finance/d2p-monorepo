@@ -15,15 +15,24 @@ export interface ContributorCardProps {
   contributor: Contributor
   t: (key: string) => string
   locale?: 'es-CO' | 'en'
+  'data-testid'?: string
 }
 
-export function ContributorCard({ contributor, t, locale = 'en' }: ContributorCardProps) {
+export function ContributorCard({
+  contributor,
+  t,
+  locale = 'en',
+  'data-testid': testId,
+}: ContributorCardProps) {
   const { name, role_es, role_en, github_handle, avatar_url, focus_iteration_slug } = contributor
   const role = locale === 'es-CO' ? role_es : role_en
   const avatarSrc = avatar_url ?? `https://github.com/${github_handle}.png`
 
   return (
-    <li className="flex items-center gap-4 py-4 border-b border-border-default last:border-b-0">
+    <li
+      data-testid={testId}
+      className="flex items-center gap-4 py-4 border-b border-border-default last:border-b-0"
+    >
       <img
         src={avatarSrc}
         alt={`${name}'s avatar`}
