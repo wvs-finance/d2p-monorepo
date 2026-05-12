@@ -1,7 +1,9 @@
 name: Sync abrigo content
 
-# Phase 1 scaffold — manual dispatch only.
-# Phase 2 enables the repository_dispatch trigger from the wvs-finance/abrigo repo.
+# Phase 2 — LAB-04 delivery.
+# Triggers on repository_dispatch from wvs-finance/abrigo-analytics (event: abrigo-content-updated)
+# and retains manual workflow_dispatch for one-off syncs.
+# Creates a PR via peter-evans/create-pull-request@v6 when content changes are detected.
 
 on:
   workflow_dispatch:
@@ -10,34 +12,78 @@ on:
         description: "abrigo commit SHA or branch to sync from"
         required: false
         default: "main"
+  repository_dispatch:
+    types: [abrigo-content-updated]
 
 jobs:
   sync:
+    name: Sync abrigo content
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout frontend
         uses: actions/checkout@v4
 
-      - name: Checkout abrigo
+      - name: Checkout abrigo-analytics
         uses: actions/checkout@v4
         with:
-          repository: wvs-finance/abrigo
-          ref: ${{ inputs.abrigo_ref }}
+          repository: wvs-finance/abrigo-analytics
+          ref: ${{ github.event.client_payload.ref || inputs.abrigo_ref || 'main' }}
           path: _abrigo
+          token: ${{ secrets.ABRIGO_READ_PAT }}
 
-      - name: Copy markdown files into content/iterations/
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Copy abrigo scratch + docs markdown into content/research/
         run: |
-          mkdir -p content/iterations
-          # Phase 2 will populate this step with rsync or a tailored copy.
-          # rsync -av --include='*/' --include='*.md' --include='*.mdx' --exclude='*' _abrigo/scratch/ content/iterations/
-          # rsync -av --include='*/' --include='*.md' --include='*.mdx' --exclude='*' _abrigo/docs/ content/iterations/
-          echo "PHASE 1 SCAFFOLD — copy step is a placeholder. Phase 2 implements it."
+          mkdir -p content/research/scratch content/research/docs
+          # Only copy *.md and *.mdx files; preserve nested directory structure
+          rsync -av --include='*/' --include='*.md' --include='*.mdx' --exclude='*' \
+            _abrigo/scratch/ content/research/scratch/ || true
+          rsync -av --include='*/' --include='*.md' --include='*.mdx' --exclude='*' \
+            _abrigo/docs/ content/research/docs/ || true
+          echo "Synced files:"
+          find content/research/scratch content/research/docs -type f 2>/dev/null || true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Validate via Velite
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm velite build
+        run: pnpm velite build
 
-      - name: Open PR
-        # Phase 2 wires peter-evans/create-pull-request@v6
-        run: echo "PHASE 1 SCAFFOLD — PR creation will be added in Phase 2."
+      - name: Detect changes
+        id: detect
+        run: |
+          if [[ -n "$(git status --porcelain content/)" ]]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.detect.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "content: sync abrigo iteration and research content"
+          title: "content: sync iteration and research content from abrigo-analytics"
+          body: |
+            Automated content sync from `wvs-finance/abrigo-analytics`.
+
+            Triggered by: `${{ github.event_name }}` (ref=`${{ github.event.client_payload.ref || inputs.abrigo_ref || 'main' }}`)
+
+            Merge gate: regular CI (impeccable, lint, typecheck, vitest, playwright, lighthouse, a11y).
+          branch: auto/sync-abrigo-content
+          base: main
+          delete-branch: true
+          add-paths: |
+            content/
