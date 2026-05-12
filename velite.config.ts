@@ -9,12 +9,13 @@ export const iterationSchema = s
     status: s.enum(['PASS', 'FAIL', 'PARKED', 'IN_PROGRESS']),
     title_es: s.string().min(1),
     title_en: s.string().min(1),
-    notebook_url: s.string().url(),
-    dataset_ref: s.string().min(1),
+    notebook_url: s.string().url().optional(),
+    dataset_ref: s.string().min(1).optional(),
     analysis_date: s.coerce.date(),
     replication_hash: s
       .string()
-      .regex(/^[a-f0-9]{64}$/, 'replication_hash must be lowercase sha256 hex (64 chars)'),
+      .regex(/^[a-f0-9]{64}$/, 'replication_hash must be lowercase sha256 hex (64 chars)')
+      .optional(),
     beta: s.number().optional(),
     ci_lower: s.number().optional(),
     ci_upper: s.number().optional(),
