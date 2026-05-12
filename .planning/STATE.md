@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-05-PLAN.md
-last_updated: "2026-05-12T23:03:04.599Z"
+stopped_at: Completed 02-07-PLAN.md
+last_updated: "2026-05-12T00:00:00Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 16
-  completed_plans: 12
-  percent: 75
+  completed_plans: 13
+  percent: 81
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-12
-**Session type:** Plan execution (02-05 complete)
-**Stopped at:** Completed 02-05-PLAN.md
+**Session type:** Plan execution (02-07 complete)
+**Stopped at:** Completed 02-07-PLAN.md
 
 ---
 
@@ -34,7 +34,7 @@ progress:
 ## Current Position
 
 **Active phase:** 02 — Research Lab Presence and Iteration Catalog
-**Active plan:** 06 (Plan 02-05 complete — 5/8 plans)
+**Active plan:** 08 (Plan 02-07 complete — 6/8 plans complete: 02-01, 02-02, 02-04, 02-05, 02-06, 02-07)
 **Status:** Executing
 
 **Progress:**
@@ -67,6 +67,7 @@ Overall: 1/5 phases complete
 | Phase 02 P04 | 7 | 3 tasks | 6 files |
 | Phase 02 P02 | 9 | 2 tasks | 22 files |
 | Phase 02 P05 | 19 | 2 tasks | 14 files |
+| Phase 02 P07 | 90 | 3 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,11 @@ Overall: 1/5 phases complete
 | useQueryState without withDefault for nullable URL filter (Plan 02-05) | withDefault(null) causes TS exactOptionalPropertyTypes collision with nuqs parseAsStringEnum; absence of ?status param natively returns null (show ALL). This is the correct ITER-01 anti-fishing implementation | IterationStatusFilter always uses parseAsStringEnum without withDefault; null = all statuses visible |
 | JSON-LD html extracted to variable before JSX return (Plan 02-05) | Biome noDangerouslySetInnerHtml suppression comment only works on single-line JSX elements; multi-line JSX (from long inline expressions) cannot be suppressed by preceding JSX comment | All future JSON-LD in RSC pages must pre-build html string as const before return |
 | code field is optional in all iteration component interfaces (Plan 02-05) | velite schema never emits a `code` field; it was mistakenly added as required in Plans 02-02/02-04 components; passing velite Iteration objects caused TS2375 errors | component interfaces must match velite output shape; optional fields not in schema must use `?` |
+| contributors.ts is hardcoded TS array seeded from abrigo-analytics git log (Plan 02-07) | No runtime GitHub API fetch per CONTEXT.md; single contributor (Juan Serrano / JMSBPP) confirmed from git shortlog | Team page always renders from static TS array; future contributors added by editing contributors.ts |
+| research type_label keys use hyphens not underscores (Plan 02-07) | Velite enum values are 'decision-memo' and 'write-up'; messages file had 'decision_memo' and 'write_up' causing PublicationCard key construction to miss translations | All message keys for Velite-enum-based type labels must match enum values exactly including hyphens |
+| PublicationCard optional props typed as T or undefined (Plan 02-07) | exactOptionalPropertyTypes: true rejects `prop?: string` when the value can be `string | undefined`; must use `prop?: string | undefined` | Pattern applies to all components accepting Velite-generated optional fields |
+| @/.velite tsconfig path changed from index.ts to index.d.ts (Plan 02-07) | index.ts doesn't exist; incremental tsc crashes at resolveExternalModule when pointing to non-existent file; Next.js TS plugin auto-fixed path to index.d.ts | @/.velite alias always points to .velite/index.d.ts; never to .ts |
+| /about excluded from locale-coverage spec (Plan 02-07) | /about route does not exist in Phase 2 app directory; plan listed it but no page was created | locale-coverage.spec.ts covers 6 routes x 2 locales = 12 tests; /about added when that route is built |
 
 ### Critical Path Summary
 
@@ -165,8 +171,8 @@ Plan 02-02: Homepage content (real mission/explainer copy, Velite-derived counts
 Plan 02-03: Iteration catalog page (/apps/abrigo/iterations, nuqs filter) — COMPLETE (via 02-05)
 Plan 02-04: Iteration detail page (evidence chain, JSON-LD) — COMPLETE
 Plan 02-05: Iteration MDX seed files + catalog page (pair-d/v1 PASS, fx-vol/v1 FAIL) — COMPLETE
-Plan 02-06: Team page (/team, lib/team/contributors.ts)
-Plan 02-07: Publications + About pages (/research, /about)
+Plan 02-06: Team page (/team, lib/team/contributors.ts) — COMPLETE
+Plan 02-07: Publications + Team pages (/research, /team, locale coverage) — COMPLETE
 Plan 02-08: Content sync workflow (LAB-04, repository_dispatch trigger)
 ```
 

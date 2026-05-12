@@ -38,11 +38,11 @@ Each maps to exactly one phase in the roadmap.
 ### Research Lab Presence (umbrella scope — NOT scoped to Abrigo)
 
 - [ ] **LAB-01**: Lab umbrella homepage at `/` renders mission statement, "What is d2-π" explainer, current Apps overview (today: Abrigo as the sole active app — preview card linking into `/apps/abrigo`), cross-app iteration headline counts (Pass / Fail / Parked / In Progress, aggregated across all apps — currently equals Abrigo's), and links to wvs-finance GitHub org + parent DS2P Labs
-- [ ] **LAB-02**: Team / contributors page at `/team` lists contributors with role, GitHub link, and current iteration ownership
-- [ ] **LAB-03**: Publications page at `/research` indexes papers, decision memos, and iteration write-ups synced from `../abrigo/` `scratch/` and `docs/`
+- [x] **LAB-02**: Team / contributors page at `/team` lists contributors with role, GitHub link, and current iteration ownership
+- [x] **LAB-03**: Publications page at `/research` indexes papers, decision memos, and iteration write-ups synced from `../abrigo/` `scratch/` and `docs/`
 - [ ] **LAB-04**: Content pipeline CI step syncs `../abrigo/scratch/**/*.md` and `../abrigo/docs/**/*.md` into `frontend/content/iterations/` on every push to abrigo `main`
 - [ ] **LAB-05**: Lab "About" page explains the anti-fishing discipline, pre-committed-spec workflow, and trio-checkpoint method — in author's voice, no marketing slop
-- [ ] **LAB-06**: All lab pages render in es-CO and en with author-quality translations (not machine-translated)
+- [x] **LAB-06**: All lab pages render in es-CO and en with author-quality translations (not machine-translated)
 
 ### Abrigo App — Overview + Iteration Catalog (scoped under `/apps/abrigo/`)
 
@@ -212,11 +212,11 @@ Populated by gsd-roadmapper — 2026-05-11.
 | NAV-08 | Phase 1 | Pending |
 | APP-01 | Phase 1 | Pending |
 | LAB-01 | Phase 2 | Pending |
-| LAB-02 | Phase 2 | Pending |
-| LAB-03 | Phase 2 | Pending |
+| LAB-02 | Phase 2 | Complete |
+| LAB-03 | Phase 2 | Complete |
 | LAB-04 | Phase 2 | Pending |
 | LAB-05 | Phase 2 | Pending |
-| LAB-06 | Phase 2 | Pending |
+| LAB-06 | Phase 2 | Complete |
 | ITER-01 | Phase 2 | Complete |
 | ITER-02 | Phase 2 | Complete |
 | ITER-03 | Phase 2 | Pending |
