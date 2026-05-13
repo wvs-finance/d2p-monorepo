@@ -29,9 +29,9 @@ export function IterationCatalogCard({ iteration, locale, labels }: IterationCat
   return (
     <a
       href={href}
-      className="group block rounded-lg border border-border-default bg-bg-surface min-h-[120px] p-4 transition-shadow motion-safe:hover:shadow-sm motion-safe:hover:border-accent-default/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-default"
+      className="group block h-full rounded-lg border border-border-default bg-bg-surface min-h-[120px] p-4 transition-shadow motion-safe:hover:shadow-sm motion-safe:hover:border-accent-default/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-default"
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 h-full">
         <div className="flex items-start gap-3">
           <StatusPill status={iteration.status} label={labels.statusLabels[iteration.status]} />
           {/* Title region is fixed-height (2 line slots) and line-clamped at 2 lines

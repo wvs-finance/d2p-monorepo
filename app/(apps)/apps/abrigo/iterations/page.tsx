@@ -98,7 +98,13 @@ export default async function IterationsCatalogPage({ searchParams }: PageProps)
           <p className="mt-2 text-text-secondary">{t('iterations.catalog.empty_state.body')}</p>
         </div>
       ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 list-none">
+        // auto-rows-fr + h-full on the anchor (set in IterationCatalogCard) makes every
+        // card stretch to match the tallest in its row. CROSS-09 / ITER-02: cards must
+        // have identical dimensions regardless of status — the β row only renders for
+        // PASS/FAIL cards, so without this PASS/FAIL would be visually taller than
+        // IN_PROGRESS/PARKED, which is exactly the anti-fishing breach the invariant
+        // forbids.
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 list-none auto-rows-fr">
           {sorted.map((it) => (
             <li key={`${it.slug}-${it.version}`} data-testid="iteration-catalog-card">
               <IterationCatalogCard iteration={it} locale={locale} labels={{ statusLabels }} />

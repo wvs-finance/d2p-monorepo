@@ -1,25 +1,148 @@
 ---
-status: pass
+status: partial
 runtime: production
 target_url: https://www.d2pfinance.xyz
-head_commit: 1d867d6
-prior_head_commit: f0b5311
-screenshots_dir: /home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2
-verified_at: 2026-05-13T08:13:00-04:00
+head_commit: b02ceb5
+prior_head_commit: 1d867d6
+screenshots_dir: /home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-3
+verified_at: 2026-05-13T08:31:00-04:00
 verifier: EvidenceQA (Playwright MCP, live browser)
 summary:
-  pass: 10
-  partial: 2
+  pass: 12
+  partial: 1
   fail: 0
-deferred:
-  - mcp_discovery_endpoint_path_mismatch  # known, deferred per Phase 2 fix scope
-  - catalog_card_height_title_length_drift  # known, title-length driven not status-driven
+deferred: []
 residual_partials:
-  - locale_switcher_no_op_on_static_iteration_detail_pages  # force-static + dynamicParams=false locks served HTML to default locale; MDX still bilingual inline
-  - h1_strip_height_delta_pair_d_vs_fx_vol  # title-length driven, same as catalog finding; first-paragraph + scrollHeight prove equal weight
+  - catalog_card_height_status_metadata_drift  # h3 region now strictly equal (50px line-clamp-2 min-h-[2.5em]); 16px card-level delta now driven by conditional β=… <p> row for PASS/FAIL vs date-only for IN_PROGRESS/PARKED; scope of b02ceb5 fix was title region only
+prior_passes:
+  - 1d867d6  # 2026-05-13T08:13Z — closed v[version] 404 blocker
+  - f0b5311  # initial live verification
 ---
 
 # Phase 2 — Live In-Browser Verification
+
+## Re-verification pass 2 — b02ceb5 (2026-05-13T08:31:00-04:00)
+
+**Scope:** verify that commit `b02ceb5` closes the 3 residual gaps surfaced in re-verification pass 1 — locale switcher no-op on iteration detail pages, MCP discovery endpoint path mismatch, and catalog card height drift.
+**Method:** Playwright MCP, real Chromium @ 1280×900 (with 360×800 mobile breakpoint check on catalog), live against production `https://www.d2pfinance.xyz`.
+**Screenshots:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-3/` (also mirrored to `/tmp/d2p-verify-3/`).
+
+### Headline finding
+
+**2 of 3 gaps fully closed; 1 partial.**
+- Locale switcher is now fully bidirectional on all 4 iteration detail pages (force-static + dynamicParams=false dropped in `b02ceb5` — the route rename in `1d867d6` alone was sufficient).
+- MCP discovery endpoints (`/.well-known/mcp.json`, `/llms.txt`) now correctly advertise `/api/mcp/mcp` (Streamable HTTP) and `/api/mcp/sse` (SSE legacy) with proper `transport` fields, and the Streamable HTTP endpoint actually responds with valid JSON-RPC over `text/event-stream`.
+- Catalog card `<h3>` region is now strictly equal-height across all 4 cards (50px each, line-clamp-2 + min-h-[2.5em] confirmed). The 16px residual card-level delta is **no longer title-length-driven** — it now reflects the presence of the optional `β = …` `<p>` row that only renders for cards with a `beta` value (PASS/FAIL statuses). The shipped fix scope per `b02ceb5` was the title region only; status-row drift is a separate (and arguably correct, since β is signal for evaluated iterations) finding.
+
+### Priority 1 — locale switcher actually works on iteration detail — ✓ PASS (4 / 4)
+
+Procedure for each URL: clear `NEXT_LOCALE` cookie → navigate → confirm es-CO default → set cookie `NEXT_LOCALE=en` → re-navigate → confirm English copy + `<html lang="en">` → set cookie back to `es-CO` → re-navigate → confirm Spanish copy + `<html lang="es-CO">`.
+
+| URL | es-CO default | EN switch | es-CO restore | Screenshot |
+|---|---|---|---|---|
+| `/apps/abrigo/iterations/pair-d/v1` | h1 = `Pair D — servicios jóvenes Colombia × COP/USD (6–12 meses rezagado)`, `lang="es-CO"`, `details summary = "Cómo verificar este hash"` | h1 = `Pair D — Colombian young-worker services × COP/USD lagged 6–12mo`, `lang="en"`, `details summary = "How to verify this hash"` | h1 reverts to Spanish, `lang="es-CO"`, `hasES=true hasEN=false` | `locale-pair-d-en.png` |
+| `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` | h1 = `Volatilidad FX ante sorpresa CPI — Colombia`, `lang="es-CO"` | h1 = `FX volatility response to CPI surprise — Colombia`, `lang="en"`, `hasEN=true` | h1 reverts to Spanish, `lang="es-CO"` | `locale-fx-vol-en.png` |
+| `/apps/abrigo/iterations/dev-ai-stage-1-section-j/v1` | h1 = `dev-AI Stage-1 — Sección J Colombia (TIC) × COP/USD (en progreso)`, `lang="es-CO"` | h1 = `dev-AI Stage-1 — Colombian Section J (ICT) × COP/USD (in progress)`, `lang="en"` | h1 reverts to Spanish, `lang="es-CO"` | `locale-dev-ai-stage-1-section-j-en.png` |
+| `/apps/abrigo/iterations/pair-b-bittensor/v1` | h1 = `P1 Bittensor SN18 — exposición a subnet de IA (pausada)`, `lang="es-CO"` | h1 = `P1 Bittensor SN18 — AI subnet exposure (parked)`, `lang="en"` | h1 reverts to Spanish, `lang="es-CO"` | `locale-pair-b-bittensor-en.png` |
+
+**Verdict:** ✓ PASS — the previous pass's "static HTML locks built-in default" finding is closed. Cookie + navigation now produces a fresh SSR response in the requested locale on every detail page.
+
+### Priority 2 — MCP discovery endpoints serve correct content — ✓ PASS
+
+**`POST /api/mcp/mcp`** (Streamable HTTP transport, JSON-RPC 2.0 `tools/list`):
+- Response status: `200`
+- Response `content-type`: `text/event-stream`
+- Response body: `event: message\ndata: {"jsonrpc":"2.0","id":1,"error":{"code":-32601,"message":"Method not found"}}\n\n`
+- Verdict: ✓ endpoint reachable, transport correct, JSON-RPC framing correct. `-32601 Method not found` is the **expected** stub response (Phase 1 has 0 tools registered; tools land in Phase 4).
+
+**`GET /.well-known/mcp.json`**:
+```json
+{
+  "mcp_servers": [
+    { "url": "/api/mcp/mcp", "transport": "streamable-http", "description": "d2p Finance protocol and research state (Phase 1 stub — tools added in Phase 4)" },
+    { "url": "/api/mcp/sse", "transport": "sse", "description": "d2p Finance protocol and research state via SSE (deprecated in MCP spec; kept for legacy clients)" }
+  ]
+}
+```
+- Two server entries ✓
+- First: `url: "/api/mcp/mcp"`, `transport: "streamable-http"` ✓
+- Second: `url: "/api/mcp/sse"`, `transport: "sse"` ✓
+
+**`GET /llms.txt`** now lists:
+```
+## Agent endpoints
+- MCP server (Streamable HTTP):        /api/mcp/mcp
+- MCP server (SSE):                    /api/mcp/sse
+- OpenAPI 3.1 spec:                    /.well-known/openapi.yaml
+- MCP discovery:                       /.well-known/mcp.json
+```
+- Streamable HTTP endpoint (`/api/mcp/mcp`) advertised as primary ✓ (previous version listed only `/api/mcp/sse`).
+
+**Verdict:** ✓ PASS — discovery files match real endpoint, and the real endpoint behaves correctly under Streamable HTTP transport.
+
+### Priority 3 — catalog card heights strictly equal — ⚠ PARTIAL
+
+**Source verified:** `components/IterationCatalogCard.tsx` line 40 contains `className="text-xl font-semibold text-text-primary leading-tight flex-1 line-clamp-2 min-h-[2.5em]"` — fix is shipped.
+
+**Measurements @ 1280px (3-up grid):**
+
+| slug | status | title (es-CO, full) | h3 height | card height |
+|---|---|---|---:|---:|
+| dev-ai-stage-1-section-j | IN_PROGRESS | dev-AI Stage-1 — Sección J Colombia (TIC) × COP/USD (en progreso) | **50px** | 120px |
+| pair-d | PASS | Pair D — servicios jóvenes Colombia × COP/USD (6–12 meses rezagado) | **50px** | 136px |
+| pair-b-bittensor | PARKED | P1 Bittensor SN18 — exposición a subnet de IA (pausada) | **50px** | 120px |
+| fx-vol-on-cpi-surprise | FAIL | Volatilidad FX ante sorpresa CPI — Colombia | **50px** | 136px |
+
+**Measurements @ 360px (1-up stacked):** identical pattern — h3 = 50px on all 4 cards; card 120px for IN_PROGRESS/PARKED, 136px for PASS/FAIL.
+
+**Root cause of residual 16px delta** (verified via DOM inspection):
+- Inner `<div class="flex flex-col gap-2">` height: 74px for IN_PROGRESS/PARKED; 102px for PASS/FAIL.
+- The conditional `{iteration.beta != null && (<p>β = …</p>)}` row in `IterationCatalogCard.tsx` (lines 44–49) renders only when β is present (PASS/FAIL).
+- Grid container `ul.grid` does stretch `<li>` to equal row height (li=136px on all top-row items), but the anchor `<a>` card uses `block` with `min-h-[120px]` — it does **not** stretch to `h-full` within the `<li>`.
+- This is **status-driven content**, not title-length-driven — opposite of the previous pass's finding.
+
+**Verdict:** ⚠ PARTIAL — the explicit fix in `b02ceb5` (title region fixed-height) is shipped and working as designed. The card-level delta is now a second-order finding: PASS/FAIL cards are taller by one β-row's worth than IN_PROGRESS/PARKED cards. The fix scope per the commit message was the `<h3>` only; closing the card-level delta would require either (a) adding `h-full` to the anchor, or (b) reserving an empty/placeholder line for the β slot when β is absent. Recommend tracking as a follow-up if epistemic-equality invariant (CROSS-09) is meant to extend below the title row.
+
+**Screenshot:** `catalog-equal-height.png` (full-page, all 4 cards visible in 3-col + 1-row grid; visible 16px difference between rows 1 and 4).
+
+### Priority 4 — regression smoke — ✓ PASS
+
+**HTTP 200 + expected H1 on all 6 lab routes (server-rendered, es-CO default):**
+
+| route | status | h1 (es-CO) |
+|---|---:|---|
+| `/` | 200 | `DS2P Labs` |
+| `/about` | 200 | `Metodología` |
+| `/team` | 200 | `Equipo` |
+| `/research` | 200 | `Investigación` |
+| `/apps/abrigo` | 200 | `Abrigo — gamma ∂²Π` |
+| `/apps/abrigo/iterations` | 200 | `Catálogo de iteraciones — Abrigo` |
+
+**HTTP 200 + empirical evidence rendering on all 4 detail routes:**
+
+| route | status | JSON-LD @types | replication hash | β | CI | N |
+|---|---:|---|:-:|:-:|:-:|:-:|
+| `/apps/abrigo/iterations/pair-d/v1` | 200 | Organization, WebSite, Dataset, ScholarlyArticle | ✓ | ✓ (`+0.13670985`) | ✓ (`[0.0884, 0.1850]`) | ✓ (134) |
+| `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` | 200 | Organization, WebSite, Dataset, ScholarlyArticle | ✓ | ✓ (`-0.000685`) | ✓ (`[-0.003635, 0.002265]`) | ✓ (n=947, lowercase) |
+| `/apps/abrigo/iterations/dev-ai-stage-1-section-j/v1` | 200 | Organization, WebSite, Dataset, ScholarlyArticle | — (correctly absent — IN_PROGRESS) | — (correctly absent) | — | — |
+| `/apps/abrigo/iterations/pair-b-bittensor/v1` | 200 | Organization, WebSite, Dataset, ScholarlyArticle | — (correctly absent — PARKED) | — (correctly absent) | — | — |
+
+Console errors on the catalog page after `b02ceb5`: **0** (`mcp__plugin_playwright_playwright__browser_console_messages` returned 0 errors, 0 warnings).
+
+**Verdict:** ✓ PASS — no regressions introduced by dropping `force-static + dynamicParams=false`; all routes still 200; empirical evidence still rendering; JSON-LD still emitting Dataset + ScholarlyArticle on all 4 detail pages; IN_PROGRESS / PARKED pages still correctly contain no invented numeric values.
+
+### Summary
+
+| Priority | Verdict | Evidence |
+|---|---|---|
+| 1. Locale switcher on detail pages | ✓ PASS | 4/4 URLs bidirectional with screenshots |
+| 2. MCP discovery + endpoint | ✓ PASS | `mcp.json`, `llms.txt`, `POST /api/mcp/mcp` all correct |
+| 3. Catalog card equal height | ⚠ PARTIAL | h3 region strictly equal (50px); 16px card delta now status-driven, not title-driven |
+| 4. Regression smoke | ✓ PASS | 10/10 URLs 200; H1s, JSON-LD, β/CI/N, hashes all present |
+
+**Overall:** `b02ceb5` closes the two priorities the commit explicitly targeted (locale switcher, MCP endpoint paths). The third (card heights) is partially closed — the title-length-driven drift identified in pass 1 is gone; a new, smaller, status-driven delta remains. Setting top-level `status: partial` to reflect the residual card-level inequality rather than claiming `pass` and burying the finding.
+
+---
 
 ## Re-verification pass — 1d867d6 (2026-05-13T08:13:00-04:00)
 
