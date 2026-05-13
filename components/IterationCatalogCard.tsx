@@ -34,7 +34,12 @@ export function IterationCatalogCard({ iteration, locale, labels }: IterationCat
       <div className="flex flex-col gap-2">
         <div className="flex items-start gap-3">
           <StatusPill status={iteration.status} label={labels.statusLabels[iteration.status]} />
-          <h3 className="text-xl font-semibold text-text-primary leading-tight flex-1">{title}</h3>
+          {/* Title region is fixed-height (2 line slots) and line-clamped at 2 lines
+              so cards have identical dimensions regardless of title length —
+              epistemic-equality invariant (ITER-02 + CROSS-09). */}
+          <h3 className="text-xl font-semibold text-text-primary leading-tight flex-1 line-clamp-2 min-h-[2.5em]">
+            {title}
+          </h3>
         </div>
         {iteration.beta != null && (
           <p className="text-sm font-mono text-text-secondary">

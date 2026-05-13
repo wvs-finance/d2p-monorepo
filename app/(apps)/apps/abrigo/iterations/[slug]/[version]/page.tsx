@@ -13,19 +13,15 @@ interface PageProps {
   params: Promise<{ slug: string; version: string }>
 }
 
-// Pre-render at build time. Without these, Next 16 + async params treat the route as
-// fully dynamic — and the per-route lambda may not bundle the Velite JSON, producing
-// runtime 404s even when generateStaticParams would have returned 4 valid entries.
-// With force-static + dynamicParams=false, the 4 known iteration pages are baked
-// into static HTML at build time and the runtime never touches iterations.find().
-export const dynamic = 'force-static'
-export const dynamicParams = false
-
 // Version is encoded as "v1", "v2", etc. so the param value carries its own "v" prefix.
 // This is a workaround for a Next 16 / Turbopack bug where literal-prefixed dynamic
 // segments (e.g. `v[version]/`) leave the bracketed pattern unresolved in the prerender
 // manifest, causing every static URL like `/v1` to 404. With the param absorbing the
 // "v", routes like /apps/abrigo/iterations/pair-d/v1 resolve cleanly.
+//
+// The route stays dynamic (no force-static) so the cookie-based locale switcher
+// continues to work — force-static caches the build-time default locale into the
+// served HTML and makes runtime locale changes invisible to readers.
 function parseVersion(v: string): number {
   return Number.parseInt(v.startsWith('v') ? v.slice(1) : v, 10)
 }

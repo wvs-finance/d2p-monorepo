@@ -1,0 +1,35 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "d2p Finance" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e4]:
+      - button "Aplicaciones" [ref=e6]:
+        - text: Aplicaciones
+        - img [ref=e7]
+      - link "Investigación" [ref=e9] [cursor=pointer]:
+        - /url: /research
+      - link "Equipo" [ref=e10] [cursor=pointer]:
+        - /url: /team
+      - link "Acerca de" [ref=e11] [cursor=pointer]:
+        - /url: /about
+      - navigation "Idioma" [ref=e13]:
+        - button "Español (Colombia)" [disabled] [ref=e15]
+        - button "English" [ref=e17]
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - status [ref=e22]:
+          - img [ref=e23]
+          - generic [ref=e25]: Pausado
+        - generic [ref=e26]: versión v1
+      - heading "P1 Bittensor SN18 — exposición a subnet de IA (pausada)" [level=1] [ref=e27]
+      - time [ref=e28]: 15 de marzo de 2026
+    - generic [ref=e29]:
+      - article [ref=e30]:
+        - heading "Estado / Status" [level=2] [ref=e31]
+        - paragraph [ref=e32]: "(es-CO) Esta iteración propone estudiar la exposición de los trabajadores colombianos del sector de IA y computación al modelo de emisión y recompensas de la Subnet 18 (SN18) de Bittensor (TAO), un protocolo descentralizado de machine learning. La iteración está pausada porque los criterios de selección del instrumento SN18 no son suficientemente estables para iniciar el diseño de la especificación pre-comprometida: el calendario de emisión de la subnet, su mecánica de penalización y su historial de volatilidad están sujetos a cambios de gobernanza que invalidan la estabilización del par (Y, X) como variable de tratamiento. La iteración se revisará cuando el calendario de emisión de la subnet quede formalizado y auditado. No se reportan valores β, CI, p-value ni N: la iteración no ha ingresado al trío de cuadernos de validación empírica."
+        - paragraph [ref=e33]: "(en) This iteration proposes studying the exposure of Colombian AI and computing workers to the emission and reward model of Bittensor (TAO) Subnet 18 (SN18), a decentralized machine-learning protocol. The iteration is parked because the instrument selection criteria for SN18 are insufficiently stable to begin pre-committed specification design: the subnet emission schedule, its slashing mechanics, and its volatility history are subject to governance changes that prevent stable definition of the (Y, X) treatment variable. The iteration will be revisited once the subnet emission schedule is formally specified and audited. No β, CI, p-value, or N values are reported: the iteration has not entered the empirical validation notebook trio."
+      - complementary [ref=e34]:
+        - region "Cadena de evidencia" [ref=e35]:
+          - heading "Cadena de evidencia" [level=2] [ref=e36]
+  - alert [ref=e37]

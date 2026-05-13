@@ -1,20 +1,164 @@
 ---
-status: fail
+status: pass
 runtime: production
 target_url: https://www.d2pfinance.xyz
-deployment_id: dpl_Aet13twnn8xWiabJpnqXkbmLmSFH
-head_commit: f0b5311
-screenshots_dir: /home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify
-verified_at: 2026-05-13T11:51:00-04:00
+head_commit: 1d867d6
+prior_head_commit: f0b5311
+screenshots_dir: /home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2
+verified_at: 2026-05-13T08:13:00-04:00
 verifier: EvidenceQA (Playwright MCP, live browser)
 summary:
-  pass: 6
-  partial: 1
-  fail: 2
-  unreachable: 2
-blockers:
-  - iteration_detail_404_both_demo_pages
-  - mcp_streamable_http_path_mismatch_with_llms_txt
+  pass: 10
+  partial: 2
+  fail: 0
+deferred:
+  - mcp_discovery_endpoint_path_mismatch  # known, deferred per Phase 2 fix scope
+  - catalog_card_height_title_length_drift  # known, title-length driven not status-driven
+residual_partials:
+  - locale_switcher_no_op_on_static_iteration_detail_pages  # force-static + dynamicParams=false locks served HTML to default locale; MDX still bilingual inline
+  - h1_strip_height_delta_pair_d_vs_fx_vol  # title-length driven, same as catalog finding; first-paragraph + scrollHeight prove equal weight
+---
+
+# Phase 2 — Live In-Browser Verification
+
+## Re-verification pass — 1d867d6 (2026-05-13T08:13:00-04:00)
+
+**Scope:** verify that the Phase 2 fix in commit `1d867d6` (rename `[slug]/v[version]` → `[slug]/[version]`, embed `v` prefix in param value, force-static + dynamicParams=false) actually resolves the two priority-1 blockers (Pair D and FX-vol detail pages returning 404).
+**Method:** Playwright MCP, real Chromium @ 1280×900, against production `https://www.d2pfinance.xyz`.
+**Screenshots:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2/` (8 captures; also reachable at `/tmp/d2p-verify-2/` via symlink).
+
+### Headline finding
+
+**The blocker is closed.** All four iteration detail pages — Pair D (PASS), FX-vol (FAIL), dev-AI Stage-1 (IN_PROGRESS), Pair B Bittensor (PARKED) — now return HTTP 200 with full content, zero console errors, and the expected EvidenceChain / DispositionMemo / JSON-LD structures. The 6 routes that passed in the first pass still pass. Two residual partials remain (locale switcher being a no-op on the now-static detail pages, and a title-length-driven H1 strip height delta) — neither affects the demo-critical path.
+
+### Priority 1 — the fix (per detail page)
+
+#### 1. `/apps/abrigo/iterations/pair-d/v1` — PASS demo — ✓ PASS
+
+| Claim | Evidence | Verdict |
+|---|---|---|
+| HTTP 200 | Page title `Pair D — Colombian young-worker services × COP/USD lagged 6–12mo — Abrigo / DS2P Labs` rendered; no 404 fallback | ✓ |
+| H1 contains "Pair D" | `<h1>Pair D — servicios jóvenes Colombia × COP/USD (6–12 meses rezagado)</h1>` | ✓ |
+| PASS status pill (color + check icon + visible "PASS" text) | `<status>` with `<img>` (lucide check) + `<generic>Aprobado</generic>` (es-CO label; "Pass" in en locale per regression smoke) | ✓ |
+| β = +0.13670985 (or formatted) | Body text matches `+0.13670984` (8-decimal form in MDX); evidence chain definition list shows `+0.136710`; figure aria-label `β = 0.1367, 95% CI [0.0884, 0.1850]` | ✓ |
+| CI bounds ~0.0884 / ~0.1850 | DOM regex match `[0.0884, 0.1850]`; figure caption matches | ✓ |
+| p ≈ 1.46×10⁻⁸ | Body regex match `1.46e-8`; evidence chain definition shows `1.46e-8` | ✓ |
+| N = 134 | Body regex match `N = 134`; evidence chain definition shows `N = 134` | ✓ |
+| replication_hash (`d4790e74…` truncated) | `aria-label="Replication hash: d4790e743cdec62f1368cab1833e1266cb2da763d7c0931dd732bdf3d17938cf"` with displayed text `d4790e74…38cf` and Copy button | ✓ |
+| `<details>` "Cómo verificar / How to verify" expandable | Exactly 1 `<details>` element in main; summary text `"Cómo verificar este hash"` | ✓ |
+| 5-section MDX narrative (Spec / Data / Estimation / Tests / Disposition) | Six `<h2>` inside article: `Especificación / Spec`, `Datos / Data`, `Estimación / Estimation`, `Pruebas / Tests`, `Disposición / Disposition`, `Cadena de evidencia` | ✓ |
+| Two JSON-LD blocks (`Dataset` + `ScholarlyArticle`) | `document.querySelectorAll('script[type="application/ld+json"]').length === 4`; parsed @type list: `[Organization, WebSite, Dataset, ScholarlyArticle]` (Dataset + ScholarlyArticle present in addition to root-layout Organization+WebSite) | ✓ |
+| Console errors | 0 | ✓ |
+
+**Screenshot:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2/1-pair-d.png` (full page, 3303-px tall main)
+
+#### 2. `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` — FAIL demo — ✓ PASS
+
+| Claim | Evidence | Verdict |
+|---|---|---|
+| HTTP 200 | Page title `FX volatility response to CPI surprise — Colombia — Abrigo / DS2P Labs` | ✓ |
+| H1 contains "FX" / "Volatilidad FX" | `<h1>Volatilidad FX ante sorpresa CPI — Colombia</h1>` | ✓ |
+| FAIL status pill (color + X-circle icon + visible "FAIL" text) | `<status>` with `<img>` + `<generic>Rechazado</generic>` (Spanish FAIL label) at the page header strip, AND a second `<status>` with the same `Rechazado` label inside the DispositionMemo region | ✓ |
+| β̂ = -0.000685 | Body regex match `-0.000685`; evidence chain definition shows `-0.000685`; figure caption `β = -0.0007, 95% CI [-0.0036, 0.0023]` | ✓ |
+| 90% CI [-0.003635, 0.002265] | Body regex match `[-0.003635, 0.002265]`; aside shows rounded `[-0.0036, 0.0023]` | ✓ |
+| n = 947 | Body regex match `n = 947`; evidence chain definition `N = 947` | ✓ |
+| replication_hash `769ec955…` visible | `aria-label="Replication hash: 769ec955e72ddfcb6ff5b16e9c949fd8f53d9e8c349fc56ce96090fce81d791f"` with displayed text `769ec955…791f` | ✓ |
+| **DispositionMemo at same visual depth as Pair D PASS page — NOT collapsed, NOT muted, NOT in `<details>`** | DOM contains a top-level `<region aria-label="Disposición">` inside the main article column. `detailsTags === 1` (the same "How to verify" pattern used by Pair D). The region is NOT a descendant of any `<details>` element (`closest('details')` returns null). Status pill inside has full opacity, default text color, normal font size — no muting | ✓ |
+| Two JSON-LD blocks (`Dataset` + `ScholarlyArticle`) | `script[type="application/ld+json"].length === 4`; @type list includes Dataset + ScholarlyArticle | ✓ |
+| Console errors | 0 | ✓ |
+
+**Screenshot:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2/2-fx-vol.png` (full page, 3730-px tall main — **427 px LONGER than Pair D, not shorter**)
+
+#### 3. `/apps/abrigo/iterations/dev-ai-stage-1-section-j/v1` — IN_PROGRESS — ✓ PASS
+
+| Claim | Evidence | Verdict |
+|---|---|---|
+| HTTP 200 | Page title `dev-AI Stage-1 — Colombian Section J (ICT) × COP/USD (in progress) — Abrigo / DS2P Labs` | ✓ |
+| IN_PROGRESS pill | `<status>` present in header strip | ✓ |
+| Placeholder narrative, no invented numeric values | `inventedBeta === false`, `inventedN === false` (regex `/β\s*=\s*[+-]?\d+\.\d+/` and `/N\s*=\s*\d+/` both return no match); body length 2857 chars (substantive but no numeric claims) | ✓ |
+| Console errors | 0 | ✓ |
+
+**Screenshot:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2/3-dev-ai-in-progress.png`
+
+#### 4. `/apps/abrigo/iterations/pair-b-bittensor/v1` — PARKED — ✓ PASS
+
+| Claim | Evidence | Verdict |
+|---|---|---|
+| HTTP 200 | Page title `P1 Bittensor SN18 — AI subnet exposure (parked) — Abrigo / DS2P Labs` | ✓ |
+| PARKED pill | `<status>` present in header strip; H1 contains `(pausada)` qualifier | ✓ |
+| Authentic parked-reason narrative | Body length 2945 chars; mentions "pausado/parked"; no invented β | ✓ |
+| Console errors | 0 | ✓ |
+
+**Screenshot:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2/4-pair-b-parked.png`
+
+### Priority 2 — equal-weight invariant (CROSS-09 + ITER-06) — ⚠ PARTIAL (anti-fishing satisfied)
+
+Measured at 1280×900 viewport, main element top boundaries:
+
+| Metric | Pair D (PASS) | FX-vol (FAIL) | Delta | Interpretation |
+|---|---|---|---|---|
+| `<header>` strip height | 183 px | 138 px | -45 px | Title-length driven (Pair D H1 wraps to 2 lines, FX-vol H1 fits on 1 line) |
+| `<h1>` box height | 90 px | 45 px | -45 px | Same — single source of the strip delta |
+| First `<p>` height | 264 px | 264 px | **0 px (identical)** | Equal-weight body text |
+| `<main>` total scrollHeight | 3303 px | **3730 px** | **+427 px (FAIL is LONGER)** | FX-vol carries a full DispositionMemo region in addition to the same 5-section MDX |
+| H2 count | 6 (Spec / Data / Est / Tests / Disp / Cadena) | 7 (same 5 MDX + Disposición memo + Cadena) | FAIL has +1 section | FAIL page exceeds PASS page depth |
+| `<details>` count | 1 (How to verify) | 1 (How to verify) | identical | Disposition is NOT collapsed |
+
+**Anti-fishing verdict:** ✓ The FAIL page is *not* collapsed, muted, demoted, or shortened. It is in fact longer and more structurally complete than the PASS page (DispositionMemo region is rendered at the same visual hierarchy as the MDX article). The header-strip delta is the same title-length-driven artifact already documented for catalog cards (Finding 1 in original section below) and does not represent a status-driven asymmetry. PARTIAL only because the literal "identical bounding box" reading fails for the header strip; the substantive equal-weight invariant is satisfied.
+
+### Priority 3 — locale parity (Pair D) — ⚠ PARTIAL (regression introduced by fix)
+
+| Step | Evidence | Verdict |
+|---|---|---|
+| Set `NEXT_LOCALE=en` cookie via document.cookie | Cookie applied (`document.cookie === "NEXT_LOCALE=en"`) | – |
+| Click "English" button in nav (server action POST) | 3 server-action POST requests to `/apps/abrigo/iterations/pair-d/v1` returned 200; English button transitioned to `[active]` state | – |
+| Page lang attribute after toggle | `<html lang="es-CO">` — **unchanged** | ✗ |
+| "Cómo verificar" → "How to verify" | Stays "Cómo verificar este hash" | ✗ |
+| "Hash de replicación" → "Replication hash" | Stays "Hash de replicación" | ✗ |
+| "versión" → "version" | Stays "versión" | ✗ |
+| Translation keys leaking (e.g. `iterations.detail.spec`) | None — `/iterations\.detail\./` returns no match | ✓ |
+| Control: homepage with same cookie | `https://www.d2pfinance.xyz/` returns `<html lang="en">`, H1 still `DS2P Labs`, "English" nav button now `[disabled]` (active) | ✓ |
+
+**Diagnosis:** the Phase 2 fix added `dynamic = 'force-static'` + `dynamicParams = false` to pre-render the 4 iteration detail routes at build time. Vercel now serves a single pre-built HTML response per route (the default es-CO locale build) and ignores `NEXT_LOCALE` at request time — the cookie has no effect on the served HTML for these routes specifically. Other pages (homepage, about, team, research, catalog, /apps/abrigo) still honor the cookie and switch locale correctly.
+
+**Mitigating factor:** the iteration MDX content itself is authored bilingually — every `<p>` contains both `(es-CO) ...` and `(en) ...` text inline. So an English-only reader still gets the full empirical content on the detail page; only the UI chrome labels (nav, "How to verify" summary, "Replication hash" term, "versión" caption, status pill text) remain in Spanish. No translation keys leak; nothing is broken — just statically frozen in the default locale.
+
+**Verdict:** ⚠ PARTIAL. Acceptable for the demo (bilingual MDX covers the narrative), but a real regression from the previous deploy where chrome could switch. Flagged as `residual_partials.locale_switcher_no_op_on_static_iteration_detail_pages` for a follow-up phase.
+
+**Screenshot:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-2/5-pair-d-en.png` (taken after cookie-set attempt; visually still es-CO chrome, proving the freeze)
+
+### Priority 4 — regression smoke (6 known-good routes) — ✓ ALL PASS
+
+| Route | H1 | Key check | Lang | Console errors | Verdict |
+|---|---|---|---|---|---|
+| `/` | `DS2P Labs` | 4 tile labels `Pass / Fail / In Progress / Parked` present; `wvs-finance` link present | en (cookie active) | 0 | ✓ |
+| `/about` | `Methodology` | 5 NumberedSteps (`01–05`) | en | 0 | ✓ |
+| `/team` | `Team` | `Juan Serrano` rendered; JMSBPP GitHub link in HTML | en | 0 | ✓ |
+| `/research` | `Research` | 3 `<article>` PublicationCards | en | 0 | ✓ |
+| `/apps/abrigo` | `Abrigo — ∂²Π gamma` | external link `x.com/d2pfinabrigo` present | en | 0 | ✓ |
+| `/apps/abrigo/iterations` (default) | `Iteration catalog — Abrigo` | 4 cards in `<ul>`/`<ol>` list | en | 0 | ✓ |
+| `/apps/abrigo/iterations?status=FAIL` | `Iteration catalog — Abrigo` | exactly 1 card; title `FX volatility response to CPI surprise — Colombia` | en | 0 | ✓ |
+
+**Screenshots:** `6-home-en.png`, `7-catalog-fail-filter.png`, `8-catalog-all.png` (representative captures; about/team/research H1 + count assertions captured via `browser_evaluate` rather than screenshots since the prior pass already had them).
+
+### Deferred (not re-verified, per prompt)
+
+| Item | Status | Reason |
+|---|---|---|
+| `/llms.txt` advertising `/api/mcp/sse` instead of `/api/mcp/mcp` | Still broken (per prior section, Finding 2) | Explicitly out of scope for the Phase 2 fix; deferred to a follow-up MCP-discovery phase |
+| Catalog card-height parity (Pair D 161 vs FX-vol 136 @ 1280w) | Still title-length driven (per prior section, Finding 1) | Defensible per UI-SPEC "equal weight" reading; only the literal "identical bounding box" reading fails |
+
+### Scoreboard (post-fix)
+
+- ✓ PASS (10): `/`, `/about`, `/team`, `/research`, `/apps/abrigo`, `/apps/abrigo/iterations`, plus all 4 iteration detail pages
+- ⚠ PARTIAL (2): locale switcher inert on static iteration detail pages (chrome-only; MDX still bilingual); H1-strip height delta on Pair D vs FX-vol (title-length driven, equal-weight invariant satisfied via first-paragraph + scrollHeight)
+- ✗ FAIL (0)
+- ⊘ DEFERRED (2): MCP discovery endpoint mismatch; catalog card-height drift — both known and explicitly out of this fix's scope
+
+### Bottom line
+
+The fix in `1d867d6` closes both priority-1 blockers (404s on Pair D and FX-vol). The four iteration detail pages now render with full EvidenceChain + DispositionMemo + JSON-LD + bilingual MDX content. Anti-fishing equal-weight invariant is satisfied (FAIL page is longer and structurally richer than PASS page, not collapsed or muted). One regression was introduced as a side effect of forcing the detail pages static: the locale switcher is a no-op on those four URLs, but the MDX content remains bilingual inline so no reader is locked out of the English content. Frontmatter `status:` updated from `fail` to `pass`.
+
 ---
 
 # Phase 2 — Live In-Browser Verification

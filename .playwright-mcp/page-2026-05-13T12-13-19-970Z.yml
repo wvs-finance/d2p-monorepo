@@ -1,0 +1,76 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "d2p Finance" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e4]:
+      - button "Apps" [ref=e6]:
+        - text: Apps
+        - img [ref=e7]
+      - link "Research" [ref=e9] [cursor=pointer]:
+        - /url: /research
+      - link "Team" [ref=e10] [cursor=pointer]:
+        - /url: /team
+      - link "About" [ref=e11] [cursor=pointer]:
+        - /url: /about
+      - navigation "Language" [ref=e13]:
+        - button "Español (Colombia)" [ref=e15]
+        - button "English" [disabled] [ref=e17]
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - heading "Abrigo — ∂²Π gamma" [level=1] [ref=e21]
+      - paragraph [ref=e22]: Convex hedges for Colombian wage-earners — ∂²Π gamma
+    - region "Mission" [ref=e23]:
+      - heading "Mission" [level=2] [ref=e24]
+      - paragraph [ref=e25]: Abrigo designs and deploys permissionless convex-hedge instruments targeting the macro-risk exposure of Colombian wage earners. The ∂²Π gamma structure — second partial derivative of the payoff — delivers convex protection against COP/USD depreciation, CPI surprises, and labor-market shocks without requiring leverage or speculation.
+    - region "Published iterations" [ref=e26]:
+      - heading "Published iterations" [level=2] [ref=e27]
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]: "3"
+          - generic [ref=e31]: Confirmed
+          - status [ref=e32]:
+            - img [ref=e33]
+            - generic [ref=e36]: PASS
+        - generic [ref=e37]:
+          - generic [ref=e38]: "2"
+          - generic [ref=e39]: Refuted
+          - status [ref=e40]:
+            - img [ref=e41]
+            - generic [ref=e45]: FAIL
+        - generic [ref=e46]:
+          - generic [ref=e47]: "1"
+          - generic [ref=e48]: Parked
+          - status [ref=e49]:
+            - img [ref=e50]
+            - generic [ref=e52]: PARKED
+        - generic [ref=e53]:
+          - generic [ref=e54]: "1"
+          - generic [ref=e55]: In progress
+          - status [ref=e56]:
+            - img [ref=e57]
+            - generic [ref=e59]: IN PROGRESS
+    - region "External presence" [ref=e60]:
+      - heading "External presence" [level=2] [ref=e61]
+      - 'link "Open on X (Twitter): @d2pfinabrigo" [ref=e62] [cursor=pointer]':
+        - /url: https://x.com/d2pfinabrigo
+        - img [ref=e63]
+        - text: "Open on X (Twitter): @d2pfinabrigo"
+    - region "Coming in Phase 2" [ref=e66]:
+      - heading "Coming in Phase 2" [level=2] [ref=e67]
+      - list [ref=e68]:
+        - listitem "Iterations — Coming in Phase 2" [ref=e69]:
+          - generic [ref=e70]: Iterations
+          - status [ref=e71]:
+            - img [ref=e72]
+            - generic [ref=e74]: Coming in Phase 2
+        - listitem "Instruments — Coming in Phase 2" [ref=e75]:
+          - generic [ref=e76]: Instruments
+          - status [ref=e77]:
+            - img [ref=e78]
+            - generic [ref=e80]: Coming in Phase 2
+        - listitem "Dashboard — Coming in Phase 2" [ref=e81]:
+          - generic [ref=e82]: Dashboard
+          - status [ref=e83]:
+            - img [ref=e84]
+            - generic [ref=e86]: Coming in Phase 2
+  - alert [ref=e87]
