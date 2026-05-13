@@ -12,6 +12,7 @@ p_value: 1.46e-8
 sample_size: 134
 notebook_url: "https://github.com/wvs-finance/abrigo-analytics/blob/main/notebooks/pair_d_stage_2_path_a/03_tests_and_sensitivity.ipynb"
 dataset_ref: "abrigo-analytics/notebooks/pair_d_stage_2_path_a"
+replication_hash: "d4790e743cdec62f1368cab1833e1266cb2da763d7c0931dd732bdf3d17938cf"
 analysis_date: "2026-04-30"
 ---
 
@@ -23,7 +24,7 @@ analysis_date: "2026-04-30"
 
 ## Datos / Data
 
-(es-CO) El panel conjunto se construye fusionando dos series de frecuencia mensual sobre el período 2015-01-31 a 2026-02-28 (N = 134 observaciones de fin de mes). La serie Y proviene del módulo de empleo de la DANE GEIH (Gran Encuesta Integrada de Hogares), desagregada por grupo de edad (14–28) y rama de actividad CIIU Rev.4, secciones G a T. La transformación logit estabiliza la varianza de la proporción y garantiza que la escala del regresor sea comparable. La serie X es el tipo de cambio nominal COP/USD de fin de mes reportado por el Banco de la República (TRM), transformado en logaritmo natural. Los rezagos 6, 9 y 12 se construyen dentro del panel; las observaciones iniciales perdidas por el rezago máximo de 12 meses son excluidas, lo que impone el inicio de ventana efectiva en enero de 2015. El panel combinado tiene hash SHA-256 `6d7d9e60dad1715ce86e8adb7b3d44ba236d0b063796293b40575994a9363edf` (63 hex chars; artefacto en `contracts/.scratch/simple-beta-pair-d/data/panel_combined.parquet`).
+(es-CO) El panel conjunto se construye fusionando dos series de frecuencia mensual sobre el período 2015-01-31 a 2026-02-28 (N = 134 observaciones de fin de mes). La serie Y proviene del módulo de empleo de la DANE GEIH (Gran Encuesta Integrada de Hogares), desagregada por grupo de edad (14–28) y rama de actividad CIIU Rev.4, secciones G a T. La transformación logit estabiliza la varianza de la proporción y garantiza que la escala del regresor sea comparable. La serie X es el tipo de cambio nominal COP/USD de fin de mes reportado por el Banco de la República (TRM), transformado en logaritmo natural. Los rezagos 6, 9 y 12 se construyen dentro del panel; las observaciones iniciales perdidas por el rezago máximo de 12 meses son excluidas, lo que impone el inicio de ventana efectiva en enero de 2015. El panel combinado tiene hash SHA-256 `6d7d9e60dad1715ce86e8adb7b3d44ba236d0b063796293b40575994a9363edf` (artefacto en `contracts/.scratch/simple-beta-pair-d/data/panel_combined.parquet`).
 
 (en) The joint panel merges two monthly-frequency series over 2015-01-31 to 2026-02-28 (N = 134 month-end observations). The Y series is derived from the DANE GEIH (Gran Encuesta Integrada de Hogares) employment module, disaggregated by age group (14–28) and ISIC Rev.4 activity branch, sections G through T. The logit transformation stabilizes proportion variance and ensures regressor-scale comparability. The X series is the month-end nominal COP/USD exchange rate reported by Banco de la República (TRM), log-transformed. Lags 6, 9, and 12 are constructed within the panel; initial observations lost to the maximum 12-month lag are excluded, imposing an effective window start of January 2015. The combined panel carries SHA-256 fingerprint `6d7d9e60dad1715ce86e8adb7b3d44ba236d0b063796293b40575994a9363edf` (artifact at `contracts/.scratch/simple-beta-pair-d/data/panel_combined.parquet`).
 

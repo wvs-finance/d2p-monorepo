@@ -1,8 +1,7 @@
-// Phase 2 Wave 3 — filled by plan 02-07.
+// Phase 2 Wave 3 — filled by plan 02-07; /about added during gap-closure for LAB-06.
 // Covers requirement(s): LAB-06
 //
-// Note: /about is excluded — that page does not exist in Phase 2.
-// Routes covered: 6 × 2 locales = 12 test cases.
+// Routes covered: 7 × 2 locales = 14 test cases.
 import { expect, test } from '@playwright/test'
 
 // Route table for Phase 2 pages.
@@ -10,6 +9,7 @@ import { expect, test } from '@playwright/test'
 // h1_match: regex fallback for dynamic content pages.
 const ROUTES = [
   { path: '/', h1_es: 'DS2P Labs', h1_en: 'DS2P Labs' },
+  { path: '/about', h1_es: 'Metodología', h1_en: 'Methodology' },
   { path: '/team', h1_es: 'Equipo', h1_en: 'Team' },
   { path: '/research', h1_es: 'Investigación', h1_en: 'Research' },
   {
