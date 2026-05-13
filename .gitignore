@@ -16,6 +16,11 @@
 /test-results
 /.lighthouseci
 
+# Playwright MCP transient session artifacts (DOM snapshots, console logs,
+# Evidence Collector screenshots). Per CLAUDE.md these are transient evidence
+# referenced from verification reports by path, not committed.
+/.playwright-mcp/
+
 # next.js
 /.next/
 /out/
