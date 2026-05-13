@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-05-12T23:30:00Z"
+stopped_at: Completed 02-08-PLAN.md (Phase 2 plan execution complete; awaiting verifier)
+last_updated: "2026-05-13T00:00:00Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 16
-  completed_plans: 14
-  percent: 87
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
-**Last updated:** 2026-05-12
-**Session type:** Plan execution (02-06 complete)
-**Stopped at:** Completed 02-06-PLAN.md
+**Last updated:** 2026-05-13
+**Session type:** Plan execution (02-08 complete — Phase 2 plans 8/8)
+**Stopped at:** Completed 02-08-PLAN.md (Phase 2 plan execution complete; awaiting verifier)
 
 ---
 
@@ -34,14 +34,14 @@ progress:
 ## Current Position
 
 **Active phase:** 02 — Research Lab Presence and Iteration Catalog
-**Active plan:** 08 (Plan 02-06 complete — 7/8 plans complete: 02-01, 02-02, 02-04, 02-05, 02-06, 02-07, 02-06)
-**Status:** Executing
+**Active plan:** All 8 Phase 2 plans complete (02-01, 02-02, 02-03, 02-04, 02-05, 02-06, 02-07, 02-08)
+**Status:** Plans executed; awaiting verifier + roadmap completion
 
 **Progress:**
-[████████░░] 75%
+[██████████] 100%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
-[          ] Phase 2: Research Lab Presence and Iteration Catalog
+[██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
 [          ] Phase 3: Data Layer and On-Chain Dashboard
 [          ] Phase 4: Agent Surface (MCP)
 [          ] Phase 5: Read-First Wallet and DeFi Surface
@@ -69,6 +69,8 @@ Overall: 1/5 phases complete
 | Phase 02 P05 | 19 | 2 tasks | 14 files |
 | Phase 02 P07 | 90 | 3 tasks | 20 files |
 | Phase 02 P06 | 90 | 3 tasks | 15 files |
+| Phase 02 P03 | 36 | 2 tasks | 14 files |
+| Phase 02 P08 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -107,6 +109,10 @@ Overall: 1/5 phases complete
 | /about excluded from locale-coverage spec (Plan 02-07) | /about route does not exist in Phase 2 app directory; plan listed it but no page was created | locale-coverage.spec.ts covers 6 routes x 2 locales = 12 tests; /about added when that route is built |
 | MDX rendering: Velite s.mdx() compile-time over next-mdx-remote runtime (Plan 02-06) | s.mdx() compiles at build time to code string; evaluation is one line `new Function(code)(runtime).default`; zero runtime mdx compiler dependency | All iteration detail MDX rendered via MDXRenderer RSC component |
 | velite-shim.ts static require('../.velite/X.json') not dynamic path.resolve (Plan 02-06) | Dynamic path.resolve(process.cwd()) resolved to .next/server/app/(lab)/.velite/ at runtime — wrong. Static relative path lets webpack bundle JSON correctly | All future Velite shims must use static relative require |
+| @/.velite tsconfig path → lib/velite-shim.ts (Plan 02-03) | Turbopack dev (Next.js 16+ default) ignores webpack config.resolve.alias; tsconfig paths IS respected. Pointing "@/.velite" → "lib/velite-shim.ts" in tsconfig handles both Turbopack dev and webpack prod | @/.velite imports work in both build modes via tsconfig paths alias to committed shim |
+| tsconfig excludes tests/unit/structured-data.test.tsx (Plan 02-03) | TS 5.9.3 + schema-dts + exactOptionalPropertyTypes triggers internal Debug Failure crash during tsc --noEmit; pre-commit hook blocked commits. Vitest (esbuild) runs these tests correctly | structured-data.test.tsx permanently excluded from tsconfig; tested only via vitest |
+| Default locale is es-CO not en (Plan 02-03) | i18n/request.ts falls back to es-CO when no NEXT_LOCALE cookie; e2e tests must explicitly set NEXT_LOCALE=en cookie to test English copy | All e2e tests checking English-only text must set NEXT_LOCALE=en cookie before page navigation |
+| about.json step keys use 01..05 format (Plan 02-03) | Template literal t('about.steps.01.title') requires numeric string keys; old step_01 format incompatible with plan spec pattern | about.json steps section always uses "01".."05" keys, not "step_01".."step_05" |
 | schema-dts + exactOptionalPropertyTypes: use satisfies Record not WithContext type annotation (Plan 02-06) | TS 5.9.3 + exactOptionalPropertyTypes + schema-dts isPartOf union triggers Debug Failure crash; satisfies pattern preserves structural checking without crash | StructuredData.tsx iteration mode drops WithContext annotation |
 | DispositionMemo never wrapped in details/accordion — epistemic equality invariant (Plan 02-06) | FAIL status must not de-emphasize the rejection narrative; any collapse or muting is a design violation | Three Playwright tests in iteration-fx-vol-fail + fail-equal-weight enforce this in CI |
 
@@ -166,7 +172,7 @@ None currently.
 1. Read `/home/jmsbpp/apps/d2p/frontend/.planning/ROADMAP.md` — current phase structure and success criteria
 2. Read this file — current position and accumulated context
 3. Read `/home/jmsbpp/apps/d2p/frontend/.planning/REQUIREMENTS.md` — traceability table shows which requirements belong to the active phase
-4. Run Plan 02-06 next
+4. Run phase verifier (`gsd-verifier`) — Phase 2 plan execution complete
 
 ### Phase 2 Planning Order
 
@@ -178,7 +184,9 @@ Plan 02-04: Iteration detail page (evidence chain, JSON-LD) — COMPLETE
 Plan 02-05: Iteration MDX seed files + catalog page (pair-d/v1 PASS, fx-vol/v1 FAIL) — COMPLETE
 Plan 02-06: Team page (/team, lib/team/contributors.ts) — COMPLETE
 Plan 02-07: Publications + Team pages (/research, /team, locale coverage) — COMPLETE
-Plan 02-08: Content sync workflow (LAB-04, repository_dispatch trigger)
+Plan 02-08: Content sync workflow (LAB-04, repository_dispatch trigger) — COMPLETE
+
+All 8 Phase 2 plans complete. Next step: phase verifier (goal-backward audit).
 ```
 
 ---

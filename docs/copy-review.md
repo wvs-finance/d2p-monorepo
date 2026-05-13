@@ -40,9 +40,43 @@ for tonal judgment.
 
 ---
 
-## Phase 2 review (iteration catalog)
+## Phase 2 review (iteration catalog + lab pages)
 
-*To be filled when Phase 2 copy is authored.*
+Phase 2 authored copy in both es-CO and en for all lab namespaces. Native-speaker review required.
 
-- [ ] `messages/es-CO/iterations.json` — reviewed by: ___ on: ___
-- [ ] `messages/en/iterations.json`    — reviewed by: ___ on: ___
+### es-CO Translation Quality Audit
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/lab.json` | _pending_ | | |
+| `messages/en/lab.json` | _pending_ | | |
+| `messages/es-CO/iterations.json` | _pending_ | | |
+| `messages/en/iterations.json` | _pending_ | | |
+| `messages/es-CO/research.json` | _pending_ | | |
+| `messages/en/research.json` | _pending_ | | |
+| `messages/es-CO/team.json` | _pending_ | | |
+| `messages/en/team.json` | _pending_ | | |
+| `messages/es-CO/about.json` | _pending_ | | |
+| `messages/en/about.json` | _pending_ | | |
+| `content/iterations/pair-d/v1.mdx` (es-CO sections) | _pending_ | | |
+| `content/iterations/fx-vol-on-cpi-surprise/v1.mdx` (es-CO + disposition_memo) | _pending_ | | |
+| `content/iterations/abrigo-y3-carbon-basket/v1.mdx` | _pending_ | | |
+| `content/iterations/pair-b-bittensor/v1.mdx` | _pending_ | | |
+
+Reject criteria: machine-translated phrasing, Castilian Spanish (vosotros, "ordenador"), literal back-translation, unnatural register for Colombian Spanish.
+
+### Anti-Marketing-Slop Audit
+
+Run before sign-off:
+
+```bash
+grep -iIrnE 'empower|cutting-edge|unlock your|leverage our|best-in-class|transform your|next-generation|revolutionize|unleash|seamless' messages/ content/ app/ 2>/dev/null
+```
+
+Expected output: empty (or only false positives in test strings that check for these words).
+
+### Phase 2 Sign-off
+
+- [ ] es-CO translations reviewed by native Colombian Spanish speaker
+- [ ] Anti-marketing-slop grep returns no matches in messages/ or content/
+- [ ] All MDX iteration content reviewed for author's-voice register (economics-journal tone, not SaaS landing page)
