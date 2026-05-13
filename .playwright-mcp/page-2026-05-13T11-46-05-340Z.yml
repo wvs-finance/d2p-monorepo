@@ -1,0 +1,43 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "d2p Finance" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e4]:
+      - button "Aplicaciones" [ref=e6]:
+        - text: Aplicaciones
+        - img [ref=e7]
+      - link "Investigación" [ref=e9] [cursor=pointer]:
+        - /url: /research
+      - link "Equipo" [ref=e10] [cursor=pointer]:
+        - /url: /team
+      - link "Acerca de" [ref=e11] [cursor=pointer]:
+        - /url: /about
+      - navigation "Idioma" [ref=e13]:
+        - button "Español (Colombia)" [disabled] [ref=e15]
+        - button "English" [ref=e17]
+  - generic [ref=e18]:
+    - banner [ref=e19]:
+      - generic [ref=e20]: d2p Finance
+      - navigation "Idioma" [ref=e21]:
+        - button "Español (Colombia)" [disabled] [ref=e23]
+        - button "English" [ref=e25]
+    - main [ref=e26]:
+      - main [ref=e27]:
+        - generic [ref=e28]:
+          - heading "Equipo" [level=1] [ref=e29]
+          - paragraph [ref=e30]: Contribuidores del laboratorio y responsabilidades actuales.
+        - list [ref=e31]:
+          - listitem [ref=e32]:
+            - img "Juan Serrano's avatar" [ref=e33]
+            - generic [ref=e34]:
+              - paragraph [ref=e35]: Juan Serrano
+              - paragraph [ref=e36]: Investigador principal — econometría estructural
+              - paragraph [ref=e37]: Iteración actual pair-d
+            - 'link "Ver perfil en GitHub: Juan Serrano" [ref=e38] [cursor=pointer]':
+              - /url: https://github.com/JMSBPP
+              - text: Ver perfil en GitHub
+              - img [ref=e39]
+    - contentinfo [ref=e42]:
+      - 'link "GitHub: wvs-finance" [ref=e43] [cursor=pointer]':
+        - /url: https://github.com/wvs-finance
+  - alert [ref=e44]

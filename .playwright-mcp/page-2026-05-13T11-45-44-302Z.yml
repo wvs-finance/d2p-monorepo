@@ -1,0 +1,84 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "d2p Finance" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e4]:
+      - button "Aplicaciones" [ref=e6]:
+        - text: Aplicaciones
+        - img [ref=e7]
+      - link "Investigación" [ref=e9] [cursor=pointer]:
+        - /url: /research
+      - link "Equipo" [ref=e10] [cursor=pointer]:
+        - /url: /team
+      - link "Acerca de" [ref=e11] [cursor=pointer]:
+        - /url: /about
+      - navigation "Idioma" [ref=e13]:
+        - button "Español (Colombia)" [disabled] [ref=e15]
+        - button "English" [ref=e17]
+  - generic [ref=e18]:
+    - banner [ref=e19]:
+      - generic [ref=e20]: d2p Finance
+      - navigation "Idioma" [ref=e21]:
+        - button "Español (Colombia)" [disabled] [ref=e23]
+        - button "English" [ref=e25]
+    - main [ref=e26]:
+      - article [ref=e27]:
+        - generic [ref=e28]:
+          - heading "Metodología" [level=1] [ref=e29]
+          - paragraph [ref=e30]: "La disciplina anti-fishing del laboratorio: especificaciones pre-comprometidas, flujo de trabajo estructural, y honestidad epistémica."
+        - generic [ref=e31]:
+          - paragraph [ref=e32]: Investigamos antes de desplegar. Cada instrumento de cobertura que el lab pone en producción debe haber sido validado por econometría estructural — no por análisis post-hoc, no por selección de outcomes favorables, no por narrativa.
+          - paragraph [ref=e33]: "Esta página documenta la disciplina que aplicamos a cada iteración. Las cinco etapas y los cuatro compromisos están vivos: se aplican igualmente al éxito y al fracaso."
+        - generic [ref=e34]:
+          - heading "Pipeline" [level=2] [ref=e35]
+          - generic [ref=e36]:
+            - generic [ref=e38]:
+              - generic [ref=e39]: "01"
+              - generic [ref=e40]:
+                - heading "Especificación" [level=3] [ref=e41]
+                - paragraph [ref=e42]: Pre-comprometemos la hipótesis, el universo de datos, los identificadores instrumentales, y los umbrales de prueba ANTES de mirar resultados. La especificación se publica como documento citable.
+            - generic [ref=e44]:
+              - generic [ref=e45]: "02"
+              - generic [ref=e46]:
+                - heading "Datos" [level=3] [ref=e47]
+                - paragraph [ref=e48]: Extraemos los paneles macro y micro del registro fijado en la especificación. Cualquier ajuste posterior — limpieza, imputación, recorte — se documenta en un bloque de cita de decisión antes de aplicarse.
+            - generic [ref=e50]:
+              - generic [ref=e51]: "03"
+              - generic [ref=e52]:
+                - heading "Estimación" [level=3] [ref=e53]
+                - paragraph [ref=e54]: OLS estructural con errores estándar HAC. Las pruebas de robustez (sensibilidad a la ventana, al sub-panel, a la transformación) se ejecutan automáticamente — no son opcionales.
+            - generic [ref=e56]:
+              - generic [ref=e57]: "04"
+              - generic [ref=e58]:
+                - heading "Pruebas" [level=3] [ref=e59]
+                - paragraph [ref=e60]: "Cada celda de código pasa por un trío de verificación: la celda corre, los outputs son los esperados, y un revisor lo confirma. Sin el trío, la celda no se considera resuelta."
+            - generic [ref=e62]:
+              - generic [ref=e63]: "05"
+              - generic [ref=e64]:
+                - heading "Disposición" [level=3] [ref=e65]
+                - paragraph [ref=e66]: "La iteración cierra con un memo de disposición: aprobado, rechazado, o pausado. El memo explica el resultado — y, en caso de rechazo, qué se aprendió. El rechazo tiene el mismo peso narrativo que la aprobación."
+        - generic [ref=e67]:
+          - paragraph [ref=e68]: "Compromisos del laboratorio en cada iteración:"
+          - list [ref=e70]:
+            - listitem [ref=e71]:
+              - img [ref=e72]
+              - generic [ref=e75]: El bloque de cita de decisión precede cada prueba
+            - listitem [ref=e76]:
+              - img [ref=e77]
+              - generic [ref=e80]: Trío de verificación después de cada celda de código
+            - listitem [ref=e81]:
+              - img [ref=e82]
+              - generic [ref=e85]: DETENER si hay conflicto especificación–datos
+            - listitem [ref=e86]:
+              - img [ref=e87]
+              - generic [ref=e90]: El rechazo tiene el mismo peso narrativo que la aprobación
+        - generic [ref=e91]:
+          - heading "Referencia metodológica" [level=2] [ref=e92]
+          - link "Leer la metodología de abrigo-analytics" [ref=e93] [cursor=pointer]:
+            - /url: https://github.com/wvs-finance/abrigo-analytics#readme
+            - text: Leer la metodología de abrigo-analytics
+            - img [ref=e94]
+    - contentinfo [ref=e97]:
+      - 'link "GitHub: wvs-finance" [ref=e98] [cursor=pointer]':
+        - /url: https://github.com/wvs-finance
+  - alert [ref=e99]

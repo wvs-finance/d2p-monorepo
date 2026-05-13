@@ -1,0 +1,21 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "d2p Finance" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e4]:
+      - button "Aplicaciones" [ref=e6]:
+        - text: Aplicaciones
+        - img [ref=e7]
+      - link "Investigación" [ref=e9] [cursor=pointer]:
+        - /url: /research
+      - link "Equipo" [ref=e10] [cursor=pointer]:
+        - /url: /team
+      - link "Acerca de" [ref=e11] [cursor=pointer]:
+        - /url: /about
+      - navigation "Idioma" [ref=e13]:
+        - button "Español (Colombia)" [disabled] [ref=e15]
+        - button "English" [ref=e17]
+  - generic [ref=e20]:
+    - heading "404" [level=1] [ref=e21]
+    - heading "This page could not be found." [level=2] [ref=e23]
+  - alert [ref=e24]

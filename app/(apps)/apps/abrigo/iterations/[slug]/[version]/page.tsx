@@ -13,17 +13,34 @@ interface PageProps {
   params: Promise<{ slug: string; version: string }>
 }
 
+// Pre-render at build time. Without these, Next 16 + async params treat the route as
+// fully dynamic — and the per-route lambda may not bundle the Velite JSON, producing
+// runtime 404s even when generateStaticParams would have returned 4 valid entries.
+// With force-static + dynamicParams=false, the 4 known iteration pages are baked
+// into static HTML at build time and the runtime never touches iterations.find().
+export const dynamic = 'force-static'
+export const dynamicParams = false
+
+// Version is encoded as "v1", "v2", etc. so the param value carries its own "v" prefix.
+// This is a workaround for a Next 16 / Turbopack bug where literal-prefixed dynamic
+// segments (e.g. `v[version]/`) leave the bracketed pattern unresolved in the prerender
+// manifest, causing every static URL like `/v1` to 404. With the param absorbing the
+// "v", routes like /apps/abrigo/iterations/pair-d/v1 resolve cleanly.
+function parseVersion(v: string): number {
+  return Number.parseInt(v.startsWith('v') ? v.slice(1) : v, 10)
+}
+
 export async function generateStaticParams(): Promise<Array<{ slug: string; version: string }>> {
-  return iterations.map((it) => ({ slug: it.slug, version: String(it.version) }))
+  return iterations.map((it) => ({ slug: it.slug, version: `v${it.version}` }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug, version } = await params
-  const it = iterations.find((i) => i.slug === slug && i.version === Number.parseInt(version, 10))
+  const it = iterations.find((i) => i.slug === slug && i.version === parseVersion(version))
   if (!it) return {}
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://d2pfinance.xyz'
-  const url = `${baseUrl}/apps/abrigo/iterations/${slug}/v${version}`
+  const url = `${baseUrl}/apps/abrigo/iterations/${slug}/${version}`
   // OG title uses English locale — most agent crawlers prefer English
   const title = `${it.title_en} — Abrigo / DS2P Labs`
   const betaStr = it.beta != null ? `β = ${it.beta}` : 'N/A'
@@ -41,9 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function IterationDetailPage({ params }: PageProps) {
   const { slug, version } = await params
-  const iteration = iterations.find(
-    (i) => i.slug === slug && i.version === Number.parseInt(version, 10),
-  )
+  const iteration = iterations.find((i) => i.slug === slug && i.version === parseVersion(version))
   if (!iteration) return notFound()
 
   const t = await getTranslations()

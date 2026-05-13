@@ -1,0 +1,89 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "d2p Finance" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e4]:
+      - button "Apps" [ref=e6]:
+        - text: Apps
+        - img [ref=e7]
+      - link "Research" [ref=e9] [cursor=pointer]:
+        - /url: /research
+      - link "Team" [ref=e10] [cursor=pointer]:
+        - /url: /team
+      - link "About" [ref=e11] [cursor=pointer]:
+        - /url: /about
+      - navigation "Language" [ref=e13]:
+        - button "Español (Colombia)" [ref=e15]
+        - button "English" [disabled] [ref=e17]
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - heading "Iteration catalog — Abrigo" [level=1] [ref=e21]
+      - paragraph [ref=e22]: All (Y, M, X) iterations, unfiltered by status. Passes and failures carry equal weight.
+    - navigation "Filter iterations by status" [ref=e23]:
+      - button "All 4" [pressed] [ref=e24]:
+        - text: All
+        - generic [ref=e25]: "4"
+      - button "Pass 1" [ref=e26]:
+        - text: Pass
+        - generic [ref=e27]: "1"
+      - button "Fail 1" [ref=e28]:
+        - text: Fail
+        - generic [ref=e29]: "1"
+      - button "Parked 1" [ref=e30]:
+        - text: Parked
+        - generic [ref=e31]: "1"
+      - button "In Progress 1" [ref=e32]:
+        - text: In Progress
+        - generic [ref=e33]: "1"
+    - list [ref=e34]:
+      - listitem [ref=e35]:
+        - link "dev-AI Stage-1 — Colombian Section J (ICT) × COP/USD (in progress) May 1, 2026 dev-ai-stage-1-section-j" [ref=e36] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/dev-ai-stage-1-section-j/v1
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - status [ref=e39]:
+                - img [ref=e40]
+                - generic [ref=e42]: In Progress
+              - heading "dev-AI Stage-1 — Colombian Section J (ICT) × COP/USD (in progress)" [level=3] [ref=e43]
+            - generic [ref=e44]:
+              - time [ref=e45]: May 1, 2026
+              - generic [ref=e46]: dev-ai-stage-1-section-j
+      - listitem [ref=e47]:
+        - link "Pair D — Colombian young-worker services × COP/USD lagged 6–12mo β = +0.1367 April 30, 2026 pair-d" [ref=e48] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/pair-d/v1
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - status [ref=e51]:
+                - img [ref=e52]
+                - generic [ref=e55]: Pass
+              - heading "Pair D — Colombian young-worker services × COP/USD lagged 6–12mo" [level=3] [ref=e56]
+            - paragraph [ref=e57]: β = +0.1367
+            - generic [ref=e58]:
+              - time [ref=e59]: April 30, 2026
+              - generic [ref=e60]: pair-d
+      - listitem [ref=e61]:
+        - link "P1 Bittensor SN18 — AI subnet exposure (parked) March 15, 2026 pair-b-bittensor" [ref=e62] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/pair-b-bittensor/v1
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - status [ref=e65]:
+                - img [ref=e66]
+                - generic [ref=e68]: Parked
+              - heading "P1 Bittensor SN18 — AI subnet exposure (parked)" [level=3] [ref=e69]
+            - generic [ref=e70]:
+              - time [ref=e71]: March 15, 2026
+              - generic [ref=e72]: pair-b-bittensor
+      - listitem [ref=e73]:
+        - link "FX volatility response to CPI surprise — Colombia β = -0.0007 February 23, 2026 fx-vol-on-cpi-surprise" [ref=e74] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - status [ref=e77]:
+                - img [ref=e78]
+                - generic [ref=e82]: Fail
+              - heading "FX volatility response to CPI surprise — Colombia" [level=3] [ref=e83]
+            - paragraph [ref=e84]: β = -0.0007
+            - generic [ref=e85]:
+              - time [ref=e86]: February 23, 2026
+              - generic [ref=e87]: fx-vol-on-cpi-surprise
+  - alert [ref=e88]

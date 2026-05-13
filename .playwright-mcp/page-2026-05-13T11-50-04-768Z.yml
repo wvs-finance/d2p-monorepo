@@ -1,0 +1,78 @@
+- generic [active] [ref=e1]:
+  - navigation "Main navigation" [ref=e2]:
+    - link "d2p Finance" [ref=e3] [cursor=pointer]:
+      - /url: /
+    - button "Abrir menú" [ref=e4]:
+      - img [ref=e5]
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - heading "Catálogo de iteraciones — Abrigo" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Todas las iteraciones (Y, M, X), sin filtro por estado. Aprobadas y rechazadas tienen el mismo peso.
+    - navigation "Filtrar iteraciones por estado" [ref=e11]:
+      - button "Todas 4" [pressed] [ref=e12]:
+        - text: Todas
+        - generic [ref=e13]: "4"
+      - button "Aprobado 1" [ref=e14]:
+        - text: Aprobado
+        - generic [ref=e15]: "1"
+      - button "Rechazado 1" [ref=e16]:
+        - text: Rechazado
+        - generic [ref=e17]: "1"
+      - button "Pausado 1" [ref=e18]:
+        - text: Pausado
+        - generic [ref=e19]: "1"
+      - button "En progreso 1" [ref=e20]:
+        - text: En progreso
+        - generic [ref=e21]: "1"
+    - list [ref=e22]:
+      - listitem [ref=e23]:
+        - link "dev-AI Stage-1 — Sección J Colombia (TIC) × COP/USD (en progreso) 1 de mayo de 2026 dev-ai-stage-1-section-j" [ref=e24] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/dev-ai-stage-1-section-j/v1
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - status [ref=e27]:
+                - img [ref=e28]
+                - generic [ref=e30]: En progreso
+              - heading "dev-AI Stage-1 — Sección J Colombia (TIC) × COP/USD (en progreso)" [level=3] [ref=e31]
+            - generic [ref=e32]:
+              - time [ref=e33]: 1 de mayo de 2026
+              - generic [ref=e34]: dev-ai-stage-1-section-j
+      - listitem [ref=e35]:
+        - link "Pair D — servicios jóvenes Colombia × COP/USD (6–12 meses rezagado) β = +0.1367 30 de abril de 2026 pair-d" [ref=e36] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/pair-d/v1
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - status [ref=e39]:
+                - img [ref=e40]
+                - generic [ref=e43]: Aprobado
+              - heading "Pair D — servicios jóvenes Colombia × COP/USD (6–12 meses rezagado)" [level=3] [ref=e44]
+            - paragraph [ref=e45]: β = +0.1367
+            - generic [ref=e46]:
+              - time [ref=e47]: 30 de abril de 2026
+              - generic [ref=e48]: pair-d
+      - listitem [ref=e49]:
+        - link "P1 Bittensor SN18 — exposición a subnet de IA (pausada) 15 de marzo de 2026 pair-b-bittensor" [ref=e50] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/pair-b-bittensor/v1
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - status [ref=e53]:
+                - img [ref=e54]
+                - generic [ref=e56]: Pausado
+              - heading "P1 Bittensor SN18 — exposición a subnet de IA (pausada)" [level=3] [ref=e57]
+            - generic [ref=e58]:
+              - time [ref=e59]: 15 de marzo de 2026
+              - generic [ref=e60]: pair-b-bittensor
+      - listitem [ref=e61]:
+        - link "Volatilidad FX ante sorpresa CPI — Colombia β = -0.0007 23 de febrero de 2026 fx-vol-on-cpi-surprise" [ref=e62] [cursor=pointer]:
+          - /url: /apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - status [ref=e65]:
+                - img [ref=e66]
+                - generic [ref=e70]: Rechazado
+              - heading "Volatilidad FX ante sorpresa CPI — Colombia" [level=3] [ref=e71]
+            - paragraph [ref=e72]: β = -0.0007
+            - generic [ref=e73]:
+              - time [ref=e74]: 23 de febrero de 2026
+              - generic [ref=e75]: fx-vol-on-cpi-surprise
+  - alert [ref=e76]
