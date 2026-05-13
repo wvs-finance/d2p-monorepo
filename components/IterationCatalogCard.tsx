@@ -43,7 +43,7 @@ export function IterationCatalogCard({ iteration, locale, labels }: IterationCat
           </p>
         )}
         <div className="flex items-center gap-3 text-xs text-text-muted mt-auto">
-          <time dateTime={iteration.analysis_date.toISOString()}>
+          <time dateTime={new Date(iteration.analysis_date).toISOString()}>
             {formatDate(iteration.analysis_date, locale)}
           </time>
           <span>{iteration.slug}</span>

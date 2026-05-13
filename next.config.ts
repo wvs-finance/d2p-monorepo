@@ -25,17 +25,6 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
-  // Next 16's Turbopack-based output tracer does not follow require('../.velite/*.json')
-  // from lib/velite-shim.ts because the path is outside the App Router tree. Without this,
-  // the serverless function bundle on Vercel omits the JSON files and every Velite-backed
-  // route returns 500 at runtime. The build step (`prebuild`) generates these files before
-  // tracing, so they exist when this trace include resolves.
-  outputFileTracingIncludes: {
-    '/apps/abrigo/iterations': ['./.velite/iterations.json'],
-    '/apps/abrigo/iterations/[slug]/v[version]': ['./.velite/iterations.json'],
-    '/research': ['./.velite/research.json'],
-    '/': ['./.velite/iterations.json'],
-  },
   // TypeScript 5.9.3 on Node 25 triggers "Debug Failure" when the TS worker runs with default
   // memory limits. ignoreBuildErrors: true allows the build to complete in CI / local dev.
   // The typecheck is run separately via `pnpm tsc --noEmit` (with NODE_OPTIONS=--max-old-space-size=4096).

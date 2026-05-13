@@ -38,7 +38,7 @@ export function PublicationCard({ research, locale, t }: PublicationCardProps) {
       )}
       <h3 className="text-xl font-semibold text-text-primary">{title}</h3>
       <div className="flex items-center gap-3 mt-2">
-        <time className="text-xs text-text-muted" dateTime={research.date.toISOString()}>
+        <time className="text-xs text-text-muted" dateTime={new Date(research.date).toISOString()}>
           {formatDate(research.date, locale)}
         </time>
         <Badge variant="outline">{t(typeLabelKey)}</Badge>

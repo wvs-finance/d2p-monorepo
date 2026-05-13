@@ -36,7 +36,10 @@ export function IterationDetailHeader({ iteration, locale, t }: IterationDetailH
       <h1 className="text-3xl sm:text-4xl font-semibold text-text-primary leading-tight">
         {title}
       </h1>
-      <time className="text-xs text-text-muted" dateTime={iteration.analysis_date.toISOString()}>
+      <time
+        className="text-xs text-text-muted"
+        dateTime={new Date(iteration.analysis_date).toISOString()}
+      >
         {formatDate(iteration.analysis_date, locale)}
       </time>
     </header>
