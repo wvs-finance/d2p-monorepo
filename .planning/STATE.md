@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-last_updated: "2026-05-29T21:39:52.260Z"
+status: planning
+last_updated: "2026-05-29T21:50:48.343Z"
 progress:
   total_phases: 6
   completed_phases: 1
@@ -27,7 +27,7 @@ progress:
 - **Milestone:** M1
 - **Phase:** 01 — Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations (active)
 - **Plan:** Phase 1 COMPLETE (01-01 + 01-02 + 01-03 + 01-04 + 01-05 all complete) — 5/5 plans.
-- **Status:** Phase 1 COMPLETE. SHARED-SCHEMA-01 discharged (01-05). Phase 1 execution. Plan 01-01 (Wave 0 test infra + KPD-16 scout archive) COMPLETE. Plan 01-02 (Wave 2 pre-flight verdicts) COMPLETE — KPD-17 HAPPY PATH (plain EIP-1967, IMPL-01 tracks only the proxy slot), KPD-09-docs MEDIUM branch-(a) `safe_block_depth=1` provisional, KPD-19 candle-CLOSE; FX-01 config stub + no-look-ahead candle fixture committed; three new scout files re-pinned in PROVENANCE.sha256. Plan 01-04 (Wave 2 schema foundations) COMPLETE — EVENT-01 `schemas/event_schema_v1.md` (arrival-timing first-class NOT NULL, uint256 ids Utf8-only with verbatim DTYPE SCOPE RULE, responses child table, KPD-18 reservations, topic0 domain roles UNASSIGNED) + KPD-11a `batch_manifest_v1.yaml` + `.schema.json` (Phase-5 KPD-11b invokes it); `test_uint256_not_int64` is a runtime polars round-trip (78-digit Utf8 survives, Decimal(38,0) raises, wei constructs). EVENT-01 requirement marked complete. **Plan 01-03 (Wave 2, DATA-SOURCE-01) COMPLETE** — `research/data_sourcing_matrix.yaml` (fixed 7-key schema, 18 provenance-stamped rows, four numeric sufficiency bars, provisional `ormi-free-developer` $0 verdict, three deferred items pinned) + `research/DATA_SOURCING.md` recommendation memo (Supersedes corrections; cost-of-ownership table all < $390 except flagged GetBlock Pro $399; real SC#7(iv) BUDGET-vs-COMPLETENESS reconciliation / JUSTIFIED DEPARTURE / source-agnostic intersection; sign-off section) + 2 test modules (7 tests; any-single-bar-fail flips to paid; leg-(b) raw Wilson CI [0.628, 0.790] basis wilson_95ci_n116, cross-epoch widening deferred). DATA-SOURCE-01 discharged → Phase 3 INDEX-01 unblocked. 1 of 5 Phase-1 plans remains (01-05 SHARED-SCHEMA-01).
+- **Status:** Ready to plan
 
 **Plan progress (Phase 1):** [██████████] 100% — 5/5 plans complete
 **Phase progress:** [█░░░░░] 1/6 phases complete
