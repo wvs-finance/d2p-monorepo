@@ -1,0 +1,33 @@
+# KPD-11a — batch manifest schema artifact (example / template).
+#
+# SCOPE: this is the SCHEMA ARTIFACT only. Runtime write-time validation
+#        (jsonschema.validate on every batch write) is Phase 5 / KPD-11b.
+#        KPD-11b invokes schemas/batch_manifest_v1.schema.json at write time.
+#
+# Every batch of indexed IAgentRequester events is accompanied by one manifest.
+# The sha256 fields pin the resolver/FX/impl-history/schema artifacts the batch
+# was produced under, so a batch is reproducible and auditable.
+
+# Opaque run identifier (e.g. ULID / uuid4) for this batch.
+run_id: "01J9ZX0EXAMPLE0RUNID0000000"
+
+# Source endpoints the batch was indexed from.
+rpc_endpoint: "https://api.infra.mainnet.somnia.network/"
+subgraph_endpoint: "https://api.ormi.dev/somnia/abrigo-agent-requester/v1"
+
+# Git commit sha of the indexer codebase that produced this batch.
+indexer_commit_sha: "0000000000000000000000000000000000000000"
+
+# Inclusive block range covered by this batch.
+# from_block example = resolved proxy deployment block (INDEX-01 startBlock).
+from_block: 283417317
+to_block: 283517317
+
+# The proxy implementation address observed live for this batch (EIP-1967 slot).
+observed_impl_address: "0x9AF59C5683bb8686596B0D56e4F67655C6B73EdD"
+
+# sha256 pins of the artifacts the batch was produced under (64 hex chars each).
+fx_cache_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+topic0_map_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+impl_history_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+schema_version_sha256: "0000000000000000000000000000000000000000000000000000000000000000"

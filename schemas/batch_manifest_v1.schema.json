@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abrigo.wvs.finance/schemas/batch_manifest_v1.schema.json",
+  "title": "Abrigo K_AI batch manifest (v1)",
+  "description": "KPD-11a schema artifact. Validates a per-batch manifest accompanying indexed IAgentRequester events. Runtime write-time enforcement is Phase 5 / KPD-11b, which invokes this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque run identifier (ULID / uuid4) for this batch."
+    },
+    "rpc_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "RPC endpoint the batch was indexed from."
+    },
+    "subgraph_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "Subgraph GraphQL endpoint the batch was indexed from."
+    },
+    "indexer_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{40}$",
+      "description": "Git commit sha (40 hex) of the indexer codebase."
+    },
+    "from_block": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Inclusive start block of the batch range (INDEX-01 startBlock for the first batch)."
+    },
+    "to_block": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Inclusive end block of the batch range."
+    },
+    "observed_impl_address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "description": "Proxy implementation address observed live for this batch (EIP-1967 slot)."
+    },
+    "fx_cache_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "description": "sha256 pin of the FX cache artifact."
+    },
+    "topic0_map_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "description": "sha256 pin of the topic0 -> role/ABI map artifact."
+    },
+    "impl_history_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "description": "sha256 pin of the implementation-history artifact."
+    },
+    "schema_version_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "description": "sha256 pin of the event/panel schema artifact the batch conforms to."
+    }
+  },
+  "required": [
+    "run_id",
+    "rpc_endpoint",
+    "subgraph_endpoint",
+    "indexer_commit_sha",
+    "from_block",
+    "to_block",
+    "observed_impl_address",
+    "fx_cache_sha256",
+    "topic0_map_sha256",
+    "impl_history_sha256",
+    "schema_version_sha256"
+  ]
+}
