@@ -146,7 +146,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation and Scaffold | 6/8 | In Progress|  |
 | 2. Research Lab Presence and Iteration Catalog | 5/8 | In Progress|  |
-| 3. Data Layer and On-Chain Dashboard | 0/3 | Planned | - |
+| 3. Data Layer and On-Chain Dashboard | 1/3 | In Progress|  |
 | 4. Agent Surface (MCP) | 0/? | Not started | - |
 | 5. Read-First Wallet and DeFi Surface | 0/? | Not started | - |
 
