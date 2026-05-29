@@ -44,6 +44,8 @@ describe('researchSchema shape (unchanged by Plan A)', () => {
     authors: ['jmsbpp'],
     date: '2026-05-29',
     type: 'write-up' as const,
+    // Plan B: track is now a REQUIRED schema field
+    track: 'notes' as const,
     summary_es: 'Prueba de la tubería de matemáticas KaTeX.',
     summary_en: 'Test of the KaTeX math pipeline.',
   }

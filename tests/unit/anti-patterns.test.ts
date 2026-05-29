@@ -25,7 +25,10 @@ function runImpeccable(path: string): { stdout: string; exitCode: number } {
   let stdout = ''
   let exitCode = 0
   try {
-    stdout = execSync(`npx impeccable detect "${path}"`, {
+    // Pin to the verified version (2.1.8). Unpinned `npx impeccable` drifts to
+    // latest (e.g. 2.3.1), which renamed the pure-black/#000000 rule and broke
+    // the assertions below. The documented contract is 2.1.8 (docs/impeccable-flag.md).
+    stdout = execSync(`npx --yes impeccable@2.1.8 detect "${path}"`, {
       encoding: 'utf8',
       cwd: '/home/jmsbpp/apps/d2p/frontend',
     })

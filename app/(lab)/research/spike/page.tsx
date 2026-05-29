@@ -28,8 +28,11 @@ function StubTheoremBlock({
       data-testid="theorem-block"
       data-kind={kind ?? 'theorem'}
       style={{
-        borderLeft: '3px solid oklch(0.6 0.08 70)',
-        paddingLeft: '1rem',
+        // Subtle full hairline callout — NOT a thick one-sided accent tab (impeccable AI-tell).
+        // Plan C's canonical TheoremBlock supersedes this throwaway spike treatment.
+        border: '1px solid oklch(0.35 0.01 70)',
+        borderRadius: '0.5rem',
+        padding: '1rem',
         margin: '1.5rem 0',
       }}
     >

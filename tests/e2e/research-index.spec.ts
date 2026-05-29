@@ -38,7 +38,11 @@ test.describe('research index — server track filter (§3.1)', () => {
     await page.context().addCookies([{ name: 'NEXT_LOCALE', value: 'en', url: BASE }])
     await page.goto('/research')
     const abrigoLink = page.locator('nav a', { hasText: 'Abrigo Hedge-Design' })
-    await abrigoLink.click()
+    // Wait for navigation to complete after clicking the server <Link>
+    await Promise.all([
+      page.waitForURL('**/research?track=abrigo-hedge-design'),
+      abrigoLink.click(),
+    ])
     // URL must contain the track param — server <Link> navigates
     expect(page.url()).toContain('?track=abrigo-hedge-design')
     // At least 1 card rendered (abrigo track has ≥1 entries)
