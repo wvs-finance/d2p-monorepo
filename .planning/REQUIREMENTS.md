@@ -238,11 +238,11 @@ Populated by gsd-roadmapper — 2026-05-11.
 | ITER-08 | Phase 2 | Descoped |
 | ITER-09 | Phase 2 | Descoped |
 | DASH-01 | Phase 3 | Complete |
-| DASH-02 | Phase 3 | Pending |
+| DASH-02 | Phase 3 | Descoped |
 | DASH-03 | Phase 3 | Complete |
 | DASH-04 | Phase 3 | Complete |
-| DASH-05 | Phase 3 | Pending |
-| DASH-06 | Phase 3 | Pending |
+| DASH-05 | Phase 3 | Descoped |
+| DASH-06 | Phase 3 | Descoped |
 | DASH-07 | Phase 3 | Complete |
 | DASH-08 | Phase 3 | Complete |
 | AGENT-01 | Phase 4 | Pending |
