@@ -108,10 +108,14 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
   - PITFALLS A2 (proxy registered for `Upgraded` + `AdminChanged` + `BeaconUpgraded` topics)
 **Success Criteria**:
   1. A consumer can query `topic0_map_v1.json` for any of the three observed topic0 hashes (`0x65db1ef5…`, `0x5c090ef4…`, `0xb6233992…`) and receive a `(signature, impl_address, field_layout_hash)` tuple resolved by keccak match against `emrestay/somnia-agents-skills@e15d4e9` NatSpec.
-  2. A consumer can read `impl_history.parquet` and observe at minimum one row spanning `[deployment_block, ∞)` even when no `Upgraded` event was emitted in the indexed window, and verify the latest row's bytecode hash matches `keccak256(eth_getCode(proxy, head_block))`.
+  2. A consumer can read `impl_history.parquet` and observe at minimum one row spanning `[deployment_block, ∞)` even when no `Upgraded` event was emitted in the indexed window, and verify the latest row's bytecode hash matches `keccak256(eth_getCode(impl, head_block))` — hashing the **IMPL** `0x9af5…3edd` (18,507-byte logic), NOT the 130-byte proxy stub (Phase-2 research correction).
   3. For any candidate `Upgraded` event observed in the indexed window, the ±10-block neighborhood is marked `decode_status = 'unresolved_impl_transition'` in the resolver output until the new impl's field-layout hash is independently verified.
   4. Unmatched topic0 hashes (if any) appear in `unresolved_topics.parquet` with `(topic0, first_seen_block, first_seen_tx, observed_count, raw_data_sample)` and the count of such logs across the indexed window is < 1% of total log volume.
   5. **(consumes Phase 1 SC#4)** For every `(impl, topic0)` pair in the resolver, every `indexed` field of dynamic type (string/bytes/dynamic array) in the resolved ABI is enumerated against the Phase 1 schema reservations. Any `indexed`-dynamic field not anticipated in Phase 1 triggers a schema-version bump (`event_schema_v1.md` → `v2`) before Phase 3 manifest authoring begins. **(HIGH-4 fix: per-`(impl, topic0)` enumeration relocated from Phase 1 to Phase 2)**
+
+**Plans** (created 2026-05-29 — 2 plans, 2 waves):
+- [ ] `02-01-PLAN.md` — TOPIC-01: keccak-resolve the 3 observed topic0s against the blob-pinned ABI; commit `topic0_map_v1.json` (5 events) + `unresolved_topics_v1.md` design + SC#5 (zero indexed-dynamic → no v2 bump); Wave-0 keccak dep; doc-accuracy blob-vs-commit fix **[Wave 1]**
+- [ ] `02-02-PLAN.md` — IMPL-01: `impl_history_v1.md` design (floor row `[283417317, ∞)`, Upgraded-only segmentation superseding PITFALLS A2, IMPL-not-proxy bytecode backstop `0x13e721a6…`, A1 ±10-block quarantine) + `02-FORWARD-NOTES.md` (responses state-only, CommitteeDepositFailed invariant, payment protocol) **[Wave 2, depends_on 02-01]**
 
 ### Phase 3: Subgraph Indexing
 **Goal**: A reproducible indexer on the DATA-SOURCE-01-selected data source backfills the full proxy event history from contract-deployment block to head, with continuous correctness + liveness reconciliation against direct-RPC, the **binding completeness gate** (independent transaction-coverage anchor on `234,999` txs + scout-addendum structural event-ratio conformance + indexer-internal full-range contiguity proof) that re-confirms the provisional Phase-1 source selection, end-to-end ordering/granularity verification, AND an empirically-grounded `safe_block_depth` derived from observed rollback behavior.
@@ -213,7 +217,7 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 4/5 | In Progress (01-01..01-04 done; 01-03 DATA-SOURCE-01 verdict landed → INDEX-01 unblocked; 01-05 SHARED-SCHEMA-01 remains) | - |
-| 2. Topic & Implementation Provenance | 0/TBD | Not started | - |
+| 2. Topic & Implementation Provenance | 0/2 | Planned (02-01 TOPIC-01 Wave 1; 02-02 IMPL-01 Wave 2) | - |
 | 3. Subgraph Indexing | 0/TBD | Not started | - |
 | 4. Parallel Cost Inputs | 0/TBD | Not started | - |
 | 5. Panel Materialization | 0/TBD | Not started | - |
