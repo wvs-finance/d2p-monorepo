@@ -1,0 +1,27 @@
+---
+slug: pair-d-dispatch-brief
+title_es: "Pair D Stage 2 — informe de despacho (M-sketch)"
+title_en: "Pair D Stage 2 — M-sketch dispatch brief"
+authors: ["Juan Serrano"]
+date: "2026-04-30"
+type: "decision-memo"
+track: abrigo-hedge-design
+readable_on_site: true
+external_url: "https://github.com/wvs-finance/abrigo-analytics/blob/main/scratch/2026-04-30-stage-2-m-sketch-dispatch-brief-pair-d.md"
+summary_es: "Resumen del despacho de la M-sketch para Pair D: hipótesis pre-comprometidas, especificación estructural, y resultado β̂ = +0.137 con p ≈ 1.5×10⁻⁸. Stage-2 desbloqueado."
+summary_en: "M-sketch dispatch summary for Pair D: pre-committed hypotheses, structural spec, and result β = +0.137 with p ≈ 1.5×10⁻⁸. Stage-2 unblocked."
+tags: ["pair-d", "stage-2", "m-sketch", "decision-memo"]
+order: 1
+---
+
+The Pair D simple-β empirical validation closed PASS on 28 April 2026: β_composite = +0.13670985, HAC SE = 0.02465, t = +5.5456, p_one = 1.46×10⁻⁸. The lag pattern β_6/β_9/β_12 is positive at all horizons, with β_6 capturing approximately 80% of the composite effect (lag-6 dominance, RC FLAG #3). All four robustness checks R1–R4 agree in sign; none triggers SUBSTRATE_TOO_NOISY. The joint step 4(a) §8.1 test returns PASS, unblocking Stage-2.
+
+The empirical claim carried into the M-sketch: a 1% peso devaluation today is associated with a measurable rise in young-worker services share, concentrated at the 6-month horizon within — but not uniformly across — the 6–12-month BPO-contracting window. The relationship is statistically extremely strong; the correlation is identified but the causal channel is not (RC FLAG #1).
+
+The dispatch brief specifies M-sketch requirements: position geometry, payoff shape
+
+$$
+\Pi(\sigma_T) \approx \hat{K} \cdot \sigma_T \tag{1}
+$$
+
+under the Carr-Madan linearisation, where the estimator $\hat{\beta}=+0.137$ anchors the calibration of the scale factor $\hat{K}$. Reference-asset oracle structure (Mento V3 FPMM USDm/COPm spot), premium-funding cadence, term structure, and anti-fishing inheritance from Phase 3.

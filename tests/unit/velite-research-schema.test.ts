@@ -12,6 +12,8 @@ const validBase = {
   authors: ['wvs-finance/abrigo-analytics'],
   date: '2026-04-30',
   type: 'decision-memo' as const,
+  // Plan B: track is REQUIRED — added to validBase so existing baseline cases don't regress
+  track: 'abrigo-hedge-design' as const,
   summary_es:
     'Memo de diseño pre-comprometido para la etapa 2 del par D (Y=COP/USD, M=spread de swaps, X=par D).',
   summary_en: 'Pre-committed design memo for Pair D stage 2 (Y=COP/USD, M=swap spread, X=pair D).',
@@ -107,6 +109,76 @@ describe('velite research schema', () => {
       const data = { ...validBase, type }
       const result = researchSchema.safeParse(data)
       expect(result.success, `type=${type} should be valid`).toBe(true)
+    }
+  })
+
+  // Plan B: track required — rejects when missing
+  it('rejects entry missing track', () => {
+    const { track: _removed, ...data } = validBase
+    const result = researchSchema.safeParse(data)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const paths = result.error.issues.map((i) => i.path.join('.'))
+      expect(paths).toContain('track')
+    }
+  })
+
+  // Plan B: accepts all three valid track enum values
+  it('accepts all three valid track enum values', () => {
+    for (const track of ['cfmm-microstructure', 'abrigo-hedge-design', 'notes'] as const) {
+      const data = { ...validBase, track }
+      const result = researchSchema.safeParse(data)
+      expect(result.success, `track=${track} should be valid`).toBe(true)
+    }
+  })
+
+  // Plan B: rejects unknown track value
+  it('rejects entry with track outside allowed enum', () => {
+    const data = { ...validBase, track: 'unknown-track' }
+    const result = researchSchema.safeParse(data)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const paths = result.error.issues.map((i) => i.path.join('.'))
+      expect(paths).toContain('track')
+    }
+  })
+
+  // Plan B: arxiv_id accepts post-2007 format (YYYY.NNNNN and YYYY.NNNNNvN)
+  it('accepts valid post-2007 arxiv_id formats', () => {
+    for (const arxiv_id of ['2401.12345', '2401.12345v2', '2312.00001v10'] as const) {
+      const data = { ...validBase, arxiv_id }
+      const result = researchSchema.safeParse(data)
+      expect(result.success, `arxiv_id=${arxiv_id} should be valid`).toBe(true)
+    }
+  })
+
+  // Plan B: arxiv_id rejects pre-2007 format (documented non-match)
+  it('rejects pre-2007 arxiv_id format (math/0211159)', () => {
+    const data = { ...validBase, arxiv_id: 'math/0211159' }
+    const result = researchSchema.safeParse(data)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const paths = result.error.issues.map((i) => i.path.join('.'))
+      expect(paths).toContain('arxiv_id')
+    }
+  })
+
+  // Plan B: readable_on_site defaults to false when omitted
+  it('defaults readable_on_site to false when omitted', () => {
+    const result = researchSchema.safeParse(validBase)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.readable_on_site).toBe(false)
+    }
+  })
+
+  // Plan B: readable_on_site can be set to true
+  it('accepts readable_on_site: true', () => {
+    const data = { ...validBase, readable_on_site: true }
+    const result = researchSchema.safeParse(data)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.readable_on_site).toBe(true)
     }
   })
 })

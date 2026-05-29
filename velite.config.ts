@@ -56,9 +56,23 @@ export const researchSchema = s.object({
   authors: s.array(s.string()).min(1),
   date: s.coerce.date(),
   type: s.enum(['paper', 'decision-memo', 'write-up', 'talk']),
+  // Plan B: track is REQUIRED — adding it breaks velite build until all files carry it.
+  // Migration of the 3 existing research MDX and this schema change land ATOMICALLY.
+  track: s.enum(['cfmm-microstructure', 'abrigo-hedge-design', 'notes']),
+  readable_on_site: s.boolean().default(false),
   external_url: s.string().url().optional(),
   summary_es: s.string().min(1),
   summary_en: s.string().min(1),
+  abstract_es: s.string().optional(),
+  abstract_en: s.string().optional(),
+  // arxiv_id: post-2007 format only (YYYY.NNNNN[vN]); abs/PDF URLs derived at render time
+  arxiv_id: s
+    .string()
+    .regex(/^\d{4}\.\d{4,5}(v\d+)?$/)
+    .optional(),
+  pdf_url: s.string().url().optional(),
+  doi: s.string().optional(),
+  bibtex: s.string().optional(),
   tags: s.array(s.string()).default([]),
   order: s.number().int().positive().optional(),
 })
