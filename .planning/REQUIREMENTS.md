@@ -23,7 +23,7 @@
 
 - [ ] **INDEX-01** — Indexer deployed against the proxy address `0x5E5205CF…163E6`, **on the data source DATA-SOURCE-01 selects** (Ormi free tier if it cleared the sufficiency bar; the costed paid alternative otherwise). **Blocked by DATA-SOURCE-01 — not authored until the free-vs-paid verdict lands.** Owns subgraph authorship (`subgraphs/iagentrequester/`: schema.graphql, AssemblyScript mappings, networks.yaml for chain 5031) per KPD-08. Backfilled from contract deployment block (resolved in plan-phase from creator EOA `0x320362C7…fdE88936`) to present. Reconciliation against direct-RPC per KPD-04 (per-window parity, not random row sample); the parity mechanism is conditional on the DATA-SOURCE-01 capability-matrix `eth_getBlockReceipts` row.
 
-- [ ] **SHARED-SCHEMA-01** — Joint-analysis schema, explicitly marked `v1-K_AI-anchored` with documented breakage budget when K_D ships. Two-table design: `schemas/abrigo_cost_panel_intersection_v1.md` (strict intersection columns) + `schemas/abrigo_cost_panel_k_ai_extensions_v1.md` (K_AI sidecar). Joint-analysis consumers in `abrigo-analytics` join on intersection PK.
+- [x] **SHARED-SCHEMA-01** — Joint-analysis schema, explicitly marked `v1-K_AI-anchored` with documented breakage budget when K_D ships. Two-table design: `schemas/abrigo_cost_panel_intersection_v1.md` (strict intersection columns) + `schemas/abrigo_cost_panel_k_ai_extensions_v1.md` (K_AI sidecar). Joint-analysis consumers in `abrigo-analytics` join on intersection PK.
 
 ### Cost Extraction
 
@@ -104,7 +104,7 @@ Populated by the roadmapper on 2026-05-25 from `.planning/ROADMAP.md`; updated 2
 |---|---|---|
 | DATA-SOURCE-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete (01-01 KPD-16/startBlock; 01-03 matrix + verdict + sufficiency-bar tests) |
 | EVENT-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
-| SHARED-SCHEMA-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Pending |
+| SHARED-SCHEMA-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
 | TOPIC-01 | Phase 2: Topic & Implementation Provenance | Pending |
 | IMPL-01 | Phase 2: Topic & Implementation Provenance | Pending |
 | INDEX-01 | Phase 3: Subgraph Indexing (blocked by DATA-SOURCE-01) | Pending |
