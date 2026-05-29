@@ -80,6 +80,13 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
        INDEX-01 (Phase 3) MUST NOT be authored until this verdict lands. **[NEW]**
   8. **(Arrival-timing schema SC — arrival-periodicity primacy; HIGH-1 ordering-key fix)** The committed `schemas/event_schema_v1.md` treats per-event `block_ts_utc`, `block_number`, intra-block ordering (`log_index`), and gap-detection metadata as first-class non-nullable load-bearing columns. The arrival series carries its **ordering on `(block_number, log_index)`**, with `block_ts_utc` as a coarse secondary — because Somnia blocks at ~72 ms/block and `block.timestamp` may be whole-second (DATA-SOURCE-01 SC#7(i) records which), so up to ~14 events can share a `block_ts_utc` and a timestamp-only sort would scramble intra-second arrival order. A documented note states the M2 arrival-process estimation consumes this inter-arrival series directly — so a dropped or mis-ordered event corrupts the inter-arrival distribution. A consumer can read the DDL and confirm the dedup key `(chain_id, tx_hash, log_index)`, the `(block_number, log_index)` ordering guarantee, and the `block_ts_utc`-as-secondary semantics are specified, not implied. **[NEW]**
 
+**Plans** (created 2026-05-29 — 5 plans, 3 waves; KPD-16 ordered first):
+- [ ] `01-01-PLAN.md` — Wave 0 test infra + KPD-16 scout provenance archive (sha256-pinned; deploy block 283417317 resolved) **[Wave 1 — ORDERED FIRST]**
+- [ ] `01-02-PLAN.md` — Pre-flight verdicts: KPD-17 beacon/diamond (happy path), KPD-09-docs finality (MEDIUM, safe_block_depth=1 provisional), KPD-19 CoinGecko candle-CLOSE + FX fixture **[Wave 2]**
+- [ ] `01-03-PLAN.md` — DATA-SOURCE-01: `research/data_sourcing_matrix.yaml` + `research/DATA_SOURCING.md` (provisional Ormi-free verdict, 4 sufficiency bars, coherence reconciliation, sign-off) **[Wave 2]**
+- [ ] `01-04-PLAN.md` — EVENT-01 `schemas/event_schema_v1.md` (arrival-timing first-class, uint256-safe, responses child table, KPD-18 reservations) + KPD-11a batch manifest schema **[Wave 2]**
+- [ ] `01-05-PLAN.md` — SHARED-SCHEMA-01 intersection `.md`+`.json` (v1-K_AI-anchored) + K_AI extensions + cross-artifact consistency **[Wave 3]**
+
 **Phase 1 sizing acknowledgment (MEDIUM-5; revised)**: Phase 1 now carries DATA-SOURCE-01 + 7 KPDs (KPD-20 was absorbed into DATA-SOURCE-01, so the line-item count is unchanged net), 8 success criteria, and 3 PITFALLS pre-conditions — it remains explicitly the largest phase. Plan-phase wall-clock allowance should be **1.5–2×** the per-phase median. **Wall-clock honesty (LOW fix):** the *schema-foundations* portion of Phase 1 (KPD-03 / KPD-11a / SHARED-SCHEMA artifacts) is doc-bounded and does not extend the critical-path tail; the *sufficiency-verdict* portion of DATA-SOURCE-01 may require a **live Ormi backfill-rate probe** (HIGH-4 row) whose duration is **not** bounded by a doc-read and is the part of Phase 1 most likely to consume the 1.5–2× sizing allowance — it is not free. Phase 1 is not split further because the KPD-09-docs / KPD-09-empirical and KPD-11a / KPD-11b splits are already the natural decomposition boundaries; DATA-SOURCE-01 is a research deliverable that runs concurrently with the schema-foundations work and would, as a separate phase, fragment the "probe reality before building" coherence and force renumbering of all six phases.
 
 ### Phase 2: Topic & Implementation Provenance
@@ -198,7 +205,7 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 0/TBD | Not started | - |
+| 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 0/5 | Planned (5 plans, 3 waves) | - |
 | 2. Topic & Implementation Provenance | 0/TBD | Not started | - |
 | 3. Subgraph Indexing | 0/TBD | Not started | - |
 | 4. Parallel Cost Inputs | 0/TBD | Not started | - |
