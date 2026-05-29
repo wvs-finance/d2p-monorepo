@@ -40,6 +40,11 @@
       "heading": "Estado del catálogo",
       "empty": "Aún no hay iteraciones registradas."
     },
+    "research": {
+      "heading": "Investigación",
+      "body": "El laboratorio publica su trabajo terminado —artículos, memos de decisión y análisis— en la página de investigación y en X. El ejercicio econométrico subyacente vive en el repositorio del lab, no en este sitio.",
+      "cta": "Ver la investigación"
+    },
     "github": {
       "label": "wvs-finance en GitHub"
     }

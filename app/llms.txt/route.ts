@@ -15,7 +15,6 @@ export function GET() {
     '- https://d2pfinance.xyz/team                              (contributors)',
     '- https://d2pfinance.xyz/research                          (publications)',
     '- https://d2pfinance.xyz/apps/abrigo                       (Abrigo app overview)',
-    '- https://d2pfinance.xyz/apps/abrigo/iterations            (iteration catalog)',
     '- https://d2pfinance.xyz/dashboard                         (live protocol state — coming Phase 3)',
     '',
     '## Agent endpoints',

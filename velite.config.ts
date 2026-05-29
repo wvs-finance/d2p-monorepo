@@ -1,50 +1,10 @@
 import { defineCollection, defineConfig, s } from 'velite'
 
-// Export the raw Zod schema shape so unit tests can parse objects directly
-// without invoking the full Velite build pipeline.
-export const iterationSchema = s
-  .object({
-    slug: s.string().regex(/^[a-z0-9-]+$/, 'slug must be lowercase alphanumerics + hyphens'),
-    version: s.number().int().positive(),
-    status: s.enum(['PASS', 'FAIL', 'PARKED', 'IN_PROGRESS']),
-    title_es: s.string().min(1),
-    title_en: s.string().min(1),
-    notebook_url: s.string().url().optional(),
-    dataset_ref: s.string().min(1).optional(),
-    analysis_date: s.coerce.date(),
-    replication_hash: s
-      .string()
-      .regex(/^[a-f0-9]{64}$/, 'replication_hash must be lowercase sha256 hex (64 chars)')
-      .optional(),
-    beta: s.number().optional(),
-    ci_lower: s.number().optional(),
-    ci_upper: s.number().optional(),
-    p_value: s.number().min(0).max(1).optional(),
-    sample_size: s.number().int().positive().optional(),
-    disposition_memo: s.string().optional(),
-  })
-  .refine(
-    (data) =>
-      data.status !== 'FAIL' ||
-      (typeof data.disposition_memo === 'string' && data.disposition_memo.length > 0),
-    {
-      message: 'disposition_memo is required when status is FAIL',
-      path: ['disposition_memo'],
-    },
-  )
-
-// The collection schema extends iterationSchema with the compiled MDX body.
-// s.mdx() compiles the MDX source to a React component function string at build time.
-// iterationSchema (exported above) remains unchanged for unit-test isolation.
-const iterationCollectionSchema = iterationSchema.and(s.object({ code: s.mdx() }))
-
-const iterations = defineCollection({
-  name: 'Iteration',
-  pattern: 'iterations/**/*.mdx',
-  schema: iterationCollectionSchema,
-})
-
 // Export the raw Zod schema shape for unit test isolation (no Velite build pipeline).
+// The research collection is the lab's public-facing record of published work
+// (papers, decision memos, write-ups, talks). The underlying econometric exercise
+// lives in the wvs-finance/abrigo-analytics repo and is intentionally NOT rendered
+// on this site — only finished research artifacts are surfaced here and on X.
 export const researchSchema = s.object({
   slug: s.string().regex(/^[a-z0-9-]+$/),
   title_es: s.string().min(1),
@@ -74,5 +34,5 @@ export default defineConfig({
     name: '[name]-[hash:6].[ext]',
     clean: true,
   },
-  collections: { iterations, research },
+  collections: { research },
 })

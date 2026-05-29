@@ -1,25 +1,98 @@
 ---
-status: partial
+status: pass
 runtime: production
 target_url: https://www.d2pfinance.xyz
-head_commit: b02ceb5
-prior_head_commit: 1d867d6
-screenshots_dir: /home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-3
-verified_at: 2026-05-13T08:31:00-04:00
+head_commit: 07dd50f
+prior_head_commit: b02ceb5
+screenshots_dir: /home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-4
+verified_at: 2026-05-13T12:41:50Z
 verifier: EvidenceQA (Playwright MCP, live browser)
 summary:
-  pass: 12
-  partial: 1
+  pass: 13
+  partial: 0
   fail: 0
 deferred: []
-residual_partials:
-  - catalog_card_height_status_metadata_drift  # h3 region now strictly equal (50px line-clamp-2 min-h-[2.5em]); 16px card-level delta now driven by conditional β=… <p> row for PASS/FAIL vs date-only for IN_PROGRESS/PARKED; scope of b02ceb5 fix was title region only
+residual_partials: []
 prior_passes:
+  - b02ceb5  # 2026-05-13T08:31Z — closed locale switcher + MCP discovery; card-height partial residual
   - 1d867d6  # 2026-05-13T08:13Z — closed v[version] 404 blocker
   - f0b5311  # initial live verification
 ---
 
 # Phase 2 — Live In-Browser Verification
+
+## Re-verification pass 3 — 07dd50f (2026-05-13T12:41:50Z)
+
+**Scope:** verify that commit `07dd50f` closes the single residual partial from re-verification pass 2 — status-driven catalog card-height drift (PASS/FAIL cards rendered taller than IN_PROGRESS/PARKED by exactly one β-row, ~16px). The fix in `07dd50f` adds `auto-rows-fr` to the grid `<ul>` in `app/(apps)/apps/abrigo/iterations/page.tsx` and `h-full` to both the anchor and inner flex column in `components/IterationCatalogCard.tsx` — forcing every card to stretch to the tallest row regardless of optional inner content.
+**Method:** Playwright MCP, real Chromium, live against production `https://www.d2pfinance.xyz`. Bounding-box measurements via `getBoundingClientRect()` on every card, at both 1280×900 desktop and 360×800 mobile breakpoints. Regression smoke across the 2 evidence-bearing detail pages, home, and research.
+**Screenshots:** `/home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-4/` (mirrored to `/tmp/d2p-verify-4/`).
+
+### Headline finding
+
+**The card-height fix is correct, complete, and ships at strict 1px parity across all four status classes.** All 4 cards measure **exactly 136.0 px** tall at 1280px viewport and **exactly 136.0 px** at 360px mobile — delta is **0.0 px** between any pair of cards, not within-1px tolerance. The anti-fishing breach the prior pass flagged under CROSS-09 (status-driven visual asymmetry between evaluated and in-flight iterations) is closed. Regression smoke shows no new errors and no broken routes; console produces 0 errors and 0 warnings on the catalog page after the layout change.
+
+### Priority 1 — strict catalog card-height parity (CROSS-09 + ITER-02) — ✓ PASS
+
+**Measurements @ 1280×900 viewport (3-up grid, top row of 3 + bottom row of 1):**
+
+| slug | status (inferred from card body + prior verifications) | β-row rendered? | bbox height (px) | bbox width (px) | bbox top (px) |
+|---|---|:-:|---:|---:|---:|
+| dev-ai-stage-1-section-j | IN_PROGRESS | no | **136.0** | 362.66 | 313 |
+| pair-d | PASS (β = +0.1367 visible in card) | **yes** | **136.0** | 362.67 | 313 |
+| pair-b-bittensor | PARKED | no | **136.0** | 362.66 | 313 |
+| fx-vol-on-cpi-surprise | FAIL (β = -0.0007 visible in card) | **yes** | **136.0** | 362.66 | 473 (wrapped to row 2) |
+
+**Pairwise height deltas:** all four cards measure exactly 136.0 px. `max - min = 0.0 px`. Pass criterion of "within 1px" is satisfied with margin to spare (delta is exactly zero — no sub-pixel rendering noise at all).
+
+**Status-class parity proof:**
+- The 2 cards that render a `β = …` row (pair-d PASS, fx-vol-on-cpi-surprise FAIL): 136.0 / 136.0 px → 0.0 px delta
+- The 2 cards that do not render a `β = …` row (dev-ai-stage-1-section-j IN_PROGRESS, pair-b-bittensor PARKED): 136.0 / 136.0 px → 0.0 px delta
+- Cross-class delta (any-β-card vs any-non-β-card): 136.0 − 136.0 = 0.0 px
+
+The structural mechanism: `auto-rows-fr` on the `<ul>` grid sets every grid row track to `1fr`, so all rows match the tallest row's intrinsic height; `h-full` on the anchor stretches the card to fill its `<li>`; `h-full` on the inner `<div class="flex flex-col gap-2">` propagates the stretch through to the content column so the column's `justify-between` (implicit via the layout) can distribute the optional β-row's slack across the existing rows rather than collapsing the card.
+
+**Screenshot:** `.playwright-mcp/d2p-verify-4/catalog-strict-equal.png` and `.playwright-mcp/d2p-verify-4/catalog-strict-equal-desktop.png` (full-page, 1280-wide, all 4 cards visible — bottom edges of the 3 top-row cards align pixel-precise).
+
+**Measurements @ 360×800 viewport (1-up stacked column):**
+
+| slug | bbox height (px) | bbox width (px) | bbox top (px) |
+|---|---:|---:|---:|
+| dev-ai-stage-1-section-j | **136.0** | 313 | 527 |
+| pair-d | **136.0** | 313 | 687 |
+| pair-b-bittensor | **136.0** | 313 | 847 |
+| fx-vol-on-cpi-surprise | **136.0** | 313 | 1007 |
+
+All four cards at the mobile breakpoint also measure exactly 136.0 px. Top-coordinate spacing (687−527 = 160, 847−687 = 160, 1007−847 = 160) confirms uniform vertical rhythm. Mobile delta: 0.0 px.
+
+**Screenshot:** `.playwright-mcp/d2p-verify-4/catalog-strict-equal-mobile.png` (full-page, 360-wide, all 4 cards stacked).
+
+**Verdict:** ✓ PASS — strict 1px-parity criterion satisfied with delta = 0.0 px at both viewports. Card heights are no longer driven by the presence/absence of the optional β-row. CROSS-09 epistemic-equality invariant fully closed.
+
+### Priority 2 — regression smoke — ✓ PASS
+
+| route | HTTP | H1 | Key evidence | Verdict |
+|---|---:|---|---|---|
+| `/apps/abrigo/iterations/pair-d/v1` | 200 | `Pair D — servicios jóvenes Colombia × COP/USD (6–12 meses rezagado)` | `β` reference visible in body (alternative-hypothesis context `H₁: β_composite`); β = +0.13670985 still rendered in evidence chain (confirmed via prior pass measurements that remain valid) | ✓ |
+| `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` | 200 | `Volatilidad FX ante sorpresa CPI — Colombia` | 7 h2s on page including dedicated `Disposición / Disposition` h2 + standalone `Disposición` region; `<details>` count = 1 (just "How to verify", not wrapping the memo); main scrollHeight = **3730 px** (identical to pass 2 — DispositionMemo still rendered at full visual depth, NOT collapsed) | ✓ |
+| `/` | 200 | `DS2P Labs` | 4 count-tile labels present (Aprobado/PASS, Rechazado/FAIL, En progreso, Pausado); DS2P Labs hero wordmark intact | ✓ |
+| `/research` | 200 | `Investigación` | 3 `<article>` PublicationCards present (matches prior passes) | ✓ |
+
+### Priority 3 — console hygiene — ✓ PASS
+
+`mcp__plugin_playwright_playwright__browser_console_messages` after navigation to `/apps/abrigo/iterations` at default viewport: **0 errors, 0 warnings, 0 info, 0 debug**. No hydration warnings, no `auto-rows-fr` / `h-full` related layout warnings, no new errors introduced by `07dd50f`.
+
+### Summary
+
+| Priority | Verdict | Evidence |
+|---|---|---|
+| 1. Strict catalog card-height parity (desktop) | ✓ PASS | 4 cards × 136.0 px exactly; delta = 0.0 px (catalog-strict-equal-desktop.png) |
+| 1. Strict catalog card-height parity (mobile 360px) | ✓ PASS | 4 cards × 136.0 px exactly; delta = 0.0 px (catalog-strict-equal-mobile.png) |
+| 2. Regression smoke (Pair D / FX-vol / home / research) | ✓ PASS | All HTTP 200 with expected H1s + evidence; FX-vol DispositionMemo still rendered at scrollHeight 3730 px |
+| 3. Console errors / hydration warnings | ✓ PASS | 0 errors, 0 warnings on catalog page after layout change |
+
+**Overall:** `07dd50f` closes the only residual partial from pass 2. CROSS-09 anti-fishing breach (PASS/FAIL cards visually emphasised vs IN_PROGRESS/PARKED) is now structurally impossible — every card is stretched to the tallest row by `auto-rows-fr` + `h-full`, regardless of whether the optional β-row content is present. Frontmatter `status:` advanced from `partial` to `pass`.
+
+---
 
 ## Re-verification pass 2 — b02ceb5 (2026-05-13T08:31:00-04:00)
 

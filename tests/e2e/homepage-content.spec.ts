@@ -29,10 +29,10 @@ test.describe('phase-2 - LAB-01 — homepage content', () => {
     await expect(abrigoLink).toBeVisible()
   })
 
-  test('homepage renders 4 IterationCountTile elements (one per status)', async ({ page }) => {
+  test('homepage renders a Research section linking to /research', async ({ page }) => {
     await page.goto('/')
-    const tiles = page.locator('[data-testid="iteration-count-tile"]')
-    await expect(tiles).toHaveCount(4)
+    const researchLink = page.locator('a[href="/research"]')
+    await expect(researchLink).toBeVisible()
   })
 
   test('homepage contains GitHub org link to https://github.com/wvs-finance', async ({ page }) => {

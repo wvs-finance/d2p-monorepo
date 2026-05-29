@@ -50,16 +50,7 @@ function assertKeyParity(nsName: string, esCoPath: string, enPath: string) {
 const messagesDir = resolve(__dirname, '../../messages')
 
 describe('i18n namespace key parity (es-CO ↔ en)', () => {
-  // Test 8: iterations namespace parity
-  it('iterations namespace has identical key paths in es-CO and en', () => {
-    assertKeyParity(
-      'iterations',
-      resolve(messagesDir, 'es-CO/iterations.json'),
-      resolve(messagesDir, 'en/iterations.json'),
-    )
-  })
-
-  // Test 9: research namespace parity
+  // research namespace parity
   it('research namespace has identical key paths in es-CO and en', () => {
     assertKeyParity(
       'research',

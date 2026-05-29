@@ -40,6 +40,11 @@
       "heading": "Catalog status",
       "empty": "No iterations recorded yet."
     },
+    "research": {
+      "heading": "Research",
+      "body": "The lab publishes its finished work — papers, decision memos, and write-ups — on the research page and on X. The underlying econometric exercise lives in the lab's repository, not on this site.",
+      "cta": "Read the research"
+    },
     "github": {
       "label": "wvs-finance on GitHub"
     }

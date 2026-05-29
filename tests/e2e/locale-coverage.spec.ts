@@ -12,19 +12,7 @@ const ROUTES = [
   { path: '/about', h1_es: 'Metodología', h1_en: 'Methodology' },
   { path: '/team', h1_es: 'Equipo', h1_en: 'Team' },
   { path: '/research', h1_es: 'Investigación', h1_en: 'Research' },
-  {
-    path: '/apps/abrigo/iterations',
-    h1_es: 'Catálogo de iteraciones — Abrigo',
-    h1_en: 'Iteration catalog — Abrigo',
-  },
-  {
-    path: '/apps/abrigo/iterations/pair-d/v1',
-    h1_match: /Pair D/i,
-  },
-  {
-    path: '/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1',
-    h1_match: /(Volatilidad FX|FX volatility|FX vol|cpi)/i,
-  },
+  { path: '/apps/abrigo', h1_match: /Abrigo/i },
 ] as const
 
 // Regex that catches translation-key literals leaking into the DOM.
