@@ -9,6 +9,28 @@
 
 ---
 
+## 0. Tooling Decisions (2026-05-29, post research-tooling workflow)
+
+A 22-agent research workflow surveyed 55 OSS tools and adversarially verified the top candidates against this stack. Outcomes folded into the spec below (this section governs where it refines §3–§10):
+
+**Adopt — build-time, MIT, zero client JS, slot into Velite `s.mdx()` plugin arrays:**
+- `rehype-slug` + `rehype-autolink-headings` → TOC/anchor task shrinks to "order two plugins + style anchors" (no hand-rolled slugger).
+- `remark-gfm` → footnotes engine (numbered + back-refs) + tables for free; the footnote task collapses to presentation CSS.
+- `remark-directive` → parser for `:::theorem`/`:::lemma`/`:::proof` (we still hand-author the accessible, CSS-counter-numbered handler — it only parses).
+- `rehype-pretty-code` (+ Shiki) → build-time code/pseudocode highlighting, **only if** a piece carries code; theme bound to ochre/cream/ink tokens.
+- `fonttools`/`pyftsubset` (build CLI) → subset IBM Plex + KaTeX WOFF2 to used glyphs for the 3G LCP budget (replaces the dead `glyphhanger`).
+- Plugin order in `s.mdx()` — remark: `remark-math → remark-gfm → remark-directive`; rehype: `rehype-slug → rehype-autolink-headings → rehype-katex → rehype-pretty-code`.
+
+**Deferred to v2 (user decision):** full citation rendering. **v1 paper-bridge = arXiv link + PDF link + an optional author-pasted static BibTeX block (copy button) + DOI link** — NO `rehype-citation`, NO `@citation-js`. This removes the citeproc/SWC `next build` 500 risk (Next #69150) from v1 entirely. v2 citation path (when a formal paper lands): `rehype-citation` (behind a mandatory prod-build smoke test) fed by `zotero-mcp`.
+
+**Workflow tooling (user-side, not app deps):**
+- `vercel-labs/web-design-guidelines` Claude Code skill — adopt as an **advisory** source-review step for the new components (filter out its Vercel-brand typography rules). Does NOT replace the Evidence Collector live-DOM AA gate.
+- `zotero-mcp` (54yyyu) — **GitHub-MCP-verified: MIT, actively maintained, Dockerfile present.** Add to the MCP config (Docker install) as a **v2 authoring aid** (BibTeX + PDF annotations → feeds v2 citations). Not used in v1.
+
+**Rejected:** `arxiv-mcp-server` (duplicates installed `mcp__arxiv__*`); `crossref-cite-mcp` (2-day solo repo, no LICENSE committed); `Context7` (closed backend, no Docker — optional authoring aid only); `@citation-js/plugin-csl` + `Temml` swap (copyleft `citeproc` / KaTeX swap not worth it).
+
+---
+
 ## 1. Context & Goal
 
 `/research` is the surface DS2P Labs will touch most often — where finished research is published for the public. Per the 2026-05-13 IA correction, the econometric *exercise* stays off-site (`wvs-finance/abrigo-analytics`); only *finished research* is published here and on X. This spec builds the reading experience that makes that venue first-class.
