@@ -17,7 +17,7 @@
 
 - [x] **EVENT-01** — Event-schema spec for `IAgentRequester` lifecycle. Deliverable: `schemas/event_schema_v1.md` with full DDL (column names, polars/parquet dtypes, nullability). **Arrival-timing fields (`block_ts_utc`, `block_number`, `log_index` ordering, gap-detection metadata) are load-bearing, first-class, non-nullable** — the M2 arrival-process estimation consumes this inter-arrival series directly, so a dropped or mis-ordered event corrupts the inter-arrival distribution. The arrival series is **ordered on `(block_number, log_index)`** with `block_ts_utc` as a **coarse secondary** (Somnia ~72 ms/block; whole-second `block.timestamp` would otherwise scramble intra-second order — see HIGH-1). Subcommittee `Response[]` shape committed: child table `responses` with PK `(chain_id, tx_hash, log_index, member_index)` and FK `(chain_id, tx_hash) → requests`. Includes derived congestion-adjuster column with documented inference rule, the dedup key `(chain_id, tx_hash, log_index)`, and the intra-block ordering guarantee. Reserves `agent_class_keccak` + `agent_class_string` columns per KPD-18 (indexed-dynamic-field recovery).
 
-- [ ] **TOPIC-01** — Resolve the three observed event topic0 hashes (`0x65db1ef5…`, `0x5c090ef4…`, `0xb6233992…`) to event signatures by keccak-matching against `IAgentRequester` NatSpec from `emrestay/somnia-agents-skills@e15d4e9`. Output: per-impl ABI resolver map `(implementation_address, topic0) → (signature, field_layout_hash)` committed to repo (NOT a single global map — see KPD-01). Unmatched topic0s quarantined to `unresolved_topics.parquet` per KPD-06; STATS-01 reports `pct_logs_unresolved` gated <1%.
+- [x] **TOPIC-01** — Resolve the three observed event topic0 hashes (`0x65db1ef5…`, `0x5c090ef4…`, `0xb6233992…`) to event signatures by keccak-matching against `IAgentRequester` NatSpec from `emrestay/somnia-agents-skills@e15d4e9`. Output: per-impl ABI resolver map `(implementation_address, topic0) → (signature, field_layout_hash)` committed to repo (NOT a single global map — see KPD-01). Unmatched topic0s quarantined to `unresolved_topics.parquet` per KPD-06; STATS-01 reports `pct_logs_unresolved` gated <1%.
 
 - [ ] **IMPL-01** — Track proxy implementation transitions. Index `Upgraded(address)` events at the proxy (EIP-1967 topic0). Produce `impl_history.parquet` mapping `block_range → implementation_address`. PANEL-01 join: left-join on `block_number BETWEEN impl_first_seen_block AND impl_last_seen_block`. No-upgrade edge case handled per KPD-07: minimum one row from `[deployment_block, ∞)`. Pre-INDEX-01 beacon/diamond probe required per KPD-17.
 
@@ -105,7 +105,7 @@ Populated by the roadmapper on 2026-05-25 from `.planning/ROADMAP.md`; updated 2
 | DATA-SOURCE-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete (01-01 KPD-16/startBlock; 01-03 matrix + verdict + sufficiency-bar tests) |
 | EVENT-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
 | SHARED-SCHEMA-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
-| TOPIC-01 | Phase 2: Topic & Implementation Provenance | Pending |
+| TOPIC-01 | Phase 2: Topic & Implementation Provenance | Complete |
 | IMPL-01 | Phase 2: Topic & Implementation Provenance | Pending |
 | INDEX-01 | Phase 3: Subgraph Indexing (blocked by DATA-SOURCE-01) | Pending |
 | BYTECODE-01 | Phase 4: Parallel Cost Inputs (4a-pre + 4a-validate, split across Phase 3 boundary) | Pending |
