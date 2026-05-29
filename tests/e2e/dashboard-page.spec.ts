@@ -6,11 +6,13 @@ test.describe('DASH-03 — /apps/abrigo/dashboard page content', () => {
     const response = await page.goto('/apps/abrigo/dashboard')
     expect(response?.status()).toBe(200)
 
-    // 4 tile labels must be visible (es-CO default locale)
-    await expect(page.getByText(/Saldo del fondo|Pool balance/)).toBeVisible()
-    await expect(page.getByText(/Eventos de liquidación|Settlement events/)).toBeVisible()
-    await expect(page.getByText(/Posiciones LP|LP positions/)).toBeVisible()
-    await expect(page.getByText(/Último bloque sincronizado|Last block synced/)).toBeVisible()
+    // 4 tile labels must be visible — use .first() because the label appears in every chain row
+    await expect(page.getByText(/Saldo del fondo|Pool balance/).first()).toBeVisible()
+    await expect(page.getByText(/Eventos de liquidación|Settlement events/).first()).toBeVisible()
+    await expect(page.getByText(/Posiciones LP|LP positions/).first()).toBeVisible()
+    await expect(
+      page.getByText(/Último bloque sincronizado|Last block synced/).first(),
+    ).toBeVisible()
   })
 
   test('shows the live banner when instrument registry is empty', async ({ page }) => {
@@ -44,7 +46,8 @@ test.describe('DASH-03 — /apps/abrigo/dashboard page content', () => {
       .context()
       .addCookies([{ name: 'NEXT_LOCALE', value: 'en', domain: 'localhost', path: '/' }])
     await page.goto('/apps/abrigo/dashboard')
-    await expect(page.getByText('Pool balance')).toBeVisible()
+    // .first() because tile labels repeat per chain row
+    await expect(page.getByText('Pool balance').first()).toBeVisible()
     await expect(page.getByText('Live once contracts deploy')).toBeVisible()
   })
 })

@@ -20,10 +20,13 @@ test.describe('DASH-07 — no-JS first paint (RSC)', () => {
 
   test('4 metric tile labels are visible on first paint without hydration', async ({ page }) => {
     await page.goto('/apps/abrigo/dashboard')
-    await expect(page.getByText(/Saldo del fondo|Pool balance/)).toBeVisible()
-    await expect(page.getByText(/Eventos de liquidación|Settlement events/)).toBeVisible()
-    await expect(page.getByText(/Posiciones LP|LP positions/)).toBeVisible()
-    await expect(page.getByText(/Último bloque sincronizado|Last block synced/)).toBeVisible()
+    // .first() because tile labels repeat per chain row; any visible instance confirms RSC first paint
+    await expect(page.getByText(/Saldo del fondo|Pool balance/).first()).toBeVisible()
+    await expect(page.getByText(/Eventos de liquidación|Settlement events/).first()).toBeVisible()
+    await expect(page.getByText(/Posiciones LP|LP positions/).first()).toBeVisible()
+    await expect(
+      page.getByText(/Último bloque sincronizado|Last block synced/).first(),
+    ).toBeVisible()
   })
 
   test('no wallet connection prompt is visible (read-first, no wallet gate)', async ({ page }) => {
