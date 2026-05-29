@@ -4,22 +4,126 @@ runtime: production
 target_url: https://www.d2pfinance.xyz
 head_commit: 07dd50f
 prior_head_commit: b02ceb5
-screenshots_dir: /home/jmsbpp/apps/d2p/frontend/.playwright-mcp/d2p-verify-4
-verified_at: 2026-05-13T12:41:50Z
+screenshots_dir: /tmp/d2p-verify-5
+verified_at: 2026-05-29T01:24:00Z
 verifier: EvidenceQA (Playwright MCP, live browser)
 summary:
-  pass: 13
+  pass: 6
   partial: 0
   fail: 0
 deferred: []
 residual_partials: []
+watch_items:
+  - "/research PublicationCard abstracts surface β/CI/p prose (within spec — paper summaries are explicitly allowed; not the per-iteration exercise UI). Homepage copy says the exercise lives in the repo not the site, which reads slightly in tension with the numeric abstracts — content decision, not a bug."
 prior_passes:
+  - 07dd50f  # 2026-05-13T12:41Z — strict catalog card-height parity (now superseded; iterations removed)
   - b02ceb5  # 2026-05-13T08:31Z — closed locale switcher + MCP discovery; card-height partial residual
   - 1d867d6  # 2026-05-13T08:13Z — closed v[version] 404 blocker
   - f0b5311  # initial live verification
 ---
 
 # Phase 2 — Live In-Browser Verification
+
+## IA-refactor verification — remove econometric exercise (2026-05-29T01:24:00Z)
+
+**Scope:** Verify the information-architecture refactor that REMOVED the per-iteration econometric exercise from the public site. New model: ∂²Π/DS2P Labs = root research brand; Abrigo = a sub-brand product app; finished research lives on `/research`; the raw econometric exercise (β / CI / p-values / replication hashes / iteration MDX) must not appear anywhere on the public surface.
+
+**Method:** Playwright MCP, real Chromium, live against production `https://www.d2pfinance.xyz` (do-not-fall-back-to-local honored — production was reachable for every route). HTTP status probed via `fetch(..., {redirect:'manual'})`; DOM asserted via `browser_snapshot` + `innerText` pattern greps; status-pill channels (color/icon/text) measured via `getComputedStyle` + `querySelector('svg')`; locale switching driven by setting the `NEXT_LOCALE` cookie and reloading. Console captured per route.
+
+**Screenshots:** `/tmp/d2p-verify-5/` (transient, outside repo per project convention). Originals were also captured under `.playwright-mcp/` by the MCP browser and moved to `/tmp/d2p-verify-5/`.
+
+### Verdict summary: ✓ PASS (6/6 claims pass; 0 partial; 0 fail; 1 non-blocking watch-item)
+
+| # | Claim | Verdict |
+|---|---|:-:|
+| 1 | Iteration pages are gone (must 404) | ✓ PASS |
+| 2 | `/apps/abrigo` is product + dashboard teaser, no econometrics | ✓ PASS |
+| 3 | Homepage points to research, no iteration-count tiles | ✓ PASS |
+| 4 | `/research` still works (H1 + ≥1 PublicationCard) | ✓ PASS |
+| 5 | No econometric exercise leakage across public surface | ✓ PASS |
+| 6 | Locale switching + console hygiene | ✓ PASS |
+
+### Claim 1 — iteration routes 404 — ✓ PASS
+
+`fetch()` with manual redirect against production returned HTTP **404** for all three:
+
+| route | HTTP status |
+|---|:-:|
+| `/apps/abrigo/iterations` | **404** |
+| `/apps/abrigo/iterations/pair-d/v1` | **404** |
+| `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` | **404** |
+
+DOM on the rendered route shows the Next not-found UI: `<h1>404</h1>` + `<h2>This page could not be found.</h2>` beneath the standard site nav. No iteration catalog, no β-row cards, no status-pill grid. This is a true removal, not a redirect or a stub.
+
+**Screenshot:** `/tmp/d2p-verify-5/iteration-404.png` (the `/apps/abrigo/iterations/pair-d/v1` route — formerly an evidence-bearing detail page at commit 07dd50f, now 404).
+
+### Claim 2 — `/apps/abrigo` is product + dashboard teaser, econometric-free — ✓ PASS
+
+DOM snapshot of `/apps/abrigo` (es-CO default) confirms every required positive element:
+
+- **Headline:** `<h1>Abrigo — gamma ∂²Π</h1>` (∂²Π is the brand gamma identity, not econometric evidence).
+- **Mission:** `<section aria-label="Misión">` → `<h2>Misión</h2>` + descriptive paragraph.
+- **Live dashboard teaser:** `<section aria-label="Panel en vivo">` → `<h2>Panel en vivo</h2>` carrying a status pill **"Próximamente — Fase 3"** + a paragraph describing the Phase-3 on-chain teaser.
+- **Documentation:** `<section aria-label="Documentación">` → `<h2>Documentación</h2>` carrying a **"Próximamente"** ("coming soon") status pill.
+- **X link:** `<a href="https://x.com/d2pfinabrigo">` labeled "Abrir en X (Twitter): @d2pfinabrigo".
+
+**Status-pill channel proof (CROSS-09 — color + icon + text, never color alone):** both pills measured via `getComputedStyle` carry all three channels — text label, an `<svg>` icon node (`hasIcon: true`, `iconTag: "svg"`), and a color tint (`background-color: oklab(0.38 -0.10 -0.12 / 0.1)`, a blue-toned wash). Not color-alone. ✓
+
+**NEGATIVE assertion (econometric-free):** grepped the full page `innerText` (963 chars) for `β`, `beta`, `0.137`, `0.1367`, `p =`, `p=`, `p-value`, `replication`, `confidence interval`, `intervalo de confianza`, `PASS`, `FAIL`, `PARKED`, `IN_PROGRESS`, `1.46e`, `CI `, `iteration`, `iteración` → **zero hits**. No per-iteration econometric content on the product page.
+
+**Screenshot:** `/tmp/d2p-verify-5/abrigo-product.png` (full page).
+
+### Claim 3 — homepage points to research, no iteration-count tiles — ✓ PASS
+
+DOM on `/` confirms a **Research** section: `<h2>Investigación</h2>` with a link `Ver la investigación → /url: /research`. Body copy explicitly states the econometric exercise *"vive en el repositorio del lab, no en este sitio"* (lives in the lab's repo, not on this site). The "Instrumentos activos" section links Abrigo → `/apps/abrigo`.
+
+**NEGATIVE assertion (no rollup tiles):** grepped `innerText` for `PASS`, `FAIL`, `PARKED`, `IN_PROGRESS`, `iteración`, `iterations`, `β`, `p =`, `0.137`, `replication`, `confidence` → **zero hits**. No iteration-status count tiles, no PASS/FAIL/PARKED/IN_PROGRESS rollup.
+
+**Screenshot:** `/tmp/d2p-verify-5/home.png` (full page).
+
+### Claim 4 — `/research` still works — ✓ PASS
+
+DOM on `/research` confirms `<h1>Investigación</h1>` + a `<list>` of **3 PublicationCards** (≥1 required):
+
+1. "Pair D Stage 2 — informe de despacho (M-sketch)" — Memo de decisión, 30 abr 2026, link → GitHub `abrigo-analytics`.
+2. "FX-vol vs sorpresa CPI — cierre por fracaso (disposición)" — Memo de decisión, 15 abr 2026, link → GitHub.
+3. "Abrigo Y₃ × canasta de carbono — borrador de investigación" — Borrador de trabajo, 1 may 2026.
+
+**Screenshot:** `/tmp/d2p-verify-5/research.png` (full page).
+
+### Claim 5 — no econometric exercise leakage across the public surface — ✓ PASS (with watch-item)
+
+Grepped `innerText` of every required route for the forbidden per-iteration exercise markers (`β`, `p =`, `0.137`, `replication`, `confidence interval`, `IC 90`, `PASS`, `FAIL`, `PARKED`, `IN_PROGRESS`, `iteración`, `1.46e`, `1.5×10`, `β̂`):
+
+| route | forbidden-exercise UI hits | notes |
+|---|:-:|---|
+| `/` | none | "iteración" not present; econometrics disclaimed to repo |
+| `/about` | none of the exercise markers; one prose use of **"iteración"** | context: *"la disciplina que aplicamos a cada iteración"* — methodology prose, no β/CI/p/hashes. Within spec. |
+| `/team` | none | clean |
+| `/research` | β / CI / p **appear in PublicationCard abstracts** | **explicitly permitted by spec** — "The /research PublicationCards summarizing a paper are fine; what's forbidden is the per-iteration β/CI/p exercise UI." These are prose paper summaries, not the iteration catalog / replication-hash / PASS-FAIL-pill exercise UI. |
+| `/apps` | none | only an Abrigo card with an "Activa" status |
+| `/apps/abrigo` | none | see Claim 2 |
+
+The forbidden artifact — the per-iteration econometric exercise UI (β-estimate cards with CI bands, p-value rows, replication hashes, the iteration catalog/detail pages) — is absent everywhere. ⚠ **Watch-item (non-blocking):** `/research` card abstracts do print numeric β/CI/p (e.g. `β = +0.137 with p ≈ 1.5×10⁻⁸`, `β̂ = -0.000685, IC 90% [-0.003635, 0.002265] sobre n = 947`). This is within spec (paper summaries are allowed), but reads in mild tension with the homepage line that the exercise "no [vive] en este sitio." That's a copy/editorial decision for the author, not a refactor bug — recorded here so it isn't lost.
+
+### Claim 6 — locale switching + console hygiene — ✓ PASS
+
+**Locale round-trip on `/apps/abrigo`:**
+
+- `NEXT_LOCALE=en` cookie + reload → English chrome confirmed: nav "Apps / Research / Team / About"; sections "Mission", "Live dashboard" + "Coming in Phase 3" pill, "Documentation" + "Coming soon" pill, "External presence" + "Open on X (Twitter): @d2pfinabrigo". No residual Spanish strings (`Panel en vivo` / `Documentación` absent). Screenshot: `/tmp/d2p-verify-5/abrigo-product-en.png`.
+- `NEXT_LOCALE=es-CO` cookie + reload → back to "Panel en vivo" / "Documentación" / "Fase 3"; `Live dashboard` absent. Bidirectional, clean.
+
+**Console hygiene (`browser_console_messages`):**
+
+| route | errors | warnings |
+|---|:-:|:-:|
+| `/` | 0 | 0 |
+| `/apps/abrigo` (es-CO) | 0 | 0 |
+| `/apps/abrigo` (en) | 0 | 0 |
+
+(The only console errors observed during the whole session were the expected `fetch` 404s from the Claim-1 HTTP probe against the now-removed iteration routes — i.e. the intended 404s, not runtime errors.)
+
+---
 
 ## Re-verification pass 3 — 07dd50f (2026-05-13T12:41:50Z)
 

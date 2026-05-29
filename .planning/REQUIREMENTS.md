@@ -72,11 +72,11 @@ Each maps to exactly one phase in the roadmap.
 
 - [x] **DASH-01**: BFF API route `/api/dashboard?app=abrigo` aggregates deployed Abrigo contract state across configured chains using viem multicall + Vercel KV cache (30s TTL for chain reads, 5min for historical aggregations); `app` parameter scopes which app's contracts are queried (today only Abrigo)
 - [ ] **DASH-02**: BFF API route `/api/econometrics?app=abrigo` reads from HuggingFace dataset, parses Parquet server-side, returns typed JSON to the client
-- [ ] **DASH-03**: Dashboard page at `/apps/abrigo/dashboard` shows live state for every deployed Abrigo instrument: pool balances, settlement events count, LP positions count, last block synced — per chain
-- [ ] **DASH-04**: Chain selector uses URL search params via `nuqs` so dashboard state is shareable and agent-readable
+- [x] **DASH-03**: Dashboard page at `/apps/abrigo/dashboard` shows live state for every deployed Abrigo instrument: pool balances, settlement events count, LP positions count, last block synced — per chain
+- [x] **DASH-04**: Chain selector uses URL search params via `nuqs` so dashboard state is shareable and agent-readable
 - [ ] **DASH-05**: Visx-based econometric charts render β estimate with 95% confidence band, time-series panels, and replication-evidence overlays
 - [ ] **DASH-06**: Every chart has `aria-label` summarizing the core finding plus a `sr-only` data table for screen-reader users
-- [ ] **DASH-07**: Dashboard renders correctly with no chain connection (read-first), no wallet, and on first paint without JavaScript hydration
+- [x] **DASH-07**: Dashboard renders correctly with no chain connection (read-first), no wallet, and on first paint without JavaScript hydration
 - [x] **DASH-08**: Status page at `/status` (umbrella-scoped) shows RPC health per chain, indexer freshness, HuggingFace dataset version, build hash, AND per-app health rollup (today: just Abrigo)
 
 ### Agent Surface
@@ -239,11 +239,11 @@ Populated by gsd-roadmapper — 2026-05-11.
 | ITER-09 | Phase 2 | Descoped |
 | DASH-01 | Phase 3 | Complete |
 | DASH-02 | Phase 3 | Pending |
-| DASH-03 | Phase 3 | Pending |
-| DASH-04 | Phase 3 | Pending |
+| DASH-03 | Phase 3 | Complete |
+| DASH-04 | Phase 3 | Complete |
 | DASH-05 | Phase 3 | Pending |
 | DASH-06 | Phase 3 | Pending |
-| DASH-07 | Phase 3 | Pending |
+| DASH-07 | Phase 3 | Complete |
 | DASH-08 | Phase 3 | Complete |
 | AGENT-01 | Phase 4 | Pending |
 | AGENT-02 | Phase 4 | Pending |

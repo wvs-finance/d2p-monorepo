@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-05-29T03:36:41.068Z"
+status: executing
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-05-29T03:54:21.341Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 19
-  completed_plans: 17
-  percent: 89
+  completed_plans: 18
+  percent: 95
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-13
 **Session type:** Plan execution (02-08 complete — Phase 2 plans 8/8)
-**Stopped at:** Completed 03-01-PLAN.md
+**Stopped at:** Completed 03-02-PLAN.md
 
 ---
 
@@ -34,11 +34,11 @@ progress:
 ## Current Position
 
 **Active phase:** 03 — Data Layer and On-Chain Dashboard
-**Active plan:** 03-01 complete — 03-02 (dashboard page + BFF route) is next
+**Active plan:** 03-02 complete — 03-03 (status page + /api/status route) is next
 **Status:** Executing
 
 **Progress:**
-[█████████░] 89%
+[██████████] 95%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -72,6 +72,7 @@ Overall: 1/5 phases complete
 | Phase 02 P03 | 36 | 2 tasks | 14 files |
 | Phase 02 P08 | 8 | 2 tasks | 4 files |
 | Phase 03 P01 | 8 | 3 tasks | 18 files |
+| Phase 03 P02 | 7 | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,9 @@ Overall: 1/5 phases complete
 | about.json step keys use 01..05 format (Plan 02-03) | Template literal t('about.steps.01.title') requires numeric string keys; old step_01 format incompatible with plan spec pattern | about.json steps section always uses "01".."05" keys, not "step_01".."step_05" |
 | schema-dts + exactOptionalPropertyTypes: use satisfies Record not WithContext type annotation (Plan 02-06) | TS 5.9.3 + exactOptionalPropertyTypes + schema-dts isPartOf union triggers Debug Failure crash; satisfies pattern preserves structural checking without crash | StructuredData.tsx iteration mode drops WithContext annotation |
 | DispositionMemo never wrapped in details/accordion — epistemic equality invariant (Plan 02-06) | FAIL status must not de-emphasize the rejection narrative; any collapse or muting is a design violation | Three Playwright tests in iteration-fx-vol-fail + fail-equal-weight enforce this in CI |
+| Production webServer in playwright.config.ts (Plan 03-02) | Replaced `pnpm dev` (Turbopack) with `pnpm build && pnpm start -p 3040`; Turbopack can silently honor route-segment config differently from webpack production build — the Phase-2 burn class | All future e2e specs test against the production webpack build, not Turbopack dev |
+| Anti-fishing null rule: instrument null fields render as em-dash placeholder (Plan 03-02) | null → '—' (em-dash); a real future '0' balance is semantically distinct from '—' no-data; never render 0 for missing data | DashboardContent and all future metric tile components follow this pattern |
+| Playwright strict mode requires .first() when labels repeat per chain row (Plan 03-02) | DashboardContent renders all 5 chains at equal visual weight; tile label "Pool balance" appears 5x; getByText fails with strict mode unless .first() is used | All e2e assertions on repeating tile labels must use .first() |
 
 ### Critical Path Summary
 
