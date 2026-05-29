@@ -81,7 +81,7 @@ Each maps to exactly one phase in the roadmap.
 
 ### Agent Surface
 
-- [ ] **AGENT-01**: `lib/mcp-tools/` directory exports all agent tool definitions; both the MCP route handler and the chat API import from this module — no duplication
+- [x] **AGENT-01**: `lib/mcp-tools/` directory exports all agent tool definitions; both the MCP route handler and the chat API import from this module — no duplication
 - [ ] **AGENT-02**: MCP server hosted as Next.js App Router route at `/api/mcp/[transport]` via `@vercel/mcp-handler`
 - [ ] **AGENT-03**: MCP tool `list_apps()` returns the apps registry — today returns `[{ slug: "abrigo", name: "Abrigo", status: "active", description: "...", external_url: "https://x.com/d2pfinabrigo" }]`
 - [ ] **AGENT-04** *(re-scoped — IA correction 2026-05-13)*: ~~returns all iterations within the named app with status, slug, version, β, p-value~~ STRUCK. MCP tool `list_iterations(app, filter?)` returns the on-site **research collection** rows for the named app (slug, title_es/en, type, track, date, authors, summary_es/en, external_url, arxiv_id), track-filtered to `abrigo-hedge-design` by default; `app` defaults to `"abrigo"`. β/p-value/version do not exist in the on-site data model (the raw exercise lives in `wvs-finance/abrigo-analytics`) and are never fabricated — mirrors the ITER-01..09 descope.
@@ -245,7 +245,7 @@ Populated by gsd-roadmapper — 2026-05-11.
 | DASH-06 | Phase 3 | Descoped |
 | DASH-07 | Phase 3 | Complete |
 | DASH-08 | Phase 3 | Complete |
-| AGENT-01 | Phase 4 | Pending |
+| AGENT-01 | Phase 4 | Complete |
 | AGENT-02 | Phase 4 | Pending |
 | AGENT-03 | Phase 4 | Pending |
 | AGENT-04 | Phase 4 | Pending (re-scoped) |
