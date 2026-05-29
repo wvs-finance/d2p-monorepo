@@ -1,13 +1,12 @@
 // @vitest-environment node
-// Wave 0 scaffold — skipped assertions are un-skipped by Plan 02 (get_iteration_state ships).
-// vitest has no test.fixme; .skip is the red-pending equivalent that keeps the suite green.
+// Wave 0 scaffold — un-skipped by Plan 02 (get_iteration_state ships). Now LIVE.
 //
-// NEW-BLOCKER guard. Guards the union-outputSchema blocker: a ZodUnion outputSchema →
+// NEW-BLOCKER guard. Guards the union-outputSchema blocker: a non-object outputSchema →
 // normalizeObjectSchema undefined → TypeError in validateToolOutput on EVERY call. The
-// single-object discriminated outputSchema must keep this green. This is the REAL-SDK
-// round-trip the fake-server unit tests cannot catch: it exercises the actual
-// McpServer.registerTool + validateToolOutput path over InMemoryTransport, so a
-// non-ZodObject outputSchema fails LOUDLY in CI.
+// single-object outputSchema must keep this green. This is the REAL-SDK round-trip the
+// fake-server unit tests cannot catch: it exercises the actual McpServer.registerTool +
+// validateToolOutput path over InMemoryTransport, so a non-object outputSchema fails
+// LOUDLY in CI.
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
@@ -19,7 +18,7 @@ const TOOL_MODULE = '@/lib/mcp-tools/get-iteration-state'
 type RegisterFn = { registerGetIterationState: (server: McpServer) => void }
 
 describe('get_iteration_state — REAL McpServer + Client round-trip (output-schema guard)', () => {
-  test.skip('tools/call round-trips a FOUND slug (single-object outputSchema accepted, structuredContent validates)', async () => {
+  test('tools/call round-trips a FOUND slug (single-object outputSchema accepted, structuredContent validates)', async () => {
     const { registerGetIterationState } = (await import(TOOL_MODULE)) as RegisterFn
     const server = new McpServer({ name: 'test', version: '0' })
     registerGetIterationState(server)
@@ -38,7 +37,7 @@ describe('get_iteration_state — REAL McpServer + Client round-trip (output-sch
     expect(structured?.detail).not.toBeNull()
   })
 
-  test.skip('tools/call round-trips a NOT-FOUND slug (status not_found, detail null)', async () => {
+  test('tools/call round-trips a NOT-FOUND slug (status not_found, detail null)', async () => {
     const { registerGetIterationState } = (await import(TOOL_MODULE)) as RegisterFn
     const server = new McpServer({ name: 'test', version: '0' })
     registerGetIterationState(server)

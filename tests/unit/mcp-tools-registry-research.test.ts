@@ -6,7 +6,8 @@
 // run the SDK's validateToolOutput — the REAL-SDK guard for that lives in
 // tests/api/mcp-real-sdk.test.ts (registerTool + tools/call over InMemoryTransport).
 
-import { AppEntryOut, ResearchEntryOut } from '@/lib/mcp-tools/contract'
+import { AppEntryOut, IterationDetailOut, ResearchEntryOut } from '@/lib/mcp-tools/contract'
+import { registerGetIterationState } from '@/lib/mcp-tools/get-iteration-state'
 import { registerListApps } from '@/lib/mcp-tools/list-apps'
 import { registerListIterations } from '@/lib/mcp-tools/list-iterations'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -139,5 +140,55 @@ describe('list_iterations (AGENT-04)', () => {
     const only = items[0]
     expect(only?.slug).toBe('cfmm-microstructure-fixture')
     expect(only?.arxiv_id).toBe('2401.12345')
+  })
+})
+
+describe('get_iteration_state (AGENT-05)', () => {
+  test('found slug → { status:"found", detail } single-object; text deep-equals structuredContent', async () => {
+    const { server, calls } = fakeServer()
+    registerGetIterationState(server)
+    const handler = calls.get('get_iteration_state') as Handler
+
+    const result = await handler({ app: 'abrigo', slug: 'pair-d-dispatch-brief' })
+    const parsed = JSON.parse(readText(result))
+    expect(parsed).toEqual(result.structuredContent)
+    expect(parsed.status).toBe('found')
+
+    const detail = parsed.detail as Record<string, unknown>
+    expect(detail).not.toBeNull()
+    expect(detail.slug).toBe('pair-d-dispatch-brief')
+    expect(typeof detail.body).toBe('string')
+    expect((detail.body as string).length).toBeGreaterThan(0)
+    expect(detail.date as string).toMatch(ISO_RE)
+    expect(typeof detail.external_url).toBe('string')
+    expect(detail.arxiv_id).toBeNull()
+    for (const banned of [
+      'replication_hash',
+      'notebook_url',
+      'beta',
+      'pValue',
+      'version',
+      'locale',
+      'toc',
+    ]) {
+      expect(banned in detail).toBe(false)
+    }
+    expect(() => IterationDetailOut.parse(detail)).not.toThrow()
+  })
+
+  test('unknown slug → { status:"not_found", detail:null }; isError falsy', async () => {
+    const { server, calls } = fakeServer()
+    registerGetIterationState(server)
+    const handler = calls.get('get_iteration_state') as Handler
+
+    const result = await handler({ app: 'abrigo', slug: 'does-not-exist' })
+    expect(result.isError).toBeFalsy()
+    const parsed = JSON.parse(readText(result))
+    expect(parsed).toEqual(result.structuredContent)
+    expect(parsed.status).toBe('not_found')
+    expect(parsed.detail).toBeNull()
+    expect(parsed.app).toBe('abrigo')
+    expect(parsed.slug).toBe('does-not-exist')
+    expect(typeof parsed.note).toBe('string')
   })
 })
