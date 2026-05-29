@@ -1,0 +1,19 @@
+# adapters/fx/coingecko_config.yaml — FX-01 CoinGecko SOMI/USD source config stub.
+#
+# KPD-19 (PITFALLS C1) provenance-stamped config for the Phase-4c FX adapter.
+# source_url:   https://docs.coingecko.com/reference/coins-id-ohlc
+#               https://www.coingecko.com/en/coins/somnia
+# utc_fetch_ts: 2026-05-29T20:10Z
+#
+# timestamp_convention = close: CoinGecko OHLC timestamp marks the candle CLOSE.
+# The FX LOCF join MUST subtract the candle duration before the strict
+# `t_price < t_block` comparison, else up to one candle-duration of look-ahead
+# poisons inequality #1 (see .planning/scout/2026-05-29/coingecko_convention.md).
+
+coin_id: somnia
+timestamp_convention: close   # KPD-19 — subtract candle duration on LOCF join
+endpoint_ohlc: https://api.coingecko.com/api/v3/coins/somnia/ohlc
+endpoint_range: https://api.coingecko.com/api/v3/coins/somnia/market_chart/range   # free hourly 1-90d
+fx_stale_minutes: 90
+fx_very_stale_hours: 4
+fallback_chain: [coingecko, coinmarketcap, messari]
