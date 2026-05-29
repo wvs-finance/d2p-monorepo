@@ -1,16 +1,17 @@
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-
 // Pure RSC layout for the (lab) route group.
 // CRITICAL: Do NOT import wagmi, RainbowKit, viem, or @tanstack/react-query here
 // or in any file under app/(lab)/. This is the bundle-isolation barrier (FOUND-11).
+//
+// No local <header> here: the global <TopNav> (root app/layout.tsx) already renders
+// the brand wordmark, nav, and LanguageSwitcher on every route. A second header here
+// produced a duplicate site header (double-chrome) on all (lab) routes.
 export default function LabLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="flex items-center justify-between p-6 border-b border-border-default">
-        <span className="font-semibold text-text-primary">d2p Finance</span>
-        <LanguageSwitcher />
-      </header>
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-12">{children}</main>
+      {/* Plain wrapper, not <main>: every (lab) page renders its own <main> with its
+          own max-width (research/team use max-w-[1200px]). A <main> here would nest a
+          second main landmark and cap each page's width at max-w-4xl. */}
+      <div className="flex-1 w-full">{children}</div>
       <footer className="p-6 border-t border-border-default text-text-secondary text-sm">
         <a
           href="https://github.com/wvs-finance"
