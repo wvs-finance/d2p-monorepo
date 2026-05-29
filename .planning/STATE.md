@@ -2,14 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: "Roadmap revised four times (2026-05-25 HIGH/MEDIUM/LOW fixes; 2026-05-29 #1 DATA-SOURCE-01 + arrival-periodicity; 2026-05-29 #2 DATA-SOURCE-01 rigor hardening; 2026-05-29 #3 scout-addendum fold-in resolving the two coupled HIGH findings + remaining MEDIUMs/LOW); awaiting Studio Producer re-dispatch + Reality Checker + dynamic-primary re-review per CLAUDE.md three-step pipeline."
-last_updated: "2026-05-29T21:21:03.103Z"
+status: completed
+last_updated: "2026-05-29T21:30:49.560Z"
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 4
 ---
 
 # Project State: abrigo-somnia M1
@@ -27,10 +26,10 @@ progress:
 
 - **Milestone:** M1
 - **Phase:** 01 — Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations (active)
-- **Plan:** 01-02 (next; 01-01 complete)
-- **Status:** Phase 1 execution underway. Plan 01-01 (Wave 0 test infra + KPD-16 scout archive) COMPLETE — greenfield uv/pytest harness with six N2 shared fixtures, reusable Somnia probe tooling, sha256-pinned scout archive; KPD-16 discharged; INDEX-01 startBlock resolved to 283417317. 4 of 5 Phase-1 plans remain (01-02..01-05).
+- **Plan:** 01-03 (next; 01-01 + 01-02 + 01-04 complete)
+- **Status:** Phase 1 execution underway. Plan 01-01 (Wave 0 test infra + KPD-16 scout archive) COMPLETE. Plan 01-02 (Wave 2 pre-flight verdicts) COMPLETE — KPD-17 HAPPY PATH (plain EIP-1967, IMPL-01 tracks only the proxy slot), KPD-09-docs MEDIUM branch-(a) `safe_block_depth=1` provisional, KPD-19 candle-CLOSE; FX-01 config stub + no-look-ahead candle fixture committed; three new scout files re-pinned in PROVENANCE.sha256. Plan 01-04 (Wave 2 schema foundations) COMPLETE — EVENT-01 `schemas/event_schema_v1.md` (arrival-timing first-class NOT NULL, uint256 ids Utf8-only with verbatim DTYPE SCOPE RULE, responses child table, KPD-18 reservations, topic0 domain roles UNASSIGNED) + KPD-11a `batch_manifest_v1.yaml` + `.schema.json` (Phase-5 KPD-11b invokes it); `test_uint256_not_int64` is a runtime polars round-trip (78-digit Utf8 survives, Decimal(38,0) raises, wei constructs). EVENT-01 requirement marked complete. 2 of 5 Phase-1 plans remain (01-03 DATA-SOURCE-01 matrix+verdict, 01-05 SHARED-SCHEMA-01).
 
-**Plan progress (Phase 1):** [██░░░░░░░░] 20% — 1/5 plans complete
+**Plan progress (Phase 1):** [██████░░░░] 60% — 3/5 plans complete
 **Phase progress:** [░░░░░░] 0/6 phases complete
 
 ## Roadmap Summary
@@ -58,6 +57,7 @@ progress:
 ## Accumulated Context
 
 ### Decisions (locked at revision time)
+- **(2026-05-29, 01-02 execution) Three pre-flight verdicts discharged with primary-source provenance.** KPD-17 **HAPPY PATH** — impl `0x9AF59C5683bb8686596B0D56e4F67655C6B73EdD` is plain EIP-1967 (BEACON_SLOT `0xa3f0…3d50`, IMPLEMENTATION_SLOT, EIP-2535 diamond `0xc8fc…c131c` all `0x` empty); **IMPL-01 tracks ONLY the proxy EIP-1967 slot**, ROADMAP SC#2a satisfied, SC#2b re-scope does not fire. KPD-09-docs **MEDIUM branch-(a) provisional** — Somnia docs assert sub-second PBFT finality but never irreversibility → `safe_block_depth = 1` provisionally accepted; KPD-09-empirical (≥1-hour rollback obs) deferred to Phase 3. KPD-19 **candle-CLOSE** — CoinGecko OHLC ts marks candle close; FX LOCF MUST subtract candle duration (else 1-candle look-ahead poisons inequality #1); free hourly via `market_chart/range` (OHLC hourly is paid-only). Artifacts: `beacon_diamond_probe.md`, `somnia_finality_semantics.md`, `coingecko_convention.md`, `adapters/fx/coingecko_config.yaml` (`timestamp_convention: close`), `tests/fixtures/fx_candle_convention.py` (stdlib-only no-look-ahead helper for Phase 4c, encodes ROADMAP Phase 4 SC#4). N3 closed: all three scout files appended to `PROVENANCE.sha256` (set-equality test holds at 7 `.md` files; `sha256sum -c` OK). DATA-SOURCE-01 pre-flight surface complete.
 - **(2026-05-29, 01-01 execution) Wave 0 test infra + N2 fixture contract locked.** uv-managed Python `>=3.12` (this repo's floor — deliberately NOT abrigo-analytics' `>=3.13`, recorded in pyproject comments to block a future false-parity edit) + pytest harness (dev group pytest/jsonschema/pyyaml/polars, no watch-mode). The N2 contract for ALL of Plans 01-01..01-05: shared helpers are `@pytest.fixture`s — `scout_dir`/`schemas_dir`/`research_dir` return `Path`, `load_yaml`/`load_json`/`read_text` return callables — consumed as test PARAMETERS, not module imports.
 - **(2026-05-29, 01-01 execution) KPD-16 discharged.** Scout archive consolidated under `.planning/scout/2026-05-29/` (canonical; the never-committed upstream `2026-05-25/` path reconciled in `.planning/scout/README.md`), every fact provenance-stamped (`source_url` + `utc_fetch_ts`), sha256-pinned via `PROVENANCE.sha256`. `test_scout_archive.py::test_provenance_manifest_valid` is a `.md`-scoped SET-EQUALITY check, so Plan 02's three appended files (`beacon_diamond_probe.md`, `somnia_finality_semantics.md`, `coingecko_convention.md`) MUST be re-pinned or the test fails by design. Reusable probe tooling (`probes/somnia_rpc.py`, `probes/blockscout.py`) is stdlib-only and network-touching only in `__main__` (never in CI).
 - **(2026-05-29, 01-01 execution) INDEX-01 startBlock RESOLVED = 283417317.** Recorded in `deployment_block.md` from the proxy creation tx; backfill span corrected to ~36.3M blocks (~36,287 getLogs windows). Supersedes the ROADMAP/PROJECT "~320M blocks / ~270 days" figure (conflated chain-age-since-TGE with the ~42-day-old proxy). On-chain event roles recorded as SHAPES only — scout role labels likely INVERTED (the 3-topic/1120-byte `0xb623…` matches `RequestCreated`); TOPIC-01 (Phase 2) keccak-resolves definitively against pinned commit `e15d4e9`.
@@ -104,8 +104,9 @@ ROADMAP.md "Open Questions Flagged for Plan-Phase" — 2 items: (1) deployment-b
 
 ## Session Continuity
 
-**Last action (2026-05-29):** Executed Plan 01-01 (Wave 0 + KPD-16). Three atomic commits — `6818fd8` (uv/pytest harness + six N2 fixtures), `66e3dc9` (probe scripts + scout RPC/event/deployment archive), `4991329` (sha256 manifest + 6-test scout-archive suite). `uv run pytest tests/ -q` green (6 tests); `sha256sum -c PROVENANCE.sha256` OK. SUMMARY at `.planning/phases/01-…/01-01-SUMMARY.md`.
-**Next action:** Execute Plan 01-02 (Wave 2 — beacon/diamond + finality + CoinGecko probe archive; must append its three new `.md` files to `PROVENANCE.sha256` or the set-equality test fails by design) or the next ready Phase-1 plan. Push to `origin` deferred to the user.
+**Last action (2026-05-29):** Executed Plan 01-02 (Wave 2 — pre-flight verdicts). Three atomic commits — `54d3541` (KPD-17 beacon/diamond + KPD-09-docs finality verdicts), `25dcc10` (KPD-19 candle-CLOSE + FX-01 config stub), `afbcb6a` (candle fixture + pre-flight verdict tests + PROVENANCE.sha256 re-pin). `uv run pytest tests/ -q` green (13 tests); `sha256sum -c PROVENANCE.sha256` OK for all 7 scout `.md` files. SUMMARY at `.planning/phases/01-…/01-02-SUMMARY.md`. No deviations.
+**Next action:** Execute Plan 01-03 (next ready Phase-1 plan) or the next ready wave. Push to `origin` deferred to the user.
+**Prior action (2026-05-29):** Executed Plan 01-01 (Wave 0 + KPD-16). Three atomic commits — `6818fd8`, `66e3dc9`, `4991329` (+ `002ae74` docs). 6 tests green; KPD-16 discharged; INDEX-01 startBlock 283417317.
 
 **Prior action:** Roadmap re-revision 2026-05-29 #3 — scout-addendum fold-in resolving the two coupled HIGH findings (count-anchor unit mismatch + block-vs-event sparsity) + remaining MEDIUMs/LOW. `234,999` re-labelled as the transaction-coverage anchor; Phase 3 SC#6 rebuilt as a three-leg gate (tx-anchor + scout structural event-ratio conformance + contiguity proof); the "≥99.9% blocks present" sufficiency bar replaced by distinct-tx-coverage + structural-ratio conformance (Phase 1 SC#7(ii) + Phase 3 SC#6); STATS-01 envelope corrected to ~165k `RequestCreated` events; contiguity-independence stated (SC#2 + SC#6); deep-history retention probe split from the throttle probe (SC#7(i)); tx-granularity ordering surface (SC#7); subgraph-compatible paid swap (SC#7(iii)); scout addendum logged as a KPD-16 provenance row. ROADMAP.md + PROJECT.md + REQUIREMENTS.md + this STATE.md edited surgically in place; coverage still 11/11; all #2 fixes + six prior HIGH-fixes untouched.
 **Next action:** Re-run the full planning-review pipeline (Studio Producer selector → parallel Reality Checker + dynamic primary reviewer) against the hardened `.planning/ROADMAP.md` + PROJECT.md + REQUIREMENTS.md. If both PASS, proceed to commit + `/gsd:plan-phase 1`.
