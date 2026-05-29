@@ -80,3 +80,92 @@ Expected output: empty (or only false positives in test strings that check for t
 - [ ] es-CO translations reviewed by native Colombian Spanish speaker
 - [ ] Anti-marketing-slop grep returns no matches in messages/ or content/
 - [ ] All MDX iteration content reviewed for author's-voice register (economics-journal tone, not SaaS landing page)
+
+---
+
+## Phase 03.1 review (research index chrome — Plan B)
+
+**Scope:** Index-chrome copy additions in `messages/es-CO/research.json` and `messages/en/research.json`
+authored in Plan 03.1-02. Reading-page superset (Plan C1/C2) is a separate entry.
+
+**New keys added (2026-05-29):**
+- `research.empty_track.heading` / `research.empty_track.body` — honest per-track empty state
+- `research.cta.read_on_site` — in-link label for `readable_on_site` cards
+- `research.track_filter.*` — segmented control labels (All / Microestructura CFMM / Diseño cobertura Abrigo / Notas)
+- `research.track_label.*` — track tag labels on PublicationCard
+
+**es-CO authoring notes (Plan B author: Juan Serrano / jmsbpp):**
+- "Microestructura CFMM" — standard financial-microstructure term in Colombian Spanish; no calque.
+- "Diseño de cobertura Abrigo" — "cobertura" (not "hedging") per standard Spanish finance vocabulary.
+- "Notas" — short, professional, mirrors the English "Notes".
+- "Leer en el sitio" — literal but natural; avoids "ver" (too visual) or "acceder" (too corporate).
+- "Sin publicaciones en esta línea todavía" — "línea" used for research track; "todavía" natural in es-CO.
+- Copy register: informational, laconic. No marketing tone. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/research.json` (index chrome additions) | _pending native review_ | | |
+| `messages/en/research.json` (index chrome additions) | _pending native review_ | | |
+
+### Phase 03.1-B Sign-off
+
+- [ ] es-CO index chrome reviewed by native Colombian Spanish speaker
+- [ ] `track_filter` and `track_label` labels reviewed against financial-Spanish conventions
+- [ ] Anti-marketing-slop grep passes on new keys
+
+---
+
+## Phase 03.1 review (reading-page superset — Plan C2)
+
+**Scope:** The reading-page `research.reading.*` SUPERSET in `messages/es-CO/research.json`
+(authored FIRST) and `messages/en/research.json` (native-authored second, no machine
+translation). These keys label the on-site reading surface (`/research/{slug}`) chrome:
+the table of contents, abstract heading, footnotes, the arXiv/PDF/DOI paper-bridge, the
+BibTeX copy affordance, the lab affiliation, and the figure / theorem-block labels. This
+is the SUPERSET entry distinct from the Plan-B index-chrome line above.
+
+**es-CO-first reading.* keyset (2026-05-29):**
+
+| Key | es-CO | en |
+|-----|-------|----|
+| `reading.toc_heading` | En esta página | On this page |
+| `reading.abstract_heading` | Resumen | Abstract |
+| `reading.footnote_heading` / `reading.footnotes_label` | Notas al pie | Footnotes |
+| `reading.read_on_arxiv` / `reading.arxiv` | Leer el artículo completo en arXiv | Read the full paper on arXiv |
+| `reading.read_pdf` | Leer el PDF | Read the PDF |
+| `reading.pdf` | PDF | PDF |
+| `reading.doi_label` / `reading.doi` | DOI | DOI |
+| `reading.bibtex_heading` | BibTeX | BibTeX |
+| `reading.bibtex_copy` / `reading.copy_bibtex` | Copiar BibTeX | Copy BibTeX |
+| `reading.bibtex_copied` / `reading.copied` | ¡Copiado! | Copied! |
+| `reading.affiliation` | DS2P Labs · ∂²Π | DS2P Labs · ∂²Π |
+| `reading.figure_prefix` | Figura | Figure |
+| `reading.theorem_label.theorem` | Teorema | Theorem |
+| `reading.theorem_label.definition` | Definición | Definition |
+| `reading.theorem_label.lemma` | Lema | Lemma |
+| `reading.theorem_label.proof` | Demostración | Proof |
+
+**es-CO authoring notes (Plan C2 author: Juan Serrano / jmsbpp):**
+- "En esta página" — natural es-CO for an on-page TOC; avoids the calque "Tabla de contenidos" (too document-formal for an inline rail) and "Índice" (ambiguous with database index).
+- "Resumen" — standard academic-Spanish for an article abstract; never "Abstracto" (false friend / Castilian-adjacent calque).
+- "Notas al pie" — the canonical es-CO term for footnotes; not "Pies de página" (that's a page-layout footer).
+- "Leer el artículo completo en arXiv" — "artículo" (not "paper" anglicism); "completo" makes clear the on-site view is partial. Reviewed against financial/academic register.
+- "Leer el PDF" — laconic, native; avoids "Descargar" (the link opens, it does not force a download) and "Visualizar" (corporate).
+- "Copiar BibTeX" / "¡Copiado!" — imperative + transient confirmation; the inverted opening "¡" is correct es-CO orthography (frequently dropped by machine translation — its presence is a native-authorship tell).
+- "Demostración" — the proof block label; standard math-Spanish, not "Prueba" (which reads as "test"/"trial" in es-CO).
+- "Teorema / Definición / Lema" — standard mathematics terminology; "Lema" is the correct singular (not "Lemma" anglicism, not "Lemita").
+- "Figura" — figure caption prefix; the CSS counter supplies the number, the label word comes from this key.
+- Copy register: economics-journal / paper-grade, laconic, no marketing tone. Passes banned-phrases grep (see below).
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/research.json` (`reading.*` superset) | _pending native review_ | | |
+| `messages/en/research.json` (`reading.*` superset) | _pending native review_ | | |
+
+### Phase 03.1-C2 Sign-off
+
+- [ ] es-CO reading-page `reading.*` superset reviewed by native Colombian Spanish speaker
+- [ ] Math/academic terminology (`Teorema`, `Lema`, `Demostración`, `Resumen`, `Figura`) reviewed against academic-Spanish conventions
+- [ ] Inverted-punctuation orthography (`¡Copiado!`) confirmed (native-authorship tell, not machine translation)
+- [ ] Anti-marketing-slop grep passes on `reading.*` keys (verified 2026-05-29: `grep -iIrnE '<banned>' messages/{es-CO,en}/research.json` → no matches)
+- [ ] Recursive i18n parity (`tests/unit/i18n-coverage.test.ts::assertKeyParity('research')`) green — es-CO ↔ en symmetric (verified 2026-05-29)

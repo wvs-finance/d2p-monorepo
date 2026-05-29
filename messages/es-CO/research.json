@@ -6,14 +6,56 @@
       "heading": "Sin publicaciones aún",
       "body": "Los documentos aparecerán aquí una vez se sincronice el contenido desde abrigo-analytics."
     },
+    "empty_track": {
+      "heading": "Sin publicaciones en esta línea todavía",
+      "body": "Los documentos de esta línea aparecerán aquí en cuanto se publiquen."
+    },
     "cta": {
-      "read_document": "Leer documento"
+      "read_document": "Leer documento",
+      "read_on_site": "Leer en el sitio"
     },
     "type_label": {
       "paper": "Artículo",
       "decision-memo": "Memo de decisión",
       "write-up": "Borrador de trabajo",
       "talk": "Charla"
+    },
+    "track_filter": {
+      "label": "Filtrar por línea de investigación",
+      "all": "Todas",
+      "cfmm-microstructure": "Microestructura CFMM",
+      "abrigo-hedge-design": "Diseño de cobertura Abrigo",
+      "notes": "Notas"
+    },
+    "track_label": {
+      "cfmm-microstructure": "Microestructura CFMM",
+      "abrigo-hedge-design": "Cobertura Abrigo",
+      "notes": "Notas"
+    },
+    "reading": {
+      "toc_heading": "En esta página",
+      "footnotes_label": "Notas al pie",
+      "footnote_heading": "Notas al pie",
+      "abstract_heading": "Resumen",
+      "arxiv": "Leer el artículo completo en arXiv",
+      "read_on_arxiv": "Leer el artículo completo en arXiv",
+      "pdf": "PDF",
+      "read_pdf": "Leer el PDF",
+      "doi": "DOI",
+      "doi_label": "DOI",
+      "bibtex_heading": "BibTeX",
+      "copy_bibtex": "Copiar BibTeX",
+      "bibtex_copy": "Copiar BibTeX",
+      "copied": "¡Copiado!",
+      "bibtex_copied": "¡Copiado!",
+      "affiliation": "DS2P Labs · ∂²Π",
+      "figure_prefix": "Figura",
+      "theorem_label": {
+        "theorem": "Teorema",
+        "definition": "Definición",
+        "lemma": "Lema",
+        "proof": "Demostración"
+      }
     }
   }
 }

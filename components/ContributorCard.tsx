@@ -54,7 +54,7 @@ export function ContributorCard({
         href={`https://github.com/${github_handle}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-xs text-accent-default hover:underline shrink-0"
+        className="inline-flex items-center gap-1 text-xs text-accent-text hover:underline shrink-0"
         aria-label={`${t('team.github_link_label')}: ${name}`}
       >
         {t('team.github_link_label')}

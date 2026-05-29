@@ -10,6 +10,9 @@ const baseResearch = {
   authors: ['J. Serrano'],
   date: new Date('2026-04-30'),
   type: 'decision-memo' as const,
+  // Plan B: track + readable_on_site are now required on PublicationCardResearch
+  track: 'abrigo-hedge-design' as const,
+  readable_on_site: false,
   summary_es: 'Resumen del análisis de Par D en la fase 2.',
   summary_en: 'Summary of the Pair D Stage 2 analysis.',
   tags: ['pair-d', 'ols'],
@@ -18,10 +21,16 @@ const baseResearch = {
 function mockT(key: string): string {
   const keys: Record<string, string> = {
     'research.cta.read_document': 'Read document',
+    'research.cta.read_on_site': 'Read on site',
     'research.type_label.decision-memo': 'Memo',
     'research.type_label.paper': 'Paper',
     'research.type_label.write-up': 'Write-up',
     'research.type_label.talk': 'Talk',
+    'research.track_label.abrigo-hedge-design': 'Abrigo Hedge-Design',
+    'research.track_label.cfmm-microstructure': 'CFMM Microstructure',
+    'research.track_label.notes': 'Notes',
+    'research.track_filter.label': 'Filter by track',
+    'research.track_filter.all': 'All',
   }
   return keys[key] ?? key
 }
@@ -40,11 +49,12 @@ describe('<PublicationCard />', () => {
     expect(badge).toBeInTheDocument()
   })
 
-  it('renders order prefix in font-mono text-accent-default when order prop is provided', () => {
+  it('renders order prefix in font-mono text-accent-text when order prop is provided', () => {
     const { container } = render(
       <PublicationCard research={{ ...baseResearch, order: 1 }} locale="en" t={mockT} />,
     )
-    const prefix = container.querySelector('.font-mono.text-accent-default')
+    // text-accent-text = AA-safe darker ochre for small text (Plan 03.1-04 contrast fix)
+    const prefix = container.querySelector('.font-mono.text-accent-text')
     expect(prefix).toBeInTheDocument()
     expect(prefix?.textContent).toBe('01')
   })

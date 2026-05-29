@@ -6,14 +6,56 @@
       "heading": "No publications yet",
       "body": "Documents will appear here once content is synced from abrigo-analytics."
     },
+    "empty_track": {
+      "heading": "No publications in this track yet",
+      "body": "Documents in this track will appear here once published."
+    },
     "cta": {
-      "read_document": "Read document"
+      "read_document": "Read document",
+      "read_on_site": "Read on site"
     },
     "type_label": {
       "paper": "Paper",
       "decision-memo": "Decision memo",
       "write-up": "Working draft",
       "talk": "Talk"
+    },
+    "track_filter": {
+      "label": "Filter by research track",
+      "all": "All",
+      "cfmm-microstructure": "CFMM Microstructure",
+      "abrigo-hedge-design": "Abrigo Hedge-Design",
+      "notes": "Notes"
+    },
+    "track_label": {
+      "cfmm-microstructure": "CFMM Microstructure",
+      "abrigo-hedge-design": "Abrigo Hedge-Design",
+      "notes": "Notes"
+    },
+    "reading": {
+      "toc_heading": "On this page",
+      "footnotes_label": "Footnotes",
+      "footnote_heading": "Footnotes",
+      "abstract_heading": "Abstract",
+      "arxiv": "Read the full paper on arXiv",
+      "read_on_arxiv": "Read the full paper on arXiv",
+      "pdf": "PDF",
+      "read_pdf": "Read the PDF",
+      "doi": "DOI",
+      "doi_label": "DOI",
+      "bibtex_heading": "BibTeX",
+      "copy_bibtex": "Copy BibTeX",
+      "bibtex_copy": "Copy BibTeX",
+      "copied": "Copied!",
+      "bibtex_copied": "Copied!",
+      "affiliation": "DS2P Labs · ∂²Π",
+      "figure_prefix": "Figure",
+      "theorem_label": {
+        "theorem": "Theorem",
+        "definition": "Definition",
+        "lemma": "Lemma",
+        "proof": "Proof"
+      }
     }
   }
 }

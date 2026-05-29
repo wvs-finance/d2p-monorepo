@@ -12,6 +12,7 @@
 - [ ] **Phase 1: Foundation and Scaffold** — Wires every cross-cutting constraint into the project skeleton so all downstream phases build on a compliant base
 - [ ] **Phase 2: Research Lab Presence and Iteration Catalog** — Delivers the hackathon demo critical path: lab homepage, full iteration catalog, Pair D detail (PASS), and FX-vol-fail detail (FAIL)
 - [x] **Phase 3: Data Layer and On-Chain Dashboard** — Builds the BFF API routes, HuggingFace econometric pipeline, and live dashboard page; gates Phase 4 (completed 2026-05-29)
+- [ ] **Phase 3.1: Research Reading Surface** *(INSERTED)* — Paper-grade `/research`: track filter + locale-aware math reading pages (build-time KaTeX) + arXiv/PDF paper-bridge
 - [ ] **Phase 4: Agent Surface (MCP)** — Exposes all protocol and research state to AI agents via MCP tools, OpenAPI spec, and JSON-LD structured data
 - [ ] **Phase 5: Read-First Wallet and DeFi Surface** — Adds RainbowKit wallet connection and per-instrument read-only views with payoff diagrams and risk disclosures
 
@@ -99,6 +100,26 @@ Plans:
 - [ ] 03-03-PLAN.md — Umbrella /status surface: /api/status JSON route + /status RSC page with per-chain RPC health pills, build hash, freshness, per-app rollup (DASH-08) [wave 2]
 
 ---
+
+### Phase 03.1: Research Reading Surface (INSERTED)
+
+**Goal**: `/research` becomes a paper-grade public reading surface — a reverse-chron list with a server-rendered track filter (CFMM Microstructure · Abrigo Hedge-Design · Notes), and locale-aware reading pages that render build-time KaTeX math, numbered display equations, figures, theorem/definition blocks, footnotes/sidenotes, and an arXiv/PDF paper-bridge. Hybrid: on-site MDX bodies for write-ups/memos; arXiv landing pages for formal papers.
+
+**Depends on**: Phase 2 (the `/research` index + Velite `research` collection + `PublicationCard` baseline; the locked design system; the i18n + Evidence-Collector gates)
+
+**Canonical spec**: `docs/superpowers/specs/2026-05-29-research-reading-surface-design.md` (brainstormed → two-reviewer-verified → tooling-researched; the PRD for `/gsd:plan-phase 03.1 --prd`)
+
+**Requirements**: extends LAB-03 (publications/research surface). Net-new acceptance lives in the spec §3–§8; no new top-level REQ-IDs — a depth pass on the existing research requirement.
+
+**Scope note**: full citation rendering (rehype-citation/@citation-js) is **deferred to v2** per spec §0; v1 paper-bridge = arXiv + PDF + static BibTeX.
+
+**Plans**: 4 (per spec §2; Plan C split into C1+C2 after the 3-reviewer gate) — A: math-pipeline + render-path gating spike; B: index + content migration + i18n; C1: reading page + components + paper-bridge; C2: reading i18n superset + a11y + perf/Lighthouse gates.
+
+Plans:
+- [ ] 03.1-01-PLAN.md — Plan A: math-pipeline + render-path GATING spike — install/pin katex+remark-math+rehype-katex, compiled body via s.mdx() with the §0 plugin chain, resurrect MDXRenderer, route-scoped KaTeX CSS, locale-split glob, spike fixture, e2e .katex/NOT-.katex-error under prod build (LAB-03) [wave 1]
+- [ ] 03.1-02-PLAN.md — Plan B: index + content migration + index i18n — server <Link> track filter (no nuqs), atomic schema+3-file per-locale migration with required track, extended PublicationCard, honest empty-per-track, es-CO-first index i18n (LAB-03) [wave 2]
+- [ ] 03.1-03-PLAN.md — Plan C1: reading page + components + paper-bridge — /research/[slug] Mode A/B/notFound (await params), 64ch+TOC(from s.toc())+footnotes+theorem+figures, MDX component map via the components prop, PaperBridge (sole client island, arXiv/PDF/DOI/BibTeX), Mode-B fixture, ScholarlyArticle JSON-LD, reading e2e, spike retired (LAB-03) [wave 3]
+- [ ] 03.1-04-PLAN.md — Plan C2: reading i18n superset + a11y + perf gates — es-CO-first reading.* superset + recursive parity, axe + manual MathML entry/waiver, font-display:swap + KaTeX preload (no Python subsetting), Lighthouse LCP gate in the existing lighthouserc.cjs run via Evidence Collector (LAB-03) [wave 4]
 
 ### Phase 4: Agent Surface (MCP)
 

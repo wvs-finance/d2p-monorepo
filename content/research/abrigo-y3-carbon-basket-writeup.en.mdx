@@ -5,21 +5,15 @@ title_en: "Abrigo Y₃ × carbon basket — investigation write-up"
 authors: ["Juan Serrano"]
 date: "2026-05-01"
 type: "write-up"
+track: abrigo-hedge-design
+readable_on_site: true
+abstract_es: "Análisis de viabilidad del instrumento Y₃ × canasta de carbono en Celo. Disposición de HALT estructural por n_nonzero = 77 < N_MIN = 80. Decisión de pivote pendiente."
+abstract_en: "Feasibility analysis for the Y₃ × carbon basket instrument on Celo. Structural-HALT disposition: n_nonzero = 77 < N_MIN = 80. Pivot decision pending."
 summary_es: "Borrador del análisis Y₃ × canasta de carbono en Celo: identificación del instrumento, especificación de la canasta de 10 activos, calibración por panel de 82 semanas y disposición de HALT estructural (n_nonzero = 77 < N_MIN = 80). Análisis estructural pendiente de decisión de usuario."
 summary_en: "Investigation draft for Y₃ × carbon basket on Celo: instrument identification, 10-asset basket specification, 82-week panel calibration, and structural-HALT disposition (n_nonzero = 77 < N_MIN = 80). Structural analysis pending user decision."
 tags: ["y3", "carbon", "write-up", "in-progress", "celo"]
 order: 3
 ---
-
-## Español
-
-La iteración Y₃ × canasta de carbono investiga si el volumen de negociación de usuarios de la canasta de activos de carbono en Celo (Mento stablecoins + activos globales) es un proxy confiable para el flujo de capital en mercados de frontera. La canasta incluye diez activos verificados en Celo: COPM, USDm, EURm, BRLm, KESm, XOFm, CELO nativo, USDT (0x48065fbb…), USDC y WETH (puente nativo de Celo).
-
-El panel abarca 82 viernes desde el 2024-08-30 hasta el 2026-04-03, construido a partir de los eventos `carboncontroller_evt_tokenstraded` del protocolo Carbon DeFi Celo. El filtro de usuario excluye el tráfico del Arb Fast Lane (`0x8c05ea…`). El volumen agregado por usuario de la canasta mostró 77 semanas con actividad no nula sobre 82 observaciones posibles (n_nonzero = 77).
-
-La calibración alcanzó una disposición de HALT estructural: n_nonzero (77) es menor que N_MIN pre-comprometido (80) por tres semanas. Según el diseño del protocolo §4, el modelo no silencia el fallo ajustando silenciosamente al volumen del árbitro. Se archivó un memo de disposición pathological-HALT. La siguiente etapa requiere una decisión del usuario sobre la estrategia de pivote: ampliar la ventana del panel, reemplazar el basket, o proceder con el umbral de robustez ajustado.
-
-## English
 
 The Y₃ × carbon basket iteration investigates whether user-side trading volume of the carbon asset basket on Celo (Mento stablecoins + global assets) is a reliable proxy for capital flow in frontier markets. The basket comprises ten verified Celo assets: COPM, USDm, EURm, BRLm, KESm, XOFm, native CELO, USDT (0x48065fbb…), USDC, and WETH (Celo native bridge).
 
