@@ -145,8 +145,12 @@ def test_field_layout_hash_determinism(schemas_dir, load_json):
     assert canon == "RequestCreated(uint256:I,uint256:I,uint256:D,bytes:D,address[]:D)"
     assert h == "0x9b58ba757cb55c0f041e54b88e3bfa0fe42457e16705c55bafb82c312fd39dd2"
     assert h == rc["field_layout_hash"]
-    # order sensitivity: swap the first two args -> different hash
-    _, h_reordered = field_layout_hash("RequestCreated", [args[1], args[0]] + args[2:])
+    # order sensitivity: move an indexed arg behind a data arg (changes the :I/:D
+    # sequence) -> different hash. (Swapping the two identical uint256:I args is a
+    # no-op by construction, so we reorder across the indexed/data boundary.)
+    reordered = [args[2], args[0], args[1], args[3], args[4]]
+    canon_r, h_reordered = field_layout_hash("RequestCreated", reordered)
+    assert canon_r != canon
     assert h_reordered != h
 
 
