@@ -77,6 +77,7 @@ jobs:
       - run: pnpm playwright test --project=chromium
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
   a11y:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
@@ -92,6 +93,7 @@ jobs:
       - run: pnpm playwright test tests/a11y/
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
   lighthouse:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
@@ -107,3 +109,4 @@ jobs:
         env:
           LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
           LHCI_COLLECT__URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
