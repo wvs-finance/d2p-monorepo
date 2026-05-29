@@ -3,10 +3,12 @@
 // Next.js includes a layout's CSS only for routes that use that layout,
 // so KaTeX styles do NOT leak to other route groups. Turbopack-safe.
 //
-// Font preloads: KaTeX_Main-Regular + KaTeX_Math-Italic (the two most-used
-// KaTeX faces for body text and math italic). font-display:swap is applied
-// via the @font-face override below so FOUC is minimised on 3G connections.
-// Byte-level subsetting (fonttools/pyftsubset) is DEFERRED to v2.
+// Fonts: KaTeX ships its own @font-face rules inside katex.min.css; Turbopack
+// rewrites their URLs to hashed /_next/static/media/* assets that resolve 200.
+// We do NOT hand-roll preloads or @font-face overrides — earlier attempts pointed
+// at /static/katex/*.woff2 which does not exist (4×404 + console errors, and the
+// swap override was inert). Byte-level subsetting + correct-path preload are
+// DEFERRED to v2 (Plan C2 perf); v1 relies on the bundled KaTeX fonts.
 //
 // CRITICAL: Do NOT import wagmi, RainbowKit, viem, or @tanstack/react-query
 // here — this is under (lab) which enforces the bundle-isolation barrier (FOUND-11).
@@ -15,39 +17,8 @@ import 'katex/dist/katex.min.css'
 export default function ResearchLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* KaTeX font preloads — the 2 most-used faces (LCP approach; v1).
-          crossOrigin="anonymous" is required for CORS-safe font preload in browsers. */}
-      <link
-        rel="preload"
-        as="font"
-        type="font/woff2"
-        href="/static/katex/KaTeX_Main-Regular.woff2"
-        crossOrigin="anonymous"
-      />
-      <link
-        rel="preload"
-        as="font"
-        type="font/woff2"
-        href="/static/katex/KaTeX_Math-Italic.woff2"
-        crossOrigin="anonymous"
-      />
-      {/* font-display:swap override for KaTeX faces to avoid invisible-text FOUC */}
+      {/* Mobile: display equations scroll horizontally at narrow viewports (WCAG 1.4.10) */}
       <style>{`
-        @font-face {
-          font-family: KaTeX_Main;
-          font-style: normal;
-          font-weight: 400;
-          font-display: swap;
-          src: url('/static/katex/KaTeX_Main-Regular.woff2') format('woff2');
-        }
-        @font-face {
-          font-family: KaTeX_Math;
-          font-style: italic;
-          font-weight: 400;
-          font-display: swap;
-          src: url('/static/katex/KaTeX_Math-Italic.woff2') format('woff2');
-        }
-        /* Mobile: display equations scroll horizontally at narrow viewports (WCAG 1.4.10) */
         .katex-display {
           overflow-x: auto;
           overflow-y: hidden;
