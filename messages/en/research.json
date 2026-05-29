@@ -6,14 +6,31 @@
       "heading": "No publications yet",
       "body": "Documents will appear here once content is synced from abrigo-analytics."
     },
+    "empty_track": {
+      "heading": "No publications in this track yet",
+      "body": "Documents in this track will appear here once published."
+    },
     "cta": {
-      "read_document": "Read document"
+      "read_document": "Read document",
+      "read_on_site": "Read on site"
     },
     "type_label": {
       "paper": "Paper",
       "decision-memo": "Decision memo",
       "write-up": "Working draft",
       "talk": "Talk"
+    },
+    "track_filter": {
+      "label": "Filter by research track",
+      "all": "All",
+      "cfmm-microstructure": "CFMM Microstructure",
+      "abrigo-hedge-design": "Abrigo Hedge-Design",
+      "notes": "Notes"
+    },
+    "track_label": {
+      "cfmm-microstructure": "CFMM Microstructure",
+      "abrigo-hedge-design": "Abrigo Hedge-Design",
+      "notes": "Notes"
     }
   }
 }

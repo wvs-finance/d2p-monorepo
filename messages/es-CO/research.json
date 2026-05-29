@@ -6,14 +6,31 @@
       "heading": "Sin publicaciones aún",
       "body": "Los documentos aparecerán aquí una vez se sincronice el contenido desde abrigo-analytics."
     },
+    "empty_track": {
+      "heading": "Sin publicaciones en esta línea todavía",
+      "body": "Los documentos de esta línea aparecerán aquí en cuanto se publiquen."
+    },
     "cta": {
-      "read_document": "Leer documento"
+      "read_document": "Leer documento",
+      "read_on_site": "Leer en el sitio"
     },
     "type_label": {
       "paper": "Artículo",
       "decision-memo": "Memo de decisión",
       "write-up": "Borrador de trabajo",
       "talk": "Charla"
+    },
+    "track_filter": {
+      "label": "Filtrar por línea de investigación",
+      "all": "Todas",
+      "cfmm-microstructure": "Microestructura CFMM",
+      "abrigo-hedge-design": "Diseño de cobertura Abrigo",
+      "notes": "Notas"
+    },
+    "track_label": {
+      "cfmm-microstructure": "Microestructura CFMM",
+      "abrigo-hedge-design": "Cobertura Abrigo",
+      "notes": "Notas"
     }
   }
 }

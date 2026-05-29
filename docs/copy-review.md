@@ -80,3 +80,35 @@ Expected output: empty (or only false positives in test strings that check for t
 - [ ] es-CO translations reviewed by native Colombian Spanish speaker
 - [ ] Anti-marketing-slop grep returns no matches in messages/ or content/
 - [ ] All MDX iteration content reviewed for author's-voice register (economics-journal tone, not SaaS landing page)
+
+---
+
+## Phase 03.1 review (research index chrome — Plan B)
+
+**Scope:** Index-chrome copy additions in `messages/es-CO/research.json` and `messages/en/research.json`
+authored in Plan 03.1-02. Reading-page superset (Plan C1/C2) is a separate entry.
+
+**New keys added (2026-05-29):**
+- `research.empty_track.heading` / `research.empty_track.body` — honest per-track empty state
+- `research.cta.read_on_site` — in-link label for `readable_on_site` cards
+- `research.track_filter.*` — segmented control labels (All / Microestructura CFMM / Diseño cobertura Abrigo / Notas)
+- `research.track_label.*` — track tag labels on PublicationCard
+
+**es-CO authoring notes (Plan B author: Juan Serrano / jmsbpp):**
+- "Microestructura CFMM" — standard financial-microstructure term in Colombian Spanish; no calque.
+- "Diseño de cobertura Abrigo" — "cobertura" (not "hedging") per standard Spanish finance vocabulary.
+- "Notas" — short, professional, mirrors the English "Notes".
+- "Leer en el sitio" — literal but natural; avoids "ver" (too visual) or "acceder" (too corporate).
+- "Sin publicaciones en esta línea todavía" — "línea" used for research track; "todavía" natural in es-CO.
+- Copy register: informational, laconic. No marketing tone. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/research.json` (index chrome additions) | _pending native review_ | | |
+| `messages/en/research.json` (index chrome additions) | _pending native review_ | | |
+
+### Phase 03.1-B Sign-off
+
+- [ ] es-CO index chrome reviewed by native Colombian Spanish speaker
+- [ ] `track_filter` and `track_label` labels reviewed against financial-Spanish conventions
+- [ ] Anti-marketing-slop grep passes on new keys
