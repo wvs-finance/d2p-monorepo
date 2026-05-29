@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-05-29T14:43:52.749Z"
+stopped_at: "Completed 03.1-01-PLAN.md (checkpoint:human-verify Task 4)"
+last_updated: "2026-05-29T16:56:14.168Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 3
-  total_plans: 19
-  completed_plans: 19
-  percent: 100
+  total_plans: 23
+  completed_plans: 20
+  percent: 87
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-13
 **Session type:** Plan execution (02-08 complete — Phase 2 plans 8/8)
-**Stopped at:** Completed 03-03-PLAN.md
+**Stopped at:** Completed 03.1-01-PLAN.md (checkpoint:human-verify Task 4)
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Ready to plan
 
 **Progress:**
-[██████████] 100%
+[█████████░] 87%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -74,6 +74,7 @@ Overall: 1/5 phases complete
 | Phase 03 P01 | 8 | 3 tasks | 18 files |
 | Phase 03 P02 | 7 | 3 tasks | 14 files |
 | Phase 03 P03 | 25 | 2 tasks | 4 files |
+| Phase 03.1 P01 | 17 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,10 @@ Overall: 1/5 phases complete
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| gfm:false in s.mdx() (Phase 03.1-01) | Velite@0.3.1 auto-prepends remarkGfm BEFORE user plugins without this flag; spec §0 remark order [remarkMath, remarkGfm, remarkDirective] honored only with gfm:false | All research MDX must use s.mdx({gfm:false}) |
+| locale via s.path().transform() (Phase 03.1-01) | s.path() strips only the last extension: 'research/spike-katex.es.mdx' → 'research/spike-katex.es'; .endsWith('.es') → 'es' | Locale-split glob research/*.{es,en}.mdx settled |
+| Multi-line $$ required for \tag equations (Phase 03.1-01) | Single-line $$...\tag{1}$$ is ambiguous for remark-math and classified as inline; multi-line form is unambiguously display | Content authoring constraint for all research MDX with display equations |
+| rehype-pretty-code dropped from v1 (Phase 03.1-01) | No fenced code in spike fixtures; Shiki adds LCP weight; deferred to v2 | v2 only |
 | CROSS-01 through CROSS-10 assigned to Phase 1, not a separate phase | They are CI enforcement infrastructure, not feature polish. Retrofitting accessibility, i18n, performance budgets, or design-token rules after the fact is 10x more expensive than wiring them in at scaffold time. | Phase 1 scope expanded; all downstream phases are smaller and safer |
 | Phase 4 and Phase 5 are parallelizable after Phase 3 | Agent surface (AGENT-*) and DeFi surface (DEFI-*) have no inter-dependencies; both require only Phase 3 BFF routes and Phase 1 wagmi config | Enables time-boxing of final 2 phases together to meet hackathon deadline |
 | Demo critical path gates Phase 2 completion | The Hookathon demo requires `/` + `/iterations` + Pair D detail + FX-vol-fail detail — all of which are Phase 2 deliverables. Phase 2 is non-negotiable before the June 2 deadline. | Phase 2 is the milestone gate |
