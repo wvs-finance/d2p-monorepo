@@ -31,6 +31,17 @@
       "cfmm-microstructure": "CFMM Microstructure",
       "abrigo-hedge-design": "Abrigo Hedge-Design",
       "notes": "Notes"
+    },
+    "reading": {
+      "toc_heading": "On this page",
+      "footnotes_label": "Footnotes",
+      "arxiv": "Read the full paper on arXiv",
+      "pdf": "PDF",
+      "doi": "DOI",
+      "bibtex_heading": "BibTeX",
+      "copy_bibtex": "Copy BibTeX",
+      "copied": "Copied!",
+      "abstract_heading": "Abstract"
     }
   }
 }

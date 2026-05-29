@@ -31,6 +31,17 @@
       "cfmm-microstructure": "Microestructura CFMM",
       "abrigo-hedge-design": "Cobertura Abrigo",
       "notes": "Notas"
+    },
+    "reading": {
+      "toc_heading": "En esta página",
+      "footnotes_label": "Notas al pie",
+      "arxiv": "Leer el artículo completo en arXiv",
+      "pdf": "PDF",
+      "doi": "DOI",
+      "bibtex_heading": "BibTeX",
+      "copy_bibtex": "Copiar BibTeX",
+      "copied": "¡Copiado!",
+      "abstract_heading": "Resumen"
     }
   }
 }

@@ -23,8 +23,6 @@ export default async function ResearchPage({
   // Dedupe per-locale: one card per slug for the active locale (fallback to 'es' if 'en' missing)
   const slugMap = new Map<string, (typeof research)[number]>()
   for (const entry of research) {
-    // temporary: filter out spike fixture until Plan C retires it
-    if (entry.slug === 'spike-katex') continue
     const existing = slugMap.get(entry.slug)
     if (!existing) {
       slugMap.set(entry.slug, entry)
