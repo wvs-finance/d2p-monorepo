@@ -113,12 +113,13 @@ Plans:
 
 **Scope note**: full citation rendering (rehype-citation/@citation-js) is **deferred to v2** per spec §0; v1 paper-bridge = arXiv + PDF + static BibTeX.
 
-**Plans**: 3 (per spec §2) — A: math-pipeline + render-path gating spike; B: index + content migration + i18n; C: reading page + paper-bridge + a11y/perf gates.
+**Plans**: 4 (per spec §2; Plan C split into C1+C2 after the 3-reviewer gate) — A: math-pipeline + render-path gating spike; B: index + content migration + i18n; C1: reading page + components + paper-bridge; C2: reading i18n superset + a11y + perf/Lighthouse gates.
 
 Plans:
 - [ ] 03.1-01-PLAN.md — Plan A: math-pipeline + render-path GATING spike — install/pin katex+remark-math+rehype-katex, compiled body via s.mdx() with the §0 plugin chain, resurrect MDXRenderer, route-scoped KaTeX CSS, locale-split glob, spike fixture, e2e .katex/NOT-.katex-error under prod build (LAB-03) [wave 1]
 - [ ] 03.1-02-PLAN.md — Plan B: index + content migration + index i18n — server <Link> track filter (no nuqs), atomic schema+3-file per-locale migration with required track, extended PublicationCard, honest empty-per-track, es-CO-first index i18n (LAB-03) [wave 2]
-- [ ] 03.1-03-PLAN.md — Plan C: reading page + paper-bridge + gates — /research/[slug] Mode A/B/notFound, 64ch+TOC+sidenotes+theorem+figures, PaperBridge (sole client island, arXiv/PDF/DOI/BibTeX), reading i18n superset, MathML a11y entry, Lighthouse LCP gate (LAB-03) [wave 3]
+- [ ] 03.1-03-PLAN.md — Plan C1: reading page + components + paper-bridge — /research/[slug] Mode A/B/notFound (await params), 64ch+TOC(from s.toc())+footnotes+theorem+figures, MDX component map via the components prop, PaperBridge (sole client island, arXiv/PDF/DOI/BibTeX), Mode-B fixture, ScholarlyArticle JSON-LD, reading e2e, spike retired (LAB-03) [wave 3]
+- [ ] 03.1-04-PLAN.md — Plan C2: reading i18n superset + a11y + perf gates — es-CO-first reading.* superset + recursive parity, axe + manual MathML entry/waiver, font-display:swap + KaTeX preload (no Python subsetting), Lighthouse LCP gate in the existing lighthouserc.cjs run via Evidence Collector (LAB-03) [wave 4]
 
 ### Phase 4: Agent Surface (MCP)
 
