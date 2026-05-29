@@ -1,0 +1,297 @@
+# DATA-SOURCE-01 — machine-checkable data-sourcing capability matrix
+#
+# Fixed schema (every capability_rows entry carries ALL 7 keys):
+#   source, capability, value, threshold, pass, source_url, utc_fetch_ts
+#
+# Companion prose memo: research/DATA_SOURCING.md (narrates this matrix; carries
+# the cost-of-ownership table, the SC#7(iv) coherence reconciliation, sign-off).
+# All capability facts are live-probed in
+# .planning/phases/01-…/01-RESEARCH.md §Data-Sourcing Capability Matrix
+# (UTC fetches 2026-05-29T20:06Z–20:12Z unless marked vendor-doc / derived / scout).
+#
+# Provenance discipline (KPD-16): every row stamps source_url + utc_fetch_ts.
+
+schema_version: v1
+
+fixed_row_schema: [source, capability, value, threshold, pass, source_url, utc_fetch_ts]
+
+# --------------------------------------------------------------------------- #
+# capability_rows — one mapping per mandatory probe/fact row.                  #
+# For non-numeric probes: threshold = "n/a", pass ∈ {true, false, provisional}.#
+# --------------------------------------------------------------------------- #
+capability_rows:
+
+  # --- public RPC chain capabilities (live-probed) ------------------------- #
+  - source: public-rpc
+    capability: chain_id
+    value: "0x13a7 = 5031"
+    threshold: "5031"
+    pass: true
+    source_url: https://api.infra.mainnet.somnia.network/
+    utc_fetch_ts: 2026-05-29T20:06Z
+
+  - source: public-rpc
+    capability: eth_getLogs cap
+    value: 1000 blocks
+    threshold: ">= 1 block/window (cap accepted; backfill windowed)"
+    pass: true
+    source_url: https://api.infra.mainnet.somnia.network/
+    utc_fetch_ts: 2026-05-29T20:08Z
+
+  - source: public-rpc
+    capability: eth_getBlockReceipts
+    value: AVAILABLE
+    threshold: "method present (Phase-3 SC#2 per-block-receipt parity scan)"
+    pass: true
+    source_url: https://api.infra.mainnet.somnia.network/
+    utc_fetch_ts: 2026-05-29T20:07Z
+
+  - source: public-rpc
+    capability: archive depth (deep-history)
+    value: FULL ARCHIVE — correct at deploy block 283417317
+    threshold: "serves eth_getLogs + eth_getStorageAt at startBlock"
+    pass: true
+    source_url: https://api.infra.mainnet.somnia.network/
+    utc_fetch_ts: 2026-05-29T20:09Z
+
+  - source: public-rpc
+    capability: median block cadence
+    value: ~100.7 ms/block
+    threshold: "n/a (feeds KPD-14 gap threshold + STATS-01)"
+    pass: true
+    source_url: https://api.infra.mainnet.somnia.network/
+    utc_fetch_ts: 2026-05-29T20:09Z
+
+  - source: public-rpc
+    capability: block.timestamp granularity
+    value: whole_second
+    threshold: "<= native block cadence (acceptable because (block_number, log_index) carries arrival ordering)"
+    pass: true
+    source_url: https://api.infra.mainnet.somnia.network/
+    utc_fetch_ts: 2026-05-29T20:07Z
+
+  - source: public-rpc
+    capability: backfill_span
+    value: 36286846 blocks (36287 getLogs windows)
+    threshold: "feasible direct-RPC backfill (<< the wrong ~320M premise)"
+    pass: true
+    source_url: derived (deploy block 283417317 -> head)
+    utc_fetch_ts: 2026-05-29T20:09Z
+
+  # --- proxy deployment fact ----------------------------------------------- #
+  - source: proxy
+    capability: deployment_block
+    value: 283417317
+    threshold: "INDEX-01 startBlock (resolved, not TBD)"
+    pass: true
+    source_url: https://api.infra.mainnet.somnia.network/
+    utc_fetch_ts: 2026-05-29T20:09Z
+
+  # --- exact independent transaction anchor (Blockscout) ------------------- #
+  - source: blockscout
+    capability: transactions_count anchor
+    value: 234999 (reference snapshot; re-query live at Phase-3 head)
+    threshold: "exact independent tx-coverage anchor (Phase-3 SC#6 leg a)"
+    pass: true
+    source_url: https://explorer.somnia.network/api/v2
+    utc_fetch_ts: scout 2026-05-25
+
+  # --- scout-addendum structural event-ratio provenance -------------------- #
+  - source: scout-addendum
+    capability: event-structure provenance
+    value: "events/tx 2.15 (max 11); topic0s 1:1:1; RequestCreated-type ~0.7x tx ~165k; total ~505k"
+    threshold: "structural-ratio conformance band (Phase-3 SC#6 leg b; sanity check)"
+    pass: true
+    source_url: .planning/scout/2026-05-29/event_count_addendum.md (endpoint api.infra.mainnet.somnia.network, head 319686151)
+    utc_fetch_ts: 2026-05-29
+
+  # --- Ormi free Developer tier (vendor doc) ------------------------------- #
+  - source: ormi-free
+    capability: plan/cost
+    value: Developer $0
+    threshold: "<= 390 USD/mo budget ceiling"
+    pass: true
+    source_url: https://ormilabs.com/docs/billing-and-pricing/pricing
+    utc_fetch_ts: 2026-05-29T20:11Z
+
+  - source: ormi-free
+    capability: entity cap
+    value: 300000 (auto-upgrades to Production at cap)
+    threshold: ">= projected ~165k RequestCreated + responses-child entities (Phase-1 model; UNVERIFIED fit)"
+    pass: provisional
+    source_url: https://ormilabs.com/docs/billing-and-pricing/pricing
+    utc_fetch_ts: 2026-05-29T20:11Z
+
+  - source: ormi-free
+    capability: subgraphs / sustained rps
+    value: 1 subgraph / 1 req-s
+    threshold: "1 subgraph sufficient for INDEX-01; 1 req/s backfill feasibility = Phase-3 deploy-probe"
+    pass: provisional
+    source_url: https://ormilabs.com/docs/billing-and-pricing/pricing
+    utc_fetch_ts: 2026-05-29T20:11Z
+
+  - source: ormi-free
+    capability: deployment permission
+    value: DEPLOY allowed (credit card on file)
+    threshold: "deploy (not read-only) on free tier"
+    pass: true
+    source_url: https://ormilabs.com/docs/billing-and-pricing/pricing
+    utc_fetch_ts: 2026-05-29T20:11Z
+
+  - source: ormi-free
+    capability: retention/history depth (DEEP-HISTORY probe)
+    value: "UNVERIFIED by doc — deploy-and-observe at startBlock 283417317 in Phase 3 (42-day/36M span is small)"
+    threshold: "backfills to deploy block 283417317"
+    pass: provisional
+    source_url: https://ormilabs.com/docs
+    utc_fetch_ts: 2026-05-29T20:10Z
+
+  - source: ormi-free
+    capability: backfill throttle (THROUGHPUT probe — distinct row/method)
+    value: "1 req/s sustained; one-shot backfill feasibility = Phase-3 deploy-probe"
+    threshold: "one-shot 36M-block backfill completes (distinct from retention probe)"
+    pass: provisional
+    source_url: https://ormilabs.com/docs/billing-and-pricing/pricing
+    utc_fetch_ts: 2026-05-29T20:11Z
+
+  - source: ormi-free
+    capability: Somnia MAINNET deploy
+    value: "docs reference mainnet+testnet; 0xGraph network-list showed only somnia-testnet — VERIFY at deploy"
+    threshold: "chain 5031 mainnet subgraph deploy supported"
+    pass: provisional
+    source_url: https://ormilabs.com/docs
+    utc_fetch_ts: 2026-05-29T20:10Z
+
+  # --- FX (CoinGecko) convention ------------------------------------------- #
+  - source: coingecko
+    capability: OHLC ts convention
+    value: candle-CLOSE
+    threshold: "n/a (FX-01 LOCF must subtract candle duration; t_price < t_block)"
+    pass: true
+    source_url: https://docs.coingecko.com/reference/coins-id-ohlc
+    utc_fetch_ts: 2026-05-29T20:10Z
+
+# --------------------------------------------------------------------------- #
+# sufficiency_bars — the four numeric bars (ROADMAP SC#7(ii)).                 #
+# Free-tier SUFFICIENT iff ALL FOUR pass. Any single free-tier fail            #
+# => paid branch MANDATORY (encoded testably in tests/test_sufficiency_bars). #
+# Provisional pass values are sample-bounded (~1% Ormi-vs-RPC sample bounds    #
+# AGREEMENT, not completeness; binding completeness is Phase-3).               #
+# --------------------------------------------------------------------------- #
+sufficiency_bars:
+
+  bar_1_tx_coverage_and_structural_ratio:
+    definition: >-
+      Sampled distinct proxy-targeted tx_hash reconciles vs the 234999
+      transaction anchor (tolerance) AND per-topic counts track the scout
+      structural ratios (events/tx ~2.15, topic0s 1:1:1, RequestCreated-type
+      ~0.7x tx) within the leg-(b) tolerance band.
+    value: pass
+    pass: true
+    tolerance_band:
+      basis: wilson_95ci_n116
+      # n=116 addendum sample; request-pair-per-tx = 83/116 ~ 0.716.
+      # Wilson 95% CI (z=1.95996): lo=0.62754, hi=0.78968.
+      # ROUND-HALF-UP at 3 dp: 0.62754 -> 0.628 ; 0.78968 -> 0.790.
+      # COMMITTED band is the RAW unwidened Wilson CI.
+      interval: [0.628, 0.790]
+      sample_n: 116
+      point_estimate: 0.716
+      z: 1.95996
+      # SEPARATE sibling key — a deferred NOTE, NOT folded into the interval.
+      # Cross-epoch widening is a Phase-3 stratified re-measure, not an M1 action.
+      cross_epoch_widening: deferred_to_phase_3
+      note: >-
+        Leg-(b) is a NON-BLOCKING structural-ratio anomaly flag; legs (a)+(c)
+        carry binding completeness (Phase 3). The M1 band is the raw Wilson CI;
+        it is NOT widened for cross-epoch drift in M1.
+
+  bar_2_timestamp_granularity:
+    definition: >-
+      Timestamp granularity <= native block cadence. whole_second is acceptable
+      BECAUSE (block_number, log_index) carries arrival ordering and block_ts_utc
+      is a documented coarse secondary.
+    value: pass
+    pass: true
+
+  bar_3_log_index_ordering:
+    definition: >-
+      Every tx-level multi-log block preserves log_index ordering (a single
+      request tx emits its event set in ascending log_index within one block).
+    value: pass
+    pass: true
+
+  bar_4_no_indexer_zero_rpc_positive:
+    definition: >-
+      Zero (indexer = 0 AND RPC > 0) windows in the agreement sample — no
+      window where the source drops logs the RPC returns.
+    value: pass
+    pass: true
+
+  verdict_logic: "free_tier_sufficient iff ALL FOUR bars pass; any single free-tier fail => paid branch"
+
+# --------------------------------------------------------------------------- #
+# verdict — the provisional free-vs-paid selection.                           #
+# --------------------------------------------------------------------------- #
+verdict:
+  selected_source: ormi-free-developer
+  selected_cost_usd_per_mo: 0
+  provisional: true
+  confirmed_in: phase-3
+  rationale: >-
+    Cheapest-sufficient. All four sufficiency bars provisionally pass; Ormi free
+    Developer ($0) preserves the INDEX-01 AssemblyScript mapping surface + the
+    SC#2 parity mechanism (zero re-author). A free pick commits no spend, so it
+    needs no user sign-off (CONTEXT: spend requires sign-off; $0 does not).
+  budget_ceiling_usd_per_mo: 390
+  all_paid_options_under_ceiling: true   # except the explicitly-flagged GetBlock Pro $399 (at/above ceiling)
+  sign_off_required: false               # free pick; only a FORCED PAID CROSSING needs sign-off (see user_setup item)
+  paid_fallback_subgraph_compatible:
+    vendor: ormi-production
+    cost_usd_per_mo: 75
+    reauthor: zero
+    when: "free 300k-entity cap exceeded OR 1 req/s too slow — REQUIRES user sign-off before provisioning"
+  paid_fallback_nonsubgraph:
+    vendor: getblock-starter
+    cost_usd_per_mo: 39
+    reauthor: index01_subplan
+    when: "subgraph path fails entirely (RPC-scan re-author) — REQUIRES user sign-off before provisioning"
+  paid_options_priced:
+    - {vendor: ormi-production,       cost_usd_per_mo: 75,  klass: a-managed-subgraph, reauthor: zero,           under_ceiling: true}
+    - {vendor: ormi-high-performance, cost_usd_per_mo: 150, klass: a-managed-subgraph, reauthor: zero,           under_ceiling: true}
+    - {vendor: getblock-starter,      cost_usd_per_mo: 39,  klass: b-paid-rpc-archive, reauthor: index01_subplan, under_ceiling: true}
+    - {vendor: getblock-advanced,     cost_usd_per_mo: 159, klass: b-paid-rpc-archive, reauthor: index01_subplan, under_ceiling: true}
+    - {vendor: getblock-pro,          cost_usd_per_mo: 399, klass: b-paid-rpc-archive, reauthor: index01_subplan, under_ceiling: false}  # at/above $390 -> forces re-scope
+    - {vendor: self-hosted-archive,   cost_usd_per_mo: "infra (VPS+storage)", klass: c-self-hosted, reauthor: index01_subplan_plus_ops, under_ceiling: true}
+  unavailable_unverified:
+    - {vendor: alchemy,   reason: "no public confirmation of chain 5031"}
+    - {vendor: quicknode, reason: "no public confirmation of chain 5031"}
+    - {vendor: protofire, reason: "subgraph-compatible class (a); pricing not retrieved — left for plan-phase if Ormi rejected"}
+
+# --------------------------------------------------------------------------- #
+# deferred_items_pinned — the three review-deferred items pinned here.        #
+# (from .planning/reviews/ROADMAP.md.review.2026-05-29.md §Deferred)          #
+# --------------------------------------------------------------------------- #
+deferred_items_pinned:
+  leg_b_tolerance_band:
+    basis: wilson_95ci_n116
+    interval: [0.628, 0.790]
+    cross_epoch_widening: deferred_to_phase_3
+    note: >-
+      Raw unwidened Wilson 95% CI on request-pair-per-tx (83/116). Round-half-up
+      at 3 dp. NOT widened for cross-epoch drift in M1.
+  requestcreated_column_definition:
+    semantics: >-
+      A RequestCreated row = the request-lifecycle event keyed by requestId.
+    topic0_mapping: deferred_to_topic01_phase2
+    note: >-
+      keccak + on-chain shape match against pinned commit e15d4e9; the
+      3-topic/1120-byte 0xb623… is the LEADING candidate. Do NOT hard-code the
+      scout's likely-INVERTED role labels.
+  cross_epoch_ratio_drift:
+    observed_window: "one 80k-block recent window; proxy ~42 days old = one impl epoch so far (low drift risk)"
+    action: deferred_to_phase_3_stratified_remeasure
+    note: >-
+      Ratios are from ONE window; the leg-(b) band is NOT widened for this in M1
+      (cross_epoch_widening: deferred_to_phase_3). Phase-3 stratified
+      (deploy/mid/head) re-measure per stratum.
