@@ -1,0 +1,27 @@
+[project]
+name = "abrigo-somnia"
+version = "0.1.0"
+description = "Substrate for the K_AI (agent-payment) leg of the Abrigo cost model: Somnia L1 IAgentRequester event sourcing, schema artifacts, and the empirical SOMI cost panel (M1)."
+readme = "README.md"
+# Floor this repo needs for its analysis/tooling stack. NOTE: NOT parity with
+# abrigo-analytics, which pins >=3.13 — this repo's floor is 3.12.
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "JMSBPP" }]
+dependencies = []
+
+[dependency-groups]
+# Dev/test toolchain. Match abrigo-analytics on polars (>=1.20) for the
+# parquet/Hive panel work; pytest is the M1 validation harness; jsonschema
+# validates the SHARED-SCHEMA-01 JSON-Schema (draft 2020-12) artifacts; pyyaml
+# loads the machine-checkable data_sourcing_matrix.yaml + batch_manifest_v1.yaml.
+dev = [
+    "pytest>=8",
+    "jsonschema>=4.20",
+    "pyyaml>=6",
+    "polars>=1.20",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
