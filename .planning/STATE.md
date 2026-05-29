@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: "Completed 03.1-01-PLAN.md (checkpoint:human-verify Task 4)"
-last_updated: "2026-05-29T16:56:14.168Z"
+stopped_at: Completed 03.1-03 tasks 1-2; Task 3 Evidence Collector checkpoint pending (orchestrator gate)
+last_updated: "2026-05-29T18:16:43.163Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 23
-  completed_plans: 20
-  percent: 87
+  completed_plans: 22
+  percent: 96
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-13
 **Session type:** Plan execution (02-08 complete — Phase 2 plans 8/8)
-**Stopped at:** Completed 03.1-01-PLAN.md (checkpoint:human-verify Task 4)
+**Stopped at:** Completed 03.1-03 tasks 1-2; Task 3 Evidence Collector checkpoint pending (orchestrator gate)
 
 ---
 
@@ -33,12 +33,12 @@ progress:
 
 ## Current Position
 
-**Active phase:** 03 — Data Layer and On-Chain Dashboard
-**Active plan:** 03-02 complete — 03-03 (status page + /api/status route) is next
-**Status:** Ready to plan
+**Active phase:** 03.1 — Research Reading Surface
+**Active plan:** 03.1-03 complete (tasks 1-2) — Task 3 Evidence Collector live-verify pending (orchestrator gate); 03.1-04 (Plan C2: i18n superset + a11y + Lighthouse) is next
+**Status:** Awaiting live verification gate
 
 **Progress:**
-[█████████░] 87%
+[██████████] 96%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -75,6 +75,7 @@ Overall: 1/5 phases complete
 | Phase 03 P02 | 7 | 3 tasks | 14 files |
 | Phase 03 P03 | 25 | 2 tasks | 4 files |
 | Phase 03.1 P01 | 17 | 3 tasks | 11 files |
+| Phase 03.1 P03 | 11 | 2 tasks | 21 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Overall: 1/5 phases complete
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| TheoremBlock = full 4-side ochre hairline border + bold ochre text label, NOT one-sided border-left (Phase 03.1-03) | impeccable@2.1.8 flags one-sided `border-left: Npx solid <color>` as the side-tab AI-tell; a uniform 4-side border is not a side-tab. Reconciles spec's "ochre rule + label", CROSS-09 (color+text), and the impeccable gate (exit 0 verified) | All anti-fishing callouts use full borders + text labels; never one-sided colored borders |
+| Reading page locale from NEXT_LOCALE cookie, not URL segment (Phase 03.1-03) | The /research/[slug] route has no [locale] segment; getLocale() resolves the cookie at render; generateStaticParams enumerates distinct slugs only; single-locale body per page | All locale-aware reading routes resolve locale from cookie, not path |
 | gfm:false in s.mdx() (Phase 03.1-01) | Velite@0.3.1 auto-prepends remarkGfm BEFORE user plugins without this flag; spec §0 remark order [remarkMath, remarkGfm, remarkDirective] honored only with gfm:false | All research MDX must use s.mdx({gfm:false}) |
 | locale via s.path().transform() (Phase 03.1-01) | s.path() strips only the last extension: 'research/spike-katex.es.mdx' → 'research/spike-katex.es'; .endsWith('.es') → 'es' | Locale-split glob research/*.{es,en}.mdx settled |
 | Multi-line $$ required for \tag equations (Phase 03.1-01) | Single-line $$...\tag{1}$$ is ambiguous for remark-math and classified as inline; multi-line form is unambiguously display | Content authoring constraint for all research MDX with display equations |
