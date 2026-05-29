@@ -102,7 +102,7 @@ Populated by the roadmapper on 2026-05-25 from `.planning/ROADMAP.md`; updated 2
 
 | Requirement | Phase | Status |
 |---|---|---|
-| DATA-SOURCE-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | In Progress (01-01 KPD-16/startBlock done; matrix + verdict in 01-03/01-04) |
+| DATA-SOURCE-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete (01-01 KPD-16/startBlock; 01-03 matrix + verdict + sufficiency-bar tests) |
 | EVENT-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
 | SHARED-SCHEMA-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Pending |
 | TOPIC-01 | Phase 2: Topic & Implementation Provenance | Pending |
