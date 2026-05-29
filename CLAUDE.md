@@ -7,6 +7,42 @@ Sibling repos:
 - `../abrigo-analytics` — joint empirical validation + structural econometrics
 - `../abrigo-marketing` — narrative & positioning
 
+## Planning-review protocol (non-negotiable)
+
+Every planning document produced in this repo — `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, `PLAN.md`, phase plans, `RESEARCH.md`, `UI-SPEC.md`, or any artifact that will cause downstream execution — must pass a **three-step automated review pipeline before commit and before any execute step**. The pipeline runs in addition to the built-in GSD approval prompts. Do not skip it in `--auto` / YOLO mode. Do not bypass it by manually picking the second reviewer — the selection is itself an agent-driven step.
+
+### Step 1 — Agent selection (automated)
+
+Dispatch the `Studio Producer` agent (canonical selector — chosen for "high-level creative and technical project orchestration, resource allocation"). Fallback selector if Studio Producer underperforms on prior plans: `Agents Orchestrator`. The selector receives the draft path, prior planning artifacts, and the full agent roster, and returns strict JSON:
+
+```json
+{
+  "primary": "<exact agent name from roster>",
+  "fallback": "<exact agent name from roster, distinct from primary>",
+  "rationale": "<one sentence on the technical-surface match>",
+  "primary_risks_to_check": ["<risk 1>", "<risk 2>", "..."]
+}
+```
+
+The orchestrator validates that `primary` and `fallback` are real names. Invalid → re-dispatch once with error context; still invalid → surface to user.
+
+### Step 2 — Parallel review (automated)
+
+Dispatch in a single message, two `Agent` tool uses, in parallel:
+
+- **Reviewer A — `Reality Checker`** (fixed). Prompt: "Surface fantasy, unrealistic assumptions, half-flows, broken handoffs, magical thinking. Default verdict: NEEDS WORK. Require evidence before any PASS."
+- **Reviewer B — `<selector.primary>`** (dynamic). Prompt: "Review for technical-surface correctness in your domain. Surface incorrect premises, missed dependencies, infeasible steps. Treat `selector.primary_risks_to_check` as your priority list. Default verdict: NEEDS WORK."
+
+Each gets the draft path, referenced prior artifacts, and returns `PASS` or `NEEDS WORK` plus a bulleted findings list.
+
+### Step 3 — Verdict gate
+
+- Both `PASS` → proceed to the workflow's commit step.
+- Either `NEEDS WORK` → surface findings, revise plan, re-run Steps 1–3 from scratch (the selector re-evaluates; a substantive revision can change the right reviewer).
+- `selector.primary` errors or inconclusive → re-dispatch with `selector.fallback`. If still no convergence, surface to user.
+
+The selector's JSON output is logged alongside the reviews so the audit trail explains why each reviewer was chosen. The point of the gate is to land plans in reality before spending execution tokens — a plan that looks coherent but rests on broken assumptions is far more expensive to discover during execution than during review.
+
 ## Git workflow — fork/upstream model
 
 Two remotes, identical pattern to `abrigo-x402` / `abrigo-analytics`:
@@ -39,7 +75,7 @@ Rules:
   - `json-fetch` — 0.03
   - `llm-inference` — 0.07
   - `llm-parse-website` — 0.10
-- **IAgentRequester** (`emrestay/somnia-agents-skills`, commit `e15d4e9`, fetched 2026-05-23):
+- **IAgentRequester** (`emrestay/somnia-agents-skills`, blob SHA `e15d4e9` (git blob SHA of references/interfaces/IAgentRequester.sol — not a commit SHA; reproduced by git hash-object), fetched 2026-05-23):
   - mainnet impl `0x5E5205CF39E766118C01636bED000A54D93163E6`
   - `minPerAgentDeposit = 0.01 SOMI`, `subSize_default = 3`
   - `msg.value ≥ minPerAgentDeposit·subSize + p_i·subSize`
