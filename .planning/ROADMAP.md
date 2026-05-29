@@ -90,7 +90,7 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 **Plans** (created 2026-05-29 — 5 plans, 3 waves; KPD-16 ordered first):
 - [ ] `01-01-PLAN.md` — Wave 0 test infra + KPD-16 scout provenance archive (sha256-pinned; deploy block 283417317 resolved) **[Wave 1 — ORDERED FIRST]**
 - [ ] `01-02-PLAN.md` — Pre-flight verdicts: KPD-17 beacon/diamond (happy path), KPD-09-docs finality (MEDIUM, safe_block_depth=1 provisional), KPD-19 CoinGecko candle-CLOSE + FX fixture **[Wave 2]**
-- [ ] `01-03-PLAN.md` — DATA-SOURCE-01: `research/data_sourcing_matrix.yaml` + `research/DATA_SOURCING.md` (provisional Ormi-free verdict, 4 sufficiency bars, coherence reconciliation, sign-off) **[Wave 2]**
+- [x] `01-03-PLAN.md` — DATA-SOURCE-01: `research/data_sourcing_matrix.yaml` + `research/DATA_SOURCING.md` (provisional Ormi-free verdict, 4 sufficiency bars, coherence reconciliation, sign-off) **[Wave 2]** ✅ DATA-SOURCE-01 discharged → INDEX-01 unblocked
 - [x] `01-04-PLAN.md` — EVENT-01 `schemas/event_schema_v1.md` (arrival-timing first-class, uint256-safe, responses child table, KPD-18 reservations) + KPD-11a batch manifest schema **[Wave 2]** ✅ EVENT-01 + KPD-11a discharged
 - [ ] `01-05-PLAN.md` — SHARED-SCHEMA-01 intersection `.md`+`.json` (v1-K_AI-anchored) + K_AI extensions + cross-artifact consistency **[Wave 3]**
 
@@ -212,7 +212,7 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 1/5 | In Progress (01-01 done: Wave 0 + KPD-16; 5 plans, 3 waves) | - |
+| 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 4/5 | In Progress (01-01..01-04 done; 01-03 DATA-SOURCE-01 verdict landed → INDEX-01 unblocked; 01-05 SHARED-SCHEMA-01 remains) | - |
 | 2. Topic & Implementation Provenance | 0/TBD | Not started | - |
 | 3. Subgraph Indexing | 0/TBD | Not started | - |
 | 4. Parallel Cost Inputs | 0/TBD | Not started | - |
