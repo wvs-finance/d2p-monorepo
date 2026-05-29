@@ -212,7 +212,7 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 0/5 | Planned (5 plans, 3 waves) | - |
+| 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 1/5 | In Progress (01-01 done: Wave 0 + KPD-16; 5 plans, 3 waves) | - |
 | 2. Topic & Implementation Provenance | 0/TBD | Not started | - |
 | 3. Subgraph Indexing | 0/TBD | Not started | - |
 | 4. Parallel Cost Inputs | 0/TBD | Not started | - |

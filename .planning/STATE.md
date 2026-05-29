@@ -1,3 +1,17 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: "Roadmap revised four times (2026-05-25 HIGH/MEDIUM/LOW fixes; 2026-05-29 #1 DATA-SOURCE-01 + arrival-periodicity; 2026-05-29 #2 DATA-SOURCE-01 rigor hardening; 2026-05-29 #3 scout-addendum fold-in resolving the two coupled HIGH findings + remaining MEDIUMs/LOW); awaiting Studio Producer re-dispatch + Reality Checker + dynamic-primary re-review per CLAUDE.md three-step pipeline."
+last_updated: "2026-05-29T21:21:03.103Z"
+progress:
+  total_phases: 6
+  completed_phases: 0
+  total_plans: 5
+  completed_plans: 1
+  percent: 20
+---
+
 # Project State: abrigo-somnia M1
 
 **Last updated:** 2026-05-29 #3 (scout-addendum fold-in — resolves the two coupled HIGH findings: `234,999` = **transaction** anchor not event bound; event completeness via the scout's structural ratios [total ≈ 2.15 × txs, topic0s 1:1:1, `RequestCreated` ≈ 0.7 × txs ≈ ~165k]; block-presence sufficiency bar replaced; STATS-01 envelope corrected to ~165k; deep-history retention probe; tx-granularity ordering surface; subgraph-compatible paid swap; awaiting planning-review re-run)
@@ -12,11 +26,12 @@
 ## Current Position
 
 - **Milestone:** M1
-- **Phase:** Pre-roadmap-review (no phase active)
-- **Plan:** None
-- **Status:** Roadmap revised four times (2026-05-25 HIGH/MEDIUM/LOW fixes; 2026-05-29 #1 DATA-SOURCE-01 + arrival-periodicity; 2026-05-29 #2 DATA-SOURCE-01 rigor hardening; 2026-05-29 #3 scout-addendum fold-in resolving the two coupled HIGH findings + remaining MEDIUMs/LOW); awaiting Studio Producer re-dispatch + Reality Checker + dynamic-primary re-review per CLAUDE.md three-step pipeline.
+- **Phase:** 01 — Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations (active)
+- **Plan:** 01-02 (next; 01-01 complete)
+- **Status:** Phase 1 execution underway. Plan 01-01 (Wave 0 test infra + KPD-16 scout archive) COMPLETE — greenfield uv/pytest harness with six N2 shared fixtures, reusable Somnia probe tooling, sha256-pinned scout archive; KPD-16 discharged; INDEX-01 startBlock resolved to 283417317. 4 of 5 Phase-1 plans remain (01-02..01-05).
 
-**Progress:** `[░░░░░░] 0/6 phases complete`
+**Plan progress (Phase 1):** [██░░░░░░░░] 20% — 1/5 plans complete
+**Phase progress:** [░░░░░░] 0/6 phases complete
 
 ## Roadmap Summary
 
@@ -43,6 +58,9 @@
 ## Accumulated Context
 
 ### Decisions (locked at revision time)
+- **(2026-05-29, 01-01 execution) Wave 0 test infra + N2 fixture contract locked.** uv-managed Python `>=3.12` (this repo's floor — deliberately NOT abrigo-analytics' `>=3.13`, recorded in pyproject comments to block a future false-parity edit) + pytest harness (dev group pytest/jsonschema/pyyaml/polars, no watch-mode). The N2 contract for ALL of Plans 01-01..01-05: shared helpers are `@pytest.fixture`s — `scout_dir`/`schemas_dir`/`research_dir` return `Path`, `load_yaml`/`load_json`/`read_text` return callables — consumed as test PARAMETERS, not module imports.
+- **(2026-05-29, 01-01 execution) KPD-16 discharged.** Scout archive consolidated under `.planning/scout/2026-05-29/` (canonical; the never-committed upstream `2026-05-25/` path reconciled in `.planning/scout/README.md`), every fact provenance-stamped (`source_url` + `utc_fetch_ts`), sha256-pinned via `PROVENANCE.sha256`. `test_scout_archive.py::test_provenance_manifest_valid` is a `.md`-scoped SET-EQUALITY check, so Plan 02's three appended files (`beacon_diamond_probe.md`, `somnia_finality_semantics.md`, `coingecko_convention.md`) MUST be re-pinned or the test fails by design. Reusable probe tooling (`probes/somnia_rpc.py`, `probes/blockscout.py`) is stdlib-only and network-touching only in `__main__` (never in CI).
+- **(2026-05-29, 01-01 execution) INDEX-01 startBlock RESOLVED = 283417317.** Recorded in `deployment_block.md` from the proxy creation tx; backfill span corrected to ~36.3M blocks (~36,287 getLogs windows). Supersedes the ROADMAP/PROJECT "~320M blocks / ~270 days" figure (conflated chain-age-since-TGE with the ~42-day-old proxy). On-chain event roles recorded as SHAPES only — scout role labels likely INVERTED (the 3-topic/1120-byte `0xb623…` matches `RequestCreated`); TOPIC-01 (Phase 2) keccak-resolves definitively against pinned commit `e15d4e9`.
 - **(2026-05-29) DATA-SOURCE-01 folded into Phase 1 as headline deliverable, GATING Phase 3 INDEX-01.** Chosen over a new Phase 0 because Phase 1 already hosts the chain-capability probes and DATA-SOURCE-01 absorbs the RPC-capability probe; a new phase would fragment the "probe reality before building" coherence and force renumbering of all six phases. Deliverable `research/DATA_SOURCING.md` (verified capability matrix + free-vs-paid verdict, each claim with `source_url + utc_fetch_ts`, coherence-checked against x402 SUMMARY.md + somnia_cost_extraction.md).
 - **(2026-05-29) Former KPD-20 RPC-capability probe absorbed into DATA-SOURCE-01's capability matrix** — `eth_getBlockReceipts` availability is now a provenance-stamped matrix row, not a free-standing KPD. Phase 3 SC#2 parity mechanism is conditional on that row. No orphan KPD remains.
 - **(2026-05-29) Arrival-periodicity primacy reflected in two phases:** Phase 1 EVENT-01 arrival-timing fields (`block_ts_utc`, `block_number`, `log_index` ordering, gap-detection metadata) made first-class non-nullable load-bearing columns (new Phase 1 SC#8); Phase 6 STATS-01 gains a descriptive arrival-periodicity precursor (inter-arrival series + intensity-over-time + `Var(N)/E[N]` overdispersion + periodicity, new Phase 6 SC#6). Descriptive ONLY — no NHPP/Hawkes fit, no convex-demand verdict (both M2). M2 ingest acceptance test (KPD-13 / Phase 6 SC#2) now loads the arrival series.
@@ -86,7 +104,10 @@ ROADMAP.md "Open Questions Flagged for Plan-Phase" — 2 items: (1) deployment-b
 
 ## Session Continuity
 
-**Last action:** Roadmap re-revision 2026-05-29 #3 — scout-addendum fold-in resolving the two coupled HIGH findings (count-anchor unit mismatch + block-vs-event sparsity) + remaining MEDIUMs/LOW. `234,999` re-labelled as the transaction-coverage anchor; Phase 3 SC#6 rebuilt as a three-leg gate (tx-anchor + scout structural event-ratio conformance + contiguity proof); the "≥99.9% blocks present" sufficiency bar replaced by distinct-tx-coverage + structural-ratio conformance (Phase 1 SC#7(ii) + Phase 3 SC#6); STATS-01 envelope corrected to ~165k `RequestCreated` events; contiguity-independence stated (SC#2 + SC#6); deep-history retention probe split from the throttle probe (SC#7(i)); tx-granularity ordering surface (SC#7); subgraph-compatible paid swap (SC#7(iii)); scout addendum logged as a KPD-16 provenance row. ROADMAP.md + PROJECT.md + REQUIREMENTS.md + this STATE.md edited surgically in place; coverage still 11/11; all #2 fixes + six prior HIGH-fixes untouched.
+**Last action (2026-05-29):** Executed Plan 01-01 (Wave 0 + KPD-16). Three atomic commits — `6818fd8` (uv/pytest harness + six N2 fixtures), `66e3dc9` (probe scripts + scout RPC/event/deployment archive), `4991329` (sha256 manifest + 6-test scout-archive suite). `uv run pytest tests/ -q` green (6 tests); `sha256sum -c PROVENANCE.sha256` OK. SUMMARY at `.planning/phases/01-…/01-01-SUMMARY.md`.
+**Next action:** Execute Plan 01-02 (Wave 2 — beacon/diamond + finality + CoinGecko probe archive; must append its three new `.md` files to `PROVENANCE.sha256` or the set-equality test fails by design) or the next ready Phase-1 plan. Push to `origin` deferred to the user.
+
+**Prior action:** Roadmap re-revision 2026-05-29 #3 — scout-addendum fold-in resolving the two coupled HIGH findings (count-anchor unit mismatch + block-vs-event sparsity) + remaining MEDIUMs/LOW. `234,999` re-labelled as the transaction-coverage anchor; Phase 3 SC#6 rebuilt as a three-leg gate (tx-anchor + scout structural event-ratio conformance + contiguity proof); the "≥99.9% blocks present" sufficiency bar replaced by distinct-tx-coverage + structural-ratio conformance (Phase 1 SC#7(ii) + Phase 3 SC#6); STATS-01 envelope corrected to ~165k `RequestCreated` events; contiguity-independence stated (SC#2 + SC#6); deep-history retention probe split from the throttle probe (SC#7(i)); tx-granularity ordering surface (SC#7); subgraph-compatible paid swap (SC#7(iii)); scout addendum logged as a KPD-16 provenance row. ROADMAP.md + PROJECT.md + REQUIREMENTS.md + this STATE.md edited surgically in place; coverage still 11/11; all #2 fixes + six prior HIGH-fixes untouched.
 **Next action:** Re-run the full planning-review pipeline (Studio Producer selector → parallel Reality Checker + dynamic primary reviewer) against the hardened `.planning/ROADMAP.md` + PROJECT.md + REQUIREMENTS.md. If both PASS, proceed to commit + `/gsd:plan-phase 1`.
 **Resume hint:** Read `.planning/PROJECT.md` (amended: DATA-SOURCE-01, arrival-periodicity banner, sharpened EVENT-01/STATS-01) → `.planning/REQUIREMENTS.md` (11 v1 reqs, traceability 11/11) → `.planning/ROADMAP.md` (revised) → this file.
 
