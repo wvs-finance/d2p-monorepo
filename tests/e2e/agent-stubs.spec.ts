@@ -30,14 +30,37 @@ test('/.well-known/openapi.yaml returns 200 YAML with OpenAPI 3.1 header', async
   expect(body).toContain('openapi: 3.1.0')
 })
 
-// MCP route: must exist (never 404). Returns 200 or 405 depending on transport negotiation.
-// FIXME(Phase 4 — MCP Agent Surface): the SSE transport (mcp-handler) requires Redis
-// (`redisUrl is required`); with no REDIS_URL the GET throws an unhandledRejection that
-// destabilises the server and cascades into unrelated timeouts. Phase 4 builds the real
-// MCP surface and will provision/mock Redis; re-enable this assertion there.
-test.fixme('/api/mcp/sse route exists (no 404)', async ({ request }) => {
+// MCP route: streamable-http (/api/mcp/mcp) is the canonical transport; the SSE path
+// (/api/mcp/sse) returns 404 cleanly via mcp-handler's `disableSse: true` (no Redis).
+// FIXME(Phase 4 — Plan 05 wires the tools + disableSse): un-fixme these two assertions
+// once the MCP route registers tools and sets `disableSse: true`. No Redis is provisioned;
+// the SSE path must 404, NOT crash with `redisUrl is required`.
+test.fixme(
+  '/api/mcp/mcp streamable-http handshake — POST initialize is not 404',
+  async ({ request }) => {
+    const r = await request.post('/api/mcp/mcp', {
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+      },
+      data: {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-03-26',
+          capabilities: {},
+          clientInfo: { name: 'e2e', version: '0' },
+        },
+      },
+    })
+    expect(r.status()).not.toBe(404)
+  },
+)
+
+test.fixme('/api/mcp/sse returns 404 (disableSse, no Redis)', async ({ request }) => {
   const r = await request.get('/api/mcp/sse')
-  expect(r.status()).not.toBe(404)
+  expect(r.status()).toBe(404)
 })
 
 test.fixme('root HTML contains JSON-LD WebSite + Organization', async ({ page }) => {
