@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-05-29T22:58:37.378Z"
+status: completed
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-05-29T23:10:47.571Z"
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 29
-  completed_plans: 25
-  percent: 86
+  completed_plans: 26
+  percent: 90
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-13
 **Session type:** Plan execution (02-08 complete — Phase 2 plans 8/8)
-**Stopped at:** Completed 04-02-PLAN.md
+**Stopped at:** Completed 04-03-PLAN.md
 
 ---
 
@@ -34,11 +34,11 @@ progress:
 ## Current Position
 
 **Active phase:** 04 — Agent Surface (MCP)
-**Active plan:** 04-02 complete (registry + research MCP tools: list_apps/list_iterations/get_iteration_state). 04-03 is next (sequential).
-**Status:** Plan execution — Wave 2 complete
+**Active plan:** 04-03 complete (on-chain + panel MCP tools: get_instrument_terms/get_pool_state/query_econometric_panel — honest not_deployed/unavailable envelopes). 04-04 is next (sequential).
+**Status:** Plan execution — Wave 2 in progress
 
 **Progress:**
-[█████████░] 86%
+[█████████░] 90%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -79,6 +79,7 @@ Overall: 1/5 phases complete
 | Phase 03.1 P04 | 12 | 2 tasks | 9 files |
 | Phase 04 P01 | 22 | 3 tasks | 11 files |
 | Phase 04 P02 | 8 | 2 tasks | 5 files |
+| Phase 04 P03 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Overall: 1/5 phases complete
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| MCP fake-server test harness applies the registered inputSchema before invoking the handler (Phase 04-03) | The capture-the-callback fake server passed raw input, so Zod `.default('abrigo')` never applied and `input.app` was undefined → ZodError. Real SDK applies inputSchema before the handler; the harness now mirrors that via `inputSchema.parse(input)` | All future MCP fake-server unit tests resolve schema defaults deterministically; output-envelope assertions stay strict |
+| On-chain/panel MCP tools return honest not_deployed/unavailable envelopes, never fabricated numerics (Phase 04-03) | Empty ABRIGO_INSTRUMENTS + unpublished HF panel; CROSS-09 anti-fishing. get_pool_state uses `pool_address ?? 'unknown'` (M4); serializeBigints wired as future-deployment path only; HF dataset name is a single UNVERIFIED constant never asserted in the note | Pre-launch agent queries branch on `status`, not on zero-filled fakes; bigint boundary correct when contracts land |
 | TheoremBlock = full 4-side ochre hairline border + bold ochre text label, NOT one-sided border-left (Phase 03.1-03) | impeccable@2.1.8 flags one-sided `border-left: Npx solid <color>` as the side-tab AI-tell; a uniform 4-side border is not a side-tab. Reconciles spec's "ochre rule + label", CROSS-09 (color+text), and the impeccable gate (exit 0 verified) | All anti-fishing callouts use full borders + text labels; never one-sided colored borders |
 | Reading page locale from NEXT_LOCALE cookie, not URL segment (Phase 03.1-03) | The /research/[slug] route has no [locale] segment; getLocale() resolves the cookie at render; generateStaticParams enumerates distinct slugs only; single-locale body per page | All locale-aware reading routes resolve locale from cookie, not path |
 | gfm:false in s.mdx() (Phase 03.1-01) | Velite@0.3.1 auto-prepends remarkGfm BEFORE user plugins without this flag; spec §0 remark order [remarkMath, remarkGfm, remarkDirective] honored only with gfm:false | All research MDX must use s.mdx({gfm:false}) |

@@ -86,9 +86,9 @@ Each maps to exactly one phase in the roadmap.
 - [x] **AGENT-03**: MCP tool `list_apps()` returns the apps registry — today returns `[{ slug: "abrigo", name: "Abrigo", status: "active", description: "...", external_url: "https://x.com/d2pfinabrigo" }]`
 - [x] **AGENT-04** *(re-scoped — IA correction 2026-05-13)*: ~~returns all iterations within the named app with status, slug, version, β, p-value~~ STRUCK. MCP tool `list_iterations(app, filter?)` returns the on-site **research collection** rows for the named app (slug, title_es/en, type, track, date, authors, summary_es/en, external_url, arxiv_id), track-filtered to `abrigo-hedge-design` by default; `app` defaults to `"abrigo"`. β/p-value/version do not exist in the on-site data model (the raw exercise lives in `wvs-finance/abrigo-analytics`) and are never fabricated — mirrors the ITER-01..09 descope.
 - [x] **AGENT-05** *(re-scoped — IA correction 2026-05-13)*: ~~full iteration detail including replication hash + notebook URL~~ STRUCK. MCP tool `get_iteration_state(app, slug)` returns full **on-site research-entry** detail (the ResearchEntryOut fields + `body`); `external_url` carries the notebook/analytics link where present, `arxiv_id` the citable id. `version` is accepted for API-compat but ignored (no version dimension on-site). No replication_hash/notebook_url fields exist in the data model; honest `not_found` for unknown slugs — mirrors the ITER-01..09 descope.
-- [ ] **AGENT-06**: MCP tool `get_instrument_terms(app, instrument_id, chain)` returns instrument parameters, payoff function, and current pool state
-- [ ] **AGENT-07-pool**: MCP tool `get_pool_state(app, chain, pool_address)` returns live pool reserves, LP count, recent settlement events
-- [ ] **AGENT-07**: MCP tool `query_econometric_panel(app, panel, filters)` returns rows from HuggingFace panel dataset (scoped to the app's panels) with paging
+- [x] **AGENT-06**: MCP tool `get_instrument_terms(app, instrument_id, chain)` returns instrument parameters, payoff function, and current pool state
+- [x] **AGENT-07-pool**: MCP tool `get_pool_state(app, chain, pool_address)` returns live pool reserves, LP count, recent settlement events
+- [x] **AGENT-07**: MCP tool `query_econometric_panel(app, panel, filters)` returns rows from HuggingFace panel dataset (scoped to the app's panels) with paging
 - [ ] **AGENT-08**: OpenAPI spec at `/.well-known/openapi.yaml` documents every public REST endpoint with examples
 - [ ] **AGENT-09**: `/llms.txt` at site root lists primary entry URLs, content licensing, and pointer to MCP endpoint
 - [ ] **AGENT-10**: Every iteration / instrument / dashboard page emits JSON-LD structured data that mirrors the MCP tool output schema
@@ -250,8 +250,8 @@ Populated by gsd-roadmapper — 2026-05-11.
 | AGENT-03 | Phase 4 | Complete |
 | AGENT-04 | Phase 4 | Pending (re-scoped) |
 | AGENT-05 | Phase 4 | Pending (re-scoped) |
-| AGENT-06 | Phase 4 | Pending |
-| AGENT-07 | Phase 4 | Pending |
+| AGENT-06 | Phase 4 | Complete |
+| AGENT-07 | Phase 4 | Complete |
 | AGENT-08 | Phase 4 | Pending |
 | AGENT-09 | Phase 4 | Pending |
 | AGENT-10 | Phase 4 | Pending |
