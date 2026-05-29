@@ -195,3 +195,127 @@ The 03-03 status surface is fully verified against the production webpack build:
 - Layout comment corrected (no TanStack claim); layout stays pure RSC pass-through
 - Playwright webServer: single production-build block, no sleep/pkill
 - 15/15 e2e tests green; pnpm build exits 0; tsc --noEmit exits 0; biome clean
+
+---
+
+## Phase 3 live verification — 54fc8f3 (production)
+
+```yaml
+status: pass
+status_history: "partial @54fc8f3 → pass @4132401 (es-CO rollup string localized)"
+runtime: production
+target: https://www.d2pfinance.xyz
+build_hash: 54fc8f301b9afe4feb2ba21eb97e0c30b79d835e
+gap_closure: "The lone MINOR (untranslated '0 instruments deployed' under es-CO) fixed in 4132401 via status.instruments_deployed key; confirmed live on prod (es-CO renders 'instrumentos desplegados')."
+verified: 2026-05-29T14:51Z
+verifier: Evidence Collector (Playwright MCP, live production DOM)
+```
+
+This run re-verifies the deployed Phase 3 surfaces against the **production** DOM
+(not localhost), via Playwright MCP snapshots + `browser_evaluate` + raw SSR curl.
+Default-to-skepticism. Console captured at all levels across every navigation.
+
+### Console error log
+
+**Zero console messages (0 errors, 0 warnings) across the entire session** — all
+navigations: `/apps/abrigo/dashboard`, `?chain=base`, `/status`, locale toggles.
+`browser_console_messages(level=error, all=true)` → Total messages: 0.
+
+### Claim 1 — Dashboard /apps/abrigo/dashboard (DASH-03, DASH-07)
+
+| Claim | Verdict | Evidence |
+|-------|---------|----------|
+| HTTP 200 | ✓ PASS | Navigated, title "Panel - Abrigo / DS2P Labs", H1 "Panel en vivo — Abrigo" |
+| 4 labelled metric tiles per chain (pool balance, settlement events, LP positions, last block synced) | ✓ PASS | `browser_evaluate`: 20 tiles (5 chains × 4) — labels "Saldo del fondo", "Eventos de liquidación", "Posiciones LP", "Último bloque sincronizado" |
+| Anti-fishing: every value is em-dash `—`, never a digit, never `0` | ✓ PASS | `tileCount:20, allDash:true, offendingDigitValues:[]` — `/\d/` test over all 20 values returns empty |
+| "Live once contracts deploy" banner w/ icon + text (not color-alone) | ✓ PASS | `<output role=status>` = lucide-info SVG + span "En vivo una vez se desplieguen los contratos" |
+| No runtime console errors | ✓ PASS | 0 messages |
+
+Screenshot: `/tmp/d2p-verify-6/dashboard.png` (full-page; visually confirms em-dash skeleton + info banner + IBM Plex chrome + single ochre accent).
+
+### Claim 2 — Chain selector (DASH-04)
+
+| Claim | Verdict | Evidence |
+|-------|---------|----------|
+| 5-chain selector (Celo, Ethereum, Base, Arbitrum, Optimism) | ✓ PASS | `<select>` options: Celo, Ethereum, Base, Arbitrum, Optimism |
+| Selecting Base updates URL to `?chain=base` | ✓ PASS | `selectOption(['base'])` → URL `…/dashboard?chain=base` |
+| Reloading `?chain=base` fresh restores Base (shareable) | ✓ PASS | Fresh `browser_navigate` → `selectValue:"base"`, `selectedOptionText:"Base"`, primary region heading "Base" |
+
+Screenshot: `/tmp/d2p-verify-6/dashboard-chain.png`.
+
+### Claim 3 — No-JS first paint (DASH-07)
+
+| Claim | Verdict | Evidence |
+|-------|---------|----------|
+| Tiles + banner render without JS (meaningful first paint, no wallet gate, no blank page) | ✓ PASS | Raw `curl` of SSR HTML (no JS engine — stronger than a JS-disabled browser): HTTP 200, H1 "Panel en vivo — Abrigo" present, banner text + `lucide-info` icon present, all 4 tile labels present, 57 em-dash placeholders, **no** "connect wallet"/"conectar" text, **no** fabricated numeric metric values |
+
+Caveat (⚠ method note, not a defect): Playwright MCP exposes no context-creation
+tool to set `javaScriptEnabled:false`, so no-JS was verified by raw SSR-HTML curl
+(the markup the browser receives before hydration) rather than a JS-disabled
+screenshot. This is a strictly stronger no-JS proof. Artifact saved as
+`/tmp/d2p-verify-6/dashboard-nojs.html` (no PNG for this claim).
+
+### Claim 4 — Status /status (DASH-08)
+
+| Claim | Verdict | Evidence |
+|-------|---------|----------|
+| HTTP 200 | ✓ PASS | Title "Estado / Status — DS2P Labs", H1 "Estado del sistema" |
+| 5 per-chain RPC health rows | ✓ PASS | Rows: Celo, Ethereum, Base, Arbitrum One, OP Mainnet (each with block height + latency ms) |
+| Each row StatusPill = color + icon + text (CROSS-09) | ✓ PASS | 5 pills, each `lucide-circle-check` SVG + "Saludable" text |
+| Build hash present | ✓ PASS | `dd`: `54fc8f301b9afe4feb2ba21eb97e0c30b79d835e` (matches 54fc8f30) |
+| Freshness timestamp present | ✓ PASS | `dd`: `2026-05-29T14:49:37.108Z` |
+| Abrigo per-app rollup present | ✓ PASS | "Abrigo / 0 instruments deployed" with `lucide-loader-circle` icon + "Pre-lanzamiento" pill |
+| No runtime console errors | ✓ PASS | 0 messages |
+
+Screenshot: `/tmp/d2p-verify-6/status.png`.
+
+### Claim 5 — Descope negative check (econometrics removed)
+
+| Claim | Verdict | Evidence |
+|-------|---------|----------|
+| /apps/abrigo/dashboard free of β / CI / p-value / visx / econometric | ✓ PASS | `browser_evaluate` term scan → `descopeHits:[]` |
+| /status free of same terms | ✓ PASS | `descopeHits:[]` |
+
+### Claim 6 — Locale toggle (DASH-08 / chrome)
+
+| Claim | Verdict | Evidence |
+|-------|---------|----------|
+| `NEXT_LOCALE=en` → English chrome | ✓ PASS | `htmlLang:"en"`, H1 "Live Dashboard — Abrigo", nav Apps/Research/Team/About, banner "Live once contracts deploy", tiles "Pool balance / Settlement events / LP positions / Last block synced", English toggle disabled |
+| `NEXT_LOCALE=es-CO` → Spanish chrome restores | ✓ PASS | `htmlLang:"es-CO"`, H1 "Panel en vivo — Abrigo", banner "En vivo una vez se desplieguen los contratos" |
+| No leaked translation keys (`dashboard.status.*`) | ✓ PASS | Dotted-key regex scan over body text → `leakedKeys:[]` |
+
+### Claim 7 — Regression smoke (demo path + IA refactor)
+
+| Route | Verdict | Evidence |
+|-------|---------|----------|
+| `/` | ✓ PASS | HTTP 200, H1 "DS2P Labs" |
+| `/apps/abrigo` | ✓ PASS | HTTP 200, H1 "Abrigo — gamma ∂²Π" |
+| `/apps/abrigo/iterations/pair-d/v1` | ✓ PASS (expected 404) | HTTP 404 — econometric iteration pages stay removed; IA refactor holds |
+| `/research` | ✓ PASS | HTTP 200, H1 "Investigación" |
+
+### Issues found
+
+1. **MINOR — untranslated string under es-CO.** On `/status` with the default
+   es-CO locale, the Abrigo rollup secondary line reads **"0 instruments deployed"**
+   in English while the pill ("Pre-lanzamiento") and all surrounding chrome are
+   Spanish. Same English string also appears in the es-CO dashboard SSR. Per
+   project rule "all copy authored es-CO first," this needs an es-CO string
+   (e.g. "0 instrumentos desplegados"). Evidence: `/tmp/d2p-verify-6/status.png`,
+   chainRows scan. Priority: Low/Medium (copy gap, not functional).
+
+2. **MINOR (method, waived) — no-JS verified via SSR curl, not a JS-disabled
+   browser screenshot,** because the Playwright MCP surface has no
+   context-creation/`javaScriptEnabled:false` tool. Mitigated with raw-HTML proof
+   which is stronger; recorded so the verification method is transparent. No PNG
+   exists for `dashboard-nojs`.
+
+### Verdict
+
+**PARTIAL** — 6 of 7 claim groups fully ✓ PASS with screenshot/DOM evidence and a
+clean (zero-error) console across the session. Anti-fishing invariant holds (20/20
+em-dash, no fabricated numbers, no `0`). The single open item is a Low/Medium copy
+gap ("0 instruments deployed" not localized to es-CO). No functional defect, no
+runtime error, no descope leak, IA refactor intact. Promote to **pass** once the
+es-CO string lands.
+
+Screenshots: `/tmp/d2p-verify-6/dashboard.png`, `/tmp/d2p-verify-6/dashboard-chain.png`, `/tmp/d2p-verify-6/status.png`; SSR artifact `/tmp/d2p-verify-6/dashboard-nojs.html`.
