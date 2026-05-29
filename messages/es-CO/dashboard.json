@@ -1,0 +1,24 @@
+{
+  "dashboard": {
+    "page_title": "Panel en vivo — Abrigo",
+    "page_subtitle": "Estado en cadena de los instrumentos Abrigo desplegados en todas las redes.",
+    "live_banner": "En vivo una vez se desplieguen los contratos",
+    "chain_selector_label": "Cadena",
+    "tile_pool_balance": "Saldo del fondo",
+    "tile_settlement_events": "Eventos de liquidación",
+    "tile_lp_positions": "Posiciones LP",
+    "tile_last_block": "Último bloque sincronizado",
+    "empty_value": "—",
+    "status": {
+      "page_title": "Estado del sistema",
+      "page_subtitle": "Salud en tiempo real de las conexiones RPC y el despliegue de la aplicación.",
+      "rpc_health_heading": "Salud RPC por cadena",
+      "build_hash_label": "Hash del build",
+      "freshness_label": "Actualizado",
+      "app_rollup_heading": "Estado de aplicaciones",
+      "health_healthy": "Saludable",
+      "health_degraded": "Degradado",
+      "app_prelaunch_label": "Pre-lanzamiento"
+    }
+  }
+}

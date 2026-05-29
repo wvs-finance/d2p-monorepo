@@ -8,6 +8,8 @@ export const env = createEnv({
   server: {
     // server-only: never exposed to the browser bundle
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    // injected by Vercel at deploy time; undefined in local dev (RESEARCH Pitfall 7)
+    VERCEL_GIT_COMMIT_SHA: z.string().optional(),
   },
   client: {
     // client-safe (NEXT_PUBLIC_*): public RPCs, WalletConnect ID, app URL
@@ -22,6 +24,7 @@ export const env = createEnv({
   // runtimeEnv: every key listed explicitly — @t3-oss strips unreferenced vars at build time
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
+    VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
     NEXT_PUBLIC_RPC_CELO_PRIMARY: process.env.NEXT_PUBLIC_RPC_CELO_PRIMARY,
     NEXT_PUBLIC_RPC_ETH_PRIMARY: process.env.NEXT_PUBLIC_RPC_ETH_PRIMARY,
     NEXT_PUBLIC_RPC_BASE_PRIMARY: process.env.NEXT_PUBLIC_RPC_BASE_PRIMARY,

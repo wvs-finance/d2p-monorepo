@@ -76,4 +76,13 @@ describe('i18n namespace key parity (es-CO ↔ en)', () => {
       resolve(messagesDir, 'en/about.json'),
     )
   })
+
+  // dashboard namespace parity (includes nested status.* keys — recursive check required)
+  it('dashboard namespace has identical key paths in es-CO and en', () => {
+    assertKeyParity(
+      'dashboard',
+      resolve(messagesDir, 'es-CO/dashboard.json'),
+      resolve(messagesDir, 'en/dashboard.json'),
+    )
+  })
 })
