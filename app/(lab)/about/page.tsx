@@ -10,7 +10,8 @@ export default async function AboutPage() {
   const t = await getTranslations()
 
   return (
-    <article className="space-y-12">
+    // Own <main> landmark + container (the (lab) layout no longer wraps pages in <main>).
+    <main className="max-w-4xl mx-auto w-full px-6 py-12 space-y-12">
       {/* Page header */}
       <header className="space-y-4 py-12">
         <h1 className="text-4xl font-semibold text-text-primary">{t('about.h1')}</h1>
@@ -69,6 +70,6 @@ export default async function AboutPage() {
           <ArrowUpRight className="h-3 w-3" />
         </a>
       </section>
-    </article>
+    </main>
   )
 }

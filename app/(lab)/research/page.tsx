@@ -23,6 +23,10 @@ export default async function ResearchPage({
   // Dedupe per-locale: one card per slug for the active locale (fallback to 'es' if 'en' missing)
   const slugMap = new Map<string, (typeof research)[number]>()
   for (const entry of research) {
+    // Demo/render-proof fixtures (slug ending in -fixture) are NOT public research —
+    // they exercise the reading-page components but must not appear on the index
+    // (same policy as the retired spike). Keeps the public list to finished artifacts.
+    if (entry.slug.endsWith('-fixture')) continue
     const existing = slugMap.get(entry.slug)
     if (!existing) {
       slugMap.set(entry.slug, entry)

@@ -4,7 +4,8 @@ import { defineConfig, devices } from '@playwright/test'
 // When present we test the DEPLOYED build directly and must NOT spin up a local webServer
 // (a local `pnpm build` on CI fails because the NEXT_PUBLIC_* env is Vercel-only — this was
 // the test-e2e CI break). When absent we fall back to a local prod server for dev.
-const REMOTE_TARGET = process.env.PLAYWRIGHT_TEST_BASE_URL ?? process.env.BASE_URL
+// Use || (not ??) so an empty-string env var is treated as unset → local mode.
+const REMOTE_TARGET = process.env.PLAYWRIGHT_TEST_BASE_URL || process.env.BASE_URL || undefined
 const BASE_URL = REMOTE_TARGET ?? 'http://localhost:3040'
 
 // Vercel Deployment Protection (SSO) 401s preview URLs; the automation-bypass secret, when

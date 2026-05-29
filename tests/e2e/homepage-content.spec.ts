@@ -31,7 +31,8 @@ test.describe('phase-2 - LAB-01 — homepage content', () => {
 
   test('homepage renders a Research section linking to /research', async ({ page }) => {
     await page.goto('/')
-    const researchLink = page.locator('a[href="/research"]')
+    // first() handles both the in-page Research section CTA and the global TopNav link.
+    const researchLink = page.locator('a[href="/research"]').first()
     await expect(researchLink).toBeVisible()
   })
 

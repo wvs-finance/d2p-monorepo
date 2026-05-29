@@ -6,7 +6,9 @@ export default async function HomePage() {
   const t = await getTranslations()
 
   return (
-    <article className="space-y-12">
+    // Own <main> landmark + container: the (lab) layout no longer wraps pages in <main>
+    // (each page owns its width). max-w-4xl mirrors the container the layout used to provide.
+    <main className="max-w-4xl mx-auto w-full px-6 py-12 space-y-12">
       {/* Hero */}
       <header className="space-y-4 py-20 lg:py-[120px] text-center">
         <h1 className="text-4xl font-semibold text-text-primary leading-tight">
@@ -74,6 +76,6 @@ export default async function HomePage() {
           <ArrowUpRight className="h-3 w-3" />
         </a>
       </section>
-    </article>
+    </main>
   )
 }

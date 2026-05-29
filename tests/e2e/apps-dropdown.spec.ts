@@ -13,10 +13,11 @@ test('apps dropdown opens and lists Abrigo with active status badge', async ({ p
   // Two menuitems per app entry: primary link + external link (both role="menuitem")
   const items = page.getByRole('menuitem')
   await expect(items).toHaveCount(2)
-  // Abrigo text visible
-  await expect(page.getByText('Abrigo')).toBeVisible()
-  // Status pill present (Active / Activa)
-  await expect(page.getByText(/active|activa/i)).toBeVisible()
+  // Abrigo listed in the dropdown — scope to the menu and take the first match
+  // ("Abrigo" now resolves to multiple nodes: primary link + external link).
+  await expect(menu.getByText('Abrigo').first()).toBeVisible()
+  // Status pill present (Active / Activa) — scope to the menu
+  await expect(menu.getByText(/active|activa/i).first()).toBeVisible()
 })
 
 // Test 2: Apps dropdown primary link navigates to /apps/abrigo
