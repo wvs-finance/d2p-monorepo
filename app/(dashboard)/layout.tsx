@@ -1,6 +1,7 @@
 // Dashboard route group layout — pure RSC shell.
-// In Phase 3, this will wrap a client-side TanStack QueryClientProvider.
-// For Phase 1, it is a pass-through (no dashboard pages yet).
+// Phase 3 hosts the umbrella /status page here. Server-side reads use viem directly
+// (lib/status/health.ts); no client QueryClientProvider is needed — this stays a pure
+// RSC pass-through.
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return <div className="min-h-screen">{children}</div>
 }
