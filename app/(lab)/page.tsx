@@ -37,7 +37,7 @@ export default async function HomePage() {
         >
           <h3 className="text-xl font-semibold text-text-primary">{t('lab.apps.abrigo.name')}</h3>
           <p className="mt-2 text-base text-text-secondary">{t('lab.apps.abrigo.description')}</p>
-          <span className="mt-4 inline-flex items-center gap-1 text-sm text-accent-default underline-offset-2 group-hover:underline">
+          <span className="mt-4 inline-flex items-center gap-1 text-sm text-accent-text underline-offset-2 group-hover:underline">
             {t('lab.apps.abrigo.cta')}
             <ArrowUpRight className="h-3 w-3" />
           </span>
@@ -55,7 +55,7 @@ export default async function HomePage() {
         </p>
         <a
           href="/research"
-          className="mt-4 inline-flex items-center gap-1 text-sm text-accent-default underline-offset-2 hover:underline"
+          className="mt-4 inline-flex items-center gap-1 text-sm text-accent-text underline-offset-2 hover:underline"
         >
           {t('lab.research.cta')}
           <ArrowUpRight className="h-3 w-3" />
@@ -68,7 +68,7 @@ export default async function HomePage() {
           href="https://github.com/wvs-finance"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-sm text-accent-default underline-offset-2 hover:underline"
+          className="inline-flex items-center gap-1 text-sm text-accent-text underline-offset-2 hover:underline"
         >
           {t('lab.github.label')}
           <ArrowUpRight className="h-3 w-3" />

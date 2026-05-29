@@ -52,7 +52,7 @@ export function PublicationCard({ research, locale, t }: PublicationCardProps) {
   return (
     <article className="group rounded-lg border border-border-default bg-bg-surface p-6 transition-shadow motion-safe:hover:shadow-sm">
       {research.order != null && (
-        <span className="font-mono text-accent-default text-xs block mb-2">
+        <span className="font-mono text-accent-text text-xs block mb-2">
           {String(research.order).padStart(2, '0')}
         </span>
       )}
@@ -75,7 +75,7 @@ export function PublicationCard({ research, locale, t }: PublicationCardProps) {
         {internalHref && (
           <Link
             href={internalHref}
-            className="inline-flex items-center gap-1 text-sm text-accent-default underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-accent-text underline-offset-2 hover:underline"
           >
             {t('research.cta.read_on_site')}
           </Link>
@@ -85,7 +85,7 @@ export function PublicationCard({ research, locale, t }: PublicationCardProps) {
             href={externalHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm text-accent-default underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-accent-text underline-offset-2 hover:underline"
           >
             {t('research.cta.read_document')}
             <ArrowUpRight className="h-3 w-3" aria-hidden="true" />

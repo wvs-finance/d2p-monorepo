@@ -16,14 +16,20 @@
 
   --text-primary: oklch(0.2 0.01 80);
   --text-secondary: oklch(0.4 0.01 75);
-  --text-muted: oklch(0.58 0.008 70);
+  /* Darkened from 0.58 → 0.5 so muted small text clears WCAG AA 4.5:1 on bg-surface
+     (was 3.56:1). Verified via axe in Plan 03.1-04. */
+  --text-muted: oklch(0.5 0.008 70);
 
   --border-default: oklch(0.86 0.012 75);
 
-  /* Accent — LOCKED muted ochre (#a87c3a) */
+  /* Accent — LOCKED muted ochre (#a87c3a). Used for fills, borders, icons, large text. */
   --accent-default: oklch(0.6 0.08 70);
   --accent-hover: oklch(0.54 0.09 70);
   --accent-subtle: oklch(0.6 0.08 70 / 0.12);
+  /* AA-safe ochre for SMALL text only (CTAs, links, labels): the locked accent (0.6)
+     is 3.33:1 on bg-surface — sub-AA for <18.66px text. This darker variant clears
+     4.5:1 while keeping the ochre identity. Do NOT use for fills/large headings. */
+  --accent-text: oklch(0.48 0.08 70);
 
   /* Status — epistemic-honesty discipline: equal saturation/lightness (CROSS-09 + ITER-02)
      Lightness at 0.38-0.42 ensures WCAG AA 4.5:1 text contrast against near-white canvas
@@ -60,6 +66,9 @@
   --accent-default: oklch(0.7 0.1 70);
   --accent-hover: oklch(0.76 0.11 70);
   --accent-subtle: oklch(0.7 0.1 70 / 0.18);
+  /* Dark mode: the brighter accent (0.7) already clears AA on the dark canvas; the
+     small-text variant tracks it (kept slightly brighter for parity with light intent). */
+  --accent-text: oklch(0.72 0.1 70);
   --ring: oklch(0.7 0.1 70);
 
   /* Dark mode: lightened for readability against dark canvas (L≈0.13) */
@@ -91,6 +100,7 @@
   --color-accent-default: var(--accent-default);
   --color-accent-hover: var(--accent-hover);
   --color-accent-subtle: var(--accent-subtle);
+  --color-accent-text: var(--accent-text);
 
   --color-status-pass: var(--status-pass);
   --color-status-fail: var(--status-fail);

@@ -42,7 +42,7 @@ export function TrackFilter({ track, t }: TrackFilterProps) {
                   'border border-border-default transition-colors',
                   isActive
                     ? // Active: ochre bottom-border + accent text — color+border+text, never color alone (CROSS-09)
-                      'border-b-[color:var(--color-accent-default)] border-b-2 text-accent-default bg-bg-surface font-semibold'
+                      'border-b-[color:var(--color-accent-default)] border-b-2 text-accent-text bg-bg-surface font-semibold'
                     : 'text-text-secondary bg-bg-surface hover:text-text-primary hover:border-border-strong',
                 ].join(' ')}
               >

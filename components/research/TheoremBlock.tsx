@@ -57,7 +57,7 @@ export function TheoremBlock({
       className="my-6 rounded-md border border-accent-default/40 bg-bg-surface p-4"
     >
       {/* color + TEXT label — never color alone (CROSS-09). */}
-      <p className="mb-2 font-mono text-sm font-semibold text-accent-default">
+      <p className="mb-2 font-mono text-sm font-semibold text-accent-text">
         {kindWord}
         {label ? <span className="text-text-secondary"> — {label}</span> : null}
       </p>

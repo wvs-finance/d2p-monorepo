@@ -48,7 +48,7 @@ function ExternalLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-sm text-accent-default underline-offset-2 hover:underline"
+      className="inline-flex items-center gap-1 text-sm text-accent-text underline-offset-2 hover:underline"
     >
       {children}
       <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />

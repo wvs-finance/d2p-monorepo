@@ -49,11 +49,12 @@ describe('<PublicationCard />', () => {
     expect(badge).toBeInTheDocument()
   })
 
-  it('renders order prefix in font-mono text-accent-default when order prop is provided', () => {
+  it('renders order prefix in font-mono text-accent-text when order prop is provided', () => {
     const { container } = render(
       <PublicationCard research={{ ...baseResearch, order: 1 }} locale="en" t={mockT} />,
     )
-    const prefix = container.querySelector('.font-mono.text-accent-default')
+    // text-accent-text = AA-safe darker ochre for small text (Plan 03.1-04 contrast fix)
+    const prefix = container.querySelector('.font-mono.text-accent-text')
     expect(prefix).toBeInTheDocument()
     expect(prefix?.textContent).toBe('01')
   })

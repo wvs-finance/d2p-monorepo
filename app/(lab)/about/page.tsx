@@ -63,7 +63,7 @@ export default async function AboutPage() {
           href="https://github.com/wvs-finance/abrigo-analytics#readme"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 text-sm text-accent-default underline-offset-2 hover:underline"
+          className="mt-3 inline-flex items-center gap-1 text-sm text-accent-text underline-offset-2 hover:underline"
         >
           {t('about.reference.link_label')}
           <ArrowUpRight className="h-3 w-3" />
