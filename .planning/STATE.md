@@ -77,6 +77,9 @@ Overall: 1/5 phases complete
 
 ## Accumulated Context
 
+### Roadmap Evolution
+- Phase 03.1 (Research Reading Surface) inserted after Phase 3, before Phase 4 (2026-05-29). Depth pass on `/research` (LAB-03): paper-grade math reading surface, build-time KaTeX, track filter, arXiv/PDF paper-bridge. Canonical spec: `docs/superpowers/specs/2026-05-29-research-reading-surface-design.md`. Citations deferred to v2.
+
 ### Key Decisions Made
 
 | Decision | Rationale | Phase Impact |

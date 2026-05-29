@@ -12,6 +12,7 @@
 - [ ] **Phase 1: Foundation and Scaffold** — Wires every cross-cutting constraint into the project skeleton so all downstream phases build on a compliant base
 - [ ] **Phase 2: Research Lab Presence and Iteration Catalog** — Delivers the hackathon demo critical path: lab homepage, full iteration catalog, Pair D detail (PASS), and FX-vol-fail detail (FAIL)
 - [x] **Phase 3: Data Layer and On-Chain Dashboard** — Builds the BFF API routes, HuggingFace econometric pipeline, and live dashboard page; gates Phase 4 (completed 2026-05-29)
+- [ ] **Phase 3.1: Research Reading Surface** *(INSERTED)* — Paper-grade `/research`: track filter + locale-aware math reading pages (build-time KaTeX) + arXiv/PDF paper-bridge
 - [ ] **Phase 4: Agent Surface (MCP)** — Exposes all protocol and research state to AI agents via MCP tools, OpenAPI spec, and JSON-LD structured data
 - [ ] **Phase 5: Read-First Wallet and DeFi Surface** — Adds RainbowKit wallet connection and per-instrument read-only views with payoff diagrams and risk disclosures
 
@@ -99,6 +100,23 @@ Plans:
 - [ ] 03-03-PLAN.md — Umbrella /status surface: /api/status JSON route + /status RSC page with per-chain RPC health pills, build hash, freshness, per-app rollup (DASH-08) [wave 2]
 
 ---
+
+### Phase 03.1: Research Reading Surface (INSERTED)
+
+**Goal**: `/research` becomes a paper-grade public reading surface — a reverse-chron list with a server-rendered track filter (CFMM Microstructure · Abrigo Hedge-Design · Notes), and locale-aware reading pages that render build-time KaTeX math, numbered display equations, figures, theorem/definition blocks, footnotes/sidenotes, and an arXiv/PDF paper-bridge. Hybrid: on-site MDX bodies for write-ups/memos; arXiv landing pages for formal papers.
+
+**Depends on**: Phase 2 (the `/research` index + Velite `research` collection + `PublicationCard` baseline; the locked design system; the i18n + Evidence-Collector gates)
+
+**Canonical spec**: `docs/superpowers/specs/2026-05-29-research-reading-surface-design.md` (brainstormed → two-reviewer-verified → tooling-researched; the PRD for `/gsd:plan-phase 03.1 --prd`)
+
+**Requirements**: extends LAB-03 (publications/research surface). Net-new acceptance lives in the spec §3–§8; no new top-level REQ-IDs — a depth pass on the existing research requirement.
+
+**Scope note**: full citation rendering (rehype-citation/@citation-js) is **deferred to v2** per spec §0; v1 paper-bridge = arXiv + PDF + static BibTeX.
+
+**Plans**: 3 (per spec §2) — A: math-pipeline + render-path gating spike; B: index + content migration + i18n; C: reading page + paper-bridge + a11y/perf gates.
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 03.1 to break down)
 
 ### Phase 4: Agent Surface (MCP)
 
