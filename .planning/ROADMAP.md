@@ -137,7 +137,15 @@ Plans:
   3. An AI agent calling `get_instrument_terms` and `get_pool_state` receives instrument parameters and live pool reserves for the deployed Celo instrument — sourced from the same BFF route that powers the human dashboard, with no duplicated logic.
   4. An agent or developer fetching `/.well-known/openapi.yaml` receives a valid OpenAPI 3.1 spec documenting every public REST endpoint with request/response examples — sufficient for a developer to write a client without reading source code.
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Foundation: pin @asteasolutions/zod-to-openapi@7.3.4 + js-yaml, shared Zod contract module (single source of truth), Wave 0 test scaffolds, re-point SSE fixme (AGENT-01) [wave 1]
+- [ ] 04-02-PLAN.md — Registry + research tools: list_apps, list_iterations, get_iteration_state mapped to on-site Velite research collection (IA-correction-honest, no β/p-value) (AGENT-03, AGENT-04, AGENT-05) [wave 2]
+- [ ] 04-03-PLAN.md — On-chain + panel tools: get_instrument_terms, get_pool_state (not_deployed envelopes, bigint-safe), query_econometric_panel (unavailable envelope) (AGENT-06, AGENT-07-pool, AGENT-07) [wave 2]
+- [ ] 04-04-PLAN.md — Drift-proof OpenAPI 3.1 generated from Zod + llms.txt refresh (AGENT-08, AGENT-09) [wave 2]
+- [ ] 04-05-PLAN.md — Wire MCP route: lib/mcp-tools barrel + createMcpHandler(disableSse:true, runtime nodejs) + live handshake checkpoint (AGENT-01, AGENT-02) [wave 3]
+- [ ] 04-06-PLAN.md — JSON-LD mirroring on dashboard (honest not_deployed) + Evidence-Collector route gate (AGENT-10) [wave 3]
 
 ---
 
