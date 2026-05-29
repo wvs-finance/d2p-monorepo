@@ -9,6 +9,8 @@
     "tile_lp_positions": "LP positions",
     "tile_last_block": "Last block synced",
     "empty_value": "—",
+    "open_dashboard": "Open the dashboard",
+    "open_dashboard_aria": "Open the live Abrigo dashboard",
     "status": {
       "page_title": "System status",
       "page_subtitle": "Real-time health of RPC connections and application deployment.",

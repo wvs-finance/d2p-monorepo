@@ -1,16 +1,18 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const BASE_URL =
-  process.env.PLAYWRIGHT_TEST_BASE_URL ?? process.env.BASE_URL ?? 'http://localhost:3000'
+  process.env.PLAYWRIGHT_TEST_BASE_URL ?? process.env.BASE_URL ?? 'http://localhost:3040'
 
-const webServer = process.env.CI
-  ? undefined
-  : {
-      command: 'pnpm dev',
-      url: 'http://localhost:3000',
-      reuseExistingServer: true,
-      timeout: 120_000,
-    }
+// Production build is the ground truth for force-dynamic route-segment config (Pitfall 5).
+// pnpm dev (Turbopack) can honor route config differently from the webpack production build —
+// the Phase-2 burn class. Running the production server here means e2e specs exercise the
+// exact same code path users see.
+const webServer = {
+  command: 'pnpm build && pnpm start -p 3040',
+  url: 'http://localhost:3040',
+  reuseExistingServer: !process.env.CI,
+  timeout: 180_000,
+}
 
 export default defineConfig({
   testDir: './tests',
@@ -42,5 +44,5 @@ export default defineConfig({
       testMatch: ['visual/**/*.spec.ts'],
     },
   ],
-  ...(webServer ? { webServer } : {}),
+  webServer,
 })

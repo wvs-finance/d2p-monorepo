@@ -9,6 +9,8 @@
     "tile_lp_positions": "Posiciones LP",
     "tile_last_block": "Último bloque sincronizado",
     "empty_value": "—",
+    "open_dashboard": "Abrir el panel",
+    "open_dashboard_aria": "Abrir el panel en vivo de Abrigo",
     "status": {
       "page_title": "Estado del sistema",
       "page_subtitle": "Salud en tiempo real de las conexiones RPC y el despliegue de la aplicación.",
