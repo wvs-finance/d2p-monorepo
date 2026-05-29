@@ -35,13 +35,27 @@
     "reading": {
       "toc_heading": "On this page",
       "footnotes_label": "Footnotes",
+      "footnote_heading": "Footnotes",
+      "abstract_heading": "Abstract",
       "arxiv": "Read the full paper on arXiv",
+      "read_on_arxiv": "Read the full paper on arXiv",
       "pdf": "PDF",
+      "read_pdf": "Read the PDF",
       "doi": "DOI",
+      "doi_label": "DOI",
       "bibtex_heading": "BibTeX",
       "copy_bibtex": "Copy BibTeX",
+      "bibtex_copy": "Copy BibTeX",
       "copied": "Copied!",
-      "abstract_heading": "Abstract"
+      "bibtex_copied": "Copied!",
+      "affiliation": "DS2P Labs · ∂²Π",
+      "figure_prefix": "Figure",
+      "theorem_label": {
+        "theorem": "Theorem",
+        "definition": "Definition",
+        "lemma": "Lemma",
+        "proof": "Proof"
+      }
     }
   }
 }
