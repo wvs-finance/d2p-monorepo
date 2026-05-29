@@ -19,7 +19,7 @@
 
 - [x] **TOPIC-01** — Resolve the three observed event topic0 hashes (`0x65db1ef5…`, `0x5c090ef4…`, `0xb6233992…`) to event signatures by keccak-matching against `IAgentRequester` NatSpec from `emrestay/somnia-agents-skills@e15d4e9`. Output: per-impl ABI resolver map `(implementation_address, topic0) → (signature, field_layout_hash)` committed to repo (NOT a single global map — see KPD-01). Unmatched topic0s quarantined to `unresolved_topics.parquet` per KPD-06; STATS-01 reports `pct_logs_unresolved` gated <1%.
 
-- [ ] **IMPL-01** — Track proxy implementation transitions. Index `Upgraded(address)` events at the proxy (EIP-1967 topic0). Produce `impl_history.parquet` mapping `block_range → implementation_address`. PANEL-01 join: left-join on `block_number BETWEEN impl_first_seen_block AND impl_last_seen_block`. No-upgrade edge case handled per KPD-07: minimum one row from `[deployment_block, ∞)`. Pre-INDEX-01 beacon/diamond probe required per KPD-17.
+- [x] **IMPL-01** — Track proxy implementation transitions. Index `Upgraded(address)` events at the proxy (EIP-1967 topic0). Produce `impl_history.parquet` mapping `block_range → implementation_address`. PANEL-01 join: left-join on `block_number BETWEEN impl_first_seen_block AND impl_last_seen_block`. No-upgrade edge case handled per KPD-07: minimum one row from `[deployment_block, ∞)`. Pre-INDEX-01 beacon/diamond probe required per KPD-17.
 
 - [ ] **INDEX-01** — Indexer deployed against the proxy address `0x5E5205CF…163E6`, **on the data source DATA-SOURCE-01 selects** (Ormi free tier if it cleared the sufficiency bar; the costed paid alternative otherwise). **Blocked by DATA-SOURCE-01 — not authored until the free-vs-paid verdict lands.** Owns subgraph authorship (`subgraphs/iagentrequester/`: schema.graphql, AssemblyScript mappings, networks.yaml for chain 5031) per KPD-08. Backfilled from contract deployment block (resolved in plan-phase from creator EOA `0x320362C7…fdE88936`) to present. Reconciliation against direct-RPC per KPD-04 (per-window parity, not random row sample); the parity mechanism is conditional on the DATA-SOURCE-01 capability-matrix `eth_getBlockReceipts` row.
 
@@ -106,7 +106,7 @@ Populated by the roadmapper on 2026-05-25 from `.planning/ROADMAP.md`; updated 2
 | EVENT-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
 | SHARED-SCHEMA-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
 | TOPIC-01 | Phase 2: Topic & Implementation Provenance | Complete |
-| IMPL-01 | Phase 2: Topic & Implementation Provenance | Pending |
+| IMPL-01 | Phase 2: Topic & Implementation Provenance | Complete |
 | INDEX-01 | Phase 3: Subgraph Indexing (blocked by DATA-SOURCE-01) | Pending |
 | BYTECODE-01 | Phase 4: Parallel Cost Inputs (4a-pre + 4a-validate, split across Phase 3 boundary) | Pending |
 | GAS-01 | Phase 4: Parallel Cost Inputs (4b) | Pending |

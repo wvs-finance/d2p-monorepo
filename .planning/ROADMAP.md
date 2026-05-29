@@ -217,7 +217,7 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 5/5 | Complete (01-01..01-05 done; DATA-SOURCE-01 verdict landed → INDEX-01 unblocked) | - |
-| 2. Topic & Implementation Provenance | 1/2 | In Progress (02-01 TOPIC-01 Wave 1 done; 02-02 IMPL-01 Wave 2 remains) | - |
+| 2. Topic & Implementation Provenance | 2/2 | Complete (02-01 TOPIC-01 Wave 1 + 02-02 IMPL-01 Wave 2 done) | 2026-05-29 |
 | 3. Subgraph Indexing | 0/TBD | Not started | - |
 | 4. Parallel Cost Inputs | 0/TBD | Not started | - |
 | 5. Panel Materialization | 0/TBD | Not started | - |
