@@ -81,15 +81,22 @@
 
 **Depends on**: Phase 1 (project scaffold, wagmi config, env var setup, test harness)
 
-**Requirements**: DASH-01, DASH-02, DASH-03, DASH-04, DASH-05, DASH-06, DASH-07, DASH-08
+**Requirements**: DASH-01, DASH-03, DASH-04, DASH-07, DASH-08 (in scope) — DASH-02, DASH-05, DASH-06 DESCOPED per the 2026-05-13 IA correction (HuggingFace econometrics route + visx β/CI charts + chart a11y re-introduce the per-iteration econometric exercise removed from the public site; econometrics reach the public only as finished papers on /research).
 
 **Success Criteria** (what must be TRUE when this phase completes):
   1. A visitor navigating to `/dashboard` with no wallet connected and no JavaScript wallet extension installed sees live pool balances, settlement event counts, LP position counts, and last-block-synced for every deployed Abrigo instrument on Celo — the page renders meaningful data on first paint without hydration.
   2. A visitor switching chains via the chain selector sees the URL update (e.g., `?chain=celo`) so the dashboard state is shareable and returns the same data when pasted into a new browser tab or an agent's fetch call.
   3. Econometric charts render β estimates with 95% confidence bands and include an `aria-label` summarizing the core finding plus a `sr-only` data table — a screen-reader user can access the same information as a sighted user.
-  4. A developer or agent hitting `/status` reads RPC health per chain, HuggingFace dataset version, indexer freshness timestamp, and build hash — the page responds even when one chain's RPC is degraded, showing which chain is healthy and which is not.
+  4. A developer or agent hitting `/status` reads RPC health per chain, indexer freshness timestamp, and build hash — the page responds even when one chain's RPC is degraded, showing which chain is healthy and which is not. (HuggingFace dataset-version line dropped — econometrics descoped.)
 
-**Plans**: TBD
+**Scope note (2026-05-13 IA correction):** The dashboard renders on-chain protocol state ONLY and lives at `/apps/abrigo/dashboard` (app-scoped, not root `/dashboard`); `/status` is umbrella-scoped. No Abrigo contracts are deployed yet, so the dashboard ships an honest schema-preview skeleton (dashed `—` values + "live once contracts deploy" banner) driven by an empty instrument registry — no fabricated numbers. DASH-02/05/06 are descoped.
+
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Data-layer foundation: empty instrument registry seam, viem multicall aggregator, per-chain RPC health lib, nuqs chain search-params, cacheComponents + env + dashboard i18n, Wave 0 test stubs (DASH-01, DASH-08) [wave 1]
+- [ ] 03-02-PLAN.md — Abrigo on-chain dashboard slice: /api/dashboard BFF route, /apps/abrigo/dashboard RSC page, nuqs chain selector, no-JS read-first first paint, overview teaser link (DASH-01, DASH-03, DASH-04, DASH-07) [wave 2]
+- [ ] 03-03-PLAN.md — Umbrella /status surface: /api/status JSON route + /status RSC page with per-chain RPC health pills, build hash, freshness, per-app rollup (DASH-08) [wave 2]
 
 ---
 
@@ -139,7 +146,7 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation and Scaffold | 6/8 | In Progress|  |
 | 2. Research Lab Presence and Iteration Catalog | 5/8 | In Progress|  |
-| 3. Data Layer and On-Chain Dashboard | 0/? | Not started | - |
+| 3. Data Layer and On-Chain Dashboard | 0/3 | Planned | - |
 | 4. Agent Surface (MCP) | 0/? | Not started | - |
 | 5. Read-First Wallet and DeFi Surface | 0/? | Not started | - |
 
