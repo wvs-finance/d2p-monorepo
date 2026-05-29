@@ -2,7 +2,7 @@
 phase: 3
 slug: data-layer-and-on-chain-dashboard
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-13
 ---
@@ -18,13 +18,15 @@ created: 2026-05-13
 | Property | Value |
 |----------|-------|
 | **Frameworks** | Vitest 4.x (unit + RSC + route handlers), Playwright 1.49 (e2e + a11y), @axe-core/playwright, Lighthouse CI (perf budget), Biome 1.9 (lint/format), tsc (typecheck), impeccable v2.1.8 (anti-pattern CLI gate) |
-| **Config files** | Existing — `vitest.config.ts`, `playwright.config.ts`, `lighthouserc.cjs`, `biome.json`, `tsconfig.json` |
+| **Config files** | Existing — `vitest.config.ts`, `playwright.config.ts` (gets a deterministic `webServer` block in Plan 03-02), `lighthouserc.cjs`, `biome.json`, `tsconfig.json` |
 | **Quick run command** | `pnpm test:quick` (biome + tsc + vitest) |
 | **Full suite command** | `pnpm test:all` |
 | **Estimated quick runtime** | ~30 seconds |
 | **Estimated full runtime** | ~6 minutes local |
 
 > **Ground-truth gate (CLAUDE.md):** automated green is necessary but NOT sufficient. After each task commit, the Evidence Collector runs live against the affected route. Phase-2 burn history (BigInt-serialization-throws-at-runtime-but-passes-tsc, Turbopack route-config divergence) means `pnpm build && pnpm start` + live DOM/route check is mandatory, not optional.
+>
+> **Caching deferred (B1):** `cacheComponents` is NOT enabled this phase — it is a global Next 16 flag that disallows `export const dynamic` and would break the existing force-static routes (`app/llms.txt`, `app/.well-known/mcp.json`, `app/.well-known/openapi.yaml`) and the force-dynamic `app/api/health`. Plan 03-02 Task 2 carries a `pnpm build` gate asserting those 3 force-static routes still render as ○ (Static).
 
 ---
 
@@ -44,11 +46,11 @@ created: 2026-05-13
 
 | Req ID | Test Type | Automated Command (guidance) | Evidence / File | Status |
 |--------|-----------|------------------------------|-----------------|--------|
-| **DASH-01** | unit + e2e | `vitest run tests/unit/dashboard-aggregator.test.ts` (aggregator returns typed JSON, bigint fields are strings, empty registry → empty instruments array) + `playwright test tests/e2e/api-dashboard.spec.ts` (GET /api/dashboard?app=abrigo&chain=celo → 200, valid JSON shape) | `app/api/dashboard/route.ts`, `lib/apps/abrigo/instruments.ts`, aggregator lib | ⬜ pending |
+| **DASH-01** | unit + e2e | `vitest run tests/unit/dashboard-aggregator.test.ts` (aggregator returns typed JSON, bigint fields are strings, empty registry → all status EXACTLY 'empty') + `vitest run tests/api/dashboard.test.ts` (GET /api/dashboard?app=abrigo → 200 version:1, ?app=unknown → 404, degraded-not-500) + `playwright test tests/e2e/api-dashboard.spec.ts` | `app/api/dashboard/route.ts`, `lib/apps/abrigo/instruments.ts`, `lib/dashboard/aggregator.ts`, `lib/chains/clients.ts`, `lib/chains/serialize.ts`, `lib/dashboard/contract.ts` | ⬜ pending |
 | **DASH-03** | e2e | `playwright test tests/e2e/dashboard-page.spec.ts` (/apps/abrigo/dashboard → 200; renders per-chain metric tiles: pool balance, settlement events, LP positions, last block synced) | `app/(apps)/apps/abrigo/dashboard/page.tsx` | ⬜ pending |
-| **DASH-04** | e2e | `playwright test tests/e2e/dashboard-chain-selector.spec.ts` (selecting a chain updates `?chain=` URL param; pasted URL returns same state) | chain selector component (nuqs) | ⬜ pending |
+| **DASH-04** | e2e | `playwright test tests/e2e/dashboard-chain-selector.spec.ts` (selecting a chain updates `?chain=` URL param; pasted URL returns same state) | chain selector component (nuqs, shared `dashboardSearchParams.chain` parser) | ⬜ pending |
 | **DASH-07** | e2e + structural | `playwright test tests/e2e/dashboard-no-js.spec.ts` with `javaScriptEnabled:false` (meaningful first-paint content, skeleton tiles present, no wallet) + grep page is RSC (no `'use client'` at page top) | dashboard page.tsx | ⬜ pending |
-| **DASH-08** | e2e + unit | `playwright test tests/e2e/status-page.spec.ts` (/status → 200; per-chain RPC health rows for all 5 chains; build hash; freshness ts; degrades when one RPC mocked-down) + `vitest run tests/unit/status-health.test.ts` (per-chain isolation: one rejected probe doesn't fail the set) | `app/api/status/route.ts` and/or `app/(dashboard)/status/page.tsx` | ⬜ pending |
+| **DASH-08** | e2e + unit | `playwright test tests/e2e/status-page.spec.ts` (/status → 200; per-chain RPC health rows for all 5 chains; build hash; freshness ts) + `vitest run tests/unit/status-health.test.ts` (per-chain isolation: one rejected probe doesn't fail the set) + `vitest run tests/api/status.test.ts` (route returns 200 version:1; degraded probe still resolves) | `app/api/status/route.ts`, `app/(dashboard)/status/page.tsx`, `lib/status/health.ts` | ⬜ pending |
 
 **Skeleton-state assertion (cross-cutting, anti-fishing):** a test MUST assert that with the empty `ABRIGO_INSTRUMENTS` registry the dashboard renders labelled dashed/empty tiles + a "live once contracts deploy" banner and shows **no fabricated numeric values**.
 
@@ -56,16 +58,23 @@ created: 2026-05-13
 
 ## Wave 0 Requirements
 
-- [ ] `tests/unit/dashboard-aggregator.test.ts` stub (DASH-01) — assert empty-registry path + bigint→string boundary
-- [ ] `tests/unit/status-health.test.ts` stub (DASH-08) — per-chain probe isolation
-- [ ] `tests/e2e/api-dashboard.spec.ts` stub (DASH-01)
-- [ ] `tests/e2e/dashboard-page.spec.ts` stub (DASH-03)
-- [ ] `tests/e2e/dashboard-chain-selector.spec.ts` stub (DASH-04)
-- [ ] `tests/e2e/dashboard-no-js.spec.ts` stub (DASH-07)
-- [ ] `tests/e2e/status-page.spec.ts` stub (DASH-08)
-- [ ] Placeholder `AbrigoInstrument` type + empty `ABRIGO_INSTRUMENTS` registry + placeholder ABI type (filled from Foundry artifact later — Wave 0 stub per research Open Question 1)
+> Final filenames (reconciled with 03-01 `files_modified`). Unit specs carry `// @vitest-environment node` (vitest global is jsdom; viem clients must not boot under jsdom). The two route-handler tests start as `it.todo` stubs in 03-01 and are filled by 03-02 / 03-03.
 
-All stubs use `test.fixme()` / `it.todo()` and are filled with real assertions by feature plans.
+- [ ] `tests/unit/dashboard-aggregator.test.ts` (DASH-01) — REAL assertions: empty registry → 5 results all status EXACTLY 'empty' (deterministic; short-circuits before any client) + bigint→string deep-walk boundary
+- [ ] `tests/unit/status-health.test.ts` (DASH-08) — REAL assertions: per-chain probe isolation (mock one `@/lib/chains/clients` client to reject)
+- [ ] `tests/unit/i18n-coverage.test.ts` — ADD a `dashboard` namespace case (recursive `assertKeyParity` over nested `status.*`) — created in Phase 2, extended here in 03-01
+- [ ] `tests/api/dashboard.test.ts` (DASH-01) — `it.todo` stub in 03-01; FILLED by 03-02 (200 version:1, chains[5], no bigint, ?app=unknown → 404, degraded-not-500)
+- [ ] `tests/api/status.test.ts` (DASH-08) — `it.todo` stub in 03-01; FILLED by 03-03 (200 version:1, chains[5], single-failing-probe isolation)
+- [ ] `tests/e2e/api-dashboard.spec.ts` (DASH-01) — `test.fixme` stub in 03-01; filled by 03-02
+- [ ] `tests/e2e/dashboard-page.spec.ts` (DASH-03) — `test.fixme` stub in 03-01; filled by 03-02
+- [ ] `tests/e2e/dashboard-chain-selector.spec.ts` (DASH-04) — `test.fixme` stub in 03-01; filled by 03-02
+- [ ] `tests/e2e/dashboard-no-js.spec.ts` (DASH-07) — `test.fixme` stub in 03-01; filled by 03-02
+- [ ] `tests/e2e/status-page.spec.ts` (DASH-08) — `test.fixme` stub in 03-01; filled by 03-03
+- [ ] `lib/apps/abrigo/instruments.ts` — `AbrigoInstrument` type + empty `ABRIGO_INSTRUMENTS` registry + `ABRIGO_ABI` (a minimal REAL 3-view-fn `readonly satisfies Abi` fragment, NOT `[]`, marked provisional pending the Foundry artifact — research Open Question 1)
+- [ ] `lib/chains/clients.ts` + `lib/chains/serialize.ts` — shared viem client factory (5s timeout) + single bigint serializer, both consumed by aggregator + health
+- [ ] `lib/dashboard/contract.ts` — shared `DashboardResponse` / `StatusResponse` (version:1) envelopes
+
+The two route-handler tests use `it.todo()` and the 5 e2e specs use `test.fixme()`; they are filled with real assertions by the feature plans (03-02 / 03-03). The two unit specs are REAL (green) from 03-01.
 
 ---
 
@@ -81,12 +90,12 @@ All stubs use `test.fixme()` / `it.todo()` and are filled with real assertions b
 
 ## Validation Sign-Off
 
-- [ ] All in-scope tasks (DASH-01/03/04/07/08) have an `<automated>` verify path or a Wave 0 dependency
-- [ ] No 3 consecutive tasks without an automated verify path
+- [x] All in-scope tasks (DASH-01/03/04/07/08) have an `<automated>` verify path or a Wave 0 dependency
+- [x] No 3 consecutive tasks without an automated verify path
 - [ ] Wave 0 stub tests + empty instrument registry created
-- [ ] Skeleton/empty-state anti-fishing assertion present
-- [ ] No watch-mode flags (CI uses `--run`)
-- [ ] DASH-02/05/06 confirmed descoped (not in any plan, not validated)
-- [ ] `nyquist_compliant: true` set once planner confirms every in-scope task references a row
+- [x] Skeleton/empty-state anti-fishing assertion present
+- [x] No watch-mode flags (CI uses `--run`)
+- [x] DASH-02/05/06 confirmed descoped (not in any plan, not validated)
+- [x] `nyquist_compliant: true` set once planner confirms every in-scope task references a row
 
 **Approval:** pending
