@@ -20,7 +20,8 @@
       "app_rollup_heading": "Application status",
       "health_healthy": "Healthy",
       "health_degraded": "Degraded",
-      "app_prelaunch_label": "Pre-launch"
+      "app_prelaunch_label": "Pre-launch",
+      "instruments_deployed": "{count} instruments deployed"
     }
   }
 }

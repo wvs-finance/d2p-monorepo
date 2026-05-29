@@ -97,7 +97,9 @@ export default async function StatusPage() {
           <li className="flex items-center justify-between py-3" data-testid="app-row-abrigo">
             <div className="space-y-0.5">
               <span className="text-sm font-medium text-text-primary">Abrigo</span>
-              <p className="text-xs text-text-muted">0 instruments deployed</p>
+              <p className="text-xs text-text-muted">
+                {t('status.instruments_deployed', { count: 0 })}
+              </p>
             </div>
             {/* IN_PROGRESS pill: pre-launch state */}
             <StatusPill status="IN_PROGRESS" label={t('status.app_prelaunch_label')} />
