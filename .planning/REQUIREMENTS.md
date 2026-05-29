@@ -46,16 +46,27 @@ Each maps to exactly one phase in the roadmap.
 
 ### Abrigo App — Overview + Iteration Catalog (scoped under `/apps/abrigo/`)
 
-- [x] **APP-01**: Abrigo app overview page at `/apps/abrigo` renders the app's mission (∂²Π gamma — convex hedges for Colombian wage-earner macro exposure), current iteration headline counts, links to iterations / instruments / dashboard sub-routes, prominent external link to https://x.com/d2pfinabrigo, and the app's status (Active)
-- [x] **ITER-01**: Iteration catalog at `/apps/abrigo/iterations` lists every Abrigo (Y, M, X) iteration regardless of status; no filter excludes FAIL or PARKED by default
-- [x] **ITER-02**: Catalog cards render status with equal visual weight — same dimensions, same typography hierarchy, same prominence for PASS / FAIL / PARKED / IN_PROGRESS
-- [x] **ITER-03**: Iteration detail page at `/apps/abrigo/iterations/{slug}/v{n}` shows spec → data → estimation → tests → disposition narrative with full evidence chain
-- [x] **ITER-04**: Each iteration detail displays β estimate, 95% confidence interval, p-value, sample size N, and replication hash with a working link to `make verify` instructions
-- [x] **ITER-05**: Pair D iteration detail page at `/apps/abrigo/iterations/pair-d/v1` (PASS, Colombian young-worker services × COP/USD lagged 6–12mo, β = +0.137) renders fully with chart, evidence chain, and notebook links
-- [x] **ITER-06**: FX-vol-on-CPI-surprise iteration detail page at `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` (CLOSED FAIL, β̂ = −0.000685, 90% CI ⊃ 0) renders with same visual weight as PASS pages, includes failure disposition memo
-- [x] **ITER-07**: Iteration status pill component (`<StatusPill status={...}>`) encodes state with color, icon, AND text label — no color-only state encoding
-- [x] **ITER-08**: Iteration URLs are content-addressable, human-readable slugs scoped under `/apps/abrigo/iterations/{slug}/v{n}`, never UUIDs or numeric IDs
-- [x] **ITER-09**: Each iteration page emits JSON-LD `Dataset` + `ScholarlyArticle` structured data (with `isPartOf` pointing to the Abrigo app and the d2-π umbrella) and an OpenGraph card
+> **IA correction (2026-05-13):** The per-iteration econometric exercise is no longer
+> published on the public site. ∂²Π/DS2P Labs is the root research brand; Abrigo is a
+> sub-brand app. The public site surfaces the APP (product + GitHub docs when contracts
+> are live) and the lab's FINISHED research (papers on `/research` + X). The raw exercise
+> lives in `wvs-finance/abrigo-analytics` and is not rendered here. As a result the
+> iteration catalog + detail pages were removed and **ITER-01..09 are DESCOPED** from v1.
+> APP-01 and LAB-01 were re-scoped: `/apps/abrigo` is now product + live-dashboard teaser
+> (no iteration counts); `/` points to `/research` instead of showing iteration counts.
+> `ITER-07` (StatusPill color+icon+text, CROSS-09) survives via the shared `StatusPill`
+> still used on the Abrigo page.
+
+- [x] **APP-01** *(re-scoped)*: Abrigo app overview page at `/apps/abrigo` renders the app's mission (∂²Π gamma — convex hedges for Colombian wage-earner macro exposure), a live-dashboard teaser (Phase 3), a GitHub-documentation "coming soon" affordance, and a prominent external link to https://x.com/d2pfinabrigo. (No iteration headline counts — descoped.)
+- [~] **ITER-01** *(descoped — IA change)*: Iteration catalog at `/apps/abrigo/iterations` lists every Abrigo iteration regardless of status
+- [~] **ITER-02** *(descoped — IA change)*: Catalog cards render status with equal visual weight — same dimensions, same typography hierarchy, same prominence for PASS / FAIL / PARKED / IN_PROGRESS
+- [~] **ITER-03** *(descoped — IA change)*: Iteration detail page at `/apps/abrigo/iterations/{slug}/v{n}` shows spec → data → estimation → tests → disposition narrative with full evidence chain
+- [~] **ITER-04** *(descoped — IA change)*: Each iteration detail displays β estimate, 95% confidence interval, p-value, sample size N, and replication hash with a working link to `make verify` instructions
+- [~] **ITER-05** *(descoped — IA change)*: Pair D iteration detail page at `/apps/abrigo/iterations/pair-d/v1` (PASS, Colombian young-worker services × COP/USD lagged 6–12mo, β = +0.137) renders fully with chart, evidence chain, and notebook links
+- [~] **ITER-06** *(descoped — IA change)*: FX-vol-on-CPI-surprise iteration detail page at `/apps/abrigo/iterations/fx-vol-on-cpi-surprise/v1` (CLOSED FAIL, β̂ = −0.000685, 90% CI ⊃ 0) renders with same visual weight as PASS pages, includes failure disposition memo
+- [~] **ITER-07** *(descoped — IA change)*: Iteration status pill component (`<StatusPill status={...}>`) encodes state with color, icon, AND text label — no color-only state encoding
+- [~] **ITER-08** *(descoped — IA change)*: Iteration URLs are content-addressable, human-readable slugs scoped under `/apps/abrigo/iterations/{slug}/v{n}`, never UUIDs or numeric IDs
+- [~] **ITER-09** *(descoped — IA change)*: Each iteration page emits JSON-LD `Dataset` + `ScholarlyArticle` structured data (with `isPartOf` pointing to the Abrigo app and the d2-π umbrella) and an OpenGraph card
 
 ### Abrigo App — On-Chain Dashboard (scoped under `/apps/abrigo/`)
 
@@ -217,15 +228,15 @@ Populated by gsd-roadmapper — 2026-05-11.
 | LAB-04 | Phase 2 | Complete |
 | LAB-05 | Phase 2 | Complete |
 | LAB-06 | Phase 2 | Complete |
-| ITER-01 | Phase 2 | Complete |
-| ITER-02 | Phase 2 | Complete |
-| ITER-03 | Phase 2 | Complete |
-| ITER-04 | Phase 2 | Complete |
-| ITER-05 | Phase 2 | Complete |
-| ITER-06 | Phase 2 | Complete |
-| ITER-07 | Phase 2 | Complete |
-| ITER-08 | Phase 2 | Complete |
-| ITER-09 | Phase 2 | Complete |
+| ITER-01 | Phase 2 | Descoped |
+| ITER-02 | Phase 2 | Descoped |
+| ITER-03 | Phase 2 | Descoped |
+| ITER-04 | Phase 2 | Descoped |
+| ITER-05 | Phase 2 | Descoped |
+| ITER-06 | Phase 2 | Descoped |
+| ITER-07 | Phase 2 | Descoped |
+| ITER-08 | Phase 2 | Descoped |
+| ITER-09 | Phase 2 | Descoped |
 | DASH-01 | Phase 3 | Pending |
 | DASH-02 | Phase 3 | Pending |
 | DASH-03 | Phase 3 | Pending |
