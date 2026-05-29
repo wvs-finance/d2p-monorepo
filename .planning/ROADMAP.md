@@ -51,6 +51,13 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 
 ## Phase Details
 
+> **⚠ Correction (2026-05-29, from Phase-1 research — `phases/01-…/01-RESEARCH.md` authoritative).** Phase-1 live re-probing corrected three facts that appear in stale form elsewhere in this roadmap (esp. the "~320M-block / Ormi-mandatory" framing in the Phase 3 / completeness-gate text and the scout-table references):
+> - Proxy deployed 2026-04-17 at block **283,417,317** → backfill ≈ **36.3M blocks** (~36,287 getLogs windows), NOT ~320M; INDEX-01 `startBlock` is RESOLVED.
+> - Public RPC is a full **archive node** → direct-RPC backfill is feasible; **Ormi is preferred, not mandatory** (every "Ormi mandatory" phrasing below is superseded).
+> - Block cadence **~100.7 ms** (refined from ~72 ms); whole-second `block.timestamp`, so `(block_number, log_index)` ordering holds.
+> - **Scout-path references that cite `.planning/scout/2026-05-25/` resolve to `.planning/scout/2026-05-29/`** (the canonical archive Plan 01-01 consolidates; see `.planning/scout/README.md`). SC#2a / Phase-3 SC#5 file paths should be read with this redirect.
+> - The 3 event topic0 role labels are likely inverted (TOPIC-01 resolves definitively); no schema hard-codes them.
+
 ### Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations
 **Goal**: Decide the data source (free vs paid) via a **provisional source selection** with verified provenance and numeric sufficiency bars so INDEX-01 can be authored; resolve the three blocking pre-conditions identified in PITFALLS (A3, B1, E1); and commit every machine-readable schema artifact — with arrival-timing fields treated as first-class — before any downstream phase touches code or data. Also: complete RPC-capability probes whose verdicts shape downstream phase plans (Phase 3 parity strategy, Phase 3 finality assumption, Phase 3 completeness gate). The RPC-capability probe is no longer a standalone KPD — it is absorbed into DATA-SOURCE-01's capability matrix.
 **Depends on**: KPD-16 (scout provenance archive) FIRST — every other Phase 1 sub-task assumes scout artifacts are trustworthy and pinned. After KPD-16 lands, the remaining Phase 1 work proceeds. DATA-SOURCE-01 runs early alongside the chain-capability probes (all are "probe reality before building" work).

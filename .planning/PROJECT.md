@@ -27,6 +27,13 @@ Findings that constrain the rest of this plan:
 
 All cited source URLs + fetch timestamps go into PANEL-01's per-batch provenance manifest (defined in EVENT-01).
 
+> **⚠ Correction (2026-05-29, from Phase-1 research — `phases/01-…/01-RESEARCH.md` is authoritative).** Live re-probing during Phase-1 planning overturned several scout-table assumptions above; the corrected facts are:
+> - **The proxy was deployed 2026-04-17 at block `283,417,317` — it is ~42 days old, NOT ~9 months / TGE-aged.** Real backfill = head − deploy ≈ **36.3M blocks (~36,287 `eth_getLogs` windows)**, not ~320M. (TGE ≠ contract deployment.)
+> - **"Direct-RPC backfill infeasible → Ormi mandatory" is FALSE.** The public RPC is a full **archive node** serving `eth_getLogs` + `eth_getStorageAt` at the deploy block, so a direct-RPC → Parquet backfill is feasible. **Ormi is *preferred*, not mandatory**; free-tier is amply sufficient (the DATA-SOURCE-01 verdict).
+> - **Native block cadence is ~100.7 ms/block** (refined from the ~72 ms estimate above) — still whole-second `block.timestamp`, so the `(block_number, log_index)` ordering key holds unchanged.
+> - **The 3-event topic0 role labels in `scout/2026-05-29/event_count_addendum.md` are likely INVERTED** (`0xb623…` matches `RequestCreated`'s shape, not the `0x65db…`+`0x5c09…` pair). Definitive resolution is Phase 2 (TOPIC-01); no schema hard-codes the labels.
+> The numbers in the table above are preserved as the pre-research record; where they conflict with this callout, this callout (and `01-RESEARCH.md`) wins.
+
 ## Requirements
 
 ### Validated

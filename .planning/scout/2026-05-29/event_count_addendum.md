@@ -1,5 +1,7 @@
 # Scout Addendum — RequestCreated event count + events-per-tx (2026-05-29)
 
+> **⚠ Superseded labeling (corrected 2026-05-29 by `phases/01-…/01-RESEARCH.md`).** The event-ROLE labels below — which call the `0x65db…`+`0x5c09…` pair the "request side" and `0xb623…` the "response side" — are **likely INVERTED**. Phase-1 research found the 3-topic/1120-byte `0xb623…` matches `RequestCreated`'s shape, and the 2-topic/32-byte pair are the smaller events. The **counts and structural ratios in this file remain valid** (3 topic0s ~1:1:1, ~2.15 events/tx, 234,999 transactions); only the topic0→event-NAME assignment is unsettled. Definitive resolution is Phase 2 (TOPIC-01), which re-pins the ABI. No schema or completeness-gate logic hard-codes these labels.
+
 **Purpose:** Resolve the count-anchor unit mismatch flagged by both reviewers — the original scout's `234,999` is a **transaction** count (`/addresses/{addr}/counters → transactions_count`), which the roadmap mis-used as an **event** count anchor for the completeness gate.
 
 **Method:** Public RPC `eth_getLogs` (address-filtered) over the 80 most-recent 1000-block windows from head, + `eth_getTransactionReceipt` on sampled txs. Blockscout `/logs` was rate-limited (429); RPC is the authoritative source here.

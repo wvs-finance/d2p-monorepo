@@ -44,16 +44,16 @@ populated: 2026-05-29
 | P01-T3 sha256 manifest + test | 01 | 1 | DATA-SOURCE-01 | smoke (file+sha256) | `uv run pytest tests/test_scout_archive.py -x -q` + `sha256sum -c` | created in task | ⬜ pending |
 | P02-T1 KPD-17 + KPD-09-docs | 02 | 2 | DATA-SOURCE-01 | smoke (content) | `grep` HAPPY PATH / safe_block_depth=1 / MEDIUM | created in task | ⬜ pending |
 | P02-T2 KPD-19 + FX config | 02 | 2 | DATA-SOURCE-01 | unit (yaml) | `python -c` yaml load `timestamp_convention=='close'` + grep | created in task | ⬜ pending |
-| P02-T3 candle fixture + verdict tests | 02 | 2 | DATA-SOURCE-01 | unit | `uv run pytest tests/fixtures/test_fx_candle_convention.py tests/test_preflight_verdicts.py -x -q` | created in task | ⬜ pending |
+| P02-T3 candle fixture + verdict tests + manifest append (N3) | 02 | 2 | DATA-SOURCE-01 | unit | `uv run pytest tests/fixtures/test_fx_candle_convention.py tests/test_preflight_verdicts.py -x -q && sha256sum -c .planning/scout/2026-05-29/PROVENANCE.sha256` (appends Plan-02's 3 scout .md to the manifest; set-equality re-check) | created in task | ⬜ pending |
 | P03-T1 data_sourcing_matrix.yaml | 03 | 2 | DATA-SOURCE-01 | unit (yaml-schema) | `python -c` fixed-schema + verdict assertions | created in task | ⬜ pending |
 | P03-T2 DATA_SOURCING.md memo | 03 | 2 | DATA-SOURCE-01 | smoke (content) | `grep` JUSTIFIED DEPARTURE / Supersedes / COMPLETENESS / BUDGET / sign-off + line-count | created in task | ⬜ pending |
-| P03-T3 matrix + sufficiency-bar tests | 03 | 2 | DATA-SOURCE-01 | unit (logic) | `uv run pytest tests/test_data_sourcing_matrix.py tests/test_sufficiency_bars.py -x -q` | created in task | ⬜ pending |
+| P03-T3 matrix + sufficiency-bar tests | 03 | 2 | DATA-SOURCE-01 | unit (logic) | `uv run pytest tests/test_data_sourcing_matrix.py tests/test_sufficiency_bars.py -x -q` (test_leg_b_tolerance_basis pins raw Wilson CI **[0.628, 0.790]** + `cross_epoch_widening: deferred_to_phase_3`, B2/B3) | created in task | ⬜ pending |
 | P04-T1 event_schema_v1.md | 04 | 2 | EVENT-01 | smoke (DDL-lint) | `grep` log_index / dedup key / uint256 / member_index / coarse secondary / topic0 | created in task | ⬜ pending |
 | P04-T2 batch_manifest schema + validator | 04 | 2 | EVENT-01 | unit (jsonschema) | `python -c` jsonschema.validate(manifest, schema) + required-fields | created in task | ⬜ pending |
-| P04-T3 event-schema + manifest tests | 04 | 2 | EVENT-01 | unit | `uv run pytest tests/test_event_schema.py tests/test_batch_manifest_schema.py -x -q` | created in task | ⬜ pending |
+| P04-T3 event-schema + manifest tests | 04 | 2 | EVENT-01 | unit (incl. RUNTIME polars round-trip) | `uv run pytest tests/test_event_schema.py tests/test_batch_manifest_schema.py -x -q` (test_uint256_not_int64 asserts a 78-digit string survives pl.Utf8 + pl.Decimal(38,0) RAISES on 2**256-1, B1) | created in task | ⬜ pending |
 | P05-T1 intersection .md/.json | 05 | 3 | SHARED-SCHEMA-01 | unit (jsonschema) | `python -c` Draft202012 check_schema + required + x-polars-dtype + grep anchored/breakage | created in task | ⬜ pending |
 | P05-T2 k_ai_extensions.md | 05 | 3 | SHARED-SCHEMA-01 | smoke (content) | `grep` (chain_id, tx_hash) / agent_class_keccak / per_agent_budget_native / classes / anchored | created in task | ⬜ pending |
-| P05-T3 JSON-Schema + consistency tests | 05 | 3 | SHARED-SCHEMA-01 | unit | `uv run pytest tests/test_shared_schema_json.py tests/test_schema_consistency.py -x -q` + full suite | created in task | ⬜ pending |
+| P05-T3 JSON-Schema + consistency tests | 05 | 3 | SHARED-SCHEMA-01 | unit (incl. RUNTIME polars round-trip) | `uv run pytest tests/test_shared_schema_json.py tests/test_schema_consistency.py -x -q` (test_polars_dtype_map asserts request_id x-polars-dtype==Utf8 + Decimal(38,0) RAISES on uint256, B1) + full suite | created in task | ⬜ pending |
 
 **Sampling continuity check:** no 3 consecutive tasks lack an automated verify — every task above carries an `<automated>` command in its plan. ✓
 
