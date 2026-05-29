@@ -132,6 +132,11 @@ export default async function ResearchReadingPage({
   const dateLabel = formatDate(new Date(entry.date), localeFull)
   const author = entry.authors.join(', ')
 
+  // Only reserve the TOC rail/column when the body actually has H2/H3 headings.
+  // Without this guard a heading-less body left an empty <aside> + a dead 16rem
+  // grid column (Evidence Collector 03.1-03 finding).
+  const hasToc = hasBody && Array.isArray(entry.toc) && entry.toc.length > 0
+
   // The FAIL memo (fx-vol-cpi-closed-fail) renders at IDENTICAL structural weight to a
   // PASS: full body, text-text-primary prose, no collapse, no muting (CROSS-09 / LAB-05).
   return (
@@ -149,7 +154,11 @@ export default async function ResearchReadingPage({
         .katex-display { overflow-x: auto; overflow-y: hidden; }
       `}</style>
 
-      <div className="lg:grid lg:grid-cols-[minmax(0,64ch)_16rem] lg:gap-12">
+      <div
+        className={
+          hasToc ? 'lg:grid lg:grid-cols-[minmax(0,64ch)_16rem] lg:gap-12' : 'mx-auto max-w-[64ch]'
+        }
+      >
         <div>
           <header className="mb-8">
             <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -188,7 +197,7 @@ export default async function ResearchReadingPage({
           </footer>
         </div>
 
-        {hasBody && (
+        {hasToc && (
           <aside className="mt-12 lg:mt-0">
             <ArticleTOC toc={entry.toc} label={t('toc_heading')} />
           </aside>
