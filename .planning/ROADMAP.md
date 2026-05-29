@@ -116,7 +116,9 @@ Plans:
 **Plans**: 3 (per spec §2) — A: math-pipeline + render-path gating spike; B: index + content migration + i18n; C: reading page + paper-bridge + a11y/perf gates.
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 03.1 to break down)
+- [ ] 03.1-01-PLAN.md — Plan A: math-pipeline + render-path GATING spike — install/pin katex+remark-math+rehype-katex, compiled body via s.mdx() with the §0 plugin chain, resurrect MDXRenderer, route-scoped KaTeX CSS, locale-split glob, spike fixture, e2e .katex/NOT-.katex-error under prod build (LAB-03) [wave 1]
+- [ ] 03.1-02-PLAN.md — Plan B: index + content migration + index i18n — server <Link> track filter (no nuqs), atomic schema+3-file per-locale migration with required track, extended PublicationCard, honest empty-per-track, es-CO-first index i18n (LAB-03) [wave 2]
+- [ ] 03.1-03-PLAN.md — Plan C: reading page + paper-bridge + gates — /research/[slug] Mode A/B/notFound, 64ch+TOC+sidenotes+theorem+figures, PaperBridge (sole client island, arXiv/PDF/DOI/BibTeX), reading i18n superset, MathML a11y entry, Lighthouse LCP gate (LAB-03) [wave 3]
 
 ### Phase 4: Agent Surface (MCP)
 
