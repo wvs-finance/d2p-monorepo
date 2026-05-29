@@ -2,7 +2,16 @@ module.exports = {
   ci: {
     collect: {
       numberOfRuns: 3,
-      url: [process.env.LHCI_COLLECT__URL ?? 'http://localhost:3000'],
+      // The reading-page URL (a migrated Mode-A /research/{slug}) is the LCP gate target
+      // for Plan 03.1-04 — rendered KaTeX math is the heaviest above-the-fold paint.
+      // The prod-build port is 3040 (matches playwright.config.ts webServer). When
+      // LHCI_COLLECT__URL is set (CI / Evidence Collector), it overrides this default.
+      url: process.env.LHCI_COLLECT__URL
+        ? [process.env.LHCI_COLLECT__URL]
+        : [
+            'http://localhost:3040/research/pair-d-dispatch-brief',
+            'http://localhost:3040/research',
+          ],
       settings: {
         formFactor: 'mobile',
         screenEmulation: {
