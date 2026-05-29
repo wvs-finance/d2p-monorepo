@@ -1,22 +1,32 @@
 // @vitest-environment node
-// Wave 0 scaffold — skipped assertions are un-skipped by Plan 04 (lib/openapi/generate.ts).
-// vitest has no test.fixme; .skip is the red-pending equivalent that keeps the suite green.
+// OpenAPI 3.1 generation — asserts the generated spec covers all four endpoints with the
+// correct health runtime example and round-trips through a YAML parser (Plan 04).
 
+import yaml from 'js-yaml'
 import { describe, expect, test } from 'vitest'
 
-// Indirected so tsc does not statically resolve the not-yet-created module (Plan 04 ships it).
-const GENERATE_MODULE = '@/lib/openapi/generate'
+import { generateOpenApiYaml } from '@/lib/openapi/generate'
 
 describe('OpenAPI 3.1 generation', () => {
-  test.skip('openapi.yaml contains openapi: 3.1.0 and all four endpoint paths', async () => {
-    const { generateOpenApiYaml } = (await import(GENERATE_MODULE)) as {
-      generateOpenApiYaml: () => string
-    }
-    const yaml = generateOpenApiYaml()
-    expect(yaml).toContain('openapi: 3.1.0')
-    expect(yaml).toContain('/api/dashboard')
-    expect(yaml).toContain('/api/status')
-    expect(yaml).toContain('/api/health')
-    expect(yaml).toContain('/api/mcp')
+  test('openapi.yaml contains openapi: 3.1.0 and all four endpoint paths', () => {
+    const out = generateOpenApiYaml()
+    expect(out).toContain('openapi: 3.1.0')
+    expect(out).toContain('/api/dashboard')
+    expect(out).toContain('/api/status')
+    expect(out).toContain('/api/health')
+    expect(out).toContain('/api/mcp')
+  })
+
+  test('the /api/health example uses runtime: node (M5), not nodejs', () => {
+    const out = generateOpenApiYaml()
+    expect(out).toContain('runtime: node')
+    expect(out).not.toContain('runtime: nodejs')
+  })
+
+  test('the generated document parses back as valid YAML', () => {
+    const out = generateOpenApiYaml()
+    expect(() => yaml.load(out)).not.toThrow()
+    const parsed = yaml.load(out) as { openapi?: string }
+    expect(parsed.openapi).toBe('3.1.0')
   })
 })
