@@ -55,8 +55,8 @@ describe('mcp-tools no-duplication + single-extend architecture', () => {
     expect(src.includes('const DashboardResponseSchema =')).toBe(false)
   })
 
-  // vitest has no test.fixme; .skip is the red-pending equivalent. Plan 05 un-skips this.
-  test.skip('lib/mcp-tools/index.ts re-exports the six registerXxx functions', async () => {
+  // Plan 05 created the barrel; this assertion is now live.
+  test('lib/mcp-tools/index.ts re-exports the six registerXxx functions', async () => {
     // Plan 05 creates the barrel. Indirected path so tsc does not statically resolve it.
     const BARREL_MODULE = '@/lib/mcp-tools/index'
     const barrel = (await import(BARREL_MODULE)) as Record<string, unknown>

@@ -1,11 +1,11 @@
 // @vitest-environment node
-// Wave 0 scaffold — skipped assertions are un-skipped by Plan 05 (route wiring + disableSse).
+// Plan 05 wires the route (barrel + disableSse) and un-skips these assertions.
 
 import { GET, POST } from '@/app/api/mcp/[transport]/route'
 import { describe, expect, test } from 'vitest'
 
 describe('MCP route /api/mcp/[transport]', () => {
-  test.skip('POST /api/mcp/mcp initialize returns 200 JSON-RPC result', async () => {
+  test('POST /api/mcp/mcp initialize returns 200 JSON-RPC result', async () => {
     const req = new Request('http://localhost/api/mcp/mcp', {
       method: 'POST',
       headers: {
@@ -27,7 +27,7 @@ describe('MCP route /api/mcp/[transport]', () => {
     expect(res.status).toBe(200)
   })
 
-  test.skip('tools/list returns all six tool names', async () => {
+  test('tools/list returns all six tool names', async () => {
     const req = new Request('http://localhost/api/mcp/mcp', {
       method: 'POST',
       headers: {
@@ -50,7 +50,7 @@ describe('MCP route /api/mcp/[transport]', () => {
     }
   })
 
-  test.skip('GET /api/mcp/sse returns 404 (disableSse)', async () => {
+  test('GET /api/mcp/sse returns 404 (disableSse)', async () => {
     const res = await GET(new Request('http://localhost/api/mcp/sse'))
     expect(res.status).toBe(404)
   })

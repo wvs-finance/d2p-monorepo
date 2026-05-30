@@ -32,33 +32,29 @@ test('/.well-known/openapi.yaml returns 200 YAML with OpenAPI 3.1 header', async
 
 // MCP route: streamable-http (/api/mcp/mcp) is the canonical transport; the SSE path
 // (/api/mcp/sse) returns 404 cleanly via mcp-handler's `disableSse: true` (no Redis).
-// FIXME(Phase 4 — Plan 05 wires the tools + disableSse): un-fixme these two assertions
-// once the MCP route registers tools and sets `disableSse: true`. No Redis is provisioned;
-// the SSE path must 404, NOT crash with `redisUrl is required`.
-test.fixme(
-  '/api/mcp/mcp streamable-http handshake — POST initialize is not 404',
-  async ({ request }) => {
-    const r = await request.post('/api/mcp/mcp', {
-      headers: {
-        'content-type': 'application/json',
-        accept: 'application/json, text/event-stream',
+// Plan 05 wired the tools + disableSse, so these two handshake assertions are live.
+// No Redis is provisioned; the SSE path must 404, NOT crash with `redisUrl is required`.
+test('/api/mcp/mcp streamable-http handshake — POST initialize is not 404', async ({ request }) => {
+  const r = await request.post('/api/mcp/mcp', {
+    headers: {
+      'content-type': 'application/json',
+      accept: 'application/json, text/event-stream',
+    },
+    data: {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2025-03-26',
+        capabilities: {},
+        clientInfo: { name: 'e2e', version: '0' },
       },
-      data: {
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'initialize',
-        params: {
-          protocolVersion: '2025-03-26',
-          capabilities: {},
-          clientInfo: { name: 'e2e', version: '0' },
-        },
-      },
-    })
-    expect(r.status()).not.toBe(404)
-  },
-)
+    },
+  })
+  expect(r.status()).not.toBe(404)
+})
 
-test.fixme('/api/mcp/sse returns 404 (disableSse, no Redis)', async ({ request }) => {
+test('/api/mcp/sse returns 404 (disableSse, no Redis)', async ({ request }) => {
   const r = await request.get('/api/mcp/sse')
   expect(r.status()).toBe(404)
 })
