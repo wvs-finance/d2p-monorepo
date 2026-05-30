@@ -21,6 +21,7 @@ dev = [
     "pyyaml>=6",
     "polars>=1.20",
     "eth-hash[pycryptodome]>=0.8.0",
+    "eth-abi>=5.2.0",
 ]
 
 [tool.pytest.ini_options]

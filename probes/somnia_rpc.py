@@ -137,6 +137,32 @@ def get_storage_at(addr: str, slot: str, blk: int | str = "latest", *, rpc: str 
     return _rpc("eth_getStorageAt", [addr, slot, tag], rpc=rpc)
 
 
+def get_request(request_id: int, block: int | str = "latest", *, rpc: str = RPC) -> str:
+    """``eth_call`` of ``getRequest(uint256)`` (selector ``0xc58343ef``) on the proxy.
+
+    Returns the raw hex ``result`` string (the ABI-encoded ``Request`` tuple) for
+    the off-chain ``responses`` state-fill (Arch B, Plan 03-04). The aggregate
+    ``Σ responses[].executionCost`` is decoded by ``indexing.decode``.
+
+    READ AT THE RequestFinalized BLOCK (or any block ≥ finalization). Reading
+    pre-finalization undercounts ``executionCost`` because members report their
+    cost as they respond — RESEARCH Pitfall 3. Pass the finalization block (or
+    ``"latest"`` only when the request is already known terminal).
+
+    NETWORK-TOUCHING: invoked from the ``__main__`` block / Plan 03-04 live probe,
+    NEVER from CI. The CI decode tests run against the frozen synthetic fixture.
+    """
+    data = "0xc58343ef" + f"{request_id:064x}"
+    return _rpc(
+        "eth_call",
+        [
+            {"to": PROXY, "data": data},
+            (block if isinstance(block, str) else _hex_int(block)),
+        ],
+        rpc=rpc,
+    )
+
+
 def get_tx_by_hash(h: str, *, rpc: str = RPC) -> dict[str, Any] | None:
     """``eth_getTransactionByHash`` — used to resolve the proxy deployment block."""
     return _rpc("eth_getTransactionByHash", [h], rpc=rpc)
@@ -180,4 +206,12 @@ if __name__ == "__main__":  # pragma: no cover - network tooling, not a CI test
     impl_slot = get_storage_at(PROXY, IMPLEMENTATION_SLOT)
     print(f"proxy IMPL slot   = {impl_slot}")
     print(f"deployment_block  = {DEPLOYMENT_BLOCK:,}")
+    # getRequest(uint256) live demo — guarded so a non-existent / unfinalized id
+    # does not crash the probe. Replace the id with a real finalized requestId.
+    demo_request_id = 1
+    try:
+        raw = get_request(demo_request_id)
+        print(f"getRequest({demo_request_id})    = {raw[:74]}… (len={len(raw)})")
+    except Exception as exc:  # noqa: BLE001 - probe demo, never fatal
+        print(f"getRequest({demo_request_id})    = <skipped: {exc}>")
     print(f"# re-confirm any fact above against the scout archive .md files; ts={ts}")
