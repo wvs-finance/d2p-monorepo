@@ -21,7 +21,7 @@
 
 - [x] **IMPL-01** — Track proxy implementation transitions. Index `Upgraded(address)` events at the proxy (EIP-1967 topic0). Produce `impl_history.parquet` mapping `block_range → implementation_address`. PANEL-01 join: left-join on `block_number BETWEEN impl_first_seen_block AND impl_last_seen_block`. No-upgrade edge case handled per KPD-07: minimum one row from `[deployment_block, ∞)`. Pre-INDEX-01 beacon/diamond probe required per KPD-17.
 
-- [ ] **INDEX-01** — Indexer deployed against the proxy address `0x5E5205CF…163E6`, **on the data source DATA-SOURCE-01 selects** (Ormi free tier if it cleared the sufficiency bar; the costed paid alternative otherwise). **Blocked by DATA-SOURCE-01 — not authored until the free-vs-paid verdict lands.** Owns subgraph authorship (`subgraphs/iagentrequester/`: schema.graphql, AssemblyScript mappings, networks.yaml for chain 5031) per KPD-08. Backfilled from contract deployment block (resolved in plan-phase from creator EOA `0x320362C7…fdE88936`) to present. Reconciliation against direct-RPC per KPD-04 (per-window parity, not random row sample); the parity mechanism is conditional on the DATA-SOURCE-01 capability-matrix `eth_getBlockReceipts` row.
+- [~] **INDEX-01** (in progress — 03-01 Wave 0 decode surface + 03-02 Wave 0 pure-logic validation engine done; 03-03..03-04 remain) — Indexer deployed against the proxy address `0x5E5205CF…163E6`, **on the data source DATA-SOURCE-01 selects** (Ormi free tier if it cleared the sufficiency bar; the costed paid alternative otherwise). **Blocked by DATA-SOURCE-01 — not authored until the free-vs-paid verdict lands.** Owns subgraph authorship (`subgraphs/iagentrequester/`: schema.graphql, AssemblyScript mappings, networks.yaml for chain 5031) per KPD-08. Backfilled from contract deployment block (resolved in plan-phase from creator EOA `0x320362C7…fdE88936`) to present. Reconciliation against direct-RPC per KPD-04 (per-window parity, not random row sample); the parity mechanism is conditional on the DATA-SOURCE-01 capability-matrix `eth_getBlockReceipts` row.
 
 - [x] **SHARED-SCHEMA-01** — Joint-analysis schema, explicitly marked `v1-K_AI-anchored` with documented breakage budget when K_D ships. Two-table design: `schemas/abrigo_cost_panel_intersection_v1.md` (strict intersection columns) + `schemas/abrigo_cost_panel_k_ai_extensions_v1.md` (K_AI sidecar). Joint-analysis consumers in `abrigo-analytics` join on intersection PK.
 
@@ -107,7 +107,7 @@ Populated by the roadmapper on 2026-05-25 from `.planning/ROADMAP.md`; updated 2
 | SHARED-SCHEMA-01 | Phase 1: Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | Complete |
 | TOPIC-01 | Phase 2: Topic & Implementation Provenance | Complete |
 | IMPL-01 | Phase 2: Topic & Implementation Provenance | Complete |
-| INDEX-01 | Phase 3: Subgraph Indexing (blocked by DATA-SOURCE-01) | Pending |
+| INDEX-01 | Phase 3: Subgraph Indexing (blocked by DATA-SOURCE-01) | In Progress (03-01 + 03-02 done) |
 | BYTECODE-01 | Phase 4: Parallel Cost Inputs (4a-pre + 4a-validate, split across Phase 3 boundary) | Pending |
 | GAS-01 | Phase 4: Parallel Cost Inputs (4b) | Pending |
 | FX-01 | Phase 4: Parallel Cost Inputs (4c) | Pending |
