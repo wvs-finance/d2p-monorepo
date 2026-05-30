@@ -165,7 +165,13 @@ Plans:
   3. A connected wallet user on the wrong chain (e.g., Polygon) sees a chain-switch call-to-action distinct from a user on an entirely unsupported chain (e.g., Solana) who sees an explanatory message — the two states are never conflated.
   4. Every instrument page explicitly labels the instrument as "hedging product, not leverage" in both `es-CO` and `en`, and this risk disclosure is present without scrolling on any viewport from 360px wide upward.
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Foundation: install recharts@3.8.1, extend AbrigoInstrument with strike/slope, payoff + wallet-state pure libs, Wave 0 tests + bundle-isolation arch test (DEFI-02, DEFI-04, DEFI-07) [wave 1]
+- [ ] 05-02-PLAN.md — Provider activation: getDefaultConfig migration + WalletConnect connectors + ochre HEX RainbowKit theme + (defi)/providers.tsx swap + live modal checkpoint (DEFI-01) [wave 2]
+- [ ] 05-03-PLAN.md — Instruments index (honest empty) + RiskCallout + InstrumentParams + es-CO-first i18n + index e2e/axe + live verify (DEFI-03, DEFI-05) [wave 2]
+- [ ] 05-04-PLAN.md — Per-instrument detail: WalletPanel 4-state + WalletStatusPill + recharts PayoffDiagram island + PoolStatePanel + detail page + wallet/instrument e2e + live verify (DEFI-02, DEFI-03, DEFI-04, DEFI-05, DEFI-06, DEFI-07) [wave 3]
 
 ---
 
