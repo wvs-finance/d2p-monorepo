@@ -91,7 +91,7 @@ Each maps to exactly one phase in the roadmap.
 - [x] **AGENT-07**: MCP tool `query_econometric_panel(app, panel, filters)` returns rows from HuggingFace panel dataset (scoped to the app's panels) with paging
 - [x] **AGENT-08**: OpenAPI spec at `/.well-known/openapi.yaml` documents every public REST endpoint with examples
 - [x] **AGENT-09**: `/llms.txt` at site root lists primary entry URLs, content licensing, and pointer to MCP endpoint
-- [ ] **AGENT-10**: Every iteration / instrument / dashboard page emits JSON-LD structured data that mirrors the MCP tool output schema
+- [x] **AGENT-10**: Every iteration / instrument / dashboard page emits JSON-LD structured data that mirrors the MCP tool output schema
 
 ### Wallet and Read-First DeFi
 
@@ -254,7 +254,7 @@ Populated by gsd-roadmapper — 2026-05-11.
 | AGENT-07 | Phase 4 | Complete |
 | AGENT-08 | Phase 4 | Complete |
 | AGENT-09 | Phase 4 | Complete |
-| AGENT-10 | Phase 4 | Pending |
+| AGENT-10 | Phase 4 | Complete |
 | DEFI-01 | Phase 5 | Pending |
 | DEFI-02 | Phase 5 | Pending |
 | DEFI-03 | Phase 5 | Pending |

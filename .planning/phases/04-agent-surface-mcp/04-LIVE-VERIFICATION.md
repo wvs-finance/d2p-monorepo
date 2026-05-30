@@ -16,3 +16,18 @@ Run by the orchestrator against a clean prod build (`pnpm build && pnpm start -p
 **Verdict: APPROVED.** All AGENT-01/AGENT-02 live claims hold. The streamable-http transport is the canonical path; SSE is a clean Redis-free 404. The single-ZodObject `get_iteration_state` fix is confirmed on the real SDK transport (not just the in-memory test).
 
 **Deferred to manual (per 04-VALIDATION):** a full external MCP client (Claude Desktop/Cursor) handshake post-deploy — the scripted JSON-RPC round-trip above is the CI/local proxy for it.
+
+## Task 04-06 — dashboard JSON-LD mirror (AGENT-10) — 2026-05-29
+
+Orchestrator live verification against a clean local prod build (`/apps/abrigo/dashboard`; JSON-LD is server-rendered, asserted from SSR HTML + a browser screenshot/console pass).
+
+| # | Claim | Verdict | Evidence |
+|---|-------|---------|----------|
+| 1 | Route renders 200 | ✓ PASS | `/apps/abrigo/dashboard` → 200 |
+| 2 | `<script type="application/ld+json">` `@type:SoftwareApplication`, `name:Abrigo` | ✓ PASS | parsed from SSR HTML |
+| 3 | Mirrors MCP tool output (honest status) | ✓ PASS | `status=not_deployed`, `chainsConfigured=5`, per-chain `= empty` |
+| 4 | No fabricated numeric values (anti-fishing) | ✓ PASS | no `"poolBalance/balance/reserves":<digit>` |
+| 5 | No console errors | ✓ PASS | 0 errors / 0 warnings |
+| — | Screenshot | `/tmp/d2p-verify/04-06-dashboard.png` |
+
+**Verdict: APPROVED.** AGENT-10 live-confirmed (dashboard-only this phase per the recorded waiver). Dashboard JSON-LD ≡ MCP tool output schema; honest empties; no fabrication.
