@@ -25,7 +25,7 @@ created: 2026-05-30
 
 > **Ground-truth gate (CLAUDE.md):** automated green is necessary, not sufficient. The instrument page + wallet states + payoff diagram + risk disclosure are RENDERED surfaces → Evidence-Collector live-verification (Playwright) per route task. **CI e2e runs LOCAL-build** (memory `ci_e2e_architecture.md`); wallet JS isolated to `(defi)` (FOUND-11).
 >
-> **Charting lib: recharts 3.8.1** (research: visx 3.12 lacks React 19 support; recharts 3.8.1 supports it). UI-SPEC chart contract is library-agnostic — recharts satisfies it. `next build --analyze` bundle-isolation check is WAIVER-05-05.
+> **Charting lib: recharts 3.8.1** (research: visx 3.12 lacks React 19 support; recharts 3.8.1 supports it). UI-SPEC chart contract is library-agnostic — recharts satisfies it. Next 16's built-in `.next/diagnostics/route-bundle-stats.json` (after `pnpm build`) is the WAIVER-05-05 bundle-isolation check — NOT `--analyze`/`@next/bundle-analyzer` (neither installed nor a real flag).
 
 ---
 
@@ -47,7 +47,7 @@ created: 2026-05-30
 |--------|-----------|------------------------------|-----------------|--------|
 | **DEFI-01** | unit + e2e | RainbowKit `getDefaultConfig` wired with WalletConnect connectors (`NEXT_PUBLIC_WALLETCONNECT_ID`); `(defi)/providers.tsx` exports the full Wagmi/RainbowKit tree; e2e: ConnectButton renders + modal opens. Mobile deeplink = WAIVER-05-02 (placeholder projectId) | `lib/wagmi/{config,Providers}.ts(x)`, `app/(defi)/providers.tsx` | ⬜ pending |
 | **DEFI-02** | unit + e2e | 4-state derivation from wagmi `getAccount` (connecting/reconnecting→CONNECTING, disconnected→DISCONNECTED, connected+`chain===undefined`→WRONG_CHAIN, connected+chain→READY) — unit-tested pure deriver; e2e asserts each state's distinct affordance | `lib/wallet/state.ts` (deriver), `components/.../WalletPanel.tsx` | ⬜ pending |
-| **DEFI-03** | e2e + structural | per-instrument page at `app/(defi)/apps/abrigo/instruments/[id]/[chain]/page.tsx` (URL `/apps/abrigo/instruments/{id}/{chain}`) shows params/payoff/pool/participants — read-only, no wallet gate; honest-empty index when registry empty. FOUND-11: grep no wallet provider in `(lab)`/`(apps)` | the route + index | ⬜ pending |
+| **DEFI-03** | e2e + structural | per-instrument page at `app/(defi)/apps/abrigo/instruments/[id]/[chain]/page.tsx` (URL `/apps/abrigo/instruments/{id}/{chainId}`, `[chain]`=numeric chainId) shows params/payoff/pool + an HONEST participant COUNT (`InstrumentState.lpPositionCount`, em-dash when not deployed) — read-only, no wallet gate; honest-empty index when registry empty. Per-address "recent participants" event FEED is deferred = **WAIVER-05-06**. FOUND-11: grep no wallet provider in `(lab)`/`(apps)` | the route + index | ⬜ pending |
 | **DEFI-04** | unit + e2e | PayoffDiagram (recharts, `next/dynamic` client island) renders CFMM curve + strike + slope + current-price marker, locale axis labels, `fill="var(--token)"`, no gradient. Unit-test the curve math + props with EXAMPLE params (in tests; not public until an instrument deploys). `AbrigoInstrument` gains `strike`/`slope` fields | `components/.../PayoffDiagram.tsx`, `lib/apps/abrigo/instruments.ts` | ⬜ pending |
 | **DEFI-05** | e2e (a11y/visual) | risk callout "hedging product, not leverage" es-CO+en, ABOVE FOLD at 360px (`scrollY===0` + screenshot), persistent (not dismissible), full-weight | `components/.../RiskCallout.tsx`, instrument page | ⬜ pending |
 | **DEFI-06** | e2e (axe + keyboard) | wallet modal keyboard-navigable, no focus trap on close, focus returns, SR state announcements via `aria-live="polite"` WalletPanel wrapper; `@axe-core/playwright` clean on the open modal + each state | wallet panel + RainbowKit modal | ⬜ pending |
@@ -61,7 +61,7 @@ created: 2026-05-30
 
 - [ ] `tests/unit/wallet-state.test.ts` — the 4-state deriver (real assertions, all branches; non-EVM unreachable noted)
 - [ ] `tests/unit/payoff-curve.test.ts(x)` — CFMM curve math + PayoffDiagram props with EXAMPLE strike/slope (tests only)
-- [ ] `tests/unit/instruments-index.test.tsx` — honest-empty index (no fabricated instruments)
+- [ ] `tests/unit/instruments-index.test.ts` — honest-empty index (no fabricated instruments) + B2 chainId→pool selector fixture (data-only, `@vitest-environment node`, `.test.ts` NOT `.tsx`)
 - [ ] `tests/e2e/instrument-page.spec.ts` — read-only render, risk-above-fold-at-360px, no wallet gate (test.fixme until an instrument exists OR drive an example fixture in test env)
 - [ ] `tests/e2e/wallet-states.spec.ts` — the 4 states + switch CTA + axe a11y (DEFI-06); mock/inject wallet state
 - [ ] `tests/architecture/defi-bundle-isolation.test.ts` — no wallet provider import in `(lab)`/`(apps)` (FOUND-11)
@@ -78,7 +78,8 @@ created: 2026-05-30
 | RainbowKit modal visual fidelity (WAIVER-05-01) | DEFI-01 | theming needs a real screenshot | Evidence Collector screenshot of the open themed modal post-build |
 | Non-EVM "unsupported chain" message (WAIVER-05-03) | DEFI-07 | unreachable via wagmi EVM connectors | N/A — documented as unreachable; no state built |
 | Instrument page live values (WAIVER-05-04) | DEFI-03, DEFI-04 | no contract deployed (empty registry) | When an Abrigo instrument deploys, verify params/payoff/pool against a block explorer |
-| recharts bundle isolation (WAIVER-05-05) | DEFI-04 | needs a build analysis | `next build --analyze` confirms recharts/d3 only in the `(defi)` chunk |
+| recharts bundle isolation (WAIVER-05-05) | DEFI-04 | needs a build analysis | After `pnpm build`, assert recharts/d3 chunks appear ONLY under the `(defi)` instrument-route chunk list in `.next/diagnostics/route-bundle-stats.json` and are absent from `(lab)`/`(apps)`/`(dashboard)` routes (NO `--analyze`/`@next/bundle-analyzer`) |
+| Per-address recent-participants event feed (WAIVER-05-06) | DEFI-03 | aggregator exposes `lpPositionCount` (count), not per-address events; no event indexer this phase | The instrument page surfaces the honest count now; a per-address feed ships when an event indexer exists |
 
 ---
 

@@ -221,27 +221,32 @@ const { switchChain, chains } = useSwitchChain()
 </button>
 ```
 
-### Pattern 4: Pool State Filter (no full-chain refetch)
+### Pattern 4: Pool State Filter (no full-chain refetch) — keyed by numeric chainId
 
 ```typescript
-// Source: lib/dashboard/aggregator.ts (verified — aggregateAllChains returns ChainAggregationResult[])
-// PoolStatePanel.tsx — 'use client'
+// Source: lib/dashboard/aggregator.ts (verified — aggregateAllChains returns ChainAggregationResult[]).
+// PoolStatePanel is an RSC (NOT 'use client') — it receives the pre-filtered InstrumentState | null as a prop.
+// The selector below runs on the server in the page RSC.
 import { aggregateAllChains } from '@/lib/dashboard/aggregator'
-import type { ChainAggregationResult } from '@/lib/dashboard/aggregator'
+import type { ChainAggregationResult, InstrumentState } from '@/lib/dashboard/aggregator'
 
-// Filter aggregator results to the single instrument — no new BFF call
+// The [chain] URL segment IS the numeric chainId (AbrigoInstrument.chainId — SupportedChainId).
+// We filter by chainId (number), NOT chainName: chainName ("Celo"/"OP Mainnet"/"Arbitrum One")
+// has no stable slug and would silently null every real instrument. chainId is unambiguous.
 function getInstrumentPoolState(
   results: ChainAggregationResult[],
   instrumentId: string,
-  chainName: string,
-) {
-  const chainResult = results.find((r) => r.chainName === chainName)
+  chainId: number,
+): InstrumentState | null {
+  const chainResult = results.find((r) => r.chainId === chainId)
   if (!chainResult || chainResult.status === 'empty') return null
   return chainResult.instruments.find((i) => i.id === instrumentId) ?? null
 }
 ```
 
-**Data access approach:** The per-instrument page is an RSC. It calls `aggregateAllChains()` server-side (same as the dashboard BFF) and passes the filtered `InstrumentState | null` to `PoolStatePanel`. No client-side hook needed — the pool state is server-fetched, consistent with the read-first RSC-first pattern. `PoolStatePanel` receives pre-filtered data as a prop (not a hook call).
+**Data access approach:** The per-instrument page is an RSC. It calls `aggregateAllChains()` server-side (same as the dashboard BFF) and passes the filtered `InstrumentState | null` to `PoolStatePanel`. No client-side hook needed — the pool state is server-fetched, consistent with the read-first RSC-first pattern. **`PoolStatePanel` is an RSC** (no `'use client'`) and receives pre-filtered data as a prop (not a hook call).
+
+**`[chain]` segment contract (locked):** `[chain] = instrument.chainId` (numeric — e.g. `42220` for Celo). It is already on `AbrigoInstrument` and on `ChainAggregationResult.chainId`, so card links, the page `notFound()` lookup, and the pool selector all key off the same unambiguous integer. The instrument lookup is `ABRIGO_INSTRUMENTS.find(i => i.id === id && i.chainId === Number(chainParam))`. Do NOT use `chainName` as the URL segment.
 
 ### Pattern 5: PayoffDiagram Client Island (recharts)
 
@@ -274,14 +279,30 @@ const tickFormatter = (locale: string) => (value: number) =>
   new Intl.NumberFormat(locale, { notation: 'compact' }).format(value)
 ```
 
-**Import pattern for `next/dynamic`:**
+**Import pattern for `next/dynamic` (Next 16 — client wrapper REQUIRED):**
+
+`dynamic(..., { ssr: false })` is a **build error inside a Server Component** in Next 16 (`"ssr: false is not allowed with next/dynamic in Server Components"`). The `ssr:false` lazy import must live in a thin `'use client'` wrapper; the RSC page imports the wrapper directly (no `dynamic(`, no `ssr:false` in the server file). The client boundary still code-splits recharts into the `(defi)` instrument-route chunk, so bundle isolation is preserved.
+
 ```typescript
-// In the parent RSC (per-instrument page.tsx):
+// components/defi/PayoffDiagramClient.tsx — 'use client' (the wrapper that owns ssr:false)
+'use client'
 import dynamic from 'next/dynamic'
-const PayoffDiagram = dynamic(
-  () => import('@/components/defi/PayoffDiagram'),
-  { ssr: false, loading: () => <div style={{ minHeight: 240 }} /> }
-)
+
+const PayoffDiagram = dynamic(() => import('./PayoffDiagram'), {
+  ssr: false,
+  // The loading skeleton AND the ResponsiveContainer parent must be sized — recharts
+  // ResponsiveContainer renders 0-height without a sized parent.
+  loading: () => <div className="min-h-[240px] sm:min-h-[320px]" aria-hidden="true" />,
+})
+
+export { PayoffDiagram as PayoffDiagramClient }
+```
+
+```typescript
+// app/(defi)/apps/abrigo/instruments/[id]/[chain]/page.tsx — RSC (NO dynamic, NO ssr:false here)
+import { PayoffDiagramClient } from '@/components/defi/PayoffDiagramClient'
+// ...
+<PayoffDiagramClient strike={instrument.strike} slope={instrument.slope} currentPrice={...} locale={locale} />
 ```
 
 **Color wiring in recharts:** recharts props accept CSS variable strings directly:
@@ -599,7 +620,7 @@ export function WalletPanel() {
 1. **AbrigoInstrument `strike`/`slope` source of truth post-deploy**
    - What we know: The payoff diagram needs `strike` and `slope`. The current `AbrigoInstrument` type has neither. They must be added to the type.
    - What's unclear: Will strike/slope come from on-chain reads (ABI calls) or from the registry constant (hardcoded when registering)? The provisional ABI doesn't include `getStrike()` / `getSlope()` functions.
-   - Recommendation: Add `strike: number` and `slope: number` to `AbrigoInstrument` as static registry fields (set when adding the entry) and update the provisional ABI stub to include these functions as comments. The planner should document this as a deploy-time data question.
+   - Recommendation: Add `strike: number` and `slope: number` to `AbrigoInstrument` as static registry fields (set when adding the entry) and update the provisional ABI stub to include these functions as comments. The planner should document this as a deploy-time data question. **ABI note:** `ABRIGO_ABI` is intentionally left WITHOUT `getStrike()`/`getSlope()` getters — strike/slope are static registry fields (provisional), not on-chain reads, until the real Foundry artifact lands.
 
 2. **RainbowKit `locale="es"` vs no locale for es-CO users**
    - What we know: RainbowKit's `Locale` type supports `'es'` and `'es-419'` but NOT `'es-CO'`. Passing `locale="es"` localizes RainbowKit's internal modal copy.
@@ -655,7 +676,8 @@ export function WalletPanel() {
 | WAIVER-05-02 | WalletConnect mobile deeplink fires (MetaMask Mobile, Valora) — requires real projectId | Real Reown projectId provisioned |
 | WAIVER-05-03 | Solana "UNSUPPORTED_CHAIN" state — unreachable via EVM connectors | Deferred |
 | WAIVER-05-04 | DEFI-03/04 per-instrument page with real data — unexercisable pre-deploy | Real contract deployed |
-| WAIVER-05-05 | recharts bundle isolation to `(defi)` chunk — verify via `next build` bundle analysis | Executor runs bundle analysis before implementing PayoffDiagram |
+| WAIVER-05-05 | recharts bundle isolation to `(defi)` chunk — verify via Next 16's built-in `.next/diagnostics/route-bundle-stats.json` after `pnpm build` (NOT `--analyze` / `@next/bundle-analyzer` — neither is installed nor a real Next 16 flag) | Executor inspects route-bundle-stats after build |
+| WAIVER-05-06 | Per-address "recent participants" event FEED (DEFI-03) — the aggregator exposes `lpPositionCount` (a COUNT, honest), not per-address events; no event indexer this phase | A participant event indexer ships |
 
 ### Sampling Rate
 
@@ -714,7 +736,7 @@ export function WalletPanel() {
 - Standard stack (RainbowKit, wagmi hooks): HIGH — verified against installed node_modules types
 - Provider tree pattern: HIGH — existing `lib/wagmi/Providers.tsx` already has the correct structure
 - `getDefaultConfig` migration path: HIGH — type signature verified
-- Chart library recommendation (recharts): HIGH for install feasibility; MEDIUM for bundle isolation claim (verify via `next build --analyze` as WAIVER-05-05)
+- Chart library recommendation (recharts): HIGH for install feasibility; MEDIUM for bundle isolation claim (verify via Next 16's built-in `.next/diagnostics/route-bundle-stats.json` after `pnpm build` as WAIVER-05-05 — `--analyze`/`@next/bundle-analyzer` are NOT available)
 - CFMM payoff math: MEDIUM — `slope * max(strike - price, 0)` is a standard put payoff approximation; the actual Abrigo contract math should be confirmed when the ABI is finalized
 - Architecture (route placement): HIGH — BLOCKER-2 fix from UI-SPEC review, verified against route group mechanics
 - a11y (DEFI-06): MEDIUM — RainbowKit a11y claimed via library, live-verified by Evidence Collector (not statically asserted)
