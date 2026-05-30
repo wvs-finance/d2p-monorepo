@@ -150,3 +150,18 @@ body {
   color: var(--text-primary);
   font-family: var(--font-sans);
 }
+
+/* ============================================================
+   Section 5 — RainbowKit modal surface overrides
+   Scoped under [data-rk] so they only affect RainbowKit's own DOM.
+   accentColor is set via lightTheme() in HEX — not overridable here
+   because RainbowKit's compositor needs the HEX value directly.
+   These vars override the modal surface colors to match the design system.
+   ============================================================ */
+[data-rk] {
+  --rk-fonts-body: var(--font-plex-sans), system-ui, sans-serif;
+  --rk-colors-modalBackground: var(--bg-elevated);
+  --rk-colors-modalBorder: var(--border-default);
+  --rk-colors-modalText: var(--text-primary);
+  --rk-colors-modalTextSecondary: var(--text-secondary);
+}

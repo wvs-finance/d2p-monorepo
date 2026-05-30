@@ -12,12 +12,26 @@
 
 import '@rainbow-me/rainbowkit/styles.css'
 
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { wagmiConfig } from './config'
+
+// HEX values REQUIRED — RainbowKit's compositor performs string operations on accentColor
+// expecting #rrggbb format. oklch breaks the compositor (RESEARCH Pitfall 3).
+// #a87c3a = locked ochre token; #f8f5f0 = HEX approx of --bg-canvas.
+// locale="es" — RainbowKit supports 'es' and 'es-419'; 'es-CO' is NOT in its Locale type.
+// Our own WalletPanel copy stays es-CO per CLAUDE.md.
+// No `chains` prop on RainbowKitProvider — v2 reads chains from wagmiConfig automatically.
+const rbkTheme = lightTheme({
+  accentColor: '#a87c3a', // HEX — RainbowKit compositor; oklch breaks it
+  accentColorForeground: '#f8f5f0',
+  borderRadius: 'medium',
+  fontStack: 'system',
+  overlayBlur: 'none',
+})
 
 export interface WagmiProvidersProps {
   children: ReactNode
@@ -41,7 +55,9 @@ export function WagmiProviders({ children }: WagmiProvidersProps) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
+        <RainbowKitProvider theme={rbkTheme} locale="es">
+          {children}
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
