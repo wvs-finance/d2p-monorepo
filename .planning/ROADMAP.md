@@ -224,7 +224,7 @@ When the panel is materialized, `tests/conftest.py` records the actual host metr
 |-------|----------------|--------|-----------|
 | 1. Data-Sourcing Gate, Pre-flight Addendum & Schema Foundations | 5/5 | Complete (01-01..01-05 done; DATA-SOURCE-01 verdict landed → INDEX-01 unblocked) | - |
 | 2. Topic & Implementation Provenance | 2/2 | Complete (02-01 TOPIC-01 Wave 1 + 02-02 IMPL-01 Wave 2 done) | 2026-05-29 |
-| 3. Subgraph Indexing | 2/4 | In Progress (03-01 decode surface + 03-02 INDEX-01 Wave 0 pure-logic validation engine done; 03-03..03-04 remain) | - |
+| 3. Subgraph Indexing | 3/4 | In Progress (03-01 decode surface + 03-02 INDEX-01 Wave 0 pure-logic validation engine + 03-03 subgraph authoring [proxy-pinned manifest, non-lossy CommitteeDepositFailed fold, manifest-lint] done; 03-04 live probes remain) | - |
 | 4. Parallel Cost Inputs | 0/TBD | Not started | - |
 | 5. Panel Materialization | 0/TBD | Not started | - |
 | 6. Statistics, Arrival-Periodicity Precursor & M2 Ingest Contract | 0/TBD | Not started | - |
