@@ -3,10 +3,10 @@
 Maps 03-VALIDATION.md rows #1 (Σ executionCost), #2 (uint256→Utf8), #3
 (wei→Decimal(38,0)). NO live network: the only input is the FROZEN SYNTHETIC
 fixture ``tests/fixtures/getrequest_response.json`` (a 3-member SUCCESS request,
-Σ = 0.2 SOMI). This module MUST NOT read ``getrequest_response_real.json`` —
-the real recorded return is captured + bound-checked NON-STRICT in Plan 03-04 on
-that SEPARATE file so a legitimate Failed/TimedOut zero-cost finalized request is
-never false-rejected.
+Σ = 0.2 SOMI). This module MUST NOT read Plan 03-04's SEPARATE real-return
+fixture — the real recorded return is captured + bound-checked NON-STRICT in
+Plan 03-04 on that separate file so a legitimate Failed/TimedOut zero-cost
+finalized request is never false-rejected.
 
 Per CONTRACT DECISION N2, the shared helper ``load_json`` (callable) is consumed
 as a TEST PARAMETER from conftest.py; the fixture path is a module literal.
@@ -83,7 +83,7 @@ def test_structural_mis_slice_guard(load_json):
     legitimate Failed/TimedOut finalized request has Σ == 0, and a strict bound
     would false-reject it. The exact-match + per-member≤budget pair catches the
     mis-slice structurally WITHOUT conflating it with a legitimate zero (whose
-    non-strict bound lives in 03-04 on getrequest_response_real.json).
+    non-strict bound lives in 03-04 on its own separate real-return fixture).
     """
     fx = load_json(FIXTURE_PATH)
     request_tuple = decode_get_request(fx["raw"])
@@ -118,8 +118,7 @@ def test_selector_constant():
     assert RESPONSE_RECEIPT_INDEX == 3
 
 
-def test_does_not_read_real_fixture():
-    """This synthetic-only module never reads the 03-04 real fixture."""
-    assert not Path("tests/fixtures/getrequest_response_real.json").exists() or True
-    # the assertion above is intentionally permissive; the binding guarantee is
-    # the grep acceptance criterion that this module never references the real file.
+# NOTE: this synthetic-only module deliberately references NO 03-04 real fixture
+# (the real recorded return is bound-checked NON-STRICT in Plan 03-04 on its own
+# separate file). The binding guarantee is the acceptance grep that the real
+# fixture path never appears here — so there is intentionally no test naming it.
