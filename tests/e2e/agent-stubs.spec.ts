@@ -30,18 +30,75 @@ test('/.well-known/openapi.yaml returns 200 YAML with OpenAPI 3.1 header', async
   expect(body).toContain('openapi: 3.1.0')
 })
 
-// MCP route: must exist (never 404). Returns 200 or 405 depending on transport negotiation.
-// FIXME(Phase 4 — MCP Agent Surface): the SSE transport (mcp-handler) requires Redis
-// (`redisUrl is required`); with no REDIS_URL the GET throws an unhandledRejection that
-// destabilises the server and cascades into unrelated timeouts. Phase 4 builds the real
-// MCP surface and will provision/mock Redis; re-enable this assertion there.
-test.fixme('/api/mcp/sse route exists (no 404)', async ({ request }) => {
-  const r = await request.get('/api/mcp/sse')
+// MCP route: streamable-http (/api/mcp/mcp) is the canonical transport; the SSE path
+// (/api/mcp/sse) returns 404 cleanly via mcp-handler's `disableSse: true` (no Redis).
+// Plan 05 wired the tools + disableSse, so these two handshake assertions are live.
+// No Redis is provisioned; the SSE path must 404, NOT crash with `redisUrl is required`.
+test('/api/mcp/mcp streamable-http handshake — POST initialize is not 404', async ({ request }) => {
+  const r = await request.post('/api/mcp/mcp', {
+    headers: {
+      'content-type': 'application/json',
+      accept: 'application/json, text/event-stream',
+    },
+    data: {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2025-03-26',
+        capabilities: {},
+        clientInfo: { name: 'e2e', version: '0' },
+      },
+    },
+  })
   expect(r.status()).not.toBe(404)
+})
+
+test('/api/mcp/sse returns 404 (disableSse, no Redis)', async ({ request }) => {
+  const r = await request.get('/api/mcp/sse')
+  expect(r.status()).toBe(404)
 })
 
 test.fixme('root HTML contains JSON-LD WebSite + Organization', async ({ page }) => {
   await page.goto('/')
   const scripts = await page.locator('script[type="application/ld+json"]').count()
   expect(scripts).toBeGreaterThanOrEqual(2)
+})
+
+// AGENT-10: the dashboard emits a SoftwareApplication JSON-LD block whose fields
+// mirror the MCP tool output schema. Pre-launch the registry is empty, so the
+// overall status MUST be `not_deployed` and NO fabricated numeric balance may
+// appear in the structured data (anti-fishing, CROSS-09).
+test('/apps/abrigo/dashboard emits SoftwareApplication JSON-LD mirroring tool output', async ({
+  page,
+}) => {
+  await page.goto('/apps/abrigo/dashboard')
+
+  const blocks = await page.locator('script[type="application/ld+json"]').allTextContents()
+  expect(blocks.length).toBeGreaterThanOrEqual(1)
+
+  const appBlock = blocks
+    .map((t) => {
+      try {
+        return JSON.parse(t)
+      } catch {
+        return null
+      }
+    })
+    .find((o) => o && o['@type'] === 'SoftwareApplication')
+
+  expect(appBlock, 'a SoftwareApplication JSON-LD block is present').toBeTruthy()
+  expect(appBlock['@type']).toBe('SoftwareApplication')
+  expect(appBlock.name).toBe('Abrigo')
+
+  const status = (appBlock.additionalProperty as Array<{ name: string; value: string }>).find(
+    (p) => p.name === 'status',
+  )
+  expect(status, 'a status PropertyValue is present').toBeTruthy()
+  expect(status?.value).toBe('not_deployed')
+
+  // Anti-fishing: no fabricated numeric pool balance leaked into the structured data.
+  const raw = JSON.stringify(appBlock)
+  expect(raw).not.toContain('poolBalance')
+  expect(raw).not.toMatch(/balance/i)
 })

@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 4 context gathered
-last_updated: "2026-05-29T21:15:52.105Z"
+status: executing
+stopped_at: Completed 04-04-PLAN.md
+last_updated: "2026-05-29T23:20:05.421Z"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 23
-  completed_plans: 23
-  percent: 96
+  total_plans: 29
+  completed_plans: 27
+  percent: 93
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-13
 **Session type:** Plan execution (02-08 complete — Phase 2 plans 8/8)
-**Stopped at:** Phase 4 context gathered
+**Stopped at:** Completed 04-04-PLAN.md
 
 ---
 
@@ -33,12 +33,12 @@ progress:
 
 ## Current Position
 
-**Active phase:** 03.1 — Research Reading Surface
-**Active plan:** 03.1-03 complete (tasks 1-2) — Task 3 Evidence Collector live-verify pending (orchestrator gate); 03.1-04 (Plan C2: i18n superset + a11y + Lighthouse) is next
-**Status:** Awaiting live verification gate
+**Active phase:** 04 — Agent Surface (MCP)
+**Active plan:** 04-04 complete (drift-proof OpenAPI 3.1 generated from the canonical Zod registry via OpenApiGeneratorV31 + js-yaml; /.well-known/openapi.yaml serves the generated spec; /llms.txt refreshed to live URLs). Wave 2 done. 04-05/06 (Wave 3) next — they carry human-verify checkpoints.
+**Status:** Plan execution — Wave 2 complete
 
 **Progress:**
-[██████████] 96%
+[█████████░] 93%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -77,6 +77,10 @@ Overall: 1/5 phases complete
 | Phase 03.1 P01 | 17 | 3 tasks | 11 files |
 | Phase 03.1 P03 | 11 | 2 tasks | 21 files |
 | Phase 03.1 P04 | 12 | 2 tasks | 9 files |
+| Phase 04 P01 | 22 | 3 tasks | 11 files |
+| Phase 04 P02 | 8 | 2 tasks | 5 files |
+| Phase 04 P03 | 8 | 2 tasks | 4 files |
+| Phase 04 P04 | 6 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -87,6 +91,10 @@ Overall: 1/5 phases complete
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| OpenAPI 3.1 spec generated from the canonical Zod registry, imported never re-declared (Phase 04-04) | lib/openapi/schemas.ts imports the schemas from @/lib/mcp-tools/contract; the single extendZodWithOpenApi stays in lib/dashboard/contract.ts; the conformance test proves live route ≡ schema so the spec cannot drift (Phase-2/3 burn class) | All future boundary artifacts are generated from the same Zod the routes conform to; the architecture grep test asserts the single extend call site |
+| MCP JSON-RPC endpoint documented in prose + example, not modelled as a schema (Phase 04-04) | OpenApiGeneratorV31 requires a schema per content entry, so /api/mcp/mcp content uses z.object({}).passthrough() placeholders; the method-dispatched JSON-RPC union lives in the path description prose + one example body | Any future JSON-RPC/transport endpoint uses prose+example+passthrough rather than a fabricated union schema |
+| MCP fake-server test harness applies the registered inputSchema before invoking the handler (Phase 04-03) | The capture-the-callback fake server passed raw input, so Zod `.default('abrigo')` never applied and `input.app` was undefined → ZodError. Real SDK applies inputSchema before the handler; the harness now mirrors that via `inputSchema.parse(input)` | All future MCP fake-server unit tests resolve schema defaults deterministically; output-envelope assertions stay strict |
+| On-chain/panel MCP tools return honest not_deployed/unavailable envelopes, never fabricated numerics (Phase 04-03) | Empty ABRIGO_INSTRUMENTS + unpublished HF panel; CROSS-09 anti-fishing. get_pool_state uses `pool_address ?? 'unknown'` (M4); serializeBigints wired as future-deployment path only; HF dataset name is a single UNVERIFIED constant never asserted in the note | Pre-launch agent queries branch on `status`, not on zero-filled fakes; bigint boundary correct when contracts land |
 | TheoremBlock = full 4-side ochre hairline border + bold ochre text label, NOT one-sided border-left (Phase 03.1-03) | impeccable@2.1.8 flags one-sided `border-left: Npx solid <color>` as the side-tab AI-tell; a uniform 4-side border is not a side-tab. Reconciles spec's "ochre rule + label", CROSS-09 (color+text), and the impeccable gate (exit 0 verified) | All anti-fishing callouts use full borders + text labels; never one-sided colored borders |
 | Reading page locale from NEXT_LOCALE cookie, not URL segment (Phase 03.1-03) | The /research/[slug] route has no [locale] segment; getLocale() resolves the cookie at render; generateStaticParams enumerates distinct slugs only; single-locale body per page | All locale-aware reading routes resolve locale from cookie, not path |
 | gfm:false in s.mdx() (Phase 03.1-01) | Velite@0.3.1 auto-prepends remarkGfm BEFORE user plugins without this flag; spec §0 remark order [remarkMath, remarkGfm, remarkDirective] honored only with gfm:false | All research MDX must use s.mdx({gfm:false}) |
