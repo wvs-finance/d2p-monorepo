@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: "05-03 Tasks 1+2 complete — checkpoint:human-verify Task 3 pending (instruments index live verify)"
-last_updated: "2026-05-30T20:24:51.693Z"
+status: in_progress
+stopped_at: "05-03 complete (instruments index honest-empty + RiskCallout + InstrumentParams — PASS 6/6). Next: 05-04 (per-instrument detail page)"
+last_updated: "2026-05-30T21:00:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 33
-  completed_plans: 31
-  percent: 94
+  completed_plans: 32
+  percent: 97
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-30
-**Session type:** Plan execution (05-02 complete — RainbowKit provider activation, DEFI-01)
-**Stopped at:** 05-03 Tasks 1+2 complete — checkpoint:human-verify Task 3 pending (instruments index live verify)
+**Session type:** Plan execution (05-03 complete — instruments honest-empty index + RiskCallout + InstrumentParams)
+**Stopped at:** 05-03 complete (instruments index honest-empty + RiskCallout + InstrumentParams — PASS 6/6). Next: 05-04 (per-instrument detail page)
 
 ---
 
@@ -34,17 +34,17 @@ progress:
 ## Current Position
 
 **Active phase:** 05 — Read-First Wallet and DeFi Surface
-**Active plan:** 05-02 complete (getDefaultConfig migration + HEX-ochre RainbowKit theme + (defi) provider tree live; WAIVER-05-01 cleared via Evidence Collector; WAIVER-05-02 acknowledged). 05-03 next — instruments index + RiskCallout.
-**Status:** Plan execution — Wave 2 (05-02 complete, 05-03 next)
+**Active plan:** 05-03 complete (instruments honest-empty index + RiskCallout + InstrumentParams + es-CO-first i18n; PASS 6/6 Evidence Collector). 05-04 next — per-instrument detail page (RiskCallout + InstrumentParams wiring + WalletPanel + PayoffDiagram + PoolStatePanel).
+**Status:** Plan execution — Wave 2 (05-03 complete, 05-04 next)
 
 **Progress:**
-[█████████░] 94%
+[█████████░] 97%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
 [██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
 [██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
-[██        ] Phase 5: Read-First Wallet and DeFi Surface — 2/4 plans complete
+[███       ] Phase 5: Read-First Wallet and DeFi Surface — 3/4 plans complete
 
 Overall: 4/5 phases complete (Phase 5 in progress)
 
@@ -83,6 +83,7 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | Phase 04 P04 | 6 | 2 tasks | 5 files |
 | Phase 05 P01 | 5 | 3 tasks | 12 files |
 | Phase 05 P02 | 35 | 2 tasks | 4 files |
+| Phase 05 P03 | 35 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,9 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | Production webServer in playwright.config.ts (Plan 03-02) | Replaced `pnpm dev` (Turbopack) with `pnpm build && pnpm start -p 3040`; Turbopack can silently honor route-segment config differently from webpack production build — the Phase-2 burn class | All future e2e specs test against the production webpack build, not Turbopack dev |
 | Anti-fishing null rule: instrument null fields render as em-dash placeholder (Plan 03-02) | null → '—' (em-dash); a real future '0' balance is semantically distinct from '—' no-data; never render 0 for missing data | DashboardContent and all future metric tile components follow this pattern |
 | Playwright strict mode requires .first() when labels repeat per chain row (Plan 03-02) | DashboardContent renders all 5 chains at equal visual weight; tile label "Pool balance" appears 5x; getByText fails with strict mode unless .first() is used | All e2e assertions on repeating tile labels must use .first() |
+| (defi)/(apps) route-group split for /apps/abrigo/* is intentional (Plan 05-03) | /apps/abrigo/dashboard lives under (apps) (no wallet tree); /apps/abrigo/instruments lives under (defi) (inherits wallet providers). Different provider trees — do NOT consolidate | Route-group coexistence (M5) verified in pnpm build; each new /apps/abrigo/* route must be placed in the appropriate group based on wallet dependency |
+| Instrument card links use numeric chainId segment (Plan 05-03) | /apps/abrigo/instruments/${id}/${chainId} uses the raw numeric chainId. Using a chain name slug would silently null the pool selector in 05-04's WalletPanel/PoolStatePanel | All future instrument link construction must use numeric chainId, not chain name/slug |
+| es-CO-first instruments copy authored; native sign-off pending (Plan 05-03) | instruments namespace authored in es-CO by developer per project policy; docs/copy-review.md row recorded but native Colombian Spanish reviewer sign-off must complete before v1 launch | Non-blocking for 05-04 execution; required before production deploy |
 
 ### Critical Path Summary
 
