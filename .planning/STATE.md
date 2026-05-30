@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-stopped_at: "05-03 complete (instruments index honest-empty + RiskCallout + InstrumentParams — PASS 6/6). Next: 05-04 (per-instrument detail page)"
-last_updated: "2026-05-30T21:00:00.000Z"
+status: completed
+stopped_at: 05-04 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
+last_updated: "2026-05-30T21:56:53.798Z"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -17,7 +17,7 @@ progress:
 
 **Last updated:** 2026-05-30
 **Session type:** Plan execution (05-03 complete — instruments honest-empty index + RiskCallout + InstrumentParams)
-**Stopped at:** 05-03 complete (instruments index honest-empty + RiskCallout + InstrumentParams — PASS 6/6). Next: 05-04 (per-instrument detail page)
+**Stopped at:** 05-04 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
 
 ---
 
@@ -34,17 +34,17 @@ progress:
 ## Current Position
 
 **Active phase:** 05 — Read-First Wallet and DeFi Surface
-**Active plan:** 05-03 complete (instruments honest-empty index + RiskCallout + InstrumentParams + es-CO-first i18n; PASS 6/6 Evidence Collector). 05-04 next — per-instrument detail page (RiskCallout + InstrumentParams wiring + WalletPanel + PayoffDiagram + PoolStatePanel).
-**Status:** Plan execution — Wave 2 (05-03 complete, 05-04 next)
+**Active plan:** 05-04 Tasks 1+2 complete (WalletPanel/WalletStatusPill/PayoffDiagram/PoolStatePanel/detail page + pool filter). At checkpoint Task 3 — awaiting Evidence Collector live verification of 4 wallet states + 360px above-fold risk + payoff tokens.
+**Status:** Plan execution — Wave 3 (05-04 Tasks 1+2 committed; checkpoint Task 3 pending)
 
 **Progress:**
-[█████████░] 97%
+[█████████░] 98%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
 [██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
 [██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
-[███       ] Phase 5: Read-First Wallet and DeFi Surface — 3/4 plans complete
+[████      ] Phase 5: Read-First Wallet and DeFi Surface — 3.5/4 plans (05-04 Tasks 1+2 complete, checkpoint Task 3 pending)
 
 Overall: 4/5 phases complete (Phase 5 in progress)
 
@@ -84,6 +84,7 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | Phase 05 P01 | 5 | 3 tasks | 12 files |
 | Phase 05 P02 | 35 | 2 tasks | 4 files |
 | Phase 05 P03 | 35 | 2 tasks | 9 files |
+| Phase 05 P04 | 9 | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | MCP fake-server test harness applies the registered inputSchema before invoking the handler (Phase 04-03) | The capture-the-callback fake server passed raw input, so Zod `.default('abrigo')` never applied and `input.app` was undefined → ZodError. Real SDK applies inputSchema before the handler; the harness now mirrors that via `inputSchema.parse(input)` | All future MCP fake-server unit tests resolve schema defaults deterministically; output-envelope assertions stay strict |
 | RainbowKit accentColor must be HEX not oklch (#a87c3a) (Phase 05-02) | RainbowKit's vanilla-extract compositor requires a resolved color value at theme-injection time; CSS color functions (oklch) are not resolved and break the compositor. #a87c3a is the HEX serialization of the locked ochre token oklch(0.6 0.08 70) | All future RainbowKit theme configurations must use HEX values for accentColor and accentColorForeground |
 | ssr: false kept, no cookieToInitialState in wagmi getDefaultConfig migration (Phase 05-02) | Wallet state is client-only by design; adding cookieToInitialState/SSR-cookie hydration risks hydration mismatches. Explicit architectural choice per Pitfall 2 in 05-RESEARCH.md | All (defi) wallet state remains client-only; no server hydration path for wallet state |
+| PayoffDiagramClient 'use client' wrapper owns dynamic(ssr:false) — page.tsx RSC must never call next/dynamic (Phase 05-04 B1) | Next 16 build rule: ssr:false in an RSC is a compile-time error. Thin 'use client' wrapper delegates lazy import; RSC imports the wrapper directly. Bundle isolation preserved via client boundary | All recharts-style code-split islands must use a dedicated 'use client' wrapper; RSC pages import the wrapper |
+| recharts bundle is lazy-loaded (dynamic import) — absent from firstLoadChunkPaths of all routes (Phase 05-04 WAIVER-05-05) | dynamic(ssr:false) makes recharts a secondary lazy chunk, not a first-load chunk. route-bundle-stats.json confirms absence from all firstLoadChunkPaths. Non-(defi) routes never load recharts | WAIVER-05-05 bundle isolation confirmed via .next/diagnostics/route-bundle-stats.json after pnpm build |
 | On-chain/panel MCP tools return honest not_deployed/unavailable envelopes, never fabricated numerics (Phase 04-03) | Empty ABRIGO_INSTRUMENTS + unpublished HF panel; CROSS-09 anti-fishing. get_pool_state uses `pool_address ?? 'unknown'` (M4); serializeBigints wired as future-deployment path only; HF dataset name is a single UNVERIFIED constant never asserted in the note | Pre-launch agent queries branch on `status`, not on zero-filled fakes; bigint boundary correct when contracts land |
 | TheoremBlock = full 4-side ochre hairline border + bold ochre text label, NOT one-sided border-left (Phase 03.1-03) | impeccable@2.1.8 flags one-sided `border-left: Npx solid <color>` as the side-tab AI-tell; a uniform 4-side border is not a side-tab. Reconciles spec's "ochre rule + label", CROSS-09 (color+text), and the impeccable gate (exit 0 verified) | All anti-fishing callouts use full borders + text labels; never one-sided colored borders |
 | Reading page locale from NEXT_LOCALE cookie, not URL segment (Phase 03.1-03) | The /research/[slug] route has no [locale] segment; getLocale() resolves the cookie at render; generateStaticParams enumerates distinct slugs only; single-locale body per page | All locale-aware reading routes resolve locale from cookie, not path |
