@@ -42,6 +42,9 @@ export interface AbrigoInstrument {
   chainId: SupportedChainId
   address: Address
   deployedAt: string // ISO date string
+  // Phase 5: static registry fields — provisional pending Foundry artifact strike/slope getters
+  strike: number // strike price in the instrument's denomination
+  slope: number // payoff slope coefficient (delta at strike)
 }
 
 // EMPTY AT LAUNCH — no Abrigo contracts deployed on any chain yet (CONTEXT.md).
