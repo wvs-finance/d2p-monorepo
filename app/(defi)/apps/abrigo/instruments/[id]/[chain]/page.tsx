@@ -86,8 +86,9 @@ export default async function InstrumentDetailPage({
     connectLabel: t('wallet.connect_label'),
     connectingLabel: t('wallet.connecting_label'),
     wrongChainLabel: t('wallet.wrong_chain_label'),
-    wrongChainExplanation: (chainName: string) =>
-      t('wallet.wrong_chain_explanation').replace('{chain}', chainName),
+    // Pass the RAW template (literal {chain}) — WalletPanel interpolates the chain
+    // name client-side. A function here would break RSC→Client serialization.
+    wrongChainExplanation: t.raw('wallet.wrong_chain_explanation'),
     switchNetworkLabel: t('wallet.switch_network_label'),
     connectedReadyLabel: t('wallet.connected_ready_label'),
     statusLabels,

@@ -25,8 +25,10 @@ export interface WalletPanelStrings {
   connectingLabel: string
   /** CONNECTED_WRONG_CHAIN main text: "Cambia a una red compatible" */
   wrongChainLabel: string
-  /** CONNECTED_WRONG_CHAIN explanatory text: "Estás en [chain]. Abrigo opera en…" */
-  wrongChainExplanation: (chainName: string) => string
+  /** CONNECTED_WRONG_CHAIN explanatory text: "Estás en {chain}. Abrigo opera en…".
+   *  Raw template with a literal {chain} placeholder — interpolated client-side here.
+   *  MUST be a plain string, NOT a function: functions can't cross the RSC→Client boundary. */
+  wrongChainExplanation: string
   /** CONNECTED_WRONG_CHAIN CTA: "Cambiar red" */
   switchNetworkLabel: string
   /** CONNECTED_READY header: "Posición actual" */
@@ -75,7 +77,7 @@ export function WalletPanel({ strings }: WalletPanelProps) {
           </div>
           {chain && (
             <p className="text-sm text-text-secondary">
-              {strings.wrongChainExplanation(chain.name)}
+              {strings.wrongChainExplanation.replace('{chain}', chain.name)}
             </p>
           )}
           {/* Switch CTA — bg-status-parked text-bg-canvas (~7:1 contrast) per locked tokens */}
