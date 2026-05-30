@@ -64,3 +64,41 @@ test.fixme('root HTML contains JSON-LD WebSite + Organization', async ({ page })
   const scripts = await page.locator('script[type="application/ld+json"]').count()
   expect(scripts).toBeGreaterThanOrEqual(2)
 })
+
+// AGENT-10: the dashboard emits a SoftwareApplication JSON-LD block whose fields
+// mirror the MCP tool output schema. Pre-launch the registry is empty, so the
+// overall status MUST be `not_deployed` and NO fabricated numeric balance may
+// appear in the structured data (anti-fishing, CROSS-09).
+test('/apps/abrigo/dashboard emits SoftwareApplication JSON-LD mirroring tool output', async ({
+  page,
+}) => {
+  await page.goto('/apps/abrigo/dashboard')
+
+  const blocks = await page.locator('script[type="application/ld+json"]').allTextContents()
+  expect(blocks.length).toBeGreaterThanOrEqual(1)
+
+  const appBlock = blocks
+    .map((t) => {
+      try {
+        return JSON.parse(t)
+      } catch {
+        return null
+      }
+    })
+    .find((o) => o && o['@type'] === 'SoftwareApplication')
+
+  expect(appBlock, 'a SoftwareApplication JSON-LD block is present').toBeTruthy()
+  expect(appBlock['@type']).toBe('SoftwareApplication')
+  expect(appBlock.name).toBe('Abrigo')
+
+  const status = (appBlock.additionalProperty as Array<{ name: string; value: string }>).find(
+    (p) => p.name === 'status',
+  )
+  expect(status, 'a status PropertyValue is present').toBeTruthy()
+  expect(status?.value).toBe('not_deployed')
+
+  // Anti-fishing: no fabricated numeric pool balance leaked into the structured data.
+  const raw = JSON.stringify(appBlock)
+  expect(raw).not.toContain('poolBalance')
+  expect(raw).not.toMatch(/balance/i)
+})
