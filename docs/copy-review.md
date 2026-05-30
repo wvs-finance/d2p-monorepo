@@ -169,3 +169,47 @@ is the SUPERSET entry distinct from the Plan-B index-chrome line above.
 - [ ] Inverted-punctuation orthography (`¡Copiado!`) confirmed (native-authorship tell, not machine translation)
 - [ ] Anti-marketing-slop grep passes on `reading.*` keys (verified 2026-05-29: `grep -iIrnE '<banned>' messages/{es-CO,en}/research.json` → no matches)
 - [ ] Recursive i18n parity (`tests/unit/i18n-coverage.test.ts::assertKeyParity('research')`) green — es-CO ↔ en symmetric (verified 2026-05-29)
+
+---
+
+## Phase 05 review (instruments namespace — Plan 05-03)
+
+**Scope:** `messages/es-CO/instruments.json` and `messages/en/instruments.json` — the `instruments`
+namespace covering the instruments index (h1, empty-state copy, GitHub link) and the RiskCallout
+persistent risk disclosure (heading + body). Authored es-CO FIRST, en second. No machine translation.
+
+**New keys added (2026-05-30):**
+- `instruments.index.h1` — page heading
+- `instruments.index.empty_heading` / `instruments.index.empty_body` — honest empty state copy
+- `instruments.index.github_link` — link label for the wvs-finance contracts repo
+- `instruments.risk.heading` / `instruments.risk.body` — RiskCallout persistent disclosure
+- `instruments.params.*` — InstrumentParams table labels (id, chain, strike, slope, deployed_at, name)
+
+**es-CO authoring notes (Plan 05-03 author: Juan Serrano / jmsbpp):**
+- "Instrumento de cobertura — no es apalancamiento" — direct and precise; "cobertura" is the
+  standard Colombian-Spanish finance term for hedging; "apalancamiento" for leverage.
+- "Abrigo está diseñado para cubrir exposición cambiaria y macroeconómica" — "exposición" is the
+  established risk-management term in es-CO finance; "cambiaria" (FX) and "macroeconómica" pair
+  naturally.
+- "instrumento de cobertura convexo" — correct financial-Spanish; "convexo" is the accepted
+  adjective for instruments with positive gamma.
+- "Aún no hay instrumentos desplegados" — "desplegados" for deployed (on-chain contracts); "aún" is
+  natural es-CO for "not yet" (not "todavía" which is more colloquial in some registers).
+- "Esta página se actualizará automáticamente" — future tense with reflexive; natural register.
+- "Ver contratos pendientes en GitHub" — "Ver" (imperative/infinitive) over "Acceder" or "Consultar";
+  laconic, actionable, not corporate.
+- "Precio de activación" — standard es-CO finance term for strike price; avoids the anglicism "strike".
+- "Pendiente de cobertura" — "pendiente" for slope in the hedging context; clear and domain-appropriate.
+- Copy register: informational, laconic, economics-finance tone. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/instruments.json` | _pending native review_ | | |
+| `messages/en/instruments.json` | _pending native review_ | | |
+
+### Phase 05 instruments Sign-off
+
+- [ ] es-CO instruments copy reviewed by native Colombian Spanish speaker
+- [ ] Finance terminology (`cobertura`, `apalancamiento`, `exposición cambiaria`, `convexo`, `precio de activación`) reviewed against Colombian Spanish finance conventions
+- [ ] Anti-marketing-slop grep passes on `instruments.*` keys
+- [ ] i18n parity (es-CO ↔ en) symmetric across all `instruments.*` keys

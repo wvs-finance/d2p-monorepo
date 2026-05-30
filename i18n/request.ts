@@ -43,6 +43,8 @@ export default getRequestConfig(async () => {
   const aboutMessages = (await import(`../messages/${locale}/about.json`)).default as MessageMap
   const dashboardMessages = (await import(`../messages/${locale}/dashboard.json`))
     .default as MessageMap
+  const instrumentsMessages = (await import(`../messages/${locale}/instruments.json`))
+    .default as MessageMap
 
   const messages = mergeMessages(
     commonMessages,
@@ -52,6 +54,7 @@ export default getRequestConfig(async () => {
     teamMessages,
     aboutMessages,
     dashboardMessages,
+    instrumentsMessages,
   )
 
   return { locale, messages }

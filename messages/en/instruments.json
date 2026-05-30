@@ -1,0 +1,22 @@
+{
+  "instruments": {
+    "index": {
+      "h1": "Abrigo Instruments",
+      "empty_heading": "No instruments deployed yet",
+      "empty_body": "Abrigo hedging instruments will become available once contracts are deployed on-chain. This page will update automatically.",
+      "github_link": "View pending contracts on GitHub"
+    },
+    "risk": {
+      "heading": "Hedging product — not leverage",
+      "body": "Abrigo is designed to hedge against currency and macroeconomic exposure. It does not amplify gains or losses: it is a convex hedging instrument, not a leveraged product."
+    },
+    "params": {
+      "id": "Identifier",
+      "chain": "Network",
+      "strike": "Strike price",
+      "slope": "Hedge slope",
+      "deployed_at": "Deployment date",
+      "name": "Name"
+    }
+  }
+}

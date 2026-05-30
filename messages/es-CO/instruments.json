@@ -1,0 +1,22 @@
+{
+  "instruments": {
+    "index": {
+      "h1": "Instrumentos Abrigo",
+      "empty_heading": "Aún no hay instrumentos desplegados",
+      "empty_body": "Los instrumentos de cobertura Abrigo se habilitarán una vez que los contratos se desplieguen en cadena. Esta página se actualizará automáticamente.",
+      "github_link": "Ver contratos pendientes en GitHub"
+    },
+    "risk": {
+      "heading": "Instrumento de cobertura — no es apalancamiento",
+      "body": "Abrigo está diseñado para cubrir exposición cambiaria y macroeconómica. No amplifica pérdidas ni ganancias: es un instrumento de cobertura convexo, no un producto de apalancamiento."
+    },
+    "params": {
+      "id": "Identificador",
+      "chain": "Red",
+      "strike": "Precio de activación",
+      "slope": "Pendiente de cobertura",
+      "deployed_at": "Fecha de despliegue",
+      "name": "Nombre"
+    }
+  }
+}
