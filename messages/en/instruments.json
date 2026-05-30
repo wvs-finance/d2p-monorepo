@@ -17,6 +17,31 @@
       "slope": "Hedge slope",
       "deployed_at": "Deployment date",
       "name": "Name"
+    },
+    "wallet": {
+      "disconnected_prompt": "Connect wallet to view your position",
+      "connect_label": "Connect wallet",
+      "connecting_label": "Connecting…",
+      "wrong_chain_label": "Switch to a supported network",
+      "wrong_chain_explanation": "You're on {chain}. Abrigo operates on Celo, Ethereum, Base, Arbitrum, and Optimism.",
+      "switch_network_label": "Switch network",
+      "connected_ready_label": "Your position",
+      "status_disconnected": "Disconnected",
+      "status_connecting": "Connecting",
+      "status_wrong_chain": "Wrong network",
+      "status_connected": "Connected"
+    },
+    "pool": {
+      "not_deployed": "No pool data available — contract not yet deployed.",
+      "pool_balance": "Pool balance",
+      "settlement_count": "Settlements",
+      "participants": "Participants",
+      "last_block": "Last block synced"
+    },
+    "errors": {
+      "not_found": "This instrument does not exist or is not yet available.",
+      "route_error": "Something went wrong loading this page.",
+      "back_home": "Back to home"
     }
   }
 }

@@ -207,9 +207,46 @@ persistent risk disclosure (heading + body). Authored es-CO FIRST, en second. No
 | `messages/es-CO/instruments.json` | _pending native review_ | | |
 | `messages/en/instruments.json` | _pending native review_ | | |
 
-### Phase 05 instruments Sign-off
+### Phase 05 instruments Sign-off (05-03 keys)
 
 - [ ] es-CO instruments copy reviewed by native Colombian Spanish speaker
 - [ ] Finance terminology (`cobertura`, `apalancamiento`, `exposición cambiaria`, `convexo`, `precio de activación`) reviewed against Colombian Spanish finance conventions
 - [ ] Anti-marketing-slop grep passes on `instruments.*` keys
 - [ ] i18n parity (es-CO ↔ en) symmetric across all `instruments.*` keys
+
+---
+
+## Phase 05 review (instruments detail-page keys — Plan 05-04)
+
+**Scope:** `instruments.wallet.*`, `instruments.pool.*`, `instruments.errors.*` — detail-page copy
+for the WalletPanel 4 states, PoolStatePanel, and route error boundary. Authored es-CO FIRST, en second.
+
+**New keys added (2026-05-30):**
+- `instruments.wallet.*` — 4-state wallet copy (disconnected prompt, connect label, connecting,
+  wrong-chain label + explanation template, switch CTA, connected-ready header, status pill labels)
+- `instruments.pool.*` — pool state labels (not-deployed message, pool balance, settlements,
+  participants, last block)
+- `instruments.errors.*` — route error boundary copy (not-found, route-error, back-home)
+
+**es-CO authoring notes (Plan 05-04 author: Juan Serrano / jmsbpp):**
+- "Conecta tu billetera para ver tu posición" — direct imperative; "billetera" is the standard
+  es-CO term for a crypto wallet (not "cartera" which is more Castilian/generic).
+- "Cambia a una red compatible" — "red" for network; "compatible" over "soportada" (more natural).
+- "Cambiar red" — imperative CTA; laconic, actionable.
+- "Posición actual" — finance term for current portfolio position; not "estado" (too generic).
+- "Balance del pool" / "Liquidaciones" / "Participantes" — standard finance/DeFi terms in es-CO.
+- "Algo salió mal al cargar esta página." — natural es-CO error copy; not "Ocurrió un error" (overly formal).
+- "Volver al inicio" — natural navigation label; "inicio" for home page.
+- Copy register: informational, laconic, finance-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/instruments.json` (wallet/pool/errors additions) | _pending native review_ | | |
+| `messages/en/instruments.json` (wallet/pool/errors additions) | _pending native review_ | | |
+
+### Phase 05-04 detail-page Sign-off
+
+- [ ] es-CO wallet/pool/errors copy reviewed by native Colombian Spanish speaker
+- [ ] "billetera" vs "cartera" usage confirmed against Colombian DeFi conventions
+- [ ] Anti-marketing-slop grep passes on new `wallet.*`, `pool.*`, `errors.*` keys
+- [ ] i18n parity (es-CO ↔ en) symmetric across all new keys

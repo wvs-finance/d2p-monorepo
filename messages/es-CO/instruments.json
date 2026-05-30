@@ -17,6 +17,31 @@
       "slope": "Pendiente de cobertura",
       "deployed_at": "Fecha de despliegue",
       "name": "Nombre"
+    },
+    "wallet": {
+      "disconnected_prompt": "Conecta tu billetera para ver tu posición",
+      "connect_label": "Conectar billetera",
+      "connecting_label": "Conectando…",
+      "wrong_chain_label": "Cambia a una red compatible",
+      "wrong_chain_explanation": "Estás en {chain}. Abrigo opera en Celo, Ethereum, Base, Arbitrum y Optimism.",
+      "switch_network_label": "Cambiar red",
+      "connected_ready_label": "Posición actual",
+      "status_disconnected": "Desconectado",
+      "status_connecting": "Conectando",
+      "status_wrong_chain": "Red incorrecta",
+      "status_connected": "Conectado"
+    },
+    "pool": {
+      "not_deployed": "No hay datos de pool disponibles — el contrato aún no está desplegado.",
+      "pool_balance": "Balance del pool",
+      "settlement_count": "Liquidaciones",
+      "participants": "Participantes",
+      "last_block": "Último bloque sincronizado"
+    },
+    "errors": {
+      "not_found": "Este instrumento no existe o aún no está disponible.",
+      "route_error": "Algo salió mal al cargar esta página.",
+      "back_home": "Volver al inicio"
     }
   }
 }
