@@ -95,7 +95,7 @@ Each maps to exactly one phase in the roadmap.
 
 ### Wallet and Read-First DeFi
 
-- [ ] **DEFI-01**: RainbowKit v2 wallet connect integrated; supports mobile wallets via WalletConnect v2 (MetaMask Mobile, Rainbow, Coinbase Wallet, Valora for Celo)
+- [x] **DEFI-01**: RainbowKit v2 wallet connect integrated; supports mobile wallets via WalletConnect v2 (MetaMask Mobile, Rainbow, Coinbase Wallet, Valora for Celo)
 - [x] **DEFI-02**: Wallet state machine has 4 explicit states — DISCONNECTED / CONNECTED_WRONG_CHAIN / CONNECTED_READY / CONNECTING — each with distinct UI affordance
 - [ ] **DEFI-03**: Per-instrument page at `/apps/abrigo/instruments/{id}/{chain}` shows parameters, payoff diagram, current pool state, recent participants — fully accessible without wallet connection
 - [x] **DEFI-04**: Payoff diagram component renders CFMM payoff curve with axis labels in user's locale, showing strike, slope, current price marker
@@ -255,7 +255,7 @@ Populated by gsd-roadmapper — 2026-05-11.
 | AGENT-08 | Phase 4 | Complete |
 | AGENT-09 | Phase 4 | Complete |
 | AGENT-10 | Phase 4 | Complete |
-| DEFI-01 | Phase 5 | Pending |
+| DEFI-01 | Phase 5 | Complete |
 | DEFI-02 | Phase 5 | Complete |
 | DEFI-03 | Phase 5 | Pending |
 | DEFI-04 | Phase 5 | Complete |

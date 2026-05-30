@@ -183,7 +183,7 @@ Plans:
 | 2. Research Lab Presence and Iteration Catalog | 5/8 | In Progress|  |
 | 3. Data Layer and On-Chain Dashboard | 3/3 | Complete   | 2026-05-29 |
 | 4. Agent Surface (MCP) | 0/? | Not started | - |
-| 5. Read-First Wallet and DeFi Surface | 1/4 | In Progress|  |
+| 5. Read-First Wallet and DeFi Surface | 2/4 | In Progress|  |
 
 ---
 
