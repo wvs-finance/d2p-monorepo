@@ -6,7 +6,11 @@ The `K_AI` (agent-payment) leg substrate of the Abrigo cost model. M1 produces a
 
 ## Core Value
 
-**Which of the caller-side inequalities in `somnia_cost_extraction.md §6` (rows #1, #2, #4, #5, #6, #7) bind empirically, where are they slack, and what is the realized `executionCost_i` distribution per agent class versus the docs-quoted `{0.03, 0.07, 0.10}` SOMI prices — across all observed proxy implementation versions?**
+> **2026-05-31 re-scope:** see `.planning/RESCOPE-SOMI-LEG-2026-05-31-v2.md` (gate-approved) — donor-transfer cost function; supersedes the subgraph/eth_call data-source approach.
+
+"M1 imputes a canonical parametric agentic cost function onto Somnia's {json-fetch 0.03, llm-inference 0.07, llm-parse-website 0.10} class structure by transfer from mature donor ecosystems. This is a forward/structural prior validated by donor-held-out calibration — NOT an estimate of Somnia's realized cost, which is unobservable until organic demand exists. Somnia supplies the settlement mechanics (trace-verified) and the posted-price anchor only."
+
+**[SUPERSEDED 2026-05-31 — prior Core Value, retained for audit history]** Which of the caller-side inequalities in `somnia_cost_extraction.md §6` (rows #1, #2, #4, #5, #6, #7) bind empirically, where are they slack, and what is the realized `executionCost_i` distribution per agent class versus the docs-quoted `{0.03, 0.07, 0.10}` SOMI prices — across all observed proxy implementation versions?
 
 Scope notes:
 - **Validator-side rows (#8, #9, #10) are out of scope** — not caller-observable.

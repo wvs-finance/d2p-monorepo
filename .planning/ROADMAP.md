@@ -12,9 +12,32 @@
 
 ## Core Value (from PROJECT.md)
 
-Which of the caller-side inequalities in `somnia_cost_extraction.md §6` (rows #1, #2, #4, #5, #6, #7) bind empirically, where are they slack, and what is the realized `executionCost_i` distribution per agent class versus the docs-quoted `{0.03, 0.07, 0.10}` SOMI prices — across all observed proxy implementation versions?
+> **2026-05-31 re-scope — see `.planning/RESCOPE-SOMI-LEG-2026-05-31-v2.md` (gate-approved).** M1 imputes a canonical parametric agentic cost function onto Somnia's `{json-fetch 0.03, llm-inference 0.07, llm-parse-website 0.10}` class structure by transfer from mature donor ecosystems — a forward/structural prior validated by donor-held-out calibration, NOT an estimate of Somnia's realized cost (unobservable until organic demand exists). Somnia supplies the settlement mechanics (trace-verified) and the posted-price anchor only. The subgraph-indexing M1 below is **superseded**; the M1 phase definition is re-framed to Waves 0–E (donor-transfer imputation — see "M1 Re-scope" below).
 
-## M1 Primary Concern — Arrival Periodicity
+*(Prior Core Value — superseded 2026-05-31, retained for audit: which of the caller-side inequalities in `somnia_cost_extraction.md §6` (rows #1, #2, #4, #5, #6, #7) bind empirically, where they are slack, and the realized `executionCost_i` distribution per agent class versus the docs-quoted `{0.03, 0.07, 0.10}` SOMI prices across observed proxy impl versions.)*
+
+## M1 Re-scope (2026-05-31, gate-approved — donor-transfer imputation)
+
+Per `.planning/RESCOPE-SOMI-LEG-2026-05-31-v2.md` (rev 3, PASSED the planning-review gate 2026-05-31): Somnia mainnet has **no organic agent-payment demand**, so M1 no longer measures Somnia's cost directly. M1 is re-framed from "subgraph indexing of Somnia cost events" to **donor-transfer imputation of the agentic cost function**, executed in six waves:
+
+- **Wave 0 — HAL feasibility gate** (PASS/FAIL; blocks everything): decrypt HAL, extract the per-task token panel, validate the HAL-task → {json-fetch, llm-inference, llm-parse-website} mapping on a frozen held-out split against committed numeric bars (strict per-class cost ordering + held-out class-assignment accuracy floor). On FAIL the slope is non-identified and M1 is anchoring-only.
+- **Wave A — donor panels** (off-chain LLM price matrix + HAL panel + on-chain Virtuals ACP / OLAS / x402 Dune panels + RENDER aggregate prior; post-censor surviving N, provenance headers).
+- **Wave B — pre-registration + slope/censor** (frozen hash-logged pre-registration BEFORE any fit; off-chain slope identification; on-chain class-FE + escrow/rebate on censored panels).
+- **Wave C — transfer fit + identification audit** (hierarchical/partial-pooling PyMC fit transferring onto Somnia as a zero-row held-out group with class FE clamped to {0.03,0.07,0.10}; per-parameter posterior-contraction + SBC + LODO identification audit).
+- **Wave D — Somnia-native anchor** (trace characterization on the real-payer sub-population — a non-organic mechanism/degraded-settlement anchor, never organic demand/cost; bytecode rebate optional cross-check; FX adapter + feasibility floor).
+- **Wave E — assembly** (imputed cost function as a posterior-predictive `C_SOMI` distribution + SHARED-SCHEMA parity; hand convex-demand inputs to M2).
+
+**M1 success criterion is donor-held-out calibration — never "Somnia fit."** Held-out-donor calibration is necessary but explicitly NOT sufficient for the Somnia extrapolation (Somnia is outside the donor convex hull); LODO max-swing within a pre-registered threshold + the "imputation/scenario" labelling carry the rest. If Somnia is prior-dominated or outside the donor convex hull, the output is labelled SCENARIO, not estimate.
+
+**M2's arrival/demand process runs on DONOR-ORGANIC demand (RENDER organic flow + LLM-API usage), NOT Somnia synthetic arrivals, and NOT donor request-counts** (ACP/OLAS counts are incentive-elastic priced rows, not a demand-quantity series).
+
+**M3 is unchanged in spirit:** the composite convex hedge now runs on the imputed cost function × the SOMI/USD FX tail (FX propagated as a random variable through the posterior-predictive, P95/P99 tail quantiles).
+
+The prior subgraph/eth_call requirements (DATA-SOURCE-01, INDEX-01) are retired (SUPERSEDED in REQUIREMENTS.md); BYTECODE-01 is now an optional rebate cross-check; GAS-01 stays in scope. The arrival-periodicity section below is **retained for audit history** — its data-source premise (organic Somnia cost events) is superseded, but the M1→M2 arrival/demand hand-off it describes is replaced by the donor-organic hand-off above.
+
+---
+
+## M1 Primary Concern — Arrival Periodicity *(superseded-in-premise 2026-05-31 — see "M1 Re-scope" above; retained for audit history)*
 
 M1 is the SOMI-leg structural parallel of the `abrigo-x402` pipeline's data-ingestion + panel stage (its L1–L3). Its primary job is to capture the `IAgentRequester` **arrival series** (per-event timing, ordering, completeness) robustly enough that the downstream **M2 milestone — arrival-process estimation (NHPP vs Hawkes) + the four-condition convex-dominance verdict** on the SOMI/USD cost cashflow — is itself robust. M1 runs no estimation and no convex-demand verdict; it guarantees the arrival foundation those rest on. This concern is load-bearing in two phases: **Phase 1 EVENT-01** (arrival-timing fields are first-class schema columns) and **Phase 6 STATS-01** (descriptive arrival-periodicity precursor handed to M2). The M1→M2 consumer contract is therefore "arrival-process estimation + convex-demand verdict," not merely "parametric fit."
 
