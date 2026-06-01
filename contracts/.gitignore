@@ -1,0 +1,7 @@
+# Foundry build artifacts
+out/
+cache/
+broadcast/
+
+# Vendored deps — restore with `forge install foundry-rs/forge-std`
+lib/
