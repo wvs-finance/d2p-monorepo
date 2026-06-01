@@ -1,69 +1,26 @@
+A pooled-escrow **data cooperative** on Somnia: users pay SOMI to query the three agent classes (json-fetch 0.03, llm-inference 0.07, llm-parse-website 0.10) over a **deterministic fetch workflow**
+(the `fetchString/fetchUint/…` surface in the author's notes); each payment **splits** into an agent deposit + an escrow premium; a shared off-chain **cache** mutualizes paywalled / rate-limited / bad-UI macro sources so many queriers are served cheaply. On top of the escrow sits a **two-book convex-payoff instrument**: Book A self-insures the cooperative against spikes in its own data cost; Book B is a **real Panoptic long-gamma position** expressing convex exposure to **cCOP/USD** (≈ COP/USD EM-FX vol), timed/sized by TE Colombia macro surprises and reached across chains. Heavy work (fetch, cache, surprise computation, sizing) is off-chain; on-chain is escrow bookkeeping + Panoptic/closed-form settlement only.
+
 Data accesibility
 
     -------------                         ---------
-   | contract    |  ------------------>  |  REST  |
-   |             |  <-- (json)--------   |  API   |
-    --------------                        ---------
+   | contract    |  ------------------>  |  REST  | ------> Keeper Server ---> TE API ---> TE server
+   |             |  <-- (json)--------   |  API   |   |
+    --------------                        ---------   |
+	                                                  |
+                                                   --------------      
+          |                                        |   Request   |   
+          V                                        |   Adapter   |
+                                                   --------------
+ ----------------------------------------------------------------------------------
+|  function fetchString(string url, string selector) returns (string)                       | 
+|  function fetchUint(string url, string selector, uint8 decimals) returns (uint256)        |
+|  function fetchInt(string url, string selector, uint8 decimals) returns (int256)          |
+|  function fetchBool(string url, string selector) returns (bool)
+|  function fetchStringArray(string url, string selector) returns (string[])                |
+|  function fetchUintArray(string url, string selector, uint8 decimals) returns (uint256[]) |
+ -------------------------------------------------------------------------------------------
 
-function fetchString(string url, string selector) returns (string)
-function fetchUint(string url, string selector, uint8 decimals) returns (uint256)
-function fetchInt(string url, string selector, uint8 decimals) returns (int256)
-function fetchBool(string url, string selector) returns (bool)
-function fetchStringArray(string url, string selector) returns (string[])
-function fetchUintArray(string url, string selector, uint8 decimals) returns (uint256[])
-
-
-- Deterministic workflow
-
-
-- The target is then build a REST API for fecthcing all source of high quality macro data for
-countries that make it difficiult by UI, IX or corporate walls to fetch macro data at available frequencie
-	- For the colombian case Is there a bridge between, have people done, open source bridge between like the complex data sources like Danny, Ben Rep, this is a radio in Colombia and build an arrest API that helps fetch data that for the public ? 
-	
-	In case not, we need to look for other countries that have more democatized and advanced economies for people who have done the same thing. For example, the United States, although the Fed is relatively open-source and there is no need for that, there might be other countries, not the United States, that have difficult access to data and people have built open-source alternative resources to fetch that data under different mechanisms.
-	
-
----
----
-
-# DESIGN — Agentic Data Cooperative + Convex (Panoptic) Instrument
-
-> The notes above are the author's original framing and are preserved verbatim. The design below operationalizes them.
-
-**Status:** DESIGN DRAFT for review. Not yet through the repo's three-step planning-review gate (`CLAUDE.md` → Studio Producer selector → Reality Checker + domain reviewer → verdict). Do not execute until gated.
-**Date:** 2026-06-01
-**Track:** *Parallel primary thrust* (pivot). Runs alongside — and does **not** disturb — the gate-approved donor-transfer cost-function milestone (`.planning/RESCOPE-SOMI-LEG-2026-05-31-v2.md`).
-**Artifacts this produces:** an economic-formalization doc + a decomposed testnet/fork PoC connected by cross-chain layers.
-
----
-
-## ⚠️ Non-removable productionization blockers
-
-Documented limitations of a private demo, not solved problems. They ride on every downstream artifact (spec, README, contract NatSpec).
-
-1. **TRADING ECONOMICS LICENSE.** TE Standard ($199/mo) grants a *limited, personal, nontransferable, revocable* license to **analyse**, with **"No Data Distribution — You cannot share or distribute data in this plan"** (verbatim, archived TE API pricing). Re-serving TE results to third parties and publishing TE values on-chain are **prohibited** absent a negotiated Enterprise/redistribution license; immutable on-chain publication is additionally incompatible with the *revocable* grant; **no derived-data safe harbor** exists. → TE is confined to **private calibration / gap-filling**. The cooperative's **redistributable core is open official data** (see §2.1).
-2. **TE KEY NEVER TOUCHES CHAIN.** The on-chain json-fetch agent fetches URLs via validators; a key in a payload is public instantly. TE is fetched **only by the off-chain keeper** via a keyless proxy that injects the key server-side.
-3. **PANOPTIC ↔ cCOP/USD CHAIN CONFLICT (evidence-based).** Panoptic core is **not on Celo or Somnia** (Dune decoded-table null results; both chains well-indexed). The cCOP/USDT UniV3 pool is on **Celo** (`0x2ac5baa668a8a58fd0e302b9896717484fd217b0`, 0.01% fee) with **~$94k TVL, decaying** — too thin for options underwriting (Panoptic longs *remove* liquidity from the pool). → Convex leg runs **real Panoptic on a mainnet-fork of a chain Panoptic IS on** (Ethereum / Base / Unichain) against a **liquid** pair; **cCOP/USD is the documented production target**, reached via cross-chain layers (§6), calibrated off-chain from TE Colombia macro, pending a Panoptic-on-Celo deployment + sufficient pool liquidity.
-
----
-
-## 1. The idea, in one paragraph
-
-A pooled-escrow **data cooperative** on Somnia: users pay SOMI to query the three agent classes (json-fetch 0.03, llm-inference 0.07, llm-parse-website 0.10) over a **deterministic fetch workflow** (the `fetchString/fetchUint/…` surface in the author's notes); each payment **splits** into an agent deposit + an escrow premium; a shared off-chain **cache** mutualizes paywalled / rate-limited / bad-UI macro sources so many queriers are served cheaply. On top of the escrow sits a **two-book convex-payoff instrument**: Book A self-insures the cooperative against spikes in its own data cost; Book B is a **real Panoptic long-gamma position** expressing convex exposure to **cCOP/USD** (≈ COP/USD EM-FX vol), timed/sized by TE Colombia macro surprises and reached across chains. Heavy work (fetch, cache, surprise computation, sizing) is off-chain; on-chain is escrow bookkeeping + Panoptic/closed-form settlement only.
-
-## 2. Data-sourcing layer (answers the author's notes)
-
-### 2.1 Redistributable core = open official data
-The legal core the cooperative re-serves is **public/open official macro data** — exactly the "hard to fetch by UI/UX/corporate walls" target in the notes:
-- **Colombia:** DANE (national statistics) + BanRep (central bank). Research item **OPEN-BRIDGE-01** determines whether open-source bridges/REST APIs to DANE/BanRep already exist; if not, the cooperative *is* that bridge (and the json-fetch/llm-parse-website agents are how it scrapes bad UIs deterministically).
-- **Fallbacks** where official access is hostile but a community has built open fetchers: surveyed in OPEN-BRIDGE-01 (the notes' "other countries" path; US/FRED is already open, so it's a calibration baseline, not a target).
-
-### 2.2 TE = private premium layer
-TE fills gaps the open sources don't cover and supplies the **surprise calibration** (Economic Calendar `Actual/Forecast/TEForecast/Previous/Revised` + point-in-time vintages → `(Actual − Forecast)`), used **off-chain only** per blocker #1. The 2 req/s + 500-series TE limits are the reason the shared cache exists.
-
-## 3. Decomposition — slices connected by cross-chain layers
-
-Each slice gets its own spec → review gate → build.
 
 | Slice | Chain | What it is | Depends on |
 |---|---|---|---|
@@ -71,12 +28,25 @@ Each slice gets its own spec → review gate → build.
 | **B — Convex Panoptic leg** | EVM mainnet-**fork** (Foundry) | Real Panoptic long-gamma on a liquid pair; **Book B**; cCOP/USD documented target; TE-calibrated sizing | none |
 | **C — Cross-chain layer** | Reactive Network ↔ Somnia ↔ EVM (+ Celo signal) | First-class enabler: carries messages/value/signals between A, B, and the Celo cCOP/USD price | A + B |
 
+
+- Have a CI that run the most important tests on key leakage and server liveness on upsrtream
+- Note that superfluid, panoptic and reactive-netwrok all share ethereum as shared chain if there is, then we must prioritize building there.
+
+	
+	
+## Status (2026-06-01) — request-adapter component BUILT
+
+The "Keeper Server / REST API" box (the **request adapter**) is built + live:
+- `keeper/` — key-hidden TE query (`teClient`), deterministic scaling (`catalog`), keyless HTTP proxy (`proxy`); 31/31 tests; **deployed on Vercel** via a quota-free prebuilt CI/CD; returns `{value,unit,ts}`, paid key never on-chain.
+- **Factor API**: `te/<domain>/<slug>` routes anchored on TE stable symbols (`HistoricalDataSymbol`/`Symbol`); on-chain `TECatalog` keys `keccak256(name) → Endpoint{proxyPath, ".value", decimals, kind, class}`. Incl. `te/colombia/capacity-utilization` (COLOMBIACAPUTI → 775).
+- **Somnia integration — PROVEN end-to-end (2026-06-01), scoped**: `SomniaProbe` on testnet had the json-fetch agent fetch the public proxy and store the callback value (`latestUint=568` on the **`te/colombia/inflation`** route — distinct from the `capacity-utilization`=775 example used in unit tests; the e2e self-calibrates so it's route-agnostic), asserted vs the live proxy. Confirmed: `fetchUint(url,"value",0)` coerces the proxy's quoted-string to uint256; selector `"value"` (no dot), decimals 0, over-fund 0.12 STT/call (no TimedOut). **Still unverified** (do not overstate): the deployed `AgentRequester` rebate closed-form (CLAUDE.md unverified #1 — needs bytecode read; if it doesn't rebate to the callback contract, full-forward donates the surplus), the real callback arg-order beyond this one live path, and the 0.07/0.10 agent classes. Vercel Deployment Protection is OFF (done) so validators reach the proxy.
+
 ## 3.5 Architecture paradigm (NON-NEGOTIABLE — stick with it everywhere)
 
 **Async request-callback consumer** — the pattern `agentathon/somnia-agents-examples/contracts/PriceOracle.sol` demonstrates, adopted as the single paradigm every contract inherits:
-- Abstract **`SomniaAgentConsumer`**: `PLATFORM = 0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776` (testnet); `_sendRequest(agentId, payload)` (deposit via `getRequestDeposit()`; `createRequest{value:deposit}(agentId, address(this), this.handleResponse.selector, payload)`; track `pendingRequests`; refund excess); `handleResponse(requestId, Response[], status, Request)` guarded by `msg.sender == PLATFORM` + `pendingRequests[id]`, dispatching to a virtual `_onResult(...)`; `receive() external payable {}` for rebates.
+- Abstract **`SomniaAgentConsumer`** (BUILT; 18/18 tests): `PLATFORM = 0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776` (testnet); `_sendRequest(agentId, payload)` requires `msg.value ≥ getRequestDeposit()` (the floor) and **forwards the WHOLE `msg.value`** to `createRequest{value: msg.value}(agentId, address(this), this.handleResponse.selector, payload)` — **no refund**: the over-fund surplus (caller sends floor + `pᵢ·subSize`) IS the `perAgentBudget`; forwarding only the floor → budget 0 → `TimedOut`. Tracks `pendingRequests`; `handleResponse(requestId, Response[], status, Request)` guarded by `msg.sender == PLATFORM` + `pendingRequests[id]`, clears pending **before** dispatch (CEI/no-replay), dispatches to virtual `_onResult(...)`. `receive()` takes platform rebates; **owner-only `sweep(to)`** is the egress so rebates are never trapped.
 - Typed payload-encoder libraries per agent class — `JsonApi.fetchUint/fetchString/…`, `Llm.*`, `ParseWebsite.*` — wrapping `IJsonApiAgent` / `ILLMAgent` / `IParseWebsiteAgent` (signatures in `agentathon/…/interfaces/ISomniaAgents.sol`).
-- All consumers (`TEFeed`, later `AgentRouter` / escrow) **inherit `SomniaAgentConsumer`**. One paradigm, reused across all three agent classes.
+- All consumers (`SomniaProbe` now; later `MacroOracleConsumer` / `AgentRouter` / escrow) **inherit `SomniaAgentConsumer`**. One paradigm, reused across all three agent classes — but the per-class price term (`pᵢ·subSize`) must come from the price table, not a hardcoded constant, when a non-json-fetch consumer ships.
 
 ## 3.6 Phase 0 — minimal first proof (START HERE)
 
@@ -84,7 +54,7 @@ Two independently-verifiable rungs on Somnia testnet (50312):
 - **0a — toolchain proof:** a `SomniaAgentConsumer` against a **keyless public** endpoint (CoinGecko, per the example). Verifies deploy → `createRequest` → `handleResponse` → rebate. Zero key risk.
 - **0b — TE encapsulation proof (via keeper-proxy):** `?c=guest:guest` is **discontinued** (live-verified 2026-06-01: every endpoint returns "guest account has been discontinued"). The **paid key works** (HTTP 200 on `/country/colombia`, returns DANE-sourced series) but **cannot go on-chain** (validators publish the fetched URL). **Decided:** 0b fetches a real TE value through a **keeper-proxy** — a server-side endpoint (serverless fn) that holds the paid key in its own env and exposes a *keyless* URL the json-fetch agent calls; the proxy injects `?c=<key>` server-side and returns the trimmed field. Only the keyless proxy URL ever appears on-chain.
 - **Proxy caveat (documented, demo-only):** the keyless proxy URL is public on-chain, and the json-fetch agent passes only a URL (no auth header), so anyone reading the chain can call the proxy → free TE redistribution (blocker #1) + abuse vector. Mitigate with an unguessable/rotating path + server-side rate-limit; demo-only, not shippable. The paid key itself never touches chain.
-- **Phase-0 success:** a TE-sourced scalar lands on-chain in `TEFeed` via callback; gas readout recorded; guest-restriction + paid-key-deferral documented in NatSpec.
+- **Phase-0 success:** a TE-sourced scalar lands on-chain in `SomniaProbe` (`latestUint`/`latestString`) via callback; gas readout recorded; guest-restriction + paid-key-deferral documented in NatSpec. **Done 2026-06-01** (inflation route, value 568).
 
 ## 4. Slice A — Somnia cooperative
 

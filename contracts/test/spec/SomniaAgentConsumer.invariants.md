@@ -15,17 +15,28 @@ Verified by fuzz (`forge`) and, where tractable, formal proof (`kontrol` is pres
   `pendingRequests[id]` follows `false → true` (on `_sendRequest`) `→ false` (on the single
   `handleResponse`) and never returns to `true`. There is no code path that re-sets a cleared id.
 
-- **INV-4 — Value pass-through conservation.** A `_sendRequest` call leaves the consumer's own
-  balance unchanged: it forwards exactly `getRequestDeposit()` to the platform and refunds the
-  remainder to the caller (`forwarded + refunded == msg.value`). The contract retains nothing from
-  a send. The only inbound value is later platform rebates via `receive()`.
+- **INV-4 — Value pass-through conservation (over-fund, no refund).** A `_sendRequest` call forwards
+  the **whole** `msg.value` to the platform (`forwarded == msg.value`) and the consumer retains
+  nothing from the send. The caller must send `>= getRequestDeposit()` (the floor); per `CLAUDE.md`
+  the caller over-funds to `minPerAgentDeposit*subSize + p_i*subSize` so the surplus funds
+  `perAgentBudget`. The only inbound value the consumer keeps is a later platform **rebate** via
+  `receive()` (unused budget). There is no refund path **on send** — but inbound value is
+  always recoverable: the base exposes an owner-only `sweep(to)` egress (INV-5), so rebates
+  are never trapped.
+
+- **INV-5 — Egress exists / no trapped value.** Every wei that lands in the consumer
+  (`receive()` rebates, over-fund surplus) is recoverable by `owner` via `sweep(to)`, which
+  transfers the full balance and leaves the contract at zero. No non-owner can move funds.
+  (Resolves the one-way-trap defect: `receive()` inflow must have a matching outflow.)
 
 ## Notes / boundary conditions (from review)
 - `getRequestDeposit()` is an operations-reserve **floor**, not the true execution cost
-  (repo `CLAUDE.md` non-negotiable). Forwarding the floor means the platform may return
-  `Failed`/`TimedOut`; that is INV-covered by the handleResponse failure branch, not an error here.
-- Refund uses `call{value:}("")` + success check under a reentrancy guard — never `transfer`
-  (the reusable paradigm must not carry the 2300-gas footgun into `AgentRouter`/escrow).
+  (repo `CLAUDE.md` non-negotiable). Forwarding **only** the floor leaves `perAgentBudget = 0`,
+  so runners skip and the platform returns `TimedOut` (live finding, 2026-06-01). The consumer
+  therefore forwards the full over-funded `msg.value`; a `Failed`/`TimedOut` outcome is still
+  INV-covered by the handleResponse failure branch, not an error in `_sendRequest`.
+- No refund subtree: the over-fund surplus is intentionally forwarded (it IS the agent budget),
+  removing the prior `call`/`transfer` reentrancy footgun from the reusable paradigm entirely.
 - The real callback **signature/arg-order** (`handleResponse(uint256,Response[],ResponseStatus,Request)`)
   is NOT proven by these unit tests (the mock replays the consumer's own selector). It is verified
   ONLY by the live-testnet observe step — that step is a hard gate, not optional.
