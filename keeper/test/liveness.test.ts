@@ -15,7 +15,7 @@ const routes: Routes = JSON.parse(readFileSync(new URL("../routes.json", import.
 
 const fetcher = (async (endpoint: string) =>
   endpoint === "country/colombia"
-    ? { ok: true, value: [{ Category: "Inflation Rate", LatestValue: 5.68, LatestValueDate: "2026-04-30", echo: "c=CID%3ASECRET" }] }
+    ? { ok: true, value: [{ Category: "Inflation Rate", HistoricalDataSymbol: "COCPIYOY", LatestValue: 5.68, LatestValueDate: "2026-04-30", echo: "c=CID%3ASECRET" }] }
     : { ok: false, error: { kind: "network", message: "x" } }) as (e: string) => Promise<unknown>;
 
 test("liveness: server boots, serves {value,unit,ts}, leaks no key, 404s unknown routes", async () => {

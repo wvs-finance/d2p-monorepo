@@ -20,13 +20,14 @@ const EXPECTED: Record<string, { decimals: number; kind: "Uint" | "Int" }> = {
   "te/colombia/unemployment": { decimals: 1, kind: "Uint" },
   "te/colombia/bond-10y": { decimals: 1, kind: "Uint" },
   "te/colombia/balance-of-trade": { decimals: 2, kind: "Int" },
+  "te/colombia/capacity-utilization": { decimals: 1, kind: "Uint" },
   "te/fx/usdcop": { decimals: 2, kind: "Uint" },
   "te/commodity/crude-oil": { decimals: 3, kind: "Uint" },
   "te/commodity/natural-gas": { decimals: 4, kind: "Uint" },
   "te/commodity/gold": { decimals: 2, kind: "Uint" },
 };
 
-test("routes.json covers exactly the catalog's 10 proxyPaths", () => {
+test("routes.json covers exactly the catalog's 11 proxyPaths", () => {
   assert.deepEqual(Object.keys(routes).sort(), Object.keys(EXPECTED).sort());
 });
 

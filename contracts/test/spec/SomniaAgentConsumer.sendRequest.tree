@@ -1,14 +1,15 @@
 SomniaAgentConsumer::sendRequest
-├── when msg.value is less than the platform deposit
-│   └── it should revert.
-└── when msg.value is greater than or equal to the platform deposit
-    ├── it should forward exactly the platform deposit to createRequest.
+├── when msg.value is less than the platform deposit floor
+│   └── it should revert with InsufficientDeposit.
+└── when msg.value is greater than or equal to the platform deposit floor
+    ├── it should forward the full msg.value to createRequest.
     ├── it should mark the request id pending.
-    ├── it should emit AgentRequested with the request id and agent id.
-    ├── given msg.value equals the deposit
-    │   └── it should not transfer any refund.
-    └── given msg.value exceeds the deposit
-        ├── given the caller accepts the refund
-        │   └── it should refund the exact excess to the caller.
-        └── given the caller rejects the refund
-            └── it should revert.
+    └── it should emit AgentRequested with the request id and the agent id.
+
+# DEPOSIT SEMANTICS (corrected 2026-06-01 from live research + CLAUDE.md non-negotiable).
+# getRequestDeposit() is an operations-reserve FLOOR (= minPerAgentDeposit * subSize), NOT the
+# execution cost. Forwarding only the floor leaves perAgentBudget = 0 -> runners skip -> TimedOut.
+# CLAUDE.md requires msg.value >= minPerAgentDeposit*subSize + p_i*subSize, so the caller over-funds
+# and the consumer forwards the WHOLE msg.value; unused budget is rebated to the contract via receive().
+# There is therefore NO refund path (the prior "refund the excess" subtree is removed — it also
+# eliminated the call/transfer reentrancy footgun). msg.value below the floor still reverts.

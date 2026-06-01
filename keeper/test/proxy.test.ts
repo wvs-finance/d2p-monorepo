@@ -20,7 +20,7 @@ function fakeFetcher() {
     if (endpoint === "country/colombia")
       // Includes an extra field echoing a secret-looking string to prove the proxy
       // strips everything except the scalar.
-      return { ok: true, value: [{ Category: "Inflation Rate", LatestValue: 5.68, LatestValueDate: "2026-04-30", echo: "c=CID%3ASECRET" }] };
+      return { ok: true, value: [{ Category: "Inflation Rate", HistoricalDataSymbol: "COCPIYOY", LatestValue: 5.68, LatestValueDate: "2026-04-30", echo: "c=CID%3ASECRET" }] };
     if (endpoint === "markets/commodity")
       return { ok: true, value: [{ Name: "Gold", Last: 4474.7, Date: "2026-06-01" }] };
     return { ok: false, error: { kind: "network", message: "upstream boom" } };

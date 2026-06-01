@@ -1,0 +1,86 @@
+[
+  {
+    "Category": "Inflation Rate",
+    "HistoricalDataSymbol": "COCPIYOY",
+    "LatestValue": 5.68,
+    "LatestValueDate": "2026-04-30T00:00:00",
+    "PreviousValue": 5.56,
+    "Unit": "percent",
+    "Frequency": "Monthly",
+    "Adjustment": "2018=100",
+    "CategoryGroup": "Prices",
+    "Source": "Dane, Colombia"
+  },
+  {
+    "Category": "Interest Rate",
+    "HistoricalDataSymbol": "CORRRMIN",
+    "LatestValue": 11.25,
+    "LatestValueDate": "2026-04-30T00:00:00",
+    "PreviousValue": 11.25,
+    "Unit": "percent",
+    "Frequency": "Daily",
+    "Adjustment": "",
+    "CategoryGroup": "Money",
+    "Source": "Banco de la República de Colombia"
+  },
+  {
+    "Category": "GDP Annual Growth Rate",
+    "HistoricalDataSymbol": "COCIPIBY",
+    "LatestValue": 2.2,
+    "LatestValueDate": "2026-03-31T00:00:00",
+    "PreviousValue": 2.1,
+    "Unit": "percent",
+    "Frequency": "Quarterly",
+    "Adjustment": "Constant Prices, NSA, 2015=100",
+    "CategoryGroup": "GDP",
+    "Source": "Dane, Colombia"
+  },
+  {
+    "Category": "Unemployment Rate",
+    "HistoricalDataSymbol": "COUNTOTR",
+    "LatestValue": 8.8,
+    "LatestValueDate": "2026-04-30T00:00:00",
+    "PreviousValue": 8.8,
+    "Unit": "percent",
+    "Frequency": "Monthly",
+    "Adjustment": "",
+    "CategoryGroup": "Labour",
+    "Source": "Dane, Colombia"
+  },
+  {
+    "Category": "Government Bond 10Y",
+    "HistoricalDataSymbol": "COGR10Y",
+    "LatestValue": 13.2,
+    "LatestValueDate": "2026-05-29T00:00:00",
+    "PreviousValue": 13.3,
+    "Unit": "percent",
+    "Frequency": "Daily",
+    "Adjustment": "",
+    "CategoryGroup": "Markets",
+    "Source": "Ministry of Finance and Public Credit Republic of Colombia"
+  },
+  {
+    "Category": "Balance of Trade",
+    "HistoricalDataSymbol": "COTRBALM",
+    "LatestValue": -0.84,
+    "LatestValueDate": "2026-03-31T00:00:00",
+    "PreviousValue": -1.53,
+    "Unit": "USD Billion",
+    "Frequency": "Monthly",
+    "Adjustment": "",
+    "CategoryGroup": "Trade",
+    "Source": "Dane, Colombia"
+  },
+  {
+    "Category": "Capacity Utilization",
+    "HistoricalDataSymbol": "COLOMBIACAPUTI",
+    "LatestValue": 77.5,
+    "LatestValueDate": "2025-12-31T00:00:00",
+    "PreviousValue": 78.6,
+    "Unit": "percent",
+    "Frequency": "Monthly",
+    "Adjustment": "NSA",
+    "CategoryGroup": "Business",
+    "Source": "Asociacion Nacional de Empresarios de Colombia (ANDI)"
+  }
+]
