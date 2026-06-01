@@ -10,7 +10,7 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.ts\"",
     "te": "node src/teClient.ts",
-    "vercel-build": "esbuild vercel/handler.ts --bundle --platform=node --format=esm --outfile=api/fetch.js"
+    "vercel-build": "node scripts/build-vercel-output.mjs"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
