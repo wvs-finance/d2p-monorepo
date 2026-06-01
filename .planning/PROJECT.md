@@ -16,6 +16,30 @@ Scope notes:
 - **Validator-side rows (#8, #9, #10) are out of scope** — not caller-observable.
 - **Row #3 (`subcommitteeSize ≤ operator_configured_max`) is excluded from per-row binding analysis** — `operator_configured_max` lives in impl storage with no exposed getter in the e15d4e9 NatSpec. #3 is validated structurally by the *absence* of `SubcommitteeSizeExceedsMax` reverts in the indexed window; per-row `pct_binding` is N/A. A future plan-phase decision (see STORAGE-01 in Known Plan-Phase Decisions) may recover the cap via storage probe if the slot can be identified — but M1 does not block on it.
 
+## Current Milestone: v2.0 — Convex Instrument (cCOP/USD long-gamma)
+
+> **2026-06-01 — new ENGINEERING milestone (parallel track).** The M1 donor-transfer
+> econometrics (Core Value above) is **PARKED mid-Phase-3** and preserved verbatim at
+> `.planning/STATE-M1-donor-transfer-2026-06-01.md` (resumable; phase docs/reviews/research
+> untouched). M1 later **calibrates this instrument's params** (K, k, pricing). This milestone
+> ships the first tradable product the econometric arc justifies.
+
+**Goal:** A TE-sized **long-gamma cCOP/USD hedge** on **borrowed-Panoptic-data-model** contracts
+(our own implementation; deployed on **Celo against the real cCOP Uniswap pool**; clean future
+swap to real Panoptic for pool creation). Premium = upfront collateral → streamed accrual →
+**data-cost-weighted reimbursement** (`deposit − streamia − commission − metered delta-hedge data
+cost`). Post-Keynesian/Shiller-grounded; **feature-by-feature, strict evm-tdd**.
+
+**Foundations (built + proven this session):** `SomniaAgentConsumer` + `SomniaProbe` +
+`MacroOracle` live on Somnia testnet (`fetchUint` 775 / `fetchInt` −84); keeper-proxy
+(key-hidden) live on Vercel. Research in `research/macro-markets-colombia/` (RESEARCH,
+FEASIBILITY-v1 [verdict FEASIBLE-WITH-CHANGES], INSTRUMENT-v1) + `DRAFT.md` + `MATH.md`.
+
+**Honest constraints:** no Celo/cCOP Panoptic deployment exists (borrow the data model, own
+contracts); delta-hedging is an external keeper add-on, not a Panoptic primitive; cCOP/USD price
++ CPI surprise both sourced from `MacroOracle`/TE; the CPI-surprise→FX-move linkage is an
+empirical assumption to validate. All planning docs pass the three-step review gate (CLAUDE.md).
+
 ## Pre-flight Scout (2026-05-25, completed)
 
 Findings that constrain the rest of this plan:
