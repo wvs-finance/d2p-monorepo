@@ -1,0 +1,43 @@
+name: keeper-deploy
+
+# PREBUILT deploy (saves Vercel build quota — we build in OUR Node-24 runner and
+# upload the prebuilt output; Vercel runs no build). Building here also fixes the
+# .ts-extension import failure that broke Vercel's remote transpile, because our
+# esbuild bundle (vercel-build) runs in our env.
+#
+# Vercel project is NOT Git-connected (created via `vercel link`), so a push never
+# triggers a Vercel-side build. This workflow is the only deploy path.
+#
+# REQUIRED repo secret: VERCEL_TOKEN  (create at https://vercel.com/account/tokens).
+# org/project IDs are identifiers, not secrets — inlined below.
+on:
+  push:
+    branches: [master]
+    paths: ["keeper/**", ".github/workflows/keeper-deploy.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VERCEL_ORG_ID: team_ZcVsxCvyIoMYJra96gGABhI6
+  VERCEL_PROJECT_ID: prj_xjfZPQAo9htADye4hEERrgz7espo
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: keeper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci
+      - run: npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        env: { VERCEL_TOKEN: "${{ secrets.VERCEL_TOKEN }}" }
+      - run: npx vercel build --prod --token="$VERCEL_TOKEN" # runs npm run vercel-build (esbuild bundle)
+        env: { VERCEL_TOKEN: "${{ secrets.VERCEL_TOKEN }}" }
+      - run: npx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" # uploads prebuilt → no Vercel build quota
+        env: { VERCEL_TOKEN: "${{ secrets.VERCEL_TOKEN }}" }

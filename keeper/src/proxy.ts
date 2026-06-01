@@ -98,7 +98,7 @@ export function createProxyServer(routes: Routes, opts: ProxyOpts = {}) {
 }
 
 // CLI: `PORT=8787 node src/proxy.ts` — demo-only (see README blockers; not for public exposure as-is).
-if (import.meta.main) {
+if ((import.meta as { main?: boolean }).main) {
   const routes: Routes = JSON.parse(readFileSync(new URL("../routes.json", import.meta.url), "utf8"));
   const port = Number(process.env.PORT ?? 8787);
   createProxyServer(routes).listen(port, () => console.log(`keeper-proxy on :${port} (demo-only)`));
