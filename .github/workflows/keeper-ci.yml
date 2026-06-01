@@ -1,0 +1,32 @@
+name: keeper-ci
+
+# Runs on every push/PR (including forks) with NO secret — mocked, keyless tests.
+# Fork PRs cannot read repository or environment secrets here (platform guarantee),
+# and we never use pull_request_target. [spec: Secret unreachable from untrusted CI]
+on:
+  pull_request:
+    paths: ["keeper/**", ".github/workflows/keeper-ci.yml"]
+  push:
+    branches: [master]
+    paths: ["keeper/**", ".github/workflows/keeper-ci.yml"]
+
+permissions:
+  contents: read # least privilege
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: keeper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24" # >=24 for TS type-stripping + import.meta.main
+      - run: npm ci
+      # Most-important coverage first (fast-fail): key never leaks + server is live.
+      - name: Critical — key-leakage + server-liveness
+        run: node --test "test/teClient.test.ts" "test/proxy.test.ts" "test/liveness.test.ts"
+      - name: Full keeper suite
+        run: npm test # node --test (fast-check); fully mocked, no API key
