@@ -35,9 +35,6 @@ jobs:
         with:
           node-version: "24"
       - run: npm ci
-      - run: npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-        env: { VERCEL_TOKEN: "${{ secrets.VERCEL_TOKEN }}" }
-      - run: npx vercel build --prod --token="$VERCEL_TOKEN" # runs npm run vercel-build (esbuild bundle)
-        env: { VERCEL_TOKEN: "${{ secrets.VERCEL_TOKEN }}" }
+      - run: npm run vercel-build # writes .vercel/output (Build Output API) via esbuild — in OUR env
       - run: npx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" # uploads prebuilt → no Vercel build quota
         env: { VERCEL_TOKEN: "${{ secrets.VERCEL_TOKEN }}" }
