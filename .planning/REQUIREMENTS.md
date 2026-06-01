@@ -49,11 +49,25 @@
 
 ## Traceability
 
-(Filled by the roadmapper.)
+Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exactly one active phase; 0 orphans. Deferred items carry no active phase. See `.planning/ROADMAP.md` (phases 7–10).
 
 | Requirement | Phase | Status |
 |---|---|---|
-| (pending roadmap) | — | Pending |
+| FORK-01 | Phase 7 | Pending |
+| FORK-02 | Phase 7 | Pending |
+| FORK-03 | Phase 7 | Pending |
+| WRAP-01 | Phase 8 | Pending |
+| WRAP-02 | Phase 8 | Pending |
+| WRAP-03 | Phase 8 | Pending |
+| WRAP-04 | Phase 8 | Pending |
+| FEE-01 | Phase 9 | Pending |
+| FEE-02 | Phase 9 | Pending |
+| FEE-03 | Phase 9 | Pending |
+| SIZE-01 | Phase 10 | Pending |
+| SIZE-02 | Phase 10 | Pending |
+| PAY-01 | Deferred | Future (no active phase) |
+| XCHAIN-01 | Deferred | Future (no active phase) |
+| HEDGE-01 | Deferred | Future (no active phase) |
 
 ---
-*Requirements defined: 2026-06-01*
+*Requirements defined: 2026-06-01. Traceability filled by the roadmapper 2026-06-01 (phases 7–10).*
