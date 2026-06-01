@@ -128,7 +128,7 @@ export async function fetchTE(
 }
 
 // CLI: `node keeper/src/teClient.ts country/colombia [k=v ...]` (run from repo root for .env)
-if (import.meta.main) {
+if ((import.meta as { main?: boolean }).main) {
   const [path, ...rest] = process.argv.slice(2);
   if (!path) {
     console.error("usage: node keeper/src/teClient.ts <te-path> [k=v ...]");

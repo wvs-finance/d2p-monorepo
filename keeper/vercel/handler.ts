@@ -1,19 +1,17 @@
 /**
- * Vercel serverless entry for the keeper-proxy.
+ * esbuild ENTRY for the Vercel function. `npm run vercel-build` bundles this into a
+ * single self-contained `api/fetch.js` (all `.ts` imports inlined, only node: builtins
+ * external) — so Vercel never has to resolve our `.ts`-extension imports at runtime
+ * (which is what broke the direct deploy: ERR_MODULE_NOT_FOUND .../proxy.ts).
  *
  * Request:  GET /te/<proxyPath...>  (rewritten to /api/fetch?path=te/<...>)
- * Response: { value, unit, ts }  — the scaled integer + metadata; NO key, ever.
- *
- * The TE key comes from the Vercel project env var TRADING_ECONOMICS_API_KEY (a
- * project secret); teClient reads it from process.env and never emits it.
- *
- * ⚠ Serverless is STATELESS: the in-memory spend-ceiling/rate-limit in makeProxy
- * only protect within a warm instance. For production B2 (gate), back makeProxy
- * with shared state (Vercel KV / Upstash). Demo-only as-is — see ../README.md.
+ * Response: { value, unit, ts } — NO key. Key from Vercel env TRADING_ECONOMICS_API_KEY.
+ * ⚠ Serverless is stateless: the in-memory spend-ceiling only protects a warm instance;
+ * back makeProxy with Vercel KV for real B2 in production (see ../README.md).
  */
 import { makeProxy, type ProxyOpts } from "../src/proxy.ts";
 import type { Routes } from "../src/catalog.ts";
-import routes from "../routes.json" with { type: "json" };
+import routes from "../routes.json";
 
 const handle = makeProxy(routes as unknown as Routes, {} as ProxyOpts);
 
