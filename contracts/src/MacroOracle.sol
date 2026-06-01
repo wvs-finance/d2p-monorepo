@@ -32,9 +32,8 @@ pragma solidity ^0.8.24;
   (CLAUDE.md's mainnet IAgentRequester 0x5E5205CF… is a DIFFERENT deployment.)
 //////////////////////////////////////////////////////////////////////////////*/
 
-// TODO(import): replace with the canonical interface from the Somnia agent repo.
-//   import {IAgentRequester, Request, Response, ResponseStatus} from ".../ISomniaAgents.sol";
-// The consumer base (request→callback paradigm) is `SomniaAgentConsumer` (see DRAFT.md §3.5).
+import {SomniaAgentConsumer} from "./SomniaAgentConsumer.sol";
+import {IJsonApiAgent, Response, ResponseStatus} from "./interfaces/ISomniaAgents.sol";
 
 /// @notice FUTURE trust-minimization seam. NOT a key retriever — a proof verifier.
 ///         The off-chain prover holds the key and proves the value is authentic;
@@ -57,10 +56,10 @@ enum MacroClass { Prices, Rates, Labor, Activity, Trade, Fx, Commodity }
 
 /// @notice One queryable TE data point. The contract builds a keyless json-fetch
 ///         request from this; the off-chain proxy resolves `proxyPath` to the real
-///         TE endpoint + extractor and returns `{value,unit,ts}` (selector = ".value").
+///         TE endpoint + extractor and returns `{value,unit,ts}` (selector = "value").
 struct Endpoint {
     string proxyPath; // keyless keeper-proxy route, e.g. "te/colombia/inflation"
-    string selector; // scalar selector in the normalized proxy output: ".value"
+    string selector; // scalar selector in the normalized proxy output: "value"
     uint8 decimals; // onchainInt = roundHalfAwayFromZero(native * 10**decimals)
     ValueKind kind; // Int where native can be negative; else Uint
     MacroClass class;
@@ -98,18 +97,18 @@ library TECatalog {
         keys = new bytes32[](11);
         eps = new Endpoint[](11);
         // name (TE Category)                  proxyPath                     sel       dec kind            class
-        keys[0]=keyInflation();    eps[0]=Endpoint("te/colombia/inflation",       ".value",2,ValueKind.Uint,MacroClass.Prices);     // Inflation Rate 5.68% -> 568
-        keys[1]=keyPolicyRate();   eps[1]=Endpoint("te/colombia/interest-rate",   ".value",2,ValueKind.Uint,MacroClass.Rates);      // Interest Rate 11.25% -> 1125
-        keys[2]=keyGdpGrowth();    eps[2]=Endpoint("te/colombia/gdp-growth",      ".value",1,ValueKind.Int, MacroClass.Activity);   // GDP YoY 2.2% -> 22 (can be <0)
-        keys[3]=keyUnemployment(); eps[3]=Endpoint("te/colombia/unemployment",    ".value",1,ValueKind.Uint,MacroClass.Labor);      // Unemployment 8.8% -> 88
-        keys[4]=keyBond10y();      eps[4]=Endpoint("te/colombia/bond-10y",        ".value",1,ValueKind.Uint,MacroClass.Rates);      // 10Y 13.2% -> 132
-        keys[5]=keyTradeBalance(); eps[5]=Endpoint("te/colombia/balance-of-trade",".value",2,ValueKind.Int, MacroClass.Trade);      // -0.84B -> -84 (USD Billion)
-        keys[6]=keyUsdCop();       eps[6]=Endpoint("te/fx/usdcop",                ".value",2,ValueKind.Uint,MacroClass.Fx);         // 3568.74 -> 356874
-        keys[7]=keyCrudeOil();     eps[7]=Endpoint("te/commodity/crude-oil",      ".value",3,ValueKind.Uint,MacroClass.Commodity);  // 93.5676 -> 93568
-        keys[8]=keyNatGas();       eps[8]=Endpoint("te/commodity/natural-gas",    ".value",4,ValueKind.Uint,MacroClass.Commodity);  // 3.1739 -> 31739
-        keys[9]=keyGold();         eps[9]=Endpoint("te/commodity/gold",           ".value",2,ValueKind.Uint,MacroClass.Commodity);  // 4474.7 -> 447470
+        keys[0]=keyInflation();    eps[0]=Endpoint("te/colombia/inflation",       "value",2,ValueKind.Uint,MacroClass.Prices);     // Inflation Rate 5.68% -> 568
+        keys[1]=keyPolicyRate();   eps[1]=Endpoint("te/colombia/interest-rate",   "value",2,ValueKind.Uint,MacroClass.Rates);      // Interest Rate 11.25% -> 1125
+        keys[2]=keyGdpGrowth();    eps[2]=Endpoint("te/colombia/gdp-growth",      "value",1,ValueKind.Int, MacroClass.Activity);   // GDP YoY 2.2% -> 22 (can be <0)
+        keys[3]=keyUnemployment(); eps[3]=Endpoint("te/colombia/unemployment",    "value",1,ValueKind.Uint,MacroClass.Labor);      // Unemployment 8.8% -> 88
+        keys[4]=keyBond10y();      eps[4]=Endpoint("te/colombia/bond-10y",        "value",1,ValueKind.Uint,MacroClass.Rates);      // 10Y 13.2% -> 132
+        keys[5]=keyTradeBalance(); eps[5]=Endpoint("te/colombia/balance-of-trade","value",2,ValueKind.Int, MacroClass.Trade);      // -0.84B -> -84 (USD Billion)
+        keys[6]=keyUsdCop();       eps[6]=Endpoint("te/fx/usdcop",                "value",2,ValueKind.Uint,MacroClass.Fx);         // 3568.74 -> 356874
+        keys[7]=keyCrudeOil();     eps[7]=Endpoint("te/commodity/crude-oil",      "value",3,ValueKind.Uint,MacroClass.Commodity);  // 93.5676 -> 93568
+        keys[8]=keyNatGas();       eps[8]=Endpoint("te/commodity/natural-gas",    "value",4,ValueKind.Uint,MacroClass.Commodity);  // 3.1739 -> 31739
+        keys[9]=keyGold();         eps[9]=Endpoint("te/commodity/gold",           "value",2,ValueKind.Uint,MacroClass.Commodity);  // 4474.7 -> 447470
         // CategoryGroup "Business" has no MacroClass member -> mapped to Activity (closest existing).
-        keys[10]=keyCapacityUtil(); eps[10]=Endpoint("te/colombia/capacity-utilization",".value",1,ValueKind.Uint,MacroClass.Activity); // 77.5% -> 775 (COLOMBIACAPUTI)
+        keys[10]=keyCapacityUtil(); eps[10]=Endpoint("te/colombia/capacity-utilization","value",1,ValueKind.Uint,MacroClass.Activity); // 77.5% -> 775 (COLOMBIACAPUTI)
     }
 }
 
@@ -118,30 +117,113 @@ library TECatalog {
 //////////////////////////////////////////////////////////////////////////////*/
 
 /// @notice The on-chain macro oracle. Inherits the async request/callback paradigm
-///         (`SomniaAgentConsumer`), looks an Endpoint up by name in `TECatalog`,
-///         and asks the json-fetch agent to fetch the KEYLESS proxy URL. The proxy
-///         injects the key off-chain; this contract never sees it.
-abstract contract MacroOracleConsumer /* is SomniaAgentConsumer */ {
-    /// @dev Keyless base URL of the off-chain keeper-proxy (e.g. "https://<proxy>/").
-    ///      Set at deploy; the key lives only behind this endpoint, never here.
-    // string public PROXY_BASE;
+///         (`SomniaAgentConsumer`), looks an Endpoint up by `dataKey` in `TECatalog`,
+///         and asks the json-fetch agent to fetch the KEYLESS keeper-proxy URL. The
+///         proxy injects the paid key off-chain; this contract never sees it.
+/// @dev    AGENT-CALL semantics (proven on testnet for fetchUint, 2026-06-01): selector is
+///         the bare key "value" (the proxy normalizes every route to {value,unit,ts}); the
+///         agent decimals arg is ALWAYS 0 because the proxy pre-scales — `Endpoint.decimals`
+///         is the proxy's scale, kept ONLY for how a consumer should interpret `scaledValue`,
+///         and is NOT passed to the agent. Int-kind endpoints use `fetchInt` (structurally
+///         analogous to the proven fetchUint path, but not yet live-verified on-chain).
+///         `MacroDatum.observedAt` stays 0: the agent fetches only the "value" field, not the
+///         proxy's "ts" — populating it needs a second fetch (a later change).
+contract MacroOracle is SomniaAgentConsumer {
+    /// @notice Somnia testnet JSON API Request agent.
+    uint256 public constant JSON_API_AGENT_ID = 13174292974160097713;
 
-    /// @dev Registered endpoints + latest values.
-    // mapping(bytes32 => Endpoint)  internal _catalog;
-    // mapping(bytes32 => MacroDatum) public latest;
-    // mapping(uint256 => bytes32)   internal _pendingKey; // requestId -> dataKey
+    /// @notice Keyless base URL of the off-chain keeper-proxy (e.g. "https://<proxy>/").
+    ///         The key lives only behind this endpoint, never here.
+    string public PROXY_BASE;
 
-    /// @notice Request a macro datum by catalog name. Builds
-    ///         fetchUint(PROXY_BASE + ep.proxyPath, ep.selector, ep.decimals) and
-    ///         sends it to the json-fetch agent via the platform.
-    /// TODO(/opsx:apply): implement using SomniaAgentConsumer._sendRequest + JsonApi.fetchUint.
-    // function requestMacro(bytes32 dataKey) external payable returns (uint256 requestId);
+    mapping(bytes32 => Endpoint) internal _catalog;
+    mapping(bytes32 => MacroDatum) public latest;
+    mapping(uint256 => bytes32) internal _pendingKey; // requestId -> dataKey
 
-    /// @notice Callback target. Decodes the scaled integer, applies sign per
-    ///         `ep.kind`, and stores a MacroDatum. MUST enforce: Uint endpoint with a
-    ///         negative native value => revert/typed error; scaled value out of int256
-    ///         range => revert (no silent wrap); rounding = half-away-from-zero
-    ///         (NOT JS Math.round, which is sign-asymmetric). [gate fix M3]
-    /// TODO(/opsx:apply): implement _onResult override.
-    // function _onResult(uint256 requestId, Response[] memory responses, ResponseStatus status) internal /* override */;
+    event MacroRequested(uint256 indexed requestId, bytes32 indexed dataKey);
+    event MacroReceived(bytes32 indexed dataKey, int256 scaledValue);
+    event MacroFailed(uint256 indexed requestId, bytes32 indexed dataKey, ResponseStatus status);
+
+    error UnknownKey(bytes32 dataKey);
+    error UnsupportedKind(bytes32 dataKey);
+    error BadProxyBase();
+
+    constructor(address platform, string memory proxyBase) SomniaAgentConsumer(platform) {
+        // Must end with "/" so string.concat(PROXY_BASE, proxyPath) yields a single slash
+        // (proxyPaths carry no leading slash). Guards the deploy-time URL-join footgun.
+        bytes memory b = bytes(proxyBase);
+        if (b.length == 0 || b[b.length - 1] != 0x2f) revert BadProxyBase();
+        PROXY_BASE = proxyBase;
+        (bytes32[] memory keys, Endpoint[] memory eps) = TECatalog.seed();
+        for (uint256 i; i < keys.length; ++i) {
+            _catalog[keys[i]] = eps[i];
+        }
+    }
+
+    /// @notice Read the registered endpoint for a key (proxyPath, decimals, kind, class).
+    function endpointOf(bytes32 dataKey) external view returns (Endpoint memory) {
+        return _catalog[dataKey];
+    }
+
+    /// @notice Request a macro datum by catalog key. Builds the agent call against the
+    ///         keyless proxy URL and forwards it via the platform. Over-fund per
+    ///         SomniaAgentConsumer: msg.value >= floor (+ p_i*subSize for a live budget).
+    function requestMacro(bytes32 dataKey) external payable returns (uint256 requestId) {
+        Endpoint memory ep = _catalog[dataKey];
+        if (bytes(ep.proxyPath).length == 0) revert UnknownKey(dataKey);
+        string memory url = string.concat(PROXY_BASE, ep.proxyPath);
+
+        bytes memory payload;
+        if (ep.kind == ValueKind.Uint) {
+            payload = abi.encodeWithSelector(IJsonApiAgent.fetchUint.selector, url, "value", uint8(0));
+        } else if (ep.kind == ValueKind.Int) {
+            payload = abi.encodeWithSelector(IJsonApiAgent.fetchInt.selector, url, "value", uint8(0));
+        } else {
+            revert UnsupportedKind(dataKey); // String kinds have no scalar MacroDatum slot
+        }
+
+        requestId = _sendRequest(JSON_API_AGENT_ID, payload);
+        _pendingKey[requestId] = dataKey;
+        emit MacroRequested(requestId, dataKey);
+    }
+
+    /// @notice Callback: decode the pre-scaled integer per `ep.kind` and store a MacroDatum.
+    ///         Defensive — a malformed/out-of-range payload routes to MacroFailed instead of
+    ///         reverting the platform callback (which would strand the request pending).
+    function _onResult(uint256 requestId, Response[] memory responses, ResponseStatus status) internal override {
+        bytes32 dataKey = _pendingKey[requestId];
+        delete _pendingKey[requestId];
+
+        if (status != ResponseStatus.Success || responses.length == 0) {
+            emit MacroFailed(requestId, dataKey, status);
+            return;
+        }
+        bytes memory result = responses[0].result; // consensus value at index 0
+        if (result.length != 32) {
+            emit MacroFailed(requestId, dataKey, status);
+            return;
+        }
+
+        int256 scaled;
+        if (_catalog[dataKey].kind == ValueKind.Int) {
+            scaled = abi.decode(result, (int256));
+        } else {
+            uint256 u = abi.decode(result, (uint256));
+            if (u > uint256(type(int256).max)) {
+                // no silent wrap into a negative int256
+                emit MacroFailed(requestId, dataKey, status);
+                return;
+            }
+            // forge-lint: disable-next-line(unsafe-typecast) -- guarded by the range check above
+            scaled = int256(u);
+        }
+
+        latest[dataKey] = MacroDatum({
+            dataKey: dataKey,
+            scaledValue: scaled,
+            observedAt: 0, // agent fetches only "value", not the proxy "ts" (see contract @dev)
+            deliveredAt: uint64(block.timestamp)
+        });
+        emit MacroReceived(dataKey, scaled);
+    }
 }
