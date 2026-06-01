@@ -91,11 +91,12 @@ library TECatalog {
     function keyCrudeOil() internal pure returns (bytes32) { return keccak256("commodity/crude-oil"); }
     function keyNatGas() internal pure returns (bytes32) { return keccak256("commodity/natural-gas"); }
     function keyGold() internal pure returns (bytes32) { return keccak256("commodity/gold"); }
+    function keyCapacityUtil() internal pure returns (bytes32) { return keccak256("co/capacity-utilization"); }
 
     /// @notice Seed catalog. decimals preserve TE's native precision; Int = sign-capable.
     function seed() internal pure returns (bytes32[] memory keys, Endpoint[] memory eps) {
-        keys = new bytes32[](10);
-        eps = new Endpoint[](10);
+        keys = new bytes32[](11);
+        eps = new Endpoint[](11);
         // name (TE Category)                  proxyPath                     sel       dec kind            class
         keys[0]=keyInflation();    eps[0]=Endpoint("te/colombia/inflation",       ".value",2,ValueKind.Uint,MacroClass.Prices);     // Inflation Rate 5.68% -> 568
         keys[1]=keyPolicyRate();   eps[1]=Endpoint("te/colombia/interest-rate",   ".value",2,ValueKind.Uint,MacroClass.Rates);      // Interest Rate 11.25% -> 1125
@@ -107,6 +108,8 @@ library TECatalog {
         keys[7]=keyCrudeOil();     eps[7]=Endpoint("te/commodity/crude-oil",      ".value",3,ValueKind.Uint,MacroClass.Commodity);  // 93.5676 -> 93568
         keys[8]=keyNatGas();       eps[8]=Endpoint("te/commodity/natural-gas",    ".value",4,ValueKind.Uint,MacroClass.Commodity);  // 3.1739 -> 31739
         keys[9]=keyGold();         eps[9]=Endpoint("te/commodity/gold",           ".value",2,ValueKind.Uint,MacroClass.Commodity);  // 4474.7 -> 447470
+        // CategoryGroup "Business" has no MacroClass member -> mapped to Activity (closest existing).
+        keys[10]=keyCapacityUtil(); eps[10]=Endpoint("te/colombia/capacity-utilization",".value",1,ValueKind.Uint,MacroClass.Activity); // 77.5% -> 775 (COLOMBIACAPUTI)
     }
 }
 
