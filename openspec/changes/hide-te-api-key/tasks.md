@@ -17,27 +17,27 @@
 
 - [x] 2.0 Commit the live-probe evidence (`openspec/changes/hide-te-api-key/probe-log.md`) backing the 10 endpoints + pinned decimals [gate M5]
 - [ ] 2.1 Finalize the Solidity `TECatalog` library + `Endpoint`/`MacroClass` types in `contracts/src/MacroOracle.sol` (sketch exists; pin testnet platform/agent) [gate M4]
-- [ ] 2.2 Add Layer-2 proxy route table `keeper/routes.json` (`proxyPath → {teEndpoint, extract, output}`) for the 10 probed endpoints
-- [ ] 2.3 Test asserting Layer-1 (`TECatalog`) ↔ Layer-2 (`routes.json`) consistency (every `proxyPath` matches; decimals/kind agree)
+- [x] 2.2 Add Layer-2 proxy route table `keeper/routes.json` (`proxyPath → {teEndpoint, extract, decimals, kind, unit}`) for the 10 probed endpoints
+- [x] 2.3 Test asserting Layer-1 (`TECatalog`) ↔ Layer-2 (`routes.json`) consistency (`keeper/test/routes.consistency.test.ts`: every `proxyPath` matches; decimals/kind agree)
 
 ## 3. Keyless HTTP proxy (makes the key-hidden data agent-callable)
 
 - [ ] 3.0 **Prerequisite:** decide + provision a public **HTTPS** proxy endpoint reachable by Somnia validators (localhost is not) [gate M3-RC]
-- [ ] 3.1 Specify the proxy behavior tree + fast-check properties FIRST: key never in response/logs/errors (incl. upstream URL); route table drives extraction; normalized `{value,unit,ts}`
-- [ ] 3.2 Implement `keeper/proxy.ts` (zero-dep): keyless `proxyPath` → route → `fetchTE` → extract → normalize; reuse `redact`/typed-`Result`; never log key or upstream URL; generic errors only
-- [ ] 3.3 Implement the **scaling authority**: round half-away-from-zero to pinned `decimals`; negative-into-`Uint` → typed error; out-of-range → typed error [gate M3]
-- [ ] 3.4 Implement the **spend ceiling + per-path rate limit**: cap upstream TE calls per window, serve cached/stale once exhausted, `429` per-path on abuse [gate B2]
-- [ ] 3.5 Tests: keyless request → normalized scalar; response/logs contain no key/upstream URL; unknown path → 404; rate-limit + budget-cap enforced; scaling edge cases
+- [x] 3.1 Behavior spec written FIRST as `keeper/test/proxy.test.ts` (routing, normalize, rate-limit, spend-ceiling, no-leak) — RED before impl
+- [x] 3.2 Implement `keeper/src/proxy.ts` (zero-dep): keyless `proxyPath` → route → `fetchTE` → extract → normalize; reuses typed-`Result`; never logs key or upstream URL; generic errors only; + `node:http` server wrapper
+- [x] 3.3 Implement the **scaling authority** in `keeper/src/catalog.ts` (`scaleToInt`/`roundHalfAwayFromZero`/`extractScalar`/`normalize`): round half-away-from-zero to pinned `decimals`; negative-into-`Uint` → typed error; out-of-range → typed error; TDD'd in `keeper/test/catalog.test.ts` (incl. fast-check sign-symmetry property) [gate M3]
+- [x] 3.4 **Spend ceiling + per-path rate limit** in `makeProxy`: cap upstream TE calls per window, serve cached once exhausted (`quota_exhausted` if uncached), `429` per-path on abuse [gate B2]
+- [x] 3.5 Tests (`proxy.test.ts` + `catalog.test.ts`): keyless request → normalized scalar; no key in body/errors (echoed upstream field stripped); unknown path → 404; rate-limit + budget-cap + window-reset enforced; scaling edge cases. 28/28 green.
 - [ ] 3.6 Live smoke (requires 3.0): `curl` a catalog path against the deployed HTTPS proxy → `{value,unit,ts}`, no key in response
 
 ## 4. CI / secrets (backed by spec requirements)
 
-- [ ] 4.1 `pull_request` job: keeper + proxy mocked tests, NO secret, least-privilege `permissions: contents: read`
-- [ ] 4.2 `workflow_dispatch` live job behind a protected Environment holding `TRADING_ECONOMICS_API_KEY`; never `pull_request_target` [gate M1]
-- [ ] 4.3 Document the secret setup in `keeper/README.md`
+- [x] 4.1 `.github/workflows/keeper-ci.yml` — `pull_request`+`push` job runs `npm test` (mocked, NO secret), least-privilege `permissions: contents: read`
+- [x] 4.2 `.github/workflows/keeper-live.yml` — `workflow_dispatch`-only live job behind protected Environment `live-api` holding `TRADING_ECONOMICS_API_KEY`; no `pull_request_target` (GitHub Environment is a one-time manual setup, documented in README) [gate M1]
+- [x] 4.3 Document the secret setup in `keeper/README.md`
 
 ## 5. Documentation / blockers
 
-- [ ] 5.1 Record the three blockers (TE license no-redistribution; public keyless-proxy-URL = obscurity + sacrificial-quota-capped; calendar 403) in `keeper/README.md` and contract NatSpec
-- [ ] 5.2 Note the zkTLS trust-minimization upgrade path (`IMacroProofVerifier`) as a future change
-- [ ] 5.3 Flag (for the convex-instrument change) that a snapshot-derived `LatestValue−PreviousValue` surprise is an UNVALIDATED proxy for the 403'd calendar `Actual−Forecast` — to be proven, not assumed [gate M6]
+- [x] 5.1 Record the three blockers (TE license no-redistribution; public keyless-proxy-URL = obscurity + sacrificial-quota-capped; calendar 403) in `keeper/README.md` and `contracts/src/MacroOracle.sol` NatSpec
+- [x] 5.2 Note the zkTLS trust-minimization upgrade path (`IMacroProofVerifier`) as a future change (README + MacroOracle.sol)
+- [x] 5.3 Flag (for the convex-instrument change) that a snapshot-derived `LatestValue−PreviousValue` surprise is an UNVALIDATED proxy for the 403'd calendar `Actual−Forecast` — recorded in `design.md` Open Questions [gate M6]
