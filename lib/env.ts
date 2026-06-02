@@ -10,6 +10,10 @@ export const env = createEnv({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     // injected by Vercel at deploy time; undefined in local dev (RESEARCH Pitfall 7)
     VERCEL_GIT_COMMIT_SHA: z.string().optional(),
+    // Set to any truthy value to enable live Somnia RPC reads in reader.ts.
+    // NEVER NEXT_PUBLIC_: this must stay server-only (RPC is not a public endpoint).
+    // Default: undefined (snapshot mode).
+    SOMNIA_LIVE: z.coerce.boolean().optional(),
   },
   client: {
     // client-safe (NEXT_PUBLIC_*): public RPCs, WalletConnect ID, app URL
@@ -25,6 +29,7 @@ export const env = createEnv({
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
+    SOMNIA_LIVE: process.env.SOMNIA_LIVE,
     NEXT_PUBLIC_RPC_CELO_PRIMARY: process.env.NEXT_PUBLIC_RPC_CELO_PRIMARY,
     NEXT_PUBLIC_RPC_ETH_PRIMARY: process.env.NEXT_PUBLIC_RPC_ETH_PRIMARY,
     NEXT_PUBLIC_RPC_BASE_PRIMARY: process.env.NEXT_PUBLIC_RPC_BASE_PRIMARY,

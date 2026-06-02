@@ -1,0 +1,11 @@
+{
+  "chainId": 50312,
+  "macroOracle": "0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f",
+  "macroHedgeStrategist": "0xfA428171E1F5B56f92C67C002De1d8e90B053EE1",
+  "platform": "0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776",
+  "llmAgentId": "12847293847561029384",
+  "keeperProxy": "https://keeper-eta-pied.vercel.app/",
+  "rpcUrl": "https://api.infra.testnet.somnia.network",
+  "capturedAt": "2026-06-02T17:20:00.000Z",
+  "source": "abrigo-somnia STATE.md 11-03"
+}
