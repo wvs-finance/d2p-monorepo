@@ -1,0 +1,16 @@
+{
+  "somnia": {
+    "panel": {
+      "heading": "Somnia macro agent",
+      "subheading": "Somnia testnet · POC · consensus = operator-supplied",
+      "dataKeyLabel": "co/inflation-rate",
+      "latestValue": "Latest value",
+      "history": "MacroReceived history",
+      "capturedLabel": "captured",
+      "provenanceLabel": "Somnia testnet · macro agent (POC)",
+      "provenanceAriaLabel": "Somnia testnet · agent macro print (POC) · recorded",
+      "caveat": "Somnia testnet agent data. Laboratory use only (POC). Consensus input is operator-supplied, not market-derived.",
+      "emptyState": "—"
+    }
+  }
+}

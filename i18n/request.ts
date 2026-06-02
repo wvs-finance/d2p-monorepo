@@ -45,6 +45,7 @@ export default getRequestConfig(async () => {
     .default as MessageMap
   const instrumentsMessages = (await import(`../messages/${locale}/instruments.json`))
     .default as MessageMap
+  const somniaMessages = (await import(`../messages/${locale}/somnia.json`)).default as MessageMap
 
   const messages = mergeMessages(
     commonMessages,
@@ -55,6 +56,7 @@ export default getRequestConfig(async () => {
     aboutMessages,
     dashboardMessages,
     instrumentsMessages,
+    somniaMessages,
   )
 
   return { locale, messages }

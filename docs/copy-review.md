@@ -299,3 +299,47 @@ jmsbpp, 2026-06-02), en second. No machine translation.
 - [x] "Solo lectura" (no accent on "solo") confirmed correct per RAE 2010 adverb-accent rule
 - [x] Anti-marketing-slop grep passes on all new `instruments.*` keys
 - [x] i18n parity gate: `pnpm vitest run tests/unit/i18n-coverage.test.ts` (instruments namespace) GREEN
+
+---
+
+## Phase 06 review (somnia namespace — Plan 06-01)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — the `somnia` namespace
+covering the agent surface macro panel heading, CPI label, provenance pill copy, timestamp label
+("capturado"/"captured"), operator caveat, and empty-state em-dash. Authored es-CO FIRST (Juan
+Serrano / jmsbpp, 2026-06-02), en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `somnia.panel.heading` — macro agent panel heading
+- `somnia.panel.subheading` — operator-honest sub-heading: "Somnia testnet · POC · consensus = operator-supplied"
+- `somnia.panel.dataKeyLabel` — "co/inflation-rate" (the only wired CPI key)
+- `somnia.panel.latestValue` — "Valor más reciente" / "Latest value"
+- `somnia.panel.history` — "Histórico MacroReceived" / "MacroReceived history"
+- `somnia.panel.capturedLabel` — "capturado" / "captured" (B3: NEVER "observado"/"observed")
+- `somnia.panel.provenanceLabel` / `somnia.panel.provenanceAriaLabel` — testnet-agent pill copy (M4: no "consensus-verified")
+- `somnia.panel.caveat` — operator-supplied honest caveat
+- `somnia.panel.emptyState` — em-dash "—" for null fields
+
+**es-CO authoring notes (Plan 06-01 author: Juan Serrano / jmsbpp):**
+- "Agente macro Somnia" — natural es-CO ordering; "agente" before "macro" mirrors tech-agent terminology in Colombian DeFi; not "Macro agente" (English order).
+- "Valor más reciente" — standard financial data label; not "último valor" (less precise) or "dato actual" (ambiguous currency).
+- "Histórico MacroReceived" — "Histórico" as the heading; "MacroReceived" retained as the on-chain event name (proper noun, no translation).
+- "capturado" — precise for the snapshot capture timestamp (B3 constraint: this is the snapshot time, NOT the on-chain observation time which is always 0).
+- "Somnia testnet · impresión macro de agente (POC) · registrado" — aria-label: "impresión" for print (as in macro data print); "registrado" for recorded sub-state; parenthetical "(POC)" is the operator-honest qualifier.
+- "la entrada de consenso es suministrada por el operador, no por el mercado" — operator-honest caveat; M4 compliance: never says "consensus-verified"; "suministrada" is the established es-CO term for supplied/provided.
+- Copy register: informational, laconic, finance/DeFi-appropriate. No marketing superlatives. Passes banned-phrases check.
+- B3 compliance: zero occurrences of "observ" in all somnia.json keys (verified by grep).
+- M4 compliance: zero occurrences of "consensus-verified" in all somnia.json keys (verified by grep).
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` | _pending native review_ | | |
+| `messages/en/somnia.json` | _pending native review_ | | |
+
+### Phase 06-01 somnia Sign-off
+
+- [ ] es-CO somnia copy reviewed by native Colombian Spanish speaker
+- [ ] B3: no "observ" substring in any somnia.json key (automated: `grep -ric "observ" messages/{es-CO,en}/somnia.json` must return 0)
+- [ ] M4: no "consensus-verified" in any somnia.json key (automated: `grep -ric "consensus-verified" messages/{es-CO,en}/somnia.json` must return 0)
+- [ ] Anti-marketing-slop grep passes on all `somnia.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric

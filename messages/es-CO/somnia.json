@@ -1,0 +1,16 @@
+{
+  "somnia": {
+    "panel": {
+      "heading": "Agente macro Somnia",
+      "subheading": "Somnia testnet · POC · consenso = entrada del operador",
+      "dataKeyLabel": "co/inflation-rate",
+      "latestValue": "Valor más reciente",
+      "history": "Histórico MacroReceived",
+      "capturedLabel": "capturado",
+      "provenanceLabel": "Somnia testnet · agente macro (POC)",
+      "provenanceAriaLabel": "Somnia testnet · impresión macro de agente (POC) · registrado",
+      "caveat": "Datos de agente Somnia testnet. Solo para uso de laboratorio (POC). La entrada de consenso es suministrada por el operador, no por el mercado.",
+      "emptyState": "—"
+    }
+  }
+}
