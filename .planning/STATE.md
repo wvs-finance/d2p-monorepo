@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Plan execution — Wave 3 (05-04 Tasks 1+2 committed; checkpoint Task 3 pending)
-stopped_at: 05.1-00 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
-last_updated: "2026-06-02T14:28:54.753Z"
+status: completed
+stopped_at: "05.1-00 complete (3/3 tasks done, Evidence Collector approved); next: 05.1-01"
+last_updated: "2026-06-02T14:41:08.216Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
   completed_plans: 1
-  percent: 98
+  percent: 20
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
-**Last updated:** 2026-05-30
-**Session type:** Plan execution (05-03 complete — instruments honest-empty index + RiskCallout + InstrumentParams)
-**Stopped at:** 05.1-00 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
+**Last updated:** 2026-06-02
+**Session type:** Plan execution (05.1-00 complete — PayoffDiagram BLOCKER fix + Wave-0 RED stubs + Evidence Collector verification)
+**Stopped at:** 05.1-00 complete (3/3 tasks done, Evidence Collector approved); next: 05.1-01
 
 ---
 
@@ -34,17 +34,18 @@ progress:
 ## Current Position
 
 **Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
-**Active plan:** 05.1-00 Tasks 1+2 complete (PayoffDiagram BLOCKER fix + 4 Wave-0 RED test stubs + chunk-strike resolved). At checkpoint Task 3 — awaiting Evidence Collector live verification of fixed PayoffDiagram on /apps/abrigo/instruments/fixture-celo-01/42220.
-**Status:** Plan execution — Wave 0 (05.1-00 Tasks 1+2 committed; checkpoint Task 3 pending)
+**Active plan:** 05.1-01 (Wave 1: fixture.ts data layer + cashflow arithmetic + honest-empty instruments union migration)
+**Status:** Plan execution — Wave 0 complete (05.1-00 DONE); starting Wave 1 (05.1-01)
 
 **Progress:**
-[█████████░] 98%
+[██░░░░░░░░] 20%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
 [██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
 [██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
-[████      ] Phase 5: Read-First Wallet and DeFi Surface — 3.5/4 plans (05-04 Tasks 1+2 complete, checkpoint Task 3 pending)
+[██████████] Phase 5: Read-First Wallet and DeFi Surface — COMPLETE (4/4 plans)
+[█         ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 1/5 plans (05.1-00 complete; 05.1-01 next)
 
 Overall: 4/5 phases complete (Phase 5 in progress)
 
@@ -155,6 +156,8 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | es-CO-first instruments copy authored; native sign-off pending (Plan 05-03) | instruments namespace authored in es-CO by developer per project policy; docs/copy-review.md row recorded but native Colombian Spanish reviewer sign-off must complete before v1 launch | Non-blocking for 05-04 execution; required before production deploy |
 | chunk.strike fixture value is OTM offset string "2000" not static absolute tick (Plan 05.1-00) | PanopticDataSeam.fork.t.sol L41: STRIKE_OFFSET=2000; L73: strike=((currentTick+2000)/tickSpacing)*tickSpacing. No static absolute exists — depends on live fork tick. Wave 1 fixture.ts uses value:"2000" with note explaining fork-tick dependency | Wave 1 fixture.ts must carry value:"2000" and the OTM-offset note; never fabricate absolute ticks for fork-dependent values |
 | Wave-0 RED stubs referencing not-yet-created modules excluded from tsconfig (Plan 05.1-00) | Three stub files (fixture.test.ts, cashflow.test.ts, provenance-badge.test.tsx) import Wave-1/2 modules that don't exist yet; exclusion lets tsc --noEmit pass pre-commit gate. Pattern: structured-data.test.tsx | All future Wave-0 RED stubs importing not-yet-created modules must be excluded from tsconfig until the module is created |
+| WalletStatusPill hydration mismatch (React #418) deferred to Wave 2 (Plan 05.1-00) | SSR renders DISCONNECTED, client briefly renders CONNECTING during wagmi auto-reconnect before settling. Present since 05-04; not introduced by 05.1-00. User approved proceeding (2026-06-02). Fix: useMounted() gate or suppressHydrationWarning on pill root. Already in Wave 2 scope (05.1-02 rewrites WalletStatusPill.tsx, lib/wallet/state.ts, WalletPanel.tsx) | Wave 2 executor (05.1-02) must add a mounted guard to WalletStatusPill before turning wallet-read-only.test.tsx GREEN |
+| Curve stroke weight bump deferred to Wave 2 (Plan 05.1-00) | 2px ochre curve passes WCAG 1.4.11 (6.11:1) but is perceptually thin in screenshots. Not a spec violation. Wave 2 reviewer may bump to 2.5–3px if designer flags prominence | Wave 2 may increase stroke weight if perceptual review requires it |
 
 ### Critical Path Summary
 
