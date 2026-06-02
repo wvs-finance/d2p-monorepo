@@ -8,7 +8,7 @@
 
 ### FORK — Base-fork + borrowed Panoptic V2
 - [x] **FORK-01**: Foundry Base-fork harness (UniV4 PoolManager + a stable token), `forge` + `bulloak`, with a BUSL NOTICE for borrowed Panoptic code
-- [ ] **FORK-02**: Deploy our own cCOP/USDC UniV4 pool (mock cCOP, realistic params) on the fork
+- [x] **FORK-02**: Deploy our own cCOP/USDC UniV4 pool (mock cCOP, realistic params) on the fork
 - [x] **FORK-03**: Borrow a minimal Panoptic V2 core behind an `IPanopticData` interface (demo-scoped)
 
 ### WRAP — long-gamma cash-flow
@@ -54,7 +54,7 @@ Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exact
 | Requirement | Phase | Status |
 |---|---|---|
 | FORK-01 | Phase 7 | Complete |
-| FORK-02 | Phase 7 | Pending |
+| FORK-02 | Phase 7 | Complete |
 | FORK-03 | Phase 7 | Complete |
 | WRAP-01 | Phase 8 | Pending |
 | WRAP-02 | Phase 8 | Pending |

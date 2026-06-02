@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Base-fork harness GREEN — vm.createSelectFork(base, 46700000) touches the live UniV4 PoolManager via V4StateReader under cancun (FORK-01 fork-run proof); `.tree` BTT spec bulloak-clean
-last_updated: "2026-06-02T03:05:00.000Z"
-last_activity: 2026-06-02 — completed 07-03-PLAN.md (Base-fork harness)
+status: cCOP/USDC UniV4 pool LIVE on the Base fork (FORK-02 GREEN) — `PoolManager.initialize` at sqrtPriceX96 ~1/4000 + 1,000,000-ether full-range LP via a minimal IUnlockCallback helper; consumer reads `sqrtPriceX96>0` (V4StateReader) + `liquidity>0` (StateLibrary) and round-trips the rate to ~4000 ∈ [3000,5000]; `test_ccopUsdcPool_initialized_state_readable` passes; `.tree` committed before impl (mn-B)
+last_updated: "2026-06-02T03:30:00.000Z"
+last_activity: 2026-06-02 — completed 07-04-PLAN.md (cCOP/USDC pool deploy + state read)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State: abrigo-somnia v2.0 — Convex Instrument
@@ -29,16 +29,16 @@ See: `.planning/PROJECT.md` (§ Current Milestone: v2.0, updated 2026-06-01)
 **Core value (this milestone):** A TE-sized long-gamma cCOP/USD hedge on borrowed-Panoptic-V2-data-model
 contracts (Base fork against our own cCOP/USDC UniV4 pool); premium = upfront collateral with
 data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-tdd.
-**Current focus:** Phase 7 executing — Plans 01 (toolchain), 02 (borrowed Panoptic V2 core + `IPanopticData` seam + MockCcop) and 03 (Base-fork harness: pinned-block fork + live PoolManager touch under cancun) complete; next is 07-04 (deploy the cCOP/USDC UniV4 pool, read `sqrtPriceX96`).
+**Current focus:** Phase 7 executing — Plans 01 (toolchain), 02 (borrowed Panoptic V2 core + `IPanopticData` seam + MockCcop), 03 (Base-fork harness) and 04 (our own cCOP/USDC UniV4 pool: initialize + full-range LP + state read, FORK-02) complete; next is 07-05 (seam test: `factory.deployNewPool` against the initialized+seeded pool, then non-reverting `dispatch`/`getAccumulatedFeesAndPositionsData` via `IPanopticData`).
 
 ## Current Position
 
 - **Milestone:** v2.0 — convex-instrument
 - **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (Executing)
-- **Plan:** 07-03 complete (3/5); next 07-04
-- **Status:** Base-fork harness GREEN — `forge test --match-path test/fork/BaseForkHarness.t.sol --fork-url "$BASE_RPC_URL"` 2/2 at pinned block 46700000; live PoolManager `0x498581…2b2b` touched under cancun via borrowed `V4StateReader` (no v4-periphery state-view path, B-2); `.tree` committed before impl (mn-B)
-- **Progress:** [██████░░░░] 60%
-- **Last activity:** 2026-06-02 — completed 07-03-PLAN.md
+- **Plan:** 07-04 complete (4/5); next 07-05
+- **Status:** cCOP/USDC UniV4 pool LIVE on the Base fork (FORK-02 GREEN) — `PoolManager.initialize` at sqrtPriceX96 ~1/4000 + 1,000,000-ether full-range LP via a minimal `IUnlockCallback`→`modifyLiquidity` helper; consumer reads `sqrtPriceX96>0` (V4StateReader) + `liquidity>0` (StateLibrary) and round-trips the decoded rate to ~4000 ∈ [3000,5000]; `test_ccopUsdcPool_initialized_state_readable` passes; bulloak clean; `.tree` committed before impl (mn-B)
+- **Progress:** [████████░░] 80%
+- **Last activity:** 2026-06-02 — completed 07-04-PLAN.md
 
 ## Decisions Log (v2.0)
 
@@ -50,6 +50,9 @@ data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-td
 - **2026-06-02 (07-02):** Phase 7 lives on branch `feat/keeper-vercel-buildoutput` (07-01 commits reachable only there), not `rescope/somi-leg-donor-transfer` as the prompt/STATE implied; executed + committed 07-02 in place (branching=none).
 - **2026-06-02 (07-03):** `BASE_FORK_BLOCK = 46700000` pinned as a Solidity `uint256 constant` in the harness source (M-4, NOT an env var) — archive-verified (`cast code <PoolManager>` = 48020 hex chars at that height; head ≈46789746). PoolManager touched via borrowed `V4StateReader.getSqrtPriceX96(IPoolManager, PoolId)` under cancun — NOT v4-periphery StateView (B-2, not installed). `forge test --fork-url "$BASE_RPC_URL"` 2/2 green = FORK-01 fork-run proof.
 - **2026-06-02 (07-03):** bulloak 0.9.2 infers the matching `.t.sol` STRICTLY same-dir as the `.tree` (no subtree search / path flag) ⇒ co-located `BaseForkHarness.tree` + `.t.sol` in `test/fork/` (deviation from the plan's `test/spec/` tree dir) so `bulloak check` exits 0 while the harness stays on the VALIDATION-verbatim `--match-path test/fork/...` path. The pre-existing `test/spec/*.tree` (MacroOracle, SomniaAgentConsumer.*) are un-parseable in 0.9.2 (`/`/`.` in branch text) — out-of-scope for FORK-01, so the full-glob `bulloak check test/spec/*.tree` is NOT a passing gate in this repo.
+- **2026-06-02 (07-04):** Our own cCOP/USDC UniV4 pool deployed on the Base fork via `PoolManager.initialize(key, sqrtPriceX96)` (FORK-02). `PoolKeyLib.buildCcopUsdcKey` is the SHARED PoolKey/sqrtPriceX96/ordering builder (mn-C, reused by Plan 05) — `ccopIsCurrency0 = ccop < usdc` decided at RUNTIME; sqrtPriceX96 bakes the 1e12 (18dp/6dp) gap for HUMAN_RATE=4000, and `decodeHumanRate` round-trips to [3000,5000] (mn-3, catches a 1e12 ordering error). **sqrtPriceX96 literals:** ccop=currency0 → `1252707241875239655932` (→4000); ccop=currency1 → `5010828967500958623728276031392126461` (→3999).
+- **2026-06-02 (07-04):** Full-range LP (M-1) via a minimal `V4LpHelper` (`IUnlockCallback`→`PoolManager.modifyLiquidity`, ticks rounded to spacing). **Seeded `SEEDED_LIQUIDITY = 1_000_000 ether`** (helper funded `type(uint128).max` of BOTH tokens via `deal`/`mint` before `unlock`) so `StateLibrary.getLiquidity(id) > 0` — **Plan 05 must size its mint FAR below 1,000,000 ether to clear `_validateSolvency`** (07-RESEARCH-DEPLOY §D). NOT `PositionManager.modifyLiquidities` / `SFPMV4.mintTokenizedPosition` (SFPM.initializeAMMPool not run yet).
+- **2026-06-02 (07-04):** Inlined the BalanceDelta settlement (`sync`→`transfer`→`settle` / `take`) in `V4LpHelper` instead of v4-core's `test/utils/CurrencySettler.sol` — the latter's `../../src/...` relative imports resolve to a DISTINCT compiler type from the `v4-core/`-remapped `Currency`/`IPoolManager` (Error 9553 invalid implicit conversion). Read path stays `V4StateReader.getSqrtPriceX96` + `StateLibrary.getLiquidity` — NO StateView (B-2). Tree+test co-located `test/instrument/CcopUsdcPool.{tree,t.sol}` (stem+same-dir bulloak rule; plan's `test/spec/` + `.fork.t.sol` would not match).
 
 ## Roadmap Summary (v2.0)
 
