@@ -9,8 +9,10 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import {
+  registerGetHedgeDecisions,
   registerGetInstrumentTerms,
   registerGetIterationState,
+  registerGetLatestMacroPrint,
   registerGetPoolState,
   registerListApps,
   registerListIterations,
@@ -26,6 +28,8 @@ const handler = createMcpHandler(
     registerGetInstrumentTerms(server)
     registerGetPoolState(server)
     registerQueryEconometricPanel(server)
+    registerGetHedgeDecisions(server)
+    registerGetLatestMacroPrint(server)
   },
   {
     serverInfo: { name: 'd2p Finance MCP Server', version: '1.0.0' },
