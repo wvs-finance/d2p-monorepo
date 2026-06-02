@@ -289,13 +289,13 @@ jmsbpp, 2026-06-02), en second. No machine translation.
 
 | File | Reviewer | Date | Pass / Findings |
 |------|----------|------|-----------------|
-| `messages/es-CO/instruments.json` (05.1-03 additions) | _pending native review_ | | |
-| `messages/en/instruments.json` (05.1-03 additions) | _pending native review_ | | |
+| `messages/es-CO/instruments.json` (05.1-03 additions) | Juan Serrano (jmsbpp) | 2026-06-02 | PASS w/ 2 edits — `simulated.caption` "mock pool" → "pool simulado" (register consistency w/ `badge_aria`); `cashflow.already_netted` "ya neteado en el colateral sobreviviente" → "ya descontado del colateral sobreviviente" (anglicism). English DeFi terms (fork/chunk/strike/tick spacing/streamia) accepted as es-CO crypto register. |
+| `messages/en/instruments.json` (05.1-03 additions) | Juan Serrano (jmsbpp) | 2026-06-02 | PASS — "mock pool" / "already netted into surviving collateral" correct English; no edits. |
 
 ### Phase 05.1-03 instruments Sign-off (CROSS-10 gate)
 
-- [ ] es-CO simulated/provenance/cashflow/params/wallet.read_only copy reviewed by native Colombian Spanish speaker
-- [ ] Technical vocabulary ("neteado", "sembrado", "liquidacion", "Prima", "Residual reclamable") reviewed against Colombian DeFi/finance conventions
-- [ ] "Solo lectura" (no accent on "solo") confirmed correct per RAE 2010 adverb-accent rule
-- [ ] Anti-marketing-slop grep passes on all new `instruments.*` keys
-- [ ] i18n parity gate: `pnpm vitest run tests/unit/i18n-coverage.test.ts` (instruments namespace) GREEN
+- [x] es-CO simulated/provenance/cashflow/params/wallet.read_only copy reviewed by native Colombian Spanish speaker (Juan Serrano, 2026-06-02)
+- [x] Technical vocabulary reviewed against Colombian DeFi/finance conventions — "neteado" replaced with "descontado"; "sembrado", "liquidación", "Prima", "Residual reclamable" accepted
+- [x] "Solo lectura" (no accent on "solo") confirmed correct per RAE 2010 adverb-accent rule
+- [x] Anti-marketing-slop grep passes on all new `instruments.*` keys
+- [x] i18n parity gate: `pnpm vitest run tests/unit/i18n-coverage.test.ts` (instruments namespace) GREEN

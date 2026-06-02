@@ -13,7 +13,7 @@
     "simulated": {
       "badge": "SIMULADO",
       "badge_aria": "Base fork — pool simulado, sin despliegue en cadena",
-      "caption": "Base fork — mock pool, sin despliegue."
+      "caption": "Base fork — pool simulado, sin despliegue."
     },
     "provenance": {
       "fork_fixture": "Fork fixture",
@@ -30,7 +30,7 @@
       "commission": "Comisión",
       "data_cost": "Costo de datos medido",
       "residual": "Residual reclamable",
-      "already_netted": "ya neteado en el colateral sobreviviente"
+      "already_netted": "ya descontado del colateral sobreviviente"
     },
     "params": {
       "id": "Identificador",
