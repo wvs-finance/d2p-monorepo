@@ -70,6 +70,31 @@
       "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada",
       "emptyState": "—",
       "emptyGamma": "No se registró decisión de gamma larga"
+    },
+    "position": {
+      "heading": "Posición (LongGammaWrapper)",
+      "emptyHeading": "Sin posición en cadena",
+      "emptyBody": "El contrato está verificado en fork pero no desplegado. Cuando se despliegue, esta vista mostrará la posición real.",
+      "notLiveCaption": "No desplegado — verificado en fork, sin posición en cadena.",
+      "provenanceLabel": "verificado en fork · no desplegado",
+      "provenanceAriaLabel": "Fuente: verificado en fork — el contrato LongGammaWrapper no ha sido desplegado en cadena; no existe posición real.",
+      "fieldLegs": "Piernas / posición",
+      "fieldCollateral": "Colateral sobreviviente",
+      "fieldTokenId": "ID del token de posición",
+      "fieldResidual": "Residual",
+      "emptyState": "—"
+    },
+    "manage": {
+      "close": "Cerrar",
+      "claim": "Reclamar residual",
+      "agent": "Control del agente",
+      "caption": "No disponible — fork-verificado, no desplegado. Sin transacción."
+    },
+    "liveness": {
+      "snapshot": "instantánea · —",
+      "polling": "sondeo",
+      "ariaSnapshot": "Estado de actualización: instantánea — datos registrados, sin actualización en vivo.",
+      "ariaPolling": "Estado de actualización: sondeo periódico."
     }
   }
 }

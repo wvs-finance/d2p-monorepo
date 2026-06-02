@@ -70,6 +70,31 @@
       "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded",
       "emptyState": "—",
       "emptyGamma": "No long-gamma decision recorded"
+    },
+    "position": {
+      "heading": "Position (LongGammaWrapper)",
+      "emptyHeading": "No on-chain position",
+      "emptyBody": "The contract is fork-verified but not deployed. Once deployed, this view will show the real position.",
+      "notLiveCaption": "Not deployed — fork-verified, no on-chain position.",
+      "provenanceLabel": "fork-verified · not deployed",
+      "provenanceAriaLabel": "Source: fork-verified — the LongGammaWrapper contract is not deployed on-chain; no real position exists.",
+      "fieldLegs": "Position legs",
+      "fieldCollateral": "Surviving collateral",
+      "fieldTokenId": "Position token id",
+      "fieldResidual": "Residual",
+      "emptyState": "—"
+    },
+    "manage": {
+      "close": "Close",
+      "claim": "Claim residual",
+      "agent": "Agent control",
+      "caption": "Unavailable — fork-verified, not deployed. No transaction."
+    },
+    "liveness": {
+      "snapshot": "snapshot · —",
+      "polling": "polling",
+      "ariaSnapshot": "Refresh state: snapshot — recorded data, no live update.",
+      "ariaPolling": "Refresh state: periodic polling."
     }
   }
 }

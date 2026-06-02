@@ -9,7 +9,7 @@
 //   - MAJOR-8: getServerSnapshot is the stable seed — first client paint matches server text.
 //     No interval fires before subscribe() is called (no reads at factory time).
 //   - CROSS-09: color + icon + text + aria-label. Neutral className for both states.
-//   - No accent/status-pass/green/emerald token.
+//   - No non-muted color token (neutral only — NEVER accent/non-default ring).
 //   - No collapse disclosure (MAJOR-10).
 //
 // Props: source (LivenessSource<string>) + pre-translated strings threaded from the page.
@@ -48,7 +48,7 @@ interface LivenessPillProps {
 const PILL_SHELL =
   'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-normal ring-1 ring-inset'
 
-// Neutral className for both snapshot and polling states (NEVER accent/status-pass/green/emerald)
+// Neutral className for both snapshot and polling states (NEVER non-muted/accent/non-default ring)
 const NEUTRAL_CLASS = 'text-text-muted ring-border-default bg-bg-surface'
 
 // ---------------------------------------------------------------------------
