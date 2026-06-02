@@ -19,6 +19,7 @@ import type { WalletPanelStrings } from '@/components/defi/WalletPanel'
 import type { WalletStatus } from '@/components/defi/WalletStatusPill'
 import { FIXTURES } from '@/lib/apps/abrigo/fixture'
 import { ABRIGO_INSTRUMENTS } from '@/lib/apps/abrigo/instruments'
+import { generatePayoffData, generateSchematicConvexPayoff } from '@/lib/apps/abrigo/payoff'
 import { aggregateAllChains } from '@/lib/dashboard/aggregator'
 import { getInstrumentPoolState } from '@/lib/dashboard/instrument-pool'
 import type { Metadata } from 'next'
@@ -119,6 +120,18 @@ export default async function InstrumentDetailPage({
       ? instrument.strike
       : (FIXTURES[instrument.fixtureKey]?.pool.humanRate.value ?? 4000)
 
+  // Wave 2: compute payoff data in the RSC body and pass as data= to PayoffDiagramClient.
+  // Live path: piecewise-linear kink at strike. Simulated path: schematic parabolic curve.
+  // Wave 3 owns the full simulated-branch page layout — this is the minimal compile-only edit.
+  const payoffData =
+    instrument.kind === 'live'
+      ? generatePayoffData(instrument.strike, instrument.slope)
+      : generateSchematicConvexPayoff(currentPrice, 0)
+
+  const payoffAriaLabel = locale.startsWith('es')
+    ? `Diagrama de rentabilidad — ${displayName}`
+    : `Payoff diagram — ${displayName}`
+
   return (
     <main className="max-w-[1200px] mx-auto px-4 lg:px-8 py-12">
       {/* JSON-LD structured data */}
@@ -151,11 +164,17 @@ export default async function InstrumentDetailPage({
           <section
             aria-label={locale.startsWith('es') ? 'Diagrama de rentabilidad' : 'Payoff diagram'}
           >
+            {/* Wave 2 minimal edit: data= prop replaces strike/slope/currentPrice props.
+                strikeRef + currentPriceRef are guarded on kind==='live' (schematic has neither).
+                Full simulated-branch layout (kind-guard-before-aggregator) is Wave 3 / Plan 03. */}
             <PayoffDiagramClient
-              strike={instrument.kind === 'live' ? instrument.strike : currentPrice}
-              slope={instrument.kind === 'live' ? instrument.slope : 0}
-              currentPrice={currentPrice}
+              data={payoffData}
+              ariaLabel={payoffAriaLabel}
               locale={locale}
+              isSchematic={instrument.kind === 'simulated'}
+              {...(instrument.kind === 'live'
+                ? { strikeRef: instrument.strike, currentPriceRef: currentPrice }
+                : {})}
             />
           </section>
 

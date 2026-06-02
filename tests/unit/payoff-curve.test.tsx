@@ -137,7 +137,14 @@ describe('PayoffDiagram — render (DEFI-04)', () => {
   it('renders a container with role="img" and an aria-label', async () => {
     // Dynamic import keeps recharts out of the top-level parse graph in node env.
     const { PayoffDiagram } = await import('@/components/defi/PayoffDiagram')
-    render(<PayoffDiagram strike={1000} slope={0.5} currentPrice={900} locale="es-CO" />)
+    render(
+      <PayoffDiagram
+        data={generateSchematicConvexPayoff(4000, 0)}
+        ariaLabel="Diagrama de rentabilidad esquemático"
+        locale="es-CO"
+        isSchematic
+      />,
+    )
     // The ResponsiveContainer is wrapped in a div with role="img"; aria-label must be set.
     const chart = screen.getByRole('img')
     expect(chart).toBeInTheDocument()
