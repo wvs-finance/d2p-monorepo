@@ -1,0 +1,8 @@
+PanopticDataSeam::mintBurnThroughInterface
+├── given a borrowed Panoptic pool deployed via the factory choreography referenced only as IPanopticData with collateral via IERC4626
+│   └── it should compile with the helper-returned address consumed as IPanopticData so forge build is green the compile-time proof
+├── when one position is minted via IPanopticData dispatch with stored balance zero so it mints
+│   ├── it should not revert
+│   └── it should read a PositionBalance array of length one via getAccumulatedFeesAndPositionsData
+└── when the same position is dispatched with size zero so it burns
+    └── it should close the position and a subsequent read reflects the burn
