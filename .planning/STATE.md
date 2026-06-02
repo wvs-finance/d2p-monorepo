@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: convex-instrument
-status: roadmap-complete
-last_updated: "2026-06-01"
+milestone_name: milestone
+status: executing
+last_updated: "2026-06-02T02:41:01.873Z"
+last_activity: 2026-06-02 — completed 07-01-PLAN.md (Foundry cancun toolchain + §C dep pins + audit remappings + BUSL NOTICE + bulloak)
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  first_phase: 7
-  last_phase: 10
+  total_plans: 5
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State: abrigo-somnia v2.0 — Convex Instrument
@@ -29,16 +29,22 @@ See: `.planning/PROJECT.md` (§ Current Milestone: v2.0, updated 2026-06-01)
 **Core value (this milestone):** A TE-sized long-gamma cCOP/USD hedge on borrowed-Panoptic-V2-data-model
 contracts (Base fork against our own cCOP/USDC UniV4 pool); premium = upfront collateral with
 data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-tdd.
-**Current focus:** Roadmap complete — ready to plan Phase 7 (`/gsd:plan-phase 7`).
+**Current focus:** Phase 7 executing — Plan 01 (toolchain + provenance) complete; next is 07-02 (port borrowed Panoptic V2 core into `panoptic-borrowed/`).
 
 ## Current Position
 
 - **Milestone:** v2.0 — convex-instrument
-- **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (Not started)
-- **Plan:** —
-- **Status:** Roadmap written; awaiting phase planning (Phase 7 first)
-- **Progress:** 0/4 phases complete `[░░░░] 0%`
-- **Last activity:** 2026-06-01 — v2.0 roadmap created (phases 7–10); M1 roadmap snapshotted
+- **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (Executing)
+- **Plan:** 07-01 complete (1/5); next 07-02
+- **Status:** Foundry cancun single-profile + §C dep set + audit remappings + BUSL NOTICE + bulloak landed; `forge build` green
+- **Progress:** [██░░░░░░░░] 20% (1/5 Phase-7 plans)
+- **Last activity:** 2026-06-02 — completed 07-01-PLAN.md
+
+## Decisions Log (v2.0)
+
+- **2026-06-02 (07-01):** Single `cancun`/`0.8.24` profile supersedes FORK-01's roadmap multi-version-solc-matrix wording (07-RESEARCH §5; Panoptic V2 is `^0.8.24` everywhere) — recorded in NOTICE + SUMMARY so the checker does not flag a false gap.
+- **2026-06-02 (07-01):** v4-periphery NOT installed and NO v4-periphery remapping (B-2) — its StateView/IStateView pull the undefined `@uniswap/v4-core/` alias + permit2; pool-state reads go via the already-borrowed `V4StateReader` + v4-core `StateLibrary` under the `v4-core/` alias.
+- **2026-06-02 (07-01):** `lib/` deps kept OUT of git (gitignored, restorable via `foundry.lock`); reverted a stray prior forge-install submodule registration to match the plan's restore model.
 
 ## Roadmap Summary (v2.0)
 

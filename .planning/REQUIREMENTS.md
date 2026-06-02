@@ -7,7 +7,7 @@
 ## v1 Requirements (the demo loop)
 
 ### FORK — Base-fork + borrowed Panoptic V2
-- [ ] **FORK-01**: Foundry Base-fork harness (UniV4 PoolManager + a stable token), `forge` + `bulloak`, with a BUSL NOTICE for borrowed Panoptic code
+- [x] **FORK-01**: Foundry Base-fork harness (UniV4 PoolManager + a stable token), `forge` + `bulloak`, with a BUSL NOTICE for borrowed Panoptic code
 - [ ] **FORK-02**: Deploy our own cCOP/USDC UniV4 pool (mock cCOP, realistic params) on the fork
 - [ ] **FORK-03**: Borrow a minimal Panoptic V2 core behind an `IPanopticData` interface (demo-scoped)
 
@@ -53,7 +53,7 @@ Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exact
 
 | Requirement | Phase | Status |
 |---|---|---|
-| FORK-01 | Phase 7 | Pending |
+| FORK-01 | Phase 7 | Complete |
 | FORK-02 | Phase 7 | Pending |
 | FORK-03 | Phase 7 | Pending |
 | WRAP-01 | Phase 8 | Pending |
