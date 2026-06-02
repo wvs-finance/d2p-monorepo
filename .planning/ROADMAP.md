@@ -18,6 +18,7 @@
 - [x] **Phase 05.1: abrigo-somnia convex instrument frontend surface** *(INSERTED)* — Read-first SIMULATED cCOP/USD long-gamma instrument surface; three-tier provenance, SIMULADO badge, read-only wallet, no fabricated numbers (completed 2026-06-02)
 - [x] **Phase 05.2: DEFI-06 wallet connect-modal accessibility** *(INSERTED)* — scoped role=status live region, focus restoration (incl. connect-success), durable e2e; real-SR speech deferred to manual pass (completed 2026-06-02)
 - [x] **Phase 6: Somnia agent surface (MacroHedgeStrategist)** — Module 2: surface the live Somnia-testnet hedge-decision agent — live CPI panel + decision feed + agent-first MCP tools + surprise→decision→instrument bridge; testnet-agent provenance tier; reads an already-deployed contract (no new deploy) (completed 2026-06-02)
+- [ ] **Phase 7: Agent reasoning + position-execution surface** — Module 3: per-decision pipeline trace (how the agent thinks: prompt → two-leg Qwen3-30B → action+size), a fork-verified/not-live LongGammaWrapper position panel with disabled management, and a LOCAL honker live-stream spike; frontend-only, no deploy, read-first
 
 ---
 
@@ -293,6 +294,26 @@ Plans:
 - [ ] 06-02-PLAN.md — A: hedge-decision feed — HedgeDecisionFeed + HedgeDecisionCard (equal-weight, consensus=operator, surprise gated, em-dash pending) mounted on the agent page + equal-weight e2e (SOMNIA-A, CROSS-09, CROSS-10, CROSS-01) [wave 1]
 - [ ] 06-03-PLAN.md — C: agent-first MCP tools — get_hedge_decisions + get_latest_macro_print (single ZodObject, dual return, new envelopes in contract.ts, barrel + route edits) + real-SDK conformance test (SOMNIA-C, AGENT-01, AGENT-02, CROSS-09) [wave 1]
 - [ ] 06-04-PLAN.md — B: surprise→decision→instrument bridge — decisionToPositionDelta (BigInt) + HedgeDecisionBridge RSC mounted in the kind==='simulated' branch of the instrument page (never on the multicall path) + es-CO-first copy + e2e (SOMNIA-B, CROSS-09, CROSS-10, CROSS-01, DEFI-08) [wave 2]
+
+---
+
+### Phase 7: Agent reasoning + position-execution surface — Module 3
+
+**Goal:** A visitor or agent can see HOW the Somnia macro-hedge agent thinks through a position — a per-decision pipeline trace (macro print → deterministic built prompt → two-leg Qwen3-30B temp-0 inference: action then size → decision → illustrative position, with the real SYSTEM_PROMPT viewable) — and WHAT its position would become, with an honest split between live-on-testnet decisions (`testnet-agent` tier) and the fork-verified-but-not-deployed `LongGammaWrapper` position + disabled management (new `fork-verified / not-live` tier). A LOCAL honker (SQLite pub/sub) Docker spike streams the real decision-pipeline events live into the UI. Frontend-only; no Solidity; no deploy; read-first; no fabricated data.
+
+**Requirements**: MOD3-TRACE (decision-pipeline trace), MOD3-POS (fork-verified/not-live position panel + reader seam gated on `WRAPPER_DEPLOYED`), MOD3-MANAGE (disabled management affordances), MOD3-LIVE (liveness `refresh()` seam + honest pill), MOD3-HONKER (local honker live-stream spike, Docker, not deployed); reuses CROSS-01/09/10, AGENT-01/02. (New MOD3-* IDs introduced at planning; honesty acceptance lives in the spec §0 + each plan's must_haves.)
+**Depends on:** Phase 6 (the `/apps/abrigo/agent` overview + reader seam + `testnet-agent` tier this extends); abrigo-somnia milestone v2.0 Phase 8 `LongGammaWrapper` (fork-verified, NOT deployed — read-only ABI consumption).
+**Canonical spec:** `docs/superpowers/specs/2026-06-02-module3-agent-reasoning-position-surface-design.md` (§0 = binding honesty corrections; pending 2-way review)
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. At `/apps/abrigo/agent/[decisionId]` a visitor sees the decision-pipeline trace for a real decision (4083729/4083997): macro print → built prompt (from actual+consensus) → Qwen3-30B temp-0 action leg → size leg → decision → illustrative position, with the real SYSTEM_PROMPT viewable; thinking/decision data carries the `testnet-agent` pill (real tx); no fabricated chain-of-thought.
+  2. The same page shows a position-execution panel under a new neutral `fork-verified / not-live` provenance tier — getters surfaced as "—/not deployed", never fabricated; live getters wired behind `WRAPPER_DEPLOYED=false`; never the stale `recordedStreamia`/`lastSurviving` baselines; `ResidualEroded.cause` not decoded as a 3-way enum.
+  3. Management controls (close/claim/agent) render visible-but-disabled with an honest "not live — fork-verified, not deployed" state; no wallet write, no transact; rendered DOM contains no "executed/realized/ejecutad/realizad" and no fabricated `$` notional.
+  4. A liveness `refresh()` seam drives the UI with an honest pill (`● live` only when subscribed to a live source, else `○ snapshot · —`); a LOCAL honker Docker service (Somnia read-only watcher → file-backed SQLite + honker pub/sub → SSE/WS) streams real `HedgeDecisionRequested`(action→size)/`HedgeDecisionMade`/`DecisionFailed` events into the pipeline trace via that seam; honker is NOT deployed and is kept out of default CI.
+
+**Honesty invariants (spec §0):** wrapper NOT deployed (no real position tx) → `fork-verified / not-live` neutral tier, never imply executed/realized; no fabricated CoT (LLM output is enum/size-constrained); disabled management (no transact); honker streams only real events and runs LOCAL only (single-host SQLite, can't run on Vercel serverless); ABI imported verbatim + churn-isolated (backend mid-dev); es-CO-first; locked tokens; `impeccable` + token tests enforced; live reads behind `SOMNIA_LIVE`, out of CI.
+
+**Plans**: TBD at planning (after `gsd:ui-phase` UI-SPEC + 2-way review).
 
 ---
 *Roadmap created: 2026-05-11*
