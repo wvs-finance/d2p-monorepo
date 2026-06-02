@@ -313,8 +313,16 @@ Plans:
 
 **Honesty invariants (spec §0):** wrapper NOT deployed → `fork-verified / not-live` neutral tier, position panel renders empty state, never imply executed/realized; no fabricated CoT (LLM output enum/clamped-int, `_buildPrompt` deterministic); disabled management (no transact); typed `adaptWrapper` adapter (NOT verbatim import) contains a moving ABI, re-derived before `WRAPPER_DEPLOYED` flips; es-CO-first; locked tokens; `impeccable` + token tests enforced; live RPC reads behind `SOMNIA_LIVE` (lazy), out of CI; honker DEFERRED (embedded in-process lib, no Dockerfile/SSE; no continuous keeper → nothing live to stream yet).
 
-**Plans**: TBD at planning (after `gsd:ui-phase` UI-SPEC).
+**Plans**: 4 plans (Wave 0 data-layer foundation → Wave 1 trace + position-panel parallel slices → Wave 2 detail-route wire + e2e + live-verify)
+
+Plans:
+- [ ] 07-00-PLAN.md — Wave 0 data layer (TDD): add HedgeDecisionRequested + LongGammaWrapper read-only ABI; typed WrapperPositionView + single adaptWrapper chokepoint gated behind WRAPPER_DEPLOYED=false; deterministic prompt-trace reconstruction; LivenessSource<T> snapshot/polling-only contract; extend snapshot capture with real leg events (route key = requestId, field renamed honestly); fork-verified neutral provenance tier; 5 failing-first stubs (MOD3-TRACE, MOD3-POS, MOD3-MANAGE, MOD3-LIVE, CROSS-09) [wave 0]
+- [ ] 07-01-PLAN.md — Wave 1 trace: DecisionPipelineTrace vertical-stepper (6 equal-weight stages) + collapsible real SYSTEM_PROMPT + illustrative position as sizeBps→fraction-of-max (never $) + es-CO-first/en trace.* copy; no fabricated CoT (MOD3-TRACE, CROSS-09, CROSS-10, CROSS-01) [wave 1]
+- [ ] 07-02-PLAN.md — Wave 1 position: not-deployed PositionPanel under the neutral fork-verified tier (em-dash values, no stale baselines) + disabled ManagementControls (perceivable beyond color: aria-disabled + aria-describedby + Lock + caption) + LivenessPill useSyncExternalStore (snapshot/polling only, no live) + position/manage/liveness copy (MOD3-POS, MOD3-MANAGE, MOD3-LIVE, CROSS-09, CROSS-01, CROSS-10) [wave 1]
+- [ ] 07-03-PLAN.md — Wave 2 wire: /apps/abrigo/agent/[id] detail route assembling trace + position panel + disabled management + liveness pill + master→detail link (accent + ChevronRight + underline) + unknown-id error state + e2e honesty greps (no executed/realized, no $, no green, no live) + Evidence Collector live-verification gate (MOD3-TRACE, MOD3-POS, MOD3-MANAGE, MOD3-LIVE, CROSS-01, CROSS-09, CROSS-10) [wave 2]
+
+**Deferred to Phase 7.x:** MOD3-HONKER (bespoke honker live-stream sidecar) — gated on a continuous keeper cadence.
 
 ---
 *Roadmap created: 2026-05-11*
-*Last updated: 2026-06-02 — Phase 6 (Somnia agent surface) planned: 5 plans (06-00 Wave-0 data layer → 06-01/02/03 D/A/C reader-parallel → 06-04 B bridge)*
+*Last updated: 2026-06-02 — Phase 7 (agent reasoning + position-execution surface, Module 3) planned: 4 plans (07-00 data layer → 07-01/02 trace+position parallel → 07-03 detail-route wire + live-verify); MOD3-HONKER deferred to 7.x*
