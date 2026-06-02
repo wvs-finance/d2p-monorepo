@@ -1,0 +1,9 @@
+CcopUsdcPool::initializeAndReadState
+├── given MockCcop deployed and a hookless cCOP-USDC PoolKey built via PoolKeyLib with currencies ascending by runtime address fee 500 tickSpacing 10
+│   ├── when PoolManager initialize is called with sqrtPriceX96 encoding cCOP per USD near 4000
+│   │   └── it should not revert and create the pool on the Base fork
+│   └── given the pool is initialized
+│       ├── it should read sqrtPriceX96 greater than zero via V4StateReader getSqrtPriceX96 poolId
+│       └── it should round-trip the decoded price through the runtime currency ordering and the 6dp 18dp scale to a human cCOP per USD rate within 3000 to 5000
+└── given full-range liquidity is LP'd via V4LpHelper
+    └── it should read liquidity greater than zero via StateLibrary getLiquidity poolId
