@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: "05.1-01 complete (3/3 tasks, all 5 consumers narrowed, 55 tests GREEN); next: 05.1-02"
-last_updated: "2026-06-02T14:52:39.889Z"
+stopped_at: "05.1-02 complete (4/4 tasks, 40 tests GREEN, all Wave-0 stubs flipped); next: 05.1-03"
+last_updated: "2026-06-02T15:07:27.277Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
-  completed_plans: 2
-  percent: 40
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-02
 **Session type:** Plan execution (05.1-01 complete — data layer freeze: cashflow.ts, schematic payoff, discriminated union, all 5 consumers narrowed)
-**Stopped at:** 05.1-01 complete (3/3 tasks, all 5 consumers narrowed, 55 tests GREEN); next: 05.1-02
+**Stopped at:** 05.1-02 complete (4/4 tasks, 40 tests GREEN, all Wave-0 stubs flipped); next: 05.1-03
 
 ---
 
@@ -34,20 +34,20 @@ progress:
 ## Current Position
 
 **Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
-**Active plan:** 05.1-02 (Wave 2: WalletStatusPill hydration fix + simulated-branch components)
-**Status:** Plan execution — Wave 1 complete (05.1-01 DONE); starting Wave 2 (05.1-02)
+**Active plan:** 05.1-03 (Wave 3: simulated-branch page layout, full SIMULADO surface)
+**Status:** Plan execution — Wave 2 complete (05.1-02 DONE); starting Wave 3 (05.1-03)
 
 **Progress:**
-[████░░░░░░] 40%
+[██████░░░░] 60%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
 [██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
 [██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
 [██████████] Phase 5: Read-First Wallet and DeFi Surface — COMPLETE (4/4 plans)
-[██        ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 2/5 plans (05.1-00, 05.1-01 complete; 05.1-02 next)
+[██████    ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 3/5 plans (05.1-00, 05.1-01, 05.1-02 complete; 05.1-03 next)
 
-Overall: 4/5 phases complete (Phase 5 in progress)
+Overall: 4/5 phases complete (Phase 5.1 in progress)
 
 ---
 
@@ -87,6 +87,7 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | Phase 05 P03 | 35 | 2 tasks | 9 files |
 | Phase 05 P04 | 9 | 2 tasks | 14 files |
 | Phase 05.1 P01 | 6 | 3 tasks | 11 files |
+| Phase 05.1 P02 | 9 | 4 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,10 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| READ_ONLY injected via WalletPanel.readOnly prop; deriveWalletState body untouched (Plan 05.1-02) | readOnly=true forces 'READ_ONLY' as const before deriveWalletState is called; the pure deriver remains a 4-output function | All future simulated-instrument pages use readOnly=true on WalletPanel; never add READ_ONLY to deriveWalletState |
+| useMounted guard in WalletStatusPill: READ_ONLY bypasses guard; others fall back to DISCONNECTED (Plan 05.1-02) | Fixes React #418 hydration mismatch where SSR emits DISCONNECTED but client briefly flashes CONNECTING during wagmi auto-reconnect | WalletStatusPill must always gate connection-derived states behind useMounted; prop-injected states (READ_ONLY) bypass the guard |
+| PayoffDiagram data= prop: RSC computes PayoffPoint[] and passes to client island (Plan 05.1-02) | Removed internal generatePayoffData call; caller (RSC page) generates data so the component is a pure renderer | All PayoffDiagram callers must generate the data array in the RSC body before passing to PayoffDiagramClient |
+| wagmi + rainbowkit vi.mock in wallet-read-only.test.tsx for hook-safe unit testing (Plan 05.1-02) | WalletPanel calls useAccount/useSwitchChain unconditionally (React hook rules); no provider tree in unit tests | All WalletPanel unit tests must mock wagmi and rainbowkit to avoid provider tree |
 | OpenAPI 3.1 spec generated from the canonical Zod registry, imported never re-declared (Phase 04-04) | lib/openapi/schemas.ts imports the schemas from @/lib/mcp-tools/contract; the single extendZodWithOpenApi stays in lib/dashboard/contract.ts; the conformance test proves live route ≡ schema so the spec cannot drift (Phase-2/3 burn class) | All future boundary artifacts are generated from the same Zod the routes conform to; the architecture grep test asserts the single extend call site |
 | MCP JSON-RPC endpoint documented in prose + example, not modelled as a schema (Phase 04-04) | OpenApiGeneratorV31 requires a schema per content entry, so /api/mcp/mcp content uses z.object({}).passthrough() placeholders; the method-dispatched JSON-RPC union lives in the path description prose + one example body | Any future JSON-RPC/transport endpoint uses prose+example+passthrough rather than a fabricated union schema |
 | MCP fake-server test harness applies the registered inputSchema before invoking the handler (Phase 04-03) | The capture-the-callback fake server passed raw input, so Zod `.default('abrigo')` never applied and `input.app` was undefined → ZodError. Real SDK applies inputSchema before the handler; the harness now mirrors that via `inputSchema.parse(input)` | All future MCP fake-server unit tests resolve schema defaults deterministically; output-envelope assertions stay strict |
