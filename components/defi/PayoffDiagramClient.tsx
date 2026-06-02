@@ -13,8 +13,8 @@ const PayoffDiagram = dynamic(
   () => import('./PayoffDiagram').then((mod) => ({ default: mod.PayoffDiagram })),
   {
     ssr: false,
-    // Loading skeleton must be sized — ResponsiveContainer renders 0-height without it.
-    loading: () => <div className="min-h-[240px] sm:min-h-[320px]" aria-hidden="true" />,
+    // Loading skeleton must match the mounted component's h-* class to avoid React #418 hydration mismatch.
+    loading: () => <div className="h-[240px] sm:h-[320px]" aria-hidden="true" />,
   },
 )
 

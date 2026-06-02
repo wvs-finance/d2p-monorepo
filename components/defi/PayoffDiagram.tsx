@@ -5,8 +5,8 @@
 // Renders ONLY with real instrument data — the page guards `instrument !== null`.
 // CROSS-09: sr-only data table below the chart.
 // SVG text: fill="var(--token)" — NOT Tailwind text-* (which sets CSS color, not SVG fill).
-// Locked tokens: stroke="var(--accent-default)", grid vertical={false}, NO gradient fill.
-// ResponsiveContainer parent MUST have min-h to avoid 0-height (B1/MINOR).
+// Locked tokens: stroke="var(--accent-text)", grid vertical={false}, NO gradient fill.
+// ResponsiveContainer parent MUST have h-[240px] sm:h-[320px] to avoid 0-height (B1/MINOR).
 
 import { generatePayoffData } from '@/lib/apps/abrigo/payoff'
 import {
@@ -55,9 +55,11 @@ export function PayoffDiagram({ strike, slope, currentPrice, locale }: PayoffDia
 
   return (
     <div>
-      {/* Sized parent + a11y wrapper — B1/MINOR: ResponsiveContainer renders 0-height without a sized parent.
-          role="img" + aria-label on the outer div (recharts ResponsiveContainer does not forward ARIA props). */}
-      <div className="min-h-[240px] sm:min-h-[320px]" role="img" aria-label={ariaLabel}>
+      {/* Sized parent + a11y wrapper — ResponsiveContainer height="100%" needs a parent with a
+          RESOLVED height; a percentage height on height:auto resolves to 0px.
+          Use a fixed h-* class (h-[240px] sm:h-[320px]). role="img" + aria-label on the
+          outer div (recharts ResponsiveContainer does not forward ARIA props). */}
+      <div className="h-[240px] sm:h-[320px]" role="img" aria-label={ariaLabel}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
             <CartesianGrid stroke="var(--border-default)" strokeOpacity={0.4} vertical={false} />
@@ -110,10 +112,10 @@ export function PayoffDiagram({ strike, slope, currentPrice, locale }: PayoffDia
                 fontFamily: 'var(--font-plex-sans)',
               }}
             />
-            {/* Current price reference line — accent color */}
+            {/* Current price reference line — accent-text (clears WCAG 1.4.11 3:1 non-text) */}
             <ReferenceLine
               x={currentPrice}
-              stroke="var(--accent-default)"
+              stroke="var(--accent-text)"
               strokeDasharray="3 3"
               label={{
                 value: currentLabel,
@@ -122,14 +124,14 @@ export function PayoffDiagram({ strike, slope, currentPrice, locale }: PayoffDia
                 fontFamily: 'var(--font-plex-sans)',
               }}
             />
-            {/* CFMM payoff curve — locked token stroke, no dot, no gradient fill */}
+            {/* CFMM payoff curve — accent-text stroke (WCAG 1.4.11 non-text 3:1 cleared; axe pass) */}
             <Line
               type="linear"
               dataKey="payoff"
-              stroke="var(--accent-default)"
+              stroke="var(--accent-text)"
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: 'var(--accent-default)' }}
+              activeDot={{ r: 4, fill: 'var(--accent-text)' }}
             />
             <Tooltip
               contentStyle={{
