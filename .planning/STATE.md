@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: cCOP/USDC UniV4 pool LIVE on the Base fork (FORK-02 GREEN) — `PoolManager.initialize` at sqrtPriceX96 ~1/4000 + 1,000,000-ether full-range LP via a minimal IUnlockCallback helper; consumer reads `sqrtPriceX96>0` (V4StateReader) + `liquidity>0` (StateLibrary) and round-trips the rate to ~4000 ∈ [3000,5000]; `test_ccopUsdcPool_initialized_state_readable` passes; `.tree` committed before impl (mn-B)
-last_updated: "2026-06-02T03:30:00.000Z"
-last_activity: 2026-06-02 — completed 07-04-PLAN.md (cCOP/USDC pool deploy + state read)
+status: PHASE 7 COMPLETE (FORK-03 GREEN) — borrowed Panoptic V2 stack factory-deployed on the Base fork via the REAL CWIA choreography (master copies + RiskEngine + `PanopticFactoryV4` §B-verbatim ctors → own MockCcop + `PoolKeyLib` PoolKey → `PoolManager.initialize` → `V4LpHelper` 1,000,000-ether seed → `factory.deployNewPool`), then ONE position minted+burned through `IPanopticData` only (dispatch mint ⇒ `getAccumulatedFeesAndPositionsData` len 1 ⇒ size-0 burn ⇒ len 0); collateral via `IERC4626` ct0/ct1 (B-1); seam test imports NEITHER panoptic-borrowed NOR the deploy helper; `test_mintBurn_single_position_through_IPanopticData` passes; bulloak clean; `.tree` committed before impl (mn-B)
+last_updated: "2026-06-01T03:30:00.000Z"
+last_activity: 2026-06-01 — completed 07-05-PLAN.md (FORK-03; Phase 7 done)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State: abrigo-somnia v2.0 — Convex Instrument
@@ -34,14 +34,18 @@ data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-td
 ## Current Position
 
 - **Milestone:** v2.0 — convex-instrument
-- **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (Executing)
-- **Plan:** 07-04 complete (4/5); next 07-05
-- **Status:** cCOP/USDC UniV4 pool LIVE on the Base fork (FORK-02 GREEN) — `PoolManager.initialize` at sqrtPriceX96 ~1/4000 + 1,000,000-ether full-range LP via a minimal `IUnlockCallback`→`modifyLiquidity` helper; consumer reads `sqrtPriceX96>0` (V4StateReader) + `liquidity>0` (StateLibrary) and round-trips the decoded rate to ~4000 ∈ [3000,5000]; `test_ccopUsdcPool_initialized_state_readable` passes; bulloak clean; `.tree` committed before impl (mn-B)
-- **Progress:** [████████░░] 80%
-- **Last activity:** 2026-06-02 — completed 07-04-PLAN.md
+- **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (COMPLETE — 5/5)
+- **Plan:** 07-05 complete (5/5); Phase 7 done (FORK-01/02/03 all green); next is Phase 8 (LongGammaWrapper)
+- **Status:** PHASE 7 COMPLETE (FORK-03 GREEN) — borrowed Panoptic V2 stack factory-deployed on the Base fork via the REAL CWIA choreography (master copies + RiskEngine + `PanopticFactoryV4` §B-verbatim ctors → own MockCcop + `PoolKeyLib` PoolKey → `PoolManager.initialize` → `V4LpHelper` 1,000,000-ether seed → `factory.deployNewPool`), then ONE position minted+burned through `IPanopticData` only; collateral via `IERC4626` ct0/ct1 (B-1); seam test imports NEITHER panoptic-borrowed NOR the deploy helper; `test_mintBurn_single_position_through_IPanopticData` passes; bulloak clean; `.tree` committed before impl (mn-B)
+- **Progress:** [██████████] 100%
+- **Last activity:** 2026-06-01 — completed 07-05-PLAN.md (Phase 7 done)
 
 ## Decisions Log (v2.0)
 
+- **2026-06-01 (07-05):** FORK-03 keystone green — the borrowed Panoptic V2 working pool comes EXCLUSIVELY from `PanopticFactory.deployNewPool` (CWIA proxies); the only `new PanopticPool`/`new CollateralTracker` are master copies (`poolReference`/`collateralReference`). `vegoid` is read inside the factory as `re.vegoid()` (constant 4, §G), never a per-pool param. `PanopticV2DeployHelper` runs the §B+§D choreography verbatim and returns a seam-safe `Deployed` struct.
+- **2026-06-01 (07-05):** M-3 deploy-isolation via a base contract (`PanopticDataSeamBase`) absorbs ALL deploy coupling so the seam test imports NEITHER `panoptic-borrowed` NOR `PanopticV2DeployHelper` (both grep guards hold) while the pool is genuinely deployed. ct0/ct1 typed `IERC4626` (B-1) so `.deposit()` is reachable without the concrete `CollateralTracker`; `poolId` handed across as a plain `uint64` so the seam test builds a concrete `TokenId` via the `@types` value-type builder.
+- **2026-06-01 (07-05):** The minted short leg must be OUT OF THE MONEY and `width=2`. `width=1` (`r=5`) leaves chunk ticks un-aligned to tickSpacing=10 ⇒ `InvalidTickBound`; `width=2` (`r=10`) aligns them. An AT-the-money strike straddles the active tick and underflows (0x11) the SFPM's ERC6909-claim burn at mint — pushing the strike +2000 ticks above current makes the short single-sided and it mints/burns cleanly against the 1,000,000-ether full-range seed. `addLeg` arg order confirmed verbatim vs vendored `TokenIdLibrary` @fe55774.
+- **2026-06-01 (07-05):** `PanopticDataSeam.fork.tree` co-located in `test/instrument/` (bulloak 0.9.2 same-dir + full-stem rule: `PanopticDataSeam.fork.tree → PanopticDataSeam.fork.t.sol`), not the plan's `test/spec/PanopticDataSeam.tree` — same deviation as 07-04. `deployPanopticV2` returns a single `Deployed` struct (+ `_deployInfra` split) to dodge Stack-too-deep under the non-viaIR cancun/200-runs profile.
 - **2026-06-02 (07-01):** Single `cancun`/`0.8.24` profile supersedes FORK-01's roadmap multi-version-solc-matrix wording (07-RESEARCH §5; Panoptic V2 is `^0.8.24` everywhere) — recorded in NOTICE + SUMMARY so the checker does not flag a false gap.
 - **2026-06-02 (07-01):** v4-periphery NOT installed and NO v4-periphery remapping (B-2) — its StateView/IStateView pull the undefined `@uniswap/v4-core/` alias + permit2; pool-state reads go via the already-borrowed `V4StateReader` + v4-core `StateLibrary` under the `v4-core/` alias.
 - **2026-06-02 (07-01):** `lib/` deps kept OUT of git (gitignored, restorable via `foundry.lock`); reverted a stray prior forge-install submodule registration to match the plan's restore model.
