@@ -35,7 +35,13 @@ export type SupportedChainId =
   | typeof arbitrum.id
   | typeof optimism.id
 
-export interface AbrigoInstrument {
+// ---------------------------------------------------------------------------
+// Discriminated union — kind: 'live' | 'simulated'
+// ---------------------------------------------------------------------------
+
+/** A live (deployed) instrument. All on-chain fields are present. */
+export type LiveInstrument = {
+  kind: 'live'
   id: string
   name: string // es-CO display name
   nameEn: string // en display name
@@ -47,6 +53,32 @@ export interface AbrigoInstrument {
   slope: number // payoff slope coefficient (delta at strike)
 }
 
-// EMPTY AT LAUNCH — no Abrigo contracts deployed on any chain yet (CONTEXT.md).
-// Adding one entry here is the ONLY change needed to light up live reads.
-export const ABRIGO_INSTRUMENTS: AbrigoInstrument[] = []
+/** A simulated (fork-fixture, not deployed) instrument. No on-chain fields. */
+export type SimulatedInstrument = {
+  kind: 'simulated'
+  id: string
+  name: string // es-CO display name
+  nameEn: string // en display name
+  chainId: SupportedChainId
+  /** Key into FIXTURES (lib/apps/abrigo/fixture.ts) for fork-fixture data. */
+  fixtureKey: string
+}
+
+/** Discriminated union — narrow on `instrument.kind` before reading live-only fields. */
+export type AbrigoInstrument = LiveInstrument | SimulatedInstrument
+
+// ---------------------------------------------------------------------------
+// Registry
+// ---------------------------------------------------------------------------
+
+// Adding a LiveInstrument entry here is the ONLY change needed to light up live reads.
+export const ABRIGO_INSTRUMENTS: AbrigoInstrument[] = [
+  {
+    kind: 'simulated',
+    id: 'ccop-usd-long-gamma',
+    name: 'Cobertura larga gamma cCOP/USD',
+    nameEn: 'cCOP/USD Long-Gamma Hedge',
+    chainId: 8453,
+    fixtureKey: 'ccop-usd-long-gamma',
+  },
+]

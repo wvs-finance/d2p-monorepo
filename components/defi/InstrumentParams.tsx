@@ -4,6 +4,8 @@
 // Labels text-sm font-normal.
 // No card-inside-card.
 // Built here (05-03); wired on the detail page in 05-04.
+// Wave 1: narrowed on kind — simulated renders name/id/chain rows only;
+//   live renders full 6 rows. Full Panoptic fork-param rows are Wave 3 / Plan 05.1-03.
 
 import type { AbrigoInstrument } from '@/lib/apps/abrigo/instruments'
 
@@ -26,7 +28,8 @@ interface InstrumentParamsProps {
 export function InstrumentParams({ instrument, labels, locale }: InstrumentParamsProps) {
   const displayName = locale.startsWith('es') ? instrument.name : instrument.nameEn
 
-  const rows: Array<{ label: string; value: React.ReactNode }> = [
+  // Shared rows (present for both live and simulated)
+  const sharedRows: Array<{ label: string; value: React.ReactNode }> = [
     {
       label: labels.name,
       value: <span className="text-sm font-normal text-text-primary">{displayName}</span>,
@@ -41,25 +44,41 @@ export function InstrumentParams({ instrument, labels, locale }: InstrumentParam
         <span className="font-mono text-sm font-normal text-text-muted">{instrument.chainId}</span>
       ),
     },
-    {
-      label: labels.strike,
-      value: (
-        <span className="font-mono text-sm font-normal text-text-primary">{instrument.strike}</span>
-      ),
-    },
-    {
-      label: labels.slope,
-      value: (
-        <span className="font-mono text-sm font-normal text-text-primary">{instrument.slope}</span>
-      ),
-    },
-    {
-      label: labels.deployed_at,
-      value: (
-        <span className="text-sm font-normal text-text-secondary">{instrument.deployedAt}</span>
-      ),
-    },
   ]
+
+  // Live-only rows — only read strike/slope/deployedAt inside the live guard
+  const liveRows: Array<{ label: string; value: React.ReactNode }> =
+    instrument.kind === 'live'
+      ? [
+          {
+            label: labels.strike,
+            value: (
+              <span className="font-mono text-sm font-normal text-text-primary">
+                {instrument.strike}
+              </span>
+            ),
+          },
+          {
+            label: labels.slope,
+            value: (
+              <span className="font-mono text-sm font-normal text-text-primary">
+                {instrument.slope}
+              </span>
+            ),
+          },
+          {
+            label: labels.deployed_at,
+            value: (
+              <span className="text-sm font-normal text-text-secondary">
+                {instrument.deployedAt}
+              </span>
+            ),
+          },
+        ]
+      : []
+  // Simulated: strike/slope/deployedAt rows omitted. Full Panoptic fork-param rows are Wave 3.
+
+  const rows = [...sharedRows, ...liveRows]
 
   return (
     <dl className="divide-y divide-border-default">

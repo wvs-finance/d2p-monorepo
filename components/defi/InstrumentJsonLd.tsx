@@ -1,7 +1,7 @@
 // InstrumentJsonLd — RSC, structured data for the per-instrument detail page.
 // Extends AgentStateJsonLd pattern (components/AgentStateJsonLd.tsx).
-// Anti-fishing (CROSS-09): NO fabricated numerics. Pool state values are omitted;
-//   only static registry fields (id, chainId, name, deployedAt, strike, slope) are emitted.
+// Anti-fishing (CROSS-09): NO fabricated numerics. Pool state values are omitted.
+// Simulated branch: emits simulated:true + provenance, NO strike/slope/address (AGENT-10).
 // html const pre-built BEFORE the return (biome dangerouslySetInnerHTML rule — Phase 2).
 
 import type { AbrigoInstrument } from '@/lib/apps/abrigo/instruments'
@@ -32,19 +32,43 @@ interface InstrumentJsonLdProps {
 }
 
 export function InstrumentJsonLd({ instrument }: InstrumentJsonLdProps): React.JSX.Element {
-  const jsonLd: FinancialProductLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FinancialProduct',
-    identifier: instrument.id,
-    name: instrument.nameEn,
-    description: `Abrigo convex hedge instrument — strike ${instrument.strike}, slope ${instrument.slope}`,
-    additionalProperty: [
-      { '@type': 'PropertyValue', name: 'chainId', value: String(instrument.chainId) },
-      { '@type': 'PropertyValue', name: 'address', value: instrument.address },
-      { '@type': 'PropertyValue', name: 'strike', value: String(instrument.strike) },
-      { '@type': 'PropertyValue', name: 'slope', value: String(instrument.slope) },
-      { '@type': 'PropertyValue', name: 'deployedAt', value: instrument.deployedAt },
-    ],
+  let jsonLd: FinancialProductLd
+
+  if (instrument.kind === 'live') {
+    // Live branch: full on-chain fields — strike, slope, address, deployedAt all safe to read.
+    jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'FinancialProduct',
+      identifier: instrument.id,
+      name: instrument.nameEn,
+      description: `Abrigo convex hedge instrument — strike ${instrument.strike}, slope ${instrument.slope}`,
+      additionalProperty: [
+        { '@type': 'PropertyValue', name: 'chainId', value: String(instrument.chainId) },
+        { '@type': 'PropertyValue', name: 'address', value: instrument.address },
+        { '@type': 'PropertyValue', name: 'strike', value: String(instrument.strike) },
+        { '@type': 'PropertyValue', name: 'slope', value: String(instrument.slope) },
+        { '@type': 'PropertyValue', name: 'deployedAt', value: instrument.deployedAt },
+      ],
+    }
+  } else {
+    // Simulated branch: no strike/slope/address — anti-fishing (AGENT-10 / CROSS-09).
+    // Emits simulated:true + fork-fixture provenance so agents can identify the data source.
+    jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'FinancialProduct',
+      identifier: instrument.id,
+      name: instrument.nameEn,
+      description: `Abrigo simulated convex instrument (fork-fixture, not deployed) — ${instrument.nameEn}`,
+      additionalProperty: [
+        { '@type': 'PropertyValue', name: 'chainId', value: String(instrument.chainId) },
+        { '@type': 'PropertyValue', name: 'simulated', value: 'true' },
+        {
+          '@type': 'PropertyValue',
+          name: 'provenance',
+          value: 'fork-fixture: test-seeded mock pool, not market data',
+        },
+      ],
+    }
   }
 
   // Pre-build html BEFORE the return — biome noDangerouslySetInnerHtml requires

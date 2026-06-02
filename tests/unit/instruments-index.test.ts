@@ -20,12 +20,42 @@ function getInstrumentPoolState(
 }
 
 describe('ABRIGO_INSTRUMENTS — anti-fishing (DEFI-03)', () => {
-  it('registry is empty at launch (no fabricated/ghost instruments)', () => {
-    expect(ABRIGO_INSTRUMENTS).toHaveLength(0)
-  })
-
   it('registry is an array', () => {
     expect(Array.isArray(ABRIGO_INSTRUMENTS)).toBe(true)
+  })
+
+  it('contains exactly one entry (the simulated ccop-usd-long-gamma instrument)', () => {
+    expect(ABRIGO_INSTRUMENTS).toHaveLength(1)
+  })
+
+  it('the single entry is kind: simulated', () => {
+    const entry = ABRIGO_INSTRUMENTS[0]
+    expect(entry?.kind).toBe('simulated')
+  })
+
+  it('the single entry has id === ccop-usd-long-gamma', () => {
+    const entry = ABRIGO_INSTRUMENTS[0]
+    expect(entry?.id).toBe('ccop-usd-long-gamma')
+  })
+
+  it('the single entry has chainId === 8453 (Base)', () => {
+    const entry = ABRIGO_INSTRUMENTS[0]
+    expect(entry?.chainId).toBe(8453)
+  })
+
+  it('the simulated entry has NO strike field (anti-fishing: no fabricated numerics)', () => {
+    const entry = ABRIGO_INSTRUMENTS[0]
+    expect('strike' in (entry ?? {})).toBe(false)
+  })
+
+  it('the simulated entry has NO slope field', () => {
+    const entry = ABRIGO_INSTRUMENTS[0]
+    expect('slope' in (entry ?? {})).toBe(false)
+  })
+
+  it('the simulated entry has NO address field', () => {
+    const entry = ABRIGO_INSTRUMENTS[0]
+    expect('address' in (entry ?? {})).toBe(false)
   })
 })
 

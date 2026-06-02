@@ -67,6 +67,9 @@ export default async function InstrumentsIndexPage() {
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {ABRIGO_INSTRUMENTS.map((instrument) => {
             const displayName = locale.startsWith('es') ? instrument.name : instrument.nameEn
+            // Guard deployedAt on kind — simulated shows SIMULADO + em-dash (CROSS-09 anti-fishing)
+            const deployedAtDisplay =
+              instrument.kind === 'live' ? instrument.deployedAt : 'SIMULADO — —'
             return (
               <li key={`${instrument.id}-${instrument.chainId}`}>
                 <article className="bg-elevated border border-border-default rounded-[var(--radius)] px-4 py-4 space-y-3">
@@ -76,7 +79,7 @@ export default async function InstrumentsIndexPage() {
                       chain: {instrument.chainId}
                     </p>
                   </header>
-                  <p className="text-sm font-normal text-text-secondary">{instrument.deployedAt}</p>
+                  <p className="text-sm font-normal text-text-secondary">{deployedAtDisplay}</p>
                   <Link
                     href={`/apps/abrigo/instruments/${instrument.id}/${instrument.chainId}`}
                     className="text-sm font-normal text-accent-text underline underline-offset-4 hover:text-accent-default transition-colors"

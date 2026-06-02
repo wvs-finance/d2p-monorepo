@@ -2,7 +2,7 @@
 // DEFI-04: Pure unit tests for the CFMM convex-hedge payoff function
 // PLUS a render assertion for PayoffDiagram (fixture params — test-only).
 import '@testing-library/jest-dom/vitest'
-import { generatePayoffData } from '@/lib/apps/abrigo/payoff'
+import { generatePayoffData, generateSchematicConvexPayoff } from '@/lib/apps/abrigo/payoff'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
@@ -73,6 +73,61 @@ describe('generatePayoffData — edge cases', () => {
   it('custom points count is respected', () => {
     const data = generatePayoffData(1000, 0.5, 50)
     expect(data).toHaveLength(50)
+  })
+})
+
+// Wave-1: schematic convex generator assertions
+describe('generateSchematicConvexPayoff — shape', () => {
+  it('returns exactly 200 points by default', () => {
+    const data = generateSchematicConvexPayoff(4000, 0)
+    expect(data).toHaveLength(200)
+  })
+
+  it('all payoff values are >= 0 (floored at 0)', () => {
+    const data = generateSchematicConvexPayoff(4000, 10)
+    for (const point of data) {
+      expect(point.payoff).toBeGreaterThanOrEqual(0)
+    }
+  })
+
+  it('at least one payoff > 0 (curve is non-trivial with premium=0)', () => {
+    const data = generateSchematicConvexPayoff(4000, 0)
+    const positive = data.filter((p) => p.payoff > 0)
+    expect(positive.length).toBeGreaterThan(0)
+  })
+
+  it('is convex: payoff increases as price moves away from center (prices far left of center)', () => {
+    const center = 4000
+    const data = generateSchematicConvexPayoff(center, 0)
+    // At prices far below center the parabola has positive payoff
+    // and each step away from center increases payoff (convexity)
+    const belowCenter = data.filter((p) => p.price < center * 0.7)
+    // Sort by ascending price so index 0 is furthest left
+    belowCenter.sort((a, b) => a.price - b.price)
+    for (let i = 0; i + 1 < belowCenter.length; i++) {
+      // Moving from lower price to higher price: payoff DECREASES (toward minimum at center)
+      const curr = belowCenter[i]
+      const next = belowCenter[i + 1]
+      expect(curr?.payoff).toBeGreaterThanOrEqual(next?.payoff ?? 0)
+    }
+  })
+
+  it('custom points count is respected', () => {
+    const data = generateSchematicConvexPayoff(4000, 0, 0.000005, 50)
+    expect(data).toHaveLength(50)
+  })
+
+  it('is independent of generatePayoffData (does not call it internally)', () => {
+    // Structural: generateSchematicConvexPayoff uses a parabola, not a kink.
+    // At centerPrice the generatePayoffData kink would produce payoff=slope*(strike-strike)=0,
+    // but the parabola also returns 0 at the center. Distinguish by checking the
+    // curve shape is symmetric: payoff at center+1000 equals payoff at center-1000.
+    const center = 4000
+    const data = generateSchematicConvexPayoff(center, 0)
+    const above = data.find((p) => Math.abs(p.price - (center + 1000)) < 50)
+    const below = data.find((p) => Math.abs(p.price - (center - 1000)) < 50)
+    // Both are symmetric distances from center — payoffs should be approximately equal
+    expect(Math.abs((above?.payoff ?? 0) - (below?.payoff ?? 0))).toBeLessThan(5)
   })
 })
 

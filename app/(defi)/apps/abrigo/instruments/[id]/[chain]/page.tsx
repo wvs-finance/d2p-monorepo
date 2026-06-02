@@ -17,6 +17,7 @@ import { RiskCallout } from '@/components/defi/RiskCallout'
 import { WalletPanel } from '@/components/defi/WalletPanel'
 import type { WalletPanelStrings } from '@/components/defi/WalletPanel'
 import type { WalletStatus } from '@/components/defi/WalletStatusPill'
+import { FIXTURES } from '@/lib/apps/abrigo/fixture'
 import { ABRIGO_INSTRUMENTS } from '@/lib/apps/abrigo/instruments'
 import { aggregateAllChains } from '@/lib/dashboard/aggregator'
 import { getInstrumentPoolState } from '@/lib/dashboard/instrument-pool'
@@ -111,9 +112,12 @@ export default async function InstrumentDetailPage({
     name: t('params.name'),
   }
 
-  // Use current price = strike as a safe default when live price unavailable pre-deploy.
-  // The diagram is still honest: it shows the payoff curve shape with the kink at strike.
-  const currentPrice = instrument.strike
+  // Use current price = strike (live) or humanRate from fixture (simulated) as a safe default.
+  // The diagram is still honest: it shows the payoff curve shape with the kink at the reference price.
+  const currentPrice =
+    instrument.kind === 'live'
+      ? instrument.strike
+      : (FIXTURES[instrument.fixtureKey]?.pool.humanRate.value ?? 4000)
 
   return (
     <main className="max-w-[1200px] mx-auto px-4 lg:px-8 py-12">
@@ -148,8 +152,8 @@ export default async function InstrumentDetailPage({
             aria-label={locale.startsWith('es') ? 'Diagrama de rentabilidad' : 'Payoff diagram'}
           >
             <PayoffDiagramClient
-              strike={instrument.strike}
-              slope={instrument.slope}
+              strike={instrument.kind === 'live' ? instrument.strike : currentPrice}
+              slope={instrument.kind === 'live' ? instrument.slope : 0}
               currentPrice={currentPrice}
               locale={locale}
             />
