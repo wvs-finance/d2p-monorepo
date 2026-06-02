@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 7 UI-SPEC approved
-last_updated: "2026-06-02T21:59:55.049Z"
+stopped_at: Completed 07-00-PLAN.md
+last_updated: "2026-06-02T23:13:45.993Z"
 progress:
   total_phases: 10
   completed_phases: 8
-  total_plans: 44
-  completed_plans: 43
-  percent: 98
+  total_plans: 48
+  completed_plans: 44
+  percent: 92
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-02
 **Session type:** Plan execution (05.2-01 complete — DEFI-06 wallet connect modal a11y: scoped live region, lang fix, connect-success focus, durable e2e)
-**Stopped at:** Phase 7 UI-SPEC approved
+**Stopped at:** Completed 07-00-PLAN.md
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Milestone complete
 
 **Progress:**
-[██████████] 98%
+[█████████░] 92%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -96,6 +96,7 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 06 P03 | 5 | 2 tasks | 8 files |
 | Phase 06 P02 | 8 | 2 tasks | 9 files |
 | Phase 06 P04 | 11 | 2 tasks | 9 files |
+| Phase 07-agent-reasoning-position-surface P00 | 8 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,9 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| getDecisionTraceById additive join by size-leg requestId; HedgeDecisionView.decisionId unchanged for Phase-6 compatibility (Plan 07-00) | Snapshot stores SIZE-leg requestId in decisionId field; additive DecisionTraceView does not touch this field; HedgeDecisionFeed/Card/somnia-reader tests compile and pass unchanged | All Phase-7 trace consumers use getDecisionTraceById; Phase-6 consumers use getHedgeDecisions unchanged |
+| LivenessSource<T> ships snapshot+polling only; liveness='live' structurally absent; honker-node never in package.json (Plan 07-00) | honker is an embedded N-API lib with no Dockerfile/SSE — deferred to Phase 7.x pending a continuous keeper cadence | Phase-7 UI uses snapshotSource by default; pollingSource for SOMNIA_LIVE; live slot reserved for deferred honker phase |
+| adaptWrapper is the single §2 chokepoint; stale baselines and realized-costs structurally unreachable; WRAPPER_DEPLOYED default false (Plan 07-00) | LongGammaWrapper ABI is mid-dev/moving; adapter encodes mapping rules so JSX cannot violate them; flag re-derives from final ABI before flipping | All Phase-7 position panel code imports only WrapperPositionView; never raw ABI types |
 | Explicit role='status' DOM attribute blocked by Biome noRedundantRoles + useSemanticElements on <output> (Plan 05.2-01) | <output> already carries implicit role=status via HTML-AAM; Biome correctly blocks the redundant attribute; defense-in-depth via explicit aria-live='polite' which IS present | All WalletPanel live-region tests assert role attr is null + aria-live is 'polite'; do NOT add explicit role to <output> |
 | wagmi mock() connector is NOT surfaced in RainbowKit modal (Plan 05.2-01) | wagmi and RainbowKit use separate connector registries; mock() registers with wagmi only; RainbowKit's modal list comes from connectorsForWallets | Connect-success e2e must use TestConnectButton (outside modal); RainbowKit modal tests cover open/close/focus-return only |
 | Tab-loop navigation required in e2e tests for ConnectButton trigger (Plan 05.2-01) | ConnectButton trigger is tab stop ~7 after nav links; single page.keyboard.press('Tab') lands on first nav <a>, not the button; loop up to 15 presses checking activeElement | All e2e tests targeting ConnectButton via keyboard must use a Tab loop with activeElement check |
