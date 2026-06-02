@@ -10,13 +10,43 @@
       "heading": "Hedging product — not leverage",
       "body": "Abrigo is designed to hedge against currency and macroeconomic exposure. It does not amplify gains or losses: it is a convex hedging instrument, not a leveraged product."
     },
+    "simulated": {
+      "badge": "SIMULATED",
+      "badge_aria": "Base fork — simulated pool, not deployed on-chain",
+      "caption": "Base fork — mock pool, not deployed."
+    },
+    "provenance": {
+      "fork_fixture": "Fork fixture",
+      "fork_fixture_aria": "Value seeded in tests on simulated pool — not market data",
+      "spec": "Specification",
+      "spec_aria": "Specified in abrigo-somnia Phase-8 plans — not yet on-chain",
+      "schematic": "Schematic",
+      "schematic_aria": "Illustrative shape — not a contract-derived settlement function"
+    },
+    "cashflow": {
+      "heading": "Cash flow",
+      "premium": "Premium (deposit)",
+      "streamia": "Streamia",
+      "commission": "Commission",
+      "data_cost": "Metered data cost",
+      "residual": "Claimable residual",
+      "already_netted": "already netted into surviving collateral"
+    },
     "params": {
       "id": "Identifier",
       "chain": "Network",
       "strike": "Strike price",
       "slope": "Hedge slope",
       "deployed_at": "Deployment date",
-      "name": "Name"
+      "name": "Name",
+      "chunk_strike": "Chunk strike (offset)",
+      "width": "Chunk width",
+      "tick_spacing": "Tick spacing",
+      "pair": "Pair",
+      "fork_block": "Fork block",
+      "seeded_liquidity": "Seeded liquidity",
+      "human_rate": "Rate (seed)",
+      "fork_params_caption": "Fork-test parameters — not chosen geometry"
     },
     "wallet": {
       "disconnected_prompt": "Connect wallet to view your position",
@@ -29,7 +59,9 @@
       "status_disconnected": "Disconnected",
       "status_connecting": "Connecting",
       "status_wrong_chain": "Wrong network",
-      "status_connected": "Connected"
+      "status_connected": "Connected",
+      "read_only_status": "Read only",
+      "read_only_label": "no transactions — simulated fork"
     },
     "pool": {
       "not_deployed": "No pool data available — contract not yet deployed.",

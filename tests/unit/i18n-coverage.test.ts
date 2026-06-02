@@ -85,4 +85,13 @@ describe('i18n namespace key parity (es-CO ↔ en)', () => {
       resolve(messagesDir, 'en/dashboard.json'),
     )
   })
+
+  // instruments namespace parity (covers simulated/provenance/cashflow/params/wallet.read_only — Wave 3)
+  it('instruments namespace has identical key paths in es-CO and en', () => {
+    assertKeyParity(
+      'instruments',
+      resolve(messagesDir, 'es-CO/instruments.json'),
+      resolve(messagesDir, 'en/instruments.json'),
+    )
+  })
 })
