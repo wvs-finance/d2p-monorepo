@@ -1,0 +1,56 @@
+{
+  "somnia": {
+    "panel": {
+      "heading": "Somnia macro agent",
+      "subheading": "Somnia testnet · POC · consensus = operator-supplied",
+      "dataKeyLabel": "co/inflation-rate",
+      "latestValue": "Latest value",
+      "history": "MacroReceived history",
+      "capturedLabel": "captured",
+      "printTimestampLabel": "Price timestamp",
+      "printTimestampUnavailable": "Price timestamp — not available",
+      "provenanceLabel": "Somnia testnet · macro agent (POC)",
+      "provenanceAriaLabel": "Somnia testnet · agent macro print (POC) · recorded",
+      "caveat": "Somnia testnet agent data. Laboratory use only (POC). Consensus input is operator-supplied, not market-derived.",
+      "emptyState": "—"
+    },
+    "feed": {
+      "heading": "Hedge decisions",
+      "emptyState": "No recorded decisions.",
+      "action": {
+        "HOLD": "Hold",
+        "ADD_LONG_GAMMA": "Add long gamma",
+        "REDUCE": "Reduce",
+        "EXIT": "Exit"
+      },
+      "sizeBpsLabel": "Size (bps)",
+      "macroLabel": "Macro print",
+      "consensusLabel": "Consensus",
+      "consensusCaveat": "operator-supplied — not market-derived",
+      "surpriseLabel": "Surprise",
+      "pendingLabel": "pending",
+      "provenanceLabel": "Somnia testnet · agent (POC)",
+      "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded"
+    },
+    "bridge": {
+      "heading": "From macro surprise to position",
+      "macroLabel": "Macro print",
+      "consensusLabel": "Consensus",
+      "consensusCaveat": "operator-supplied — not market-derived",
+      "surpriseLabel": "Surprise",
+      "action": {
+        "HOLD": "Hold",
+        "ADD_LONG_GAMMA": "Add long gamma",
+        "REDUCE": "Reduce",
+        "EXIT": "Exit"
+      },
+      "sizeBpsLabel": "Size (bps)",
+      "deltaLabel": "Illustrative position delta",
+      "illustrativeMarker": "illustrative — simulated position",
+      "provenanceLabel": "Somnia testnet · agent (POC)",
+      "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded",
+      "emptyState": "—",
+      "emptyGamma": "No long-gamma decision recorded"
+    }
+  }
+}

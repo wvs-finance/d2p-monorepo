@@ -23,6 +23,10 @@ import { SnapshotPoolPanel } from '@/components/defi/SnapshotPoolPanel'
 import { WalletPanel } from '@/components/defi/WalletPanel'
 import type { WalletPanelStrings } from '@/components/defi/WalletPanel'
 import type { WalletStatus } from '@/components/defi/WalletStatusPill'
+import {
+  type BridgeStrings,
+  HedgeDecisionBridge,
+} from '@/components/defi/somnia/HedgeDecisionBridge'
 import type { CashFlowBreakdown } from '@/lib/apps/abrigo/cashflow'
 import { FIXTURES } from '@/lib/apps/abrigo/fixture'
 import { ABRIGO_INSTRUMENTS } from '@/lib/apps/abrigo/instruments'
@@ -78,6 +82,7 @@ export default async function InstrumentDetailPage({
   if (instrument.kind === 'simulated') {
     const locale = await getLocale()
     const t = await getTranslations('instruments')
+    const tSomnia = await getTranslations('somnia')
     const fixture = FIXTURES[instrument.fixtureKey]
     if (!fixture) {
       // Missing fixture entry is a data-integrity error; treat as not-found.
@@ -170,6 +175,29 @@ export default async function InstrumentDetailPage({
       aria: t('provenance.schematic_aria'),
     }
 
+    // Bridge strings — somnia namespace bridge sub-section.
+    // Reuses the operator caveat from the somnia.feed namespace (shared copy, no duplication).
+    const bridgeStrings: BridgeStrings = {
+      heading: tSomnia('bridge.heading'),
+      macroLabel: tSomnia('bridge.macroLabel'),
+      consensusLabel: tSomnia('bridge.consensusLabel'),
+      consensusCaveat: tSomnia('bridge.consensusCaveat'),
+      surpriseLabel: tSomnia('bridge.surpriseLabel'),
+      actionLabel: {
+        HOLD: tSomnia('bridge.action.HOLD'),
+        ADD_LONG_GAMMA: tSomnia('bridge.action.ADD_LONG_GAMMA'),
+        REDUCE: tSomnia('bridge.action.REDUCE'),
+        EXIT: tSomnia('bridge.action.EXIT'),
+      },
+      sizeBpsLabel: tSomnia('bridge.sizeBpsLabel'),
+      deltaLabel: tSomnia('bridge.deltaLabel'),
+      illustrativeMarker: tSomnia('bridge.illustrativeMarker'),
+      provenanceLabel: tSomnia('bridge.provenanceLabel'),
+      provenanceAriaLabel: tSomnia('bridge.provenanceAriaLabel'),
+      emptyState: tSomnia('bridge.emptyState'),
+      emptyGamma: tSomnia('bridge.emptyGamma'),
+    }
+
     return (
       <main className="max-w-[1200px] mx-auto px-4 lg:px-8 py-12">
         {/* JSON-LD structured data — simulated branch: no strike/slope/address */}
@@ -230,6 +258,17 @@ export default async function InstrumentDetailPage({
                 isSchematic
               />
             </section>
+
+            {/* HedgeDecisionBridge — surprise→decision→instrument bridge.
+                Mounts ONLY in this simulated branch (kind==='simulated').
+                Reads the ADD_LONG_GAMMA decision from the snapshot reader seam.
+                NEVER calls aggregateAllChains (simulated entries never reach multicall — DEFI-08).
+                The component renders its own labeled <section data-testid="bridge-section">,
+                so this wrapper is a plain <div> — a second aria-label here would create a
+                duplicate landmark with an identical name (a11y) and break strict-mode locators. */}
+            <div>
+              <HedgeDecisionBridge instrument={instrument} labels={bridgeStrings} locale={locale} />
+            </div>
 
             {/* SnapshotPoolPanel — fork-fixture pool state from fixture */}
             <section

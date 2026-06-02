@@ -19,7 +19,8 @@
     "test:lighthouse": "lhci autorun",
     "test:impeccable": "npx impeccable detect app/",
     "prepare": "lefthook install",
-    "contracts:gen": "wagmi generate"
+    "contracts:gen": "wagmi generate",
+    "somnia:capture": "npx tsx lib/apps/abrigo/somnia/capture-snapshot.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "7.3.4",

@@ -50,7 +50,7 @@ txs**. So module 2 is GO, reads an EXISTING deployment, and needs NO new deploy 
 ## 1. Context
 
 The abrigo-somnia backend advanced into **Phase 11 — `MacroHedgeStrategist`**: an on-chain,
-autonomous, **consensus-verified macro-hedge *decision* agent** on Somnia testnet (chain 50312).
+autonomous **macro-hedge *decision* agent** on Somnia testnet (chain 50312) — a real on-chain agent decision via the Somnia platform (validator byte-consensus is assumed at temp=0, not separately proven here; do NOT label it "consensus-verified" in UI copy).
 It reads a `MacroOracle` datum (live Trading-Economics macro data via the Somnia json-fetch agent —
 e.g. Colombian CPI), reasons over the **surprise** (actual vs. consensus) through the Somnia
 **LLM-inference agent** (Qwen3-30B, `temperature=0` → byte-identical validator output → consensus on
@@ -78,7 +78,7 @@ capital, consensus = operator-supplied input); nothing is fabricated (snapshot i
 ## 3. Honesty model — new `testnet-agent` provenance tier
 
 Module 1's tiers: `fork-fixture / spec / schematic`. Module 2 adds **`testnet-agent`**:
-> "Somnia testnet · consensus-verified AI decision (Qwen3-30B, temp=0) · POC — not mainnet, no real capital."
+> "Somnia testnet · agent decision (POC) · consensus = operator-supplied input — not mainnet, no real capital." (Do NOT write "consensus-verified" — validator byte-consensus is assumed at temp=0, not proven here.)
 
 Sub-states: **`live`** (read from the chain via viem/RPC now) vs **`recorded`** (from the committed
 snapshot). Pills encode color + icon + text + aria (CROSS-09); em-dash never 0.
@@ -129,7 +129,7 @@ live behind flag). Smallest; no dependency on A/B.
 
 ### `06-02` — A: Hedge-decision feed
 `HedgeDecisionFeed` + `HedgeDecisionCard`: per decision, macro print → surprise → action badge +
-sizeBps + consensus-verified `testnet-agent` pill; equal visual weight across actions (anti-fishing).
+sizeBps + `testnet-agent` pill (POC, operator-supplied consensus — never "consensus-verified"); equal visual weight across actions (anti-fishing).
 TDD: unit (event decode, surprise, action→label map, sizeBps clamp display, em-dash) + integration
 (snapshot events → feed rows, both locales). Independent of B/C/D.
 

@@ -16,6 +16,8 @@
 - [ ] **Phase 4: Agent Surface (MCP)** — Exposes all protocol and research state to AI agents via MCP tools, OpenAPI spec, and JSON-LD structured data
 - [ ] **Phase 5: Read-First Wallet and DeFi Surface** — Adds RainbowKit wallet connection and per-instrument read-only views with payoff diagrams and risk disclosures
 - [x] **Phase 05.1: abrigo-somnia convex instrument frontend surface** *(INSERTED)* — Read-first SIMULATED cCOP/USD long-gamma instrument surface; three-tier provenance, SIMULADO badge, read-only wallet, no fabricated numbers (completed 2026-06-02)
+- [x] **Phase 05.2: DEFI-06 wallet connect-modal accessibility** *(INSERTED)* — scoped role=status live region, focus restoration (incl. connect-success), durable e2e; real-SR speech deferred to manual pass (completed 2026-06-02)
+- [x] **Phase 6: Somnia agent surface (MacroHedgeStrategist)** — Module 2: surface the live Somnia-testnet hedge-decision agent — live CPI panel + decision feed + agent-first MCP tools + surprise→decision→instrument bridge; testnet-agent provenance tier; reads an already-deployed contract (no new deploy) (completed 2026-06-02)
 
 ---
 
@@ -267,6 +269,31 @@ Plans:
 - [x] 05.1-03-PLAN.md — Wave 3: detail-page simulated branch (before aggregator) + es-CO/en i18n keys + GitBook page + copy-review sign-off (DEFI-08, DEFI-03, DEFI-05, DEFI-09, CROSS-10, CROSS-09, AGENT-10) [wave 3]
 - [x] 05.1-04-PLAN.md — Wave 4: real e2e/a11y on the simulated route + full suite green + Evidence Collector live-DOM gate (DEFI-08, DEFI-03, DEFI-05, DEFI-02, CROSS-01, CROSS-09) [wave 4]
 
+### Phase 6: Somnia agent surface (MacroHedgeStrategist) — Module 2
+
+**Goal:** A visitor or agent can see the live Somnia-testnet macro-hedge agent in the d2p frontend — the latest CPI macro print, the stream of consensus(operator-supplied)→surprise→action hedge decisions, a bridge tying a decision to the module-1 cCOP/USD instrument, and agent-first MCP tools — all under a `testnet-agent` provenance tier, reading an ALREADY-DEPLOYED contract (no new deploy), with no fabricated data.
+
+**Requirements**: SOMNIA-00 (Wave-0 data layer), SOMNIA-D (live CPI panel), SOMNIA-A (hedge-decision feed), SOMNIA-C (agent-first MCP tools), SOMNIA-B (surprise→decision→instrument bridge); reuses CROSS-01/09/10, AGENT-01/02, DEFI-08. (New SOMNIA-* IDs introduced at planning; honesty acceptance lives in the spec §0 + each plan's must_haves.)
+**Depends on:** Phase 5.1 (module-1 instrument, for the component-B bridge); abrigo-somnia Phase-11 (deployed MacroHedgeStrategist — DONE).
+**Canonical spec:** `docs/superpowers/specs/2026-06-02-somnia-agent-surface-phase6-design.md` (passed 2-way review; §0 = binding corrections)
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. A visitor at `/apps/abrigo/agent` sees the latest Somnia-testnet CPI print (`co/inflation-rate`, 5.68%) + recorded `MacroReceived` history, each with a `testnet-agent` provenance pill; capacity-utilization is absent (not fabricated); null fields are em-dash; data comes through the Wave-0 reader (snapshot, no network).
+  2. The same surface shows the recorded hedge decisions as equal-weight cards (print → operator-supplied consensus → surprise → action + sizeBps); consensus is honestly labeled operator-supplied (not market); surprise is gated behind that caveat; all four actions render at identical visual weight.
+  3. On the module-1 cCOP/USD simulated instrument page, a bridge ties a recorded decision to the convex position (operator-supplied surprise → ADD_LONG_GAMMA @ sizeBps → schematic position delta), mounted only in the `kind==='simulated'` branch (never on the multicall path).
+  4. An AI agent calls `get_hedge_decisions(dataKey)` and `get_latest_macro_print(dataKey)` on the Phase-4 MCP server and receives the recorded decisions / latest CPI — each a single wrapping ZodObject with both content[text] and structuredContent, consensus labeled operator-supplied, bigint serialized as string, no fabricated numerics.
+
+**Honesty invariants (spec §0):** no green provenance token (neutral `testnet-agent` tier); consensus = operator-supplied (not market); CPI-only (capacity-utilization unwired); snapshot captured from the real tx hashes (hand-authored decision data is a CROSS-09 violation); Somnia chain 50312 is a SEPARATE defineChain/client (no SupportedChainId widening); static `import x from './x.json'` + BigInt/Date rehydration; surprise computed in BigInt; live read server-side behind `SOMNIA_LIVE` (not NEXT_PUBLIC_), kept OUT of default CI.
+
+**Plans**: 5 plans (Wave 0 data layer → D/A/C reader-parallel → B bridge)
+
+Plans:
+- [ ] 06-00-PLAN.md — Wave 0 data layer: deployments.json (no deploy) + real-tx-sourced snapshot.json + separate Somnia chain/client (50312) + ABIs + types + reader.ts seam (snapshot default / live flagged) + BigInt surprise + testnet-agent provenance tier + 7 failing-first test stubs (SOMNIA-00, CROSS-09) [wave 0]
+- [ ] 06-01-PLAN.md — D: live macro-data panel — MacroDataPanel RSC (CPI-only, em-dash nulls, testnet-agent pill) + /apps/abrigo/agent route + es-CO-first somnia i18n + e2e (SOMNIA-D, CROSS-09, CROSS-10, CROSS-01) [wave 1]
+- [ ] 06-02-PLAN.md — A: hedge-decision feed — HedgeDecisionFeed + HedgeDecisionCard (equal-weight, consensus=operator, surprise gated, em-dash pending) mounted on the agent page + equal-weight e2e (SOMNIA-A, CROSS-09, CROSS-10, CROSS-01) [wave 1]
+- [ ] 06-03-PLAN.md — C: agent-first MCP tools — get_hedge_decisions + get_latest_macro_print (single ZodObject, dual return, new envelopes in contract.ts, barrel + route edits) + real-SDK conformance test (SOMNIA-C, AGENT-01, AGENT-02, CROSS-09) [wave 1]
+- [ ] 06-04-PLAN.md — B: surprise→decision→instrument bridge — decisionToPositionDelta (BigInt) + HedgeDecisionBridge RSC mounted in the kind==='simulated' branch of the instrument page (never on the multicall path) + es-CO-first copy + e2e (SOMNIA-B, CROSS-09, CROSS-10, CROSS-01, DEFI-08) [wave 2]
+
 ---
 *Roadmap created: 2026-05-11*
-*Last updated: 2026-06-02 — Phase 05.1 complete; roadmap recovered from gsd-tools truncation (see note)*
+*Last updated: 2026-06-02 — Phase 6 (Somnia agent surface) planned: 5 plans (06-00 Wave-0 data layer → 06-01/02/03 D/A/C reader-parallel → 06-04 B bridge)*

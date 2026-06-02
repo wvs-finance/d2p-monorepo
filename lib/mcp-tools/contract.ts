@@ -79,3 +79,103 @@ export type ResearchEntryOut = z.infer<typeof ResearchEntryOut>
 // model (IA correction); external_url is the notebook link, arxiv_id the citable id.
 export const IterationDetailOut = ResearchEntryOut.extend({ body: z.string().nullable() })
 export type IterationDetailOut = z.infer<typeof IterationDetailOut>
+
+// ---------------------------------------------------------------------------
+// Somnia agent-surface envelopes (06-03 — Component C)
+// Single wrapping ZodObject per envelope — never a bare array/union at the top level.
+// The MCP SDK normalizeObjectSchema requires a ZodObject (needs .shape to be defined).
+// BigInt values are STRINGS on the wire (bigint→String() at the tool boundary).
+// consensusNote carries the honest "operator-supplied POC input, not market consensus" caveat.
+// scale = 2 → raw int 568 means 5.68%; surpriseFormatted preserves sign ("+0.68" / "-3.32").
+// M4: do NOT assert that consensus was externally validated in these schemas or tool copy.
+// ---------------------------------------------------------------------------
+
+export const HedgeDecisionItem = z.object({
+  /** requestId (uint256) serialized as string. */
+  decisionId: z.string(),
+  /** Human-readable action label from the on-chain uint8 enum. */
+  action: z.enum(['HOLD', 'ADD_LONG_GAMMA', 'REDUCE', 'EXIT']),
+  /** sizeBps (uint256) as string. MAX_SIZE_BPS = 10000. */
+  sizeBps: z.string(),
+  /** macroValue (int256) as string. e.g. "568" = CPI 5.68% at scale=2. */
+  macroValue: z.string(),
+  /**
+   * consensus as string. OPERATOR-SUPPLIED POC INPUT — not market consensus.
+   * See consensusNote for the full caveat.
+   */
+  consensus: z.string(),
+  /** Raw surprise int as string: macroValue − consensus (in BigInt space). */
+  surprise: z.string(),
+  /**
+   * Decimal scale of the raw ints (always 2 for CPI in this deployment).
+   * raw / 10^scale = human value. e.g. scale=2 → 568 means 5.68%.
+   */
+  scale: z.number(),
+  /** Human-readable surprise with sign preserved. e.g. "+0.68" or "-3.32". */
+  surpriseFormatted: z.string(),
+  /** ISO timestamp when the decision landed on-chain, or null when pending. */
+  decidedAt: z.string().nullable(),
+  /** true when the decision is not yet fully settled on-chain. */
+  pending: z.boolean(),
+  /** Transaction hash of the HedgeDecisionMade event. */
+  sourceTxHash: z.string(),
+  /**
+   * Honest caveat about the consensus field.
+   * Always: "operator-supplied POC input, not market consensus".
+   */
+  consensusNote: z.string(),
+})
+export type HedgeDecisionItem = z.infer<typeof HedgeDecisionItem>
+
+/**
+ * Wrapping envelope for get_hedge_decisions.
+ * Single ZodObject — required by MCP SDK normalizeObjectSchema.
+ */
+export const HedgeDecisionsEnvelope = z.object({
+  /** "recorded" = snapshot source; "live" = live RPC source (SOMNIA_LIVE flagged). */
+  status: z.enum(['recorded', 'live']),
+  /** Somnia testnet chain ID. */
+  chainId: z.literal(50312),
+  /** Macro data key queried (e.g. "co/inflation-rate"). */
+  dataKey: z.string(),
+  /** All hedge decisions from the MacroHedgeStrategist. */
+  decisions: z.array(HedgeDecisionItem),
+  /**
+   * Contextual note for agent consumers. Must describe POC/testnet status
+   * and operator-supplied consensus — NEVER asserts external consensus validation.
+   */
+  note: z.string(),
+})
+export type HedgeDecisionsEnvelope = z.infer<typeof HedgeDecisionsEnvelope>
+
+/**
+ * Wrapping envelope for get_latest_macro_print.
+ * Single ZodObject — required by MCP SDK normalizeObjectSchema.
+ */
+export const LatestMacroPrintEnvelope = z.object({
+  /** "recorded" = snapshot source; "live" = live RPC source (SOMNIA_LIVE flagged). */
+  status: z.enum(['recorded', 'live']),
+  /** Somnia testnet chain ID. */
+  chainId: z.literal(50312),
+  /** Macro data key queried. */
+  dataKey: z.string(),
+  /** Always "co/inflation-rate" — capacity-utilization is NOT wired (would be fabrication). */
+  dataKeyLabel: z.literal('co/inflation-rate'),
+  /** scaledValue (int256) as string. e.g. "568" = 5.68% at scale=2. */
+  scaledValue: z.string(),
+  /**
+   * Decimal scale of the raw int (always 2 for CPI in this deployment).
+   * raw / 10^scale = human value. e.g. scale=2 → 568 means 5.68%.
+   */
+  scale: z.number(),
+  /** ISO timestamp when the snapshot was captured. */
+  observedAt: z.string().nullable(),
+  /** ISO timestamp when the snapshot was captured (source-of-truth timestamp). */
+  capturedAt: z.string(),
+  /**
+   * Contextual note for agent consumers. Describes POC/testnet status.
+   * NEVER asserts external consensus validation.
+   */
+  note: z.string(),
+})
+export type LatestMacroPrintEnvelope = z.infer<typeof LatestMacroPrintEnvelope>
