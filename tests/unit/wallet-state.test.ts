@@ -5,7 +5,18 @@ import type { WalletState } from '@/lib/wallet/state'
 // WAIVER-05-03: Non-EVM (Solana) is unreachable via EVM connectors — no 5th state built.
 import { describe, expect, it } from 'vitest'
 
+// Wave 2: READ_ONLY added to the union. deriveWalletState NEVER returns it.
+// ALL_STATES is the full union set; the deriver remains a 4-output function.
 const ALL_STATES: WalletState[] = [
+  'DISCONNECTED',
+  'CONNECTING',
+  'CONNECTED_WRONG_CHAIN',
+  'CONNECTED_READY',
+  'READ_ONLY',
+]
+
+// The 4 states that deriveWalletState can actually return (READ_ONLY is injected, not derived)
+const DERIVABLE_STATES: WalletState[] = [
   'DISCONNECTED',
   'CONNECTING',
   'CONNECTED_WRONG_CHAIN',
@@ -40,8 +51,8 @@ describe('deriveWalletState — 4-state derivation', () => {
   })
 })
 
-describe('deriveWalletState — exactly 4 states, no 5th', () => {
-  it('every return value is one of the 4 known literals', () => {
+describe('deriveWalletState — exactly 4 derivable states, no 5th', () => {
+  it('every return value is one of the 4 derivable literals (not READ_ONLY)', () => {
     const inputs: Parameters<typeof deriveWalletState>[0][] = [
       { status: 'connecting', chain: undefined },
       { status: 'reconnecting', chain: undefined },
@@ -53,18 +64,33 @@ describe('deriveWalletState — exactly 4 states, no 5th', () => {
     ]
     for (const input of inputs) {
       const result = deriveWalletState(input)
-      expect(ALL_STATES).toContain(result)
+      expect(DERIVABLE_STATES).toContain(result)
     }
   })
 
-  it('exhaustive: no input combination produces an unlisted state', () => {
+  it('exhaustive: no input combination produces an unlisted derivable state', () => {
     const statuses = ['connecting', 'reconnecting', 'disconnected', 'connected'] as const
     const chains = [undefined, { id: 42220 }, { id: 8453 }]
     for (const status of statuses) {
       for (const chain of chains) {
         const result = deriveWalletState({ status, chain })
-        expect(ALL_STATES, `${status} + chain:${chain?.id} → unexpected "${result}"`).toContain(
-          result,
+        expect(
+          DERIVABLE_STATES,
+          `${status} + chain:${chain?.id} → unexpected "${result}"`,
+        ).toContain(result)
+      }
+    }
+  })
+
+  it('deriveWalletState NEVER returns READ_ONLY for any input', () => {
+    // READ_ONLY is injected by WalletPanel.readOnly — the pure deriver never returns it.
+    const statuses = ['connecting', 'reconnecting', 'disconnected', 'connected'] as const
+    const chains = [undefined, { id: 42220 }, { id: 8453 }, { id: 1 }]
+    for (const status of statuses) {
+      for (const chain of chains) {
+        const result = deriveWalletState({ status, chain })
+        expect(result, `${status} + chain:${chain?.id} should not be READ_ONLY`).not.toBe(
+          'READ_ONLY',
         )
       }
     }

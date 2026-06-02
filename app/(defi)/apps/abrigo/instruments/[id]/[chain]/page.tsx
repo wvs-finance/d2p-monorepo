@@ -76,11 +76,14 @@ export default async function InstrumentDetailPage({
   const displayName = locale.startsWith('es') ? instrument.name : instrument.nameEn
 
   // Build WalletPanel strings (passing translated copy keeps WalletPanel client-simple)
+  // Wave 2: READ_ONLY entry added to statusLabels (Record completeness after union gains READ_ONLY).
+  // t('wallet.status_read_only') key is authored in Wave 3 i18n work; temporary literal until then.
   const statusLabels: Record<WalletStatus, string> = {
     DISCONNECTED: t('wallet.status_disconnected'),
     CONNECTING: t('wallet.status_connecting'),
     CONNECTED_WRONG_CHAIN: t('wallet.status_wrong_chain'),
     CONNECTED_READY: t('wallet.status_connected'),
+    READ_ONLY: 'Solo lectura',
   }
 
   const walletStrings: WalletPanelStrings = {
@@ -93,6 +96,8 @@ export default async function InstrumentDetailPage({
     wrongChainExplanation: t.raw('wallet.wrong_chain_explanation'),
     switchNetworkLabel: t('wallet.switch_network_label'),
     connectedReadyLabel: t('wallet.connected_ready_label'),
+    // readOnlyLabel: Wave 3 adds the i18n key; temporary literal until then.
+    readOnlyLabel: 'sin transacción — fork simulado',
     statusLabels,
   }
 

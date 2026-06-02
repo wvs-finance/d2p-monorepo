@@ -7,6 +7,11 @@
 // CROSS-09: DISCONNECTED prompt uses text-accent-text (WCAG AA small text).
 // DEFI-07: CONNECTED_WRONG_CHAIN → switch CTA via useSwitchChain (celo.id = 42220 primary).
 // WAIVER-05-03: Non-EVM (Solana) unreachable via EVM connectors — no 5th state built.
+//
+// Wave 2: readOnly prop added.
+// When readOnly=true, walletState is forced to 'READ_ONLY' WITHOUT calling deriveWalletState.
+// READ_ONLY renders: WalletStatusPill + readOnlyLabel text. No ConnectButton, no switch CTA.
+// CONNECTED_READY is unreachable in readOnly mode.
 
 import { WalletStatusPill } from '@/components/defi/WalletStatusPill'
 import type { WalletStatus } from '@/components/defi/WalletStatusPill'
@@ -33,19 +38,25 @@ export interface WalletPanelStrings {
   switchNetworkLabel: string
   /** CONNECTED_READY header: "Posición actual" */
   connectedReadyLabel: string
+  /** READ_ONLY copy: "sin transacción — fork simulado" */
+  readOnlyLabel: string
   /** WalletStatusPill status label overrides (locale-aware) */
   statusLabels: Record<WalletStatus, string>
 }
 
 interface WalletPanelProps {
   strings: WalletPanelStrings
+  /** When true, wallet state is forced to READ_ONLY (no connect/switch affordance).
+   *  Used on simulated-instrument pages (fork-only, no deployed contract). */
+  readOnly?: boolean
 }
 
-export function WalletPanel({ strings }: WalletPanelProps) {
+export function WalletPanel({ strings, readOnly }: WalletPanelProps) {
   const { status, chain } = useAccount()
   const { switchChain } = useSwitchChain()
 
-  const walletState = deriveWalletState({ status, chain })
+  // readOnly short-circuits deriveWalletState — READ_ONLY is injected here, never derived.
+  const walletState = readOnly ? ('READ_ONLY' as const) : deriveWalletState({ status, chain })
 
   return (
     // aria-live="polite" + aria-atomic="true" — the WE-OWN SR announcement boundary.
@@ -53,6 +64,10 @@ export function WalletPanel({ strings }: WalletPanelProps) {
     <div aria-live="polite" aria-atomic="true" className="space-y-3">
       {/* Status pill — always shown */}
       <WalletStatusPill status={walletState} label={strings.statusLabels[walletState]} />
+
+      {walletState === 'READ_ONLY' && (
+        <p className="text-sm text-text-muted">{strings.readOnlyLabel}</p>
+      )}
 
       {walletState === 'DISCONNECTED' && (
         <div className="space-y-3">
