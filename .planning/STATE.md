@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: 05.1-04 gap-closure complete — schematic pill mounted, index specs updated, 3-pill gate PASS (23/23 e2e)
-last_updated: "2026-06-02T20:00:00.000Z"
+stopped_at: 05.1-04 Tasks 1+2 complete — checkpoint Task 3 (Evidence Collector gate pending)
+last_updated: "2026-06-02T16:46:51.543Z"
 progress:
   total_phases: 1
   completed_phases: 1
@@ -35,7 +35,7 @@ progress:
 
 **Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
 **Active plan:** 05.1-03 (Wave 3: simulated-branch page layout, full SIMULADO surface)
-**Status:** Plan execution — Wave 2 complete (05.1-02 DONE); starting Wave 3 (05.1-03)
+**Status:** Milestone complete
 
 **Progress:**
 [██████░░░░] 60%
