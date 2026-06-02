@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: "05.1-00 complete (3/3 tasks done, Evidence Collector approved); next: 05.1-01"
-last_updated: "2026-06-02T14:41:08.216Z"
+stopped_at: "05.1-01 complete (3/3 tasks, all 5 consumers narrowed, 55 tests GREEN); next: 05.1-02"
+last_updated: "2026-06-02T14:52:39.889Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-02
-**Session type:** Plan execution (05.1-00 complete — PayoffDiagram BLOCKER fix + Wave-0 RED stubs + Evidence Collector verification)
-**Stopped at:** 05.1-00 complete (3/3 tasks done, Evidence Collector approved); next: 05.1-01
+**Session type:** Plan execution (05.1-01 complete — data layer freeze: cashflow.ts, schematic payoff, discriminated union, all 5 consumers narrowed)
+**Stopped at:** 05.1-01 complete (3/3 tasks, all 5 consumers narrowed, 55 tests GREEN); next: 05.1-02
 
 ---
 
@@ -34,18 +34,18 @@ progress:
 ## Current Position
 
 **Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
-**Active plan:** 05.1-01 (Wave 1: fixture.ts data layer + cashflow arithmetic + honest-empty instruments union migration)
-**Status:** Plan execution — Wave 0 complete (05.1-00 DONE); starting Wave 1 (05.1-01)
+**Active plan:** 05.1-02 (Wave 2: WalletStatusPill hydration fix + simulated-branch components)
+**Status:** Plan execution — Wave 1 complete (05.1-01 DONE); starting Wave 2 (05.1-02)
 
 **Progress:**
-[██░░░░░░░░] 20%
+[████░░░░░░] 40%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
 [██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
 [██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
 [██████████] Phase 5: Read-First Wallet and DeFi Surface — COMPLETE (4/4 plans)
-[█         ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 1/5 plans (05.1-00 complete; 05.1-01 next)
+[██        ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 2/5 plans (05.1-00, 05.1-01 complete; 05.1-02 next)
 
 Overall: 4/5 phases complete (Phase 5 in progress)
 
@@ -86,6 +86,7 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | Phase 05 P02 | 35 | 2 tasks | 4 files |
 | Phase 05 P03 | 35 | 2 tasks | 9 files |
 | Phase 05 P04 | 9 | 2 tasks | 14 files |
+| Phase 05.1 P01 | 6 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -156,6 +157,8 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | es-CO-first instruments copy authored; native sign-off pending (Plan 05-03) | instruments namespace authored in es-CO by developer per project policy; docs/copy-review.md row recorded but native Colombian Spanish reviewer sign-off must complete before v1 launch | Non-blocking for 05-04 execution; required before production deploy |
 | chunk.strike fixture value is OTM offset string "2000" not static absolute tick (Plan 05.1-00) | PanopticDataSeam.fork.t.sol L41: STRIKE_OFFSET=2000; L73: strike=((currentTick+2000)/tickSpacing)*tickSpacing. No static absolute exists — depends on live fork tick. Wave 1 fixture.ts uses value:"2000" with note explaining fork-tick dependency | Wave 1 fixture.ts must carry value:"2000" and the OTM-offset note; never fabricate absolute ticks for fork-dependent values |
 | Wave-0 RED stubs referencing not-yet-created modules excluded from tsconfig (Plan 05.1-00) | Three stub files (fixture.test.ts, cashflow.test.ts, provenance-badge.test.tsx) import Wave-1/2 modules that don't exist yet; exclusion lets tsc --noEmit pass pre-commit gate. Pattern: structured-data.test.tsx | All future Wave-0 RED stubs importing not-yet-created modules must be excluded from tsconfig until the module is created |
+| Type predicate required in aggregator filter for LiveInstrument narrowing (Plan 05.1-01) | Array.filter with a plain callback (i) => i.kind === 'live' does NOT narrow AbrigoInstrument[] to LiveInstrument[]; TypeScript requires a type predicate (i): i is LiveInstrument | All future discriminated-union filters that must produce a narrowed array type must use a type predicate |
+| Tasks 2+3 of 05.1-01 committed atomically — pre-commit tsc gate blocks mid-state (Plan 05.1-01) | Pre-commit lefthook runs tsc --noEmit; with the union in instruments.ts but consumers un-narrowed, tsc exits 2 and blocks the commit. Union + all 5 consumer narrowings must land in one atomic commit | When migrating a flat interface to a discriminated union, narrow all consumers in the same commit as the union definition |
 | WalletStatusPill hydration mismatch (React #418) deferred to Wave 2 (Plan 05.1-00) | SSR renders DISCONNECTED, client briefly renders CONNECTING during wagmi auto-reconnect before settling. Present since 05-04; not introduced by 05.1-00. User approved proceeding (2026-06-02). Fix: useMounted() gate or suppressHydrationWarning on pill root. Already in Wave 2 scope (05.1-02 rewrites WalletStatusPill.tsx, lib/wallet/state.ts, WalletPanel.tsx) | Wave 2 executor (05.1-02) must add a mounted guard to WalletStatusPill before turning wallet-read-only.test.tsx GREEN |
 | Curve stroke weight bump deferred to Wave 2 (Plan 05.1-00) | 2px ochre curve passes WCAG 1.4.11 (6.11:1) but is perceptually thin in screenshots. Not a spec violation. Wave 2 reviewer may bump to 2.5–3px if designer flags prominence | Wave 2 may increase stroke weight if perceptual review requires it |
 
