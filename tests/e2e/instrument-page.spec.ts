@@ -277,12 +277,12 @@ test.describe('CROSS-09 — three provenance tiers render as pills (gate)', () =
     await page.goto(SIMULATED_ROUTE)
     await page.waitForLoadState('networkidle')
 
-    // spec tier pill — visible text is 'Especificación' (es-CO) or 'Specification' (en).
-    // Use aria-label presence to confirm it's a ProvenancePill, not freestanding text.
-    // The spec_aria key: "Especificado en planes Phase-8 de abrigo-somnia — aún no está en cadena"
+    // ProvenancePill renders visible text as the tier key itself (e.g. "spec"),
+    // not the translated label. The span also carries aria-label with the full
+    // provenance sentence (spec_aria: "Especificado en planes Phase-8 de abrigo-somnia…").
     const specPill = page
       .locator('span[aria-label]')
-      .filter({ hasText: /especificac|specification/i })
+      .filter({ hasText: /^spec$/i })
       .first()
     await expect(specPill).toBeVisible()
   })
