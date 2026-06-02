@@ -73,13 +73,24 @@ export function WalletPanel({ strings, readOnly, lang = 'es-CO' }: WalletPanelPr
   // DEFI-06: ref to the scoped status node for connect-success focus handling.
   // Uses HTMLOutputElement — <output> has implicit role="status" + aria-live="polite".
   const statusNodeRef = useRef<HTMLOutputElement>(null)
+  // Track the previous walletState so we only move focus on a genuine TRANSITION out of the
+  // connect flow — never on initial mount (which for a readOnly/already-connected page would
+  // wrongly focus + scroll the panel into view, breaking the DEFI-05 above-the-fold invariant).
+  const prevStateRef = useRef(walletState)
 
-  // DEFI-06 connect-success focus: when walletState leaves DISCONNECTED/CONNECTING the
-  // ConnectButton trigger unmounts and focus would fall to <body>. Move it to the status
-  // node instead. The in-modal trap is RainbowKit's own — do NOT add a second one.
+  // DEFI-06 connect-success focus: ONLY when walletState transitions FROM DISCONNECTED/CONNECTING
+  // (the ConnectButton trigger just unmounted and focus would fall to <body>) → move it to the
+  // status node, WITHOUT scrolling the viewport (preventScroll). Not on mount; not for readOnly.
+  // The in-modal trap is RainbowKit's own — do NOT add a second one.
   useEffect(() => {
-    if (walletState !== 'DISCONNECTED' && walletState !== 'CONNECTING') {
-      statusNodeRef.current?.focus()
+    const prev = prevStateRef.current
+    prevStateRef.current = walletState
+    const leftConnectFlow =
+      (prev === 'DISCONNECTED' || prev === 'CONNECTING') &&
+      walletState !== 'DISCONNECTED' &&
+      walletState !== 'CONNECTING'
+    if (leftConnectFlow) {
+      statusNodeRef.current?.focus({ preventScroll: true })
     }
   }, [walletState])
 

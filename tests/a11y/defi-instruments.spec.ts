@@ -105,10 +105,11 @@ test.describe('DEFI-06 — axe WCAG 2.2 AA on simulated instrument detail (es-CO
     // Each ProvenancePill renders:
     //   <span aria-label="..."> <Icon aria-hidden="true"> <span>{tier}</span> </span>
     // The outer span must carry an aria-label (not rely on color alone).
-    // The tier text ('fork-fixture', 'spec', 'schematic') must be visible.
+    // The pill VISIBLE text is the LOCALE-AWARE label (es-CO route here), NOT the raw tier key:
+    // fork-fixture → "Fork fixture", spec → "Especificación", schematic → "Esquemático".
 
     // fork-fixture pill — appears in SnapshotPoolPanel + InstrumentParams
-    const forkFixturePills = page.locator('span[aria-label]').filter({ hasText: 'fork-fixture' })
+    const forkFixturePills = page.locator('span[aria-label]').filter({ hasText: 'Fork fixture' })
     const forkFixtureCount = await forkFixturePills.count()
     expect(forkFixtureCount).toBeGreaterThan(0)
 
@@ -118,8 +119,8 @@ test.describe('DEFI-06 — axe WCAG 2.2 AA on simulated instrument detail (es-CO
       expect(ariaLabel).toBeTruthy()
     }
 
-    // spec pill — appears in CashFlowWaterfall header
-    const specPills = page.locator('span[aria-label]').filter({ hasText: 'spec' })
+    // spec pill — appears in CashFlowWaterfall header (es-CO label "Especificación")
+    const specPills = page.locator('span[aria-label]').filter({ hasText: 'Especificación' })
     const specCount = await specPills.count()
     expect(specCount).toBeGreaterThan(0)
     for (let i = 0; i < specCount; i++) {
