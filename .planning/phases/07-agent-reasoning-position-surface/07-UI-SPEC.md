@@ -201,7 +201,7 @@ es-CO authored first (CROSS-10); `en` is an author-quality companion. Lives in t
 | Primary CTA (master→detail) | "Ver la traza de decisión" | "View decision trace" |
 | Trace stage 2 caption | "Reconstruido de forma determinista a partir del dato real + consenso provisto por el operador" | "Reconstructed deterministically from actual + operator-supplied consensus" |
 | SYSTEM_PROMPT trigger | "Ver prompt del sistema" | "View system prompt" |
-| Illustrative-position caption | "Ilustrativo — no es una posición ejecutada" | "Illustrative — not an executed position" |
+| Illustrative-position caption | "Ilustrativo — no es una posición real en cadena" | "Illustrative — not a real on-chain position" |
 | Position panel heading | "Posición (LongGammaWrapper)" | "Position (LongGammaWrapper)" |
 | **Empty state heading** (position panel) | "Sin posición en cadena" | "No on-chain position" |
 | **Empty state body** (next step) | "El contrato está verificado en fork pero no desplegado. Cuando se despliegue, esta vista mostrará la posición real." | "The contract is fork-verified but not deployed. Once deployed, this view will show the real position." |
