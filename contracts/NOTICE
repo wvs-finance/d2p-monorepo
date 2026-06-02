@@ -1,0 +1,49 @@
+NOTICE — Borrowed Panoptic V2 core (BUSL-1.1 provenance)
+========================================================
+
+This repository (abrigo-somnia) borrows audited Panoptic V2 core Solidity files
+into `contracts/panoptic-borrowed/` for a NON-PRODUCTION hackathon demo / Base-fork /
+testnet exercise only. The borrowed files retain their original licence headers; this
+NOTICE records their provenance and the terms under which they are used.
+
+Borrowed source
+---------------
+- Source repository : github.com/code-423n4/2025-12-panoptic
+- Commit (frozen)   : fe557748210a529ae414d7c487b6514be0d9e220
+                      (Code4rena "Panoptic: Next Core" audit snapshot, frozen 2025-12-23)
+- Canonical mirror  : github.com/panoptic-labs/panoptic-v2-core
+- Mirror commit     : d20b0aed127ab5d3e5ca17c5399782aad2f0ff4c (main)
+
+Licence
+-------
+- Licence           : BUSL-1.1 (Business Source License 1.1)
+- Licensor          : Axicon Labs Limited
+- Change Date       : the earlier of 2027-09-07 or the date published at
+                      v1-license-date.panoptic.eth
+- Change License    : GPL v2.0-or-later
+- Additional Use Grant : published at v1-license-grants.panoptic.eth
+
+Scope of use (BUSL-permitted mode)
+----------------------------------
+The borrowed Panoptic V2 files under `contracts/panoptic-borrowed/` are used in a
+NON-PRODUCTION fork/demo context only — the use mode permitted under BUSL-1.1 prior
+to the Change Date. They are NOT deployed to a production network for commercial use.
+Every borrowed file retains its original `// SPDX-License-Identifier: BUSL-1.1`
+header. This repository's own wrapper/interface code (`src/instrument/**` and the
+existing `src/**` Somnia code) is separately licensed (MIT) and is NOT part of the
+borrowed BUSL-1.1 surface.
+
+Byte-preservation guard (for Plan 02's import rewrite)
+------------------------------------------------------
+When Plan 02 ports the borrowed files and rewrites their import paths to this repo's
+remapping aliases, the licence-header and SPDX lines MUST remain byte-identical to the
+upstream source. Any in-place rewrite (e.g. sed) MUST anchor ONLY on `^import .*from "`
+lines (the curly-brace import form Panoptic V2 uses) and MUST NEVER touch `//` comment
+or `// SPDX-License-Identifier:` lines. This keeps each borrowed file's provenance and
+licence attribution intact and byte-identical to the frozen audit snapshot.
+
+Single-compile note (intentional, not a gap)
+---------------------------------------------
+FORK-01's roadmap wording references a multi-version solc matrix; 07-RESEARCH §5
+retired it — Panoptic V2 is `^0.8.24` for every file, so this repo uses a single
+`evm_version="cancun"` / `solc 0.8.24` compile profile. This is intentional, not a gap.

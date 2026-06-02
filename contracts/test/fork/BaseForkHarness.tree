@@ -1,0 +1,7 @@
+BaseForkHarness
+├── given a pinned Base mainnet fork block via the Solidity constant BASE_FORK_BLOCK
+│   ├── it should select the fork via vm.createSelectFork rpcUrl base BASE_FORK_BLOCK.
+│   └── it should observe chainid == 8453.
+└── given the live UniV4 PoolManager at 0x498581
+    ├── it should have nonzero code at the PoolManager address proving the contract exists on the fork.
+    └── it should read state through V4StateReader StateLibrary without reverting proving cancun transient storage executes.
