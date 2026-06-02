@@ -219,6 +219,7 @@ export default async function InstrumentDetailPage({
                 <ProvenancePill
                   tier="schematic"
                   fieldName="payoffDiagram"
+                  label={schematicPillStrings.label}
                   ariaLabel={schematicPillStrings.aria}
                 />
               </div>

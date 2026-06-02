@@ -178,8 +178,9 @@ test.describe('DEFI-08 — SnapshotPoolPanel fork-fixture data', () => {
     await page.goto(SIMULATED_ROUTE)
     await page.waitForLoadState('networkidle')
 
-    // ProvenancePill renders a span with the tier name 'fork-fixture' as visible text
-    const forkFixturePill = page.locator('span', { hasText: 'fork-fixture' }).first()
+    // ProvenancePill renders the LOCALE-AWARE label as visible text (es-CO/en: "Fork fixture"),
+    // NOT the raw tier key "fork-fixture". The full provenance sentence is in aria-label.
+    const forkFixturePill = page.locator('span', { hasText: 'Fork fixture' }).first()
     await expect(forkFixturePill).toBeVisible()
   })
 })
@@ -264,11 +265,10 @@ test.describe('CROSS-09 — three provenance tiers render as pills (gate)', () =
     await page.waitForLoadState('networkidle')
 
     // ProvenancePill renders a span with aria-label (the full provenance sentence)
-    // and visible tier text. fork-fixture pill has aria-label containing 'fork-fixture_aria' text.
-    // Use the visible tier text 'fork-fixture' as the anchor.
+    // and the LOCALE-AWARE visible label "Fork fixture" (es-CO/en), NOT the raw key.
     const forkFixturePill = page
       .locator('span[aria-label]')
-      .filter({ hasText: 'fork-fixture' })
+      .filter({ hasText: 'Fork fixture' })
       .first()
     await expect(forkFixturePill).toBeVisible()
   })
@@ -277,12 +277,12 @@ test.describe('CROSS-09 — three provenance tiers render as pills (gate)', () =
     await page.goto(SIMULATED_ROUTE)
     await page.waitForLoadState('networkidle')
 
-    // ProvenancePill renders visible text as the tier key itself (e.g. "spec"),
-    // not the translated label. The span also carries aria-label with the full
-    // provenance sentence (spec_aria: "Especificado en planes Phase-8 de abrigo-somnia…").
+    // ProvenancePill renders the LOCALE-AWARE label as visible text — es-CO "Especificación"
+    // / en "Specification" — NOT the raw tier key "spec". The span also carries the full
+    // provenance sentence (spec_aria: "Especificado en planes Phase-8 de abrigo-somnia…") in aria-label.
     const specPill = page
       .locator('span[aria-label]')
-      .filter({ hasText: /^spec$/i })
+      .filter({ hasText: /especificación|specification/i })
       .first()
     await expect(specPill).toBeVisible()
   })

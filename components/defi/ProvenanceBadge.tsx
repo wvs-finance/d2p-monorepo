@@ -49,23 +49,25 @@ interface ProvenancePillProps {
   tier: ProvenanceTier
   /** The data field this pill is attached to (used by callers for semantics) */
   fieldName: string
+  /** Locale-aware visible label (e.g. es-CO "Especificación", en "Specification"). */
+  label: string
   /** Full provenance sentence for screen readers: "Fuente: fork-fixture — …" */
   ariaLabel: string
 }
 
-export function ProvenancePill({ tier, ariaLabel }: ProvenancePillProps) {
+export function ProvenancePill({ tier, label, ariaLabel }: ProvenancePillProps) {
   const { Icon, className } = TIER_CONFIG[tier]
 
   // Reuse the EXACT WalletStatusPill shell string (CROSS-09 invariant).
   // The <span> wrapper carries aria-label (the full provenance sentence);
-  // visible text is the tier name.
+  // visible text is the LOCALE-AWARE label (NOT the raw tier key — es-CO first).
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-normal ring-1 ring-inset ${className}`}
       aria-label={ariaLabel}
     >
       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-      <span>{tier}</span>
+      <span>{label}</span>
     </span>
   )
 }

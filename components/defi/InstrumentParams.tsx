@@ -129,6 +129,7 @@ export function InstrumentParams({
       <ProvenancePill
         tier="fork-fixture"
         fieldName={fieldName}
+        label={pillStrings.fork_fixture}
         ariaLabel={pillStrings.fork_fixture_aria}
       />
     ) : null

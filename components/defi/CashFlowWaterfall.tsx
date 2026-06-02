@@ -46,7 +46,12 @@ export function CashFlowWaterfall({
     <section>
       {/* Section header with single spec-tier ProvenancePill */}
       <div className="flex items-center gap-2 mb-3">
-        <ProvenancePill tier="spec" fieldName="cashflow" ariaLabel={specPillStrings.aria} />
+        <ProvenancePill
+          tier="spec"
+          fieldName="cashflow"
+          label={specPillStrings.label}
+          ariaLabel={specPillStrings.aria}
+        />
       </div>
 
       <dl className="divide-y divide-border-default">
