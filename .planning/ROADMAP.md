@@ -16,6 +16,8 @@
 - [ ] **Phase 4: Agent Surface (MCP)** — Exposes all protocol and research state to AI agents via MCP tools, OpenAPI spec, and JSON-LD structured data
 - [ ] **Phase 5: Read-First Wallet and DeFi Surface** — Adds RainbowKit wallet connection and per-instrument read-only views with payoff diagrams and risk disclosures
 - [x] **Phase 05.1: abrigo-somnia convex instrument frontend surface** *(INSERTED)* — Read-first SIMULATED cCOP/USD long-gamma instrument surface; three-tier provenance, SIMULADO badge, read-only wallet, no fabricated numbers (completed 2026-06-02)
+- [x] **Phase 05.2: DEFI-06 wallet connect-modal accessibility** *(INSERTED)* — scoped role=status live region, focus restoration (incl. connect-success), durable e2e; real-SR speech deferred to manual pass (completed 2026-06-02)
+- [ ] **Phase 6: Somnia agent surface (MacroHedgeStrategist)** — Module 2: surface the live Somnia-testnet hedge-decision agent — live CPI panel + decision feed + agent-first MCP tools + surprise→decision→instrument bridge; testnet-agent provenance tier; reads an already-deployed contract (no new deploy)
 
 ---
 
@@ -267,6 +269,18 @@ Plans:
 - [x] 05.1-03-PLAN.md — Wave 3: detail-page simulated branch (before aggregator) + es-CO/en i18n keys + GitBook page + copy-review sign-off (DEFI-08, DEFI-03, DEFI-05, DEFI-09, CROSS-10, CROSS-09, AGENT-10) [wave 3]
 - [x] 05.1-04-PLAN.md — Wave 4: real e2e/a11y on the simulated route + full suite green + Evidence Collector live-DOM gate (DEFI-08, DEFI-03, DEFI-05, DEFI-02, CROSS-01, CROSS-09) [wave 4]
 
+### Phase 6: Somnia agent surface (MacroHedgeStrategist) — Module 2
+
+**Goal:** A visitor or agent can see the live Somnia-testnet macro-hedge agent in the d2p frontend — the latest CPI macro print, the stream of consensus(operator-supplied)→surprise→action hedge decisions, a bridge tying a decision to the module-1 cCOP/USD instrument, and agent-first MCP tools — all under a `testnet-agent` provenance tier, reading an ALREADY-DEPLOYED contract (no new deploy), with no fabricated data.
+
+**Requirements**: TBD at planning (new AGENT-/SOMNIA-class IDs likely; reuses CROSS-01/09/10).
+**Depends on:** Phase 5.1 (module-1 instrument, for the component-B bridge); abrigo-somnia Phase-11 (deployed MacroHedgeStrategist — DONE).
+**Canonical spec:** `docs/superpowers/specs/2026-06-02-somnia-agent-surface-phase6-design.md` (passed 2-way review)
+**Plans:** ~5 (Wave 0 data layer → D/A/C reader-parallel → B bridge). TBD at planning.
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down — 4 components: D live CPI panel, A decision feed, C MCP tools, B instrument bridge, on a Wave-0 data layer)
+
 ---
 *Roadmap created: 2026-05-11*
-*Last updated: 2026-06-02 — Phase 05.1 complete; roadmap recovered from gsd-tools truncation (see note)*
+*Last updated: 2026-06-02 — Phase 6 (Somnia agent surface) added; phases 5/5.1/5.2 merged (PR #4)*
