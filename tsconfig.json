@@ -33,14 +33,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    ".velite",
-    ".next",
-    "tests/unit/structured-data.test.tsx",
-    "tests/unit/somnia-prompt-trace.test.ts",
-    "tests/unit/wrapper-adapter.test.ts",
-    "tests/unit/somnia-liveness.test.ts",
-    "tests/unit/somnia-decision-trace-reader.test.ts"
-  ]
+  "exclude": ["node_modules", ".velite", ".next", "tests/unit/structured-data.test.tsx"]
 }

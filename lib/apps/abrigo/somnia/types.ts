@@ -80,3 +80,50 @@ export type SnapshotProvenance = {
   capturedAt: Date
   chainId: 50312
 }
+
+/**
+ * FULL-FIDELITY decision trace view — ADDITIVE shape for the per-decision detail route.
+ * Does NOT change HedgeDecisionView (existing consumers are unaffected).
+ *
+ * legSizeRequestId = the route key / snapshot decisionId (= the SIZE-leg requestId).
+ * legActionRequestId = DERIVED as uint256(decisionId topic) — always real, never invented.
+ * legActionTimestamp = null when the action-leg log falls outside the 1000-block getLogs window
+ *   (renders as em-dash — honest fallback). NEVER fabricated.
+ */
+export type DecisionTraceView = {
+  /** The route key — same as the snapshot decisionId (= SIZE-leg requestId). */
+  requestId: string
+  /** Human-readable action label. */
+  action: HedgeActionLabel
+  /** sizeBps as bigint. */
+  sizeBps: bigint
+  /** macroValue as bigint. */
+  macroValue: bigint
+  /** consensus as bigint (operator-supplied). */
+  consensus: bigint
+  /** Macro surprise: macroValue - consensus (BigInt). */
+  surprise: bigint
+  /** Deterministic built prompt reconstructed from actual+consensus (_buildPrompt). */
+  builtPrompt: string
+  /** SIZE-leg requestId string (= requestId / route key). */
+  legSizeRequestId: string
+  /**
+   * ACTION-leg requestId — DERIVED as uint256(decisionId topic). Always real; never invented.
+   * Available even when the action-leg log is outside the getLogs window.
+   */
+  legActionRequestId: string
+  /** bytes32 decisionId topic string (padding preserved). */
+  decisionId: string
+  /** Block timestamp of the SIZE-leg HedgeDecisionRequested event. */
+  legSizeTimestamp: Date
+  /**
+   * Block timestamp of the ACTION-leg HedgeDecisionRequested event.
+   * null when the action-leg log falls outside the bounded 1000-block getLogs window.
+   * Render as em-dash — NEVER fabricate a timestamp.
+   */
+  legActionTimestamp: Date | null
+  /** Transaction hash of the HedgeDecisionMade event. */
+  sourceTxHash: string
+  /** When the decision settled. null when pending. */
+  decidedAt: Date | null
+}
