@@ -440,3 +440,53 @@ jmsbpp, 2026-06-02), en second. No machine translation.
 - [ ] M6: no "ejecutad"/"realizad"/"executed"/"realized" in any bridge key (automated: `grep -ic "ejecutad|realizad|executed|realized" messages/{es-CO,en}/somnia.json` returns 0)
 - [ ] Anti-marketing-slop grep passes on all `somnia.bridge.*` keys
 - [ ] i18n key parity: es-CO ↔ en symmetric across all bridge keys
+
+---
+
+## Phase 07-01 review (somnia.trace namespace — DecisionPipelineTrace copy)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — `somnia.trace.*` keys
+added for the DecisionPipelineTrace component (Plan 07-01). Authored es-CO FIRST (Juan Serrano /
+jmsbpp, 2026-06-02), en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `somnia.trace.title` — detail-route heading
+- `somnia.trace.stage1` through `somnia.trace.stage6` — 6 stage labels
+- `somnia.trace.stage2Caption` — deterministic reconstruction caveat
+- `somnia.trace.systemPromptTrigger` — disclosure trigger label
+- `somnia.trace.illustrativeCaption` — M6 honesty marker (BLOCKER-2 reworded)
+- `somnia.trace.legLabelHeading` — leg dt heading (value "Action"/"Size" is on-chain literal, not localized)
+- `somnia.trace.modelIdLabel` / `somnia.trace.requestIdLabel` / `somnia.trace.timestampLabel` — data row labels
+- `somnia.trace.provenanceLabel` / `somnia.trace.provenanceAriaLabel` — testnet-agent pill copy
+- `somnia.trace.emptyState` — em-dash for null fields
+- NOTE: `somnia.trace.consensusCaveat` is intentionally ABSENT — REUSES `somnia.feed.consensusCaveat` (MAJOR-9)
+
+**es-CO authoring notes (Plan 07-01 author: Juan Serrano / jmsbpp):**
+- "Traza de la decisión" — "traza" is established software/analytics vocabulary for trace in es-CO; not "rastro" (too informal) or "pista" (ambiguous).
+- "Impresión macro" — reused from somnia.feed; "impresión" for macro data print is established es-CO finance vocabulary.
+- "Prompt construido (determinista)" — "construido" for built; "(determinista)" parenthetical clarifies the reconstruction is deterministic, not inferred.
+- "Reconstruido de forma determinista a partir del dato real + consenso provisto por el operador" — precise technical sentence; "dato real" for actual (on-chain data); "provisto" for supplied; no marketing tone.
+- "Decisión de acción / Decisión de tamaño" — "acción" and "tamaño" mirror the on-chain enum concepts; "Qwen3-30B, temp 0" retained as model identifiers (not translated).
+- "Ver prompt del sistema" — "Ver" (imperative, not "Visualizar" which is corporate); "prompt del sistema" retains "prompt" as the established DeFi/AI term in es-CO (widely used untranslated).
+- "Ilustrativo — no es una posición real en cadena" — BLOCKER-2 reword: "no es una posición real en cadena" (not "ejecutada" which implies executed); "en cadena" is established Colombian DeFi vocabulary.
+- "Pierna" — established options/DeFi term for leg in es-CO finance; not "segmento" or "tramo".
+- "ID del modelo" / "ID de solicitud" / "Marca de tiempo" — standard technical labels; "marca de tiempo" is the established es-CO term for timestamp.
+- "Somnia testnet · decisión de agente (POC) · registrada" — "registrada" for recorded; feminine agreement with "decisión".
+- Compliance: no "ejecutad"/"realizad"/"executed"/"realized" in any key (BLOCKER-2). No "consensus-verified" (M4). No "observ" (B3). No "razonamiento"/"pensamiento" (MINOR-14).
+- Copy register: informational, laconic, finance/DeFi-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` (somnia.trace additions) | _pending native review_ | | |
+| `messages/en/somnia.json` (somnia.trace additions) | _pending native review_ | | |
+
+### Phase 07-01 somnia.trace Sign-off
+
+- [ ] es-CO trace copy reviewed by native Colombian Spanish speaker
+- [ ] BLOCKER-2: "no es una posición real en cadena" (NOT "ejecutada"/"executed") confirmed
+- [ ] MAJOR-9: `somnia.trace.consensusCaveat` key is ABSENT from both locale files (REUSES feed.consensusCaveat)
+- [ ] Finance/AI terminology ("traza", "pierna", "prompt del sistema", "determinista") reviewed against Colombian DeFi/finance conventions
+- [ ] M4: no "consensus-verified" in any trace key
+- [ ] M6: no "ejecutad"/"realizad"/"executed"/"realized" in any trace key
+- [ ] Anti-marketing-slop grep passes on all `somnia.trace.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric across all trace keys (17 keys in both locales)

@@ -32,6 +32,25 @@
       "provenanceLabel": "Somnia testnet · agente (POC)",
       "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada"
     },
+    "trace": {
+      "title": "Traza de la decisión",
+      "stage1": "Impresión macro",
+      "stage2": "Prompt construido (determinista)",
+      "stage2Caption": "Reconstruido de forma determinista a partir del dato real + consenso provisto por el operador",
+      "stage3": "Decisión de acción (Qwen3-30B, temp 0)",
+      "stage4": "Decisión de tamaño (Qwen3-30B, temp 0)",
+      "stage5": "Decisión",
+      "stage6": "Posición ilustrativa",
+      "systemPromptTrigger": "Ver prompt del sistema",
+      "illustrativeCaption": "Ilustrativo — no es una posición real en cadena",
+      "legLabelHeading": "Pierna",
+      "modelIdLabel": "ID del modelo",
+      "requestIdLabel": "ID de solicitud",
+      "timestampLabel": "Marca de tiempo",
+      "provenanceLabel": "Somnia testnet · agente (POC)",
+      "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada",
+      "emptyState": "—"
+    },
     "bridge": {
       "heading": "De la sorpresa macro a la posición",
       "macroLabel": "Impresión macro",

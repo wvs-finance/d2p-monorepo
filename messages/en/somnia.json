@@ -32,6 +32,25 @@
       "provenanceLabel": "Somnia testnet · agent (POC)",
       "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded"
     },
+    "trace": {
+      "title": "Decision trace",
+      "stage1": "Macro print",
+      "stage2": "Built prompt (deterministic)",
+      "stage2Caption": "Reconstructed deterministically from actual + operator-supplied consensus",
+      "stage3": "Action leg (Qwen3-30B, temp 0)",
+      "stage4": "Size leg (Qwen3-30B, temp 0)",
+      "stage5": "Decision",
+      "stage6": "Illustrative position",
+      "systemPromptTrigger": "View system prompt",
+      "illustrativeCaption": "Illustrative — not a real on-chain position",
+      "legLabelHeading": "Leg",
+      "modelIdLabel": "Model id",
+      "requestIdLabel": "Request id",
+      "timestampLabel": "Timestamp",
+      "provenanceLabel": "Somnia testnet · agent (POC)",
+      "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded",
+      "emptyState": "—"
+    },
     "bridge": {
       "heading": "From macro surprise to position",
       "macroLabel": "Macro print",
