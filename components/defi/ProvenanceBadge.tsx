@@ -7,14 +7,14 @@
 //   spec         → text-status-in-progress ring-status-in-progress bg-status-in-progress/10
 //   schematic    → text-text-muted ring-border-default bg-bg-surface
 
-import { Database, FileText, FlaskConical, PenLine } from 'lucide-react'
+import { Archive, Database, FileText, FlaskConical, PenLine, Radio } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // ProvenanceTier union
 // ---------------------------------------------------------------------------
 
-export type ProvenanceTier = 'fork-fixture' | 'spec' | 'schematic'
+export type ProvenanceTier = 'fork-fixture' | 'spec' | 'schematic' | 'testnet-agent'
 
 // ---------------------------------------------------------------------------
 // Internal config map — matches the WalletStatusPill pattern
@@ -39,6 +39,13 @@ const TIER_CONFIG: Record<ProvenanceTier, ProvenanceConfig> = {
     Icon: PenLine,
     className: 'text-text-muted ring-border-default bg-bg-surface',
   },
+  // testnet-agent: NEUTRAL token (same as schematic) — NEVER green/emerald/status-pass.
+  // CROSS-09: color + icon + text + aria-label; live/recorded sub-state encoded in icon, NOT color.
+  // Provenance copy: "Somnia testnet · agent decision (POC) · consensus = operator-supplied"
+  'testnet-agent': {
+    Icon: Archive, // default icon; overridden per subState in ProvenancePill
+    className: 'text-text-muted ring-border-default bg-bg-surface',
+  },
 }
 
 // ---------------------------------------------------------------------------
@@ -53,10 +60,23 @@ interface ProvenancePillProps {
   label: string
   /** Full provenance sentence for screen readers: "Fuente: fork-fixture — …" */
   ariaLabel: string
+  /**
+   * Sub-state for 'testnet-agent' tier only. Swaps the icon (Radio for live, Archive for recorded)
+   * WITHOUT changing the color className. CROSS-09: color never encodes live/recorded alone.
+   * Optional/additive — existing callers are unaffected.
+   */
+  subState?: 'live' | 'recorded' | undefined
 }
 
-export function ProvenancePill({ tier, label, ariaLabel }: ProvenancePillProps) {
-  const { Icon, className } = TIER_CONFIG[tier]
+export function ProvenancePill({ tier, label, ariaLabel, subState }: ProvenancePillProps) {
+  const { className } = TIER_CONFIG[tier]
+
+  // For testnet-agent, icon is determined by subState (Radio=live, Archive=recorded/default).
+  // For all other tiers, use the tier's default icon.
+  let Icon: LucideIcon = TIER_CONFIG[tier].Icon
+  if (tier === 'testnet-agent') {
+    Icon = subState === 'live' ? Radio : Archive
+  }
 
   // Reuse the EXACT WalletStatusPill shell string (CROSS-09 invariant).
   // The <span> wrapper carries aria-label (the full provenance sentence);
