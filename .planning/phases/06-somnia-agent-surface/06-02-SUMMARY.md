@@ -162,5 +162,26 @@ None — no external service configuration required.
 
 ---
 
+---
+
+## Self-Check: PASSED
+
+**Files verified:**
+- components/defi/somnia/HedgeDecisionCard.tsx: FOUND
+- components/defi/somnia/HedgeDecisionFeed.tsx: FOUND
+- tests/e2e/somnia-decision-feed.spec.ts: FOUND
+- .planning/phases/06-somnia-agent-surface/06-02-SUMMARY.md: FOUND
+
+**Commits verified:**
+- 0e48ca4 (Task 1 — HedgeDecisionCard + HedgeDecisionFeed + RED→GREEN): FOUND
+- c087361 (Task 2 — agent page mount + es-CO copy + e2e): FOUND
+- 1390a98 (docs — SUMMARY.md + STATE.md): FOUND
+
+**Test results:**
+- somnia-decision-feed unit: 11/11 PASS
+- pnpm tsc --noEmit: PASS
+- pnpm biome check components/defi/somnia/: PASS
+- next build emits /apps/abrigo/agent: PASS
+
 *Phase: 06-somnia-agent-surface*
 *Completed: 2026-06-02*
