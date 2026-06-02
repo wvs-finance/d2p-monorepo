@@ -38,8 +38,6 @@
     ".velite",
     ".next",
     "tests/unit/structured-data.test.tsx",
-    "tests/unit/fixture.test.ts",
-    "tests/unit/cashflow.test.ts",
     "tests/unit/provenance-badge.test.tsx"
   ]
 }
