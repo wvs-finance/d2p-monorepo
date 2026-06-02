@@ -38,7 +38,6 @@
     ".velite",
     ".next",
     "tests/unit/structured-data.test.tsx",
-    "tests/unit/somnia-macro-panel.test.tsx",
     "tests/unit/somnia-decision-feed.test.tsx",
     "tests/unit/somnia-mcp-tools.test.ts",
     "tests/unit/somnia-bridge.test.tsx"
