@@ -15,6 +15,7 @@
 - [ ] **Phase 3.1: Research Reading Surface** *(INSERTED)* — Paper-grade `/research`: track filter + locale-aware math reading pages (build-time KaTeX) + arXiv/PDF paper-bridge
 - [ ] **Phase 4: Agent Surface (MCP)** — Exposes all protocol and research state to AI agents via MCP tools, OpenAPI spec, and JSON-LD structured data
 - [ ] **Phase 5: Read-First Wallet and DeFi Surface** — Adds RainbowKit wallet connection and per-instrument read-only views with payoff diagrams and risk disclosures
+- [x] **Phase 05.1: abrigo-somnia convex instrument frontend surface** *(INSERTED)* — Read-first SIMULATED cCOP/USD long-gamma instrument surface; three-tier provenance, SIMULADO badge, read-only wallet, no fabricated numbers (completed 2026-06-02)
 
 ---
 
@@ -165,7 +166,13 @@ Plans:
   3. A connected wallet user on the wrong chain (e.g., Polygon) sees a chain-switch call-to-action distinct from a user on an entirely unsupported chain (e.g., Solana) who sees an explanatory message — the two states are never conflated.
   4. Every instrument page explicitly labels the instrument as "hedging product, not leverage" in both `es-CO` and `en`, and this risk disclosure is present without scrolling on any viewport from 360px wide upward.
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Foundation: install recharts@3.8.1, extend AbrigoInstrument with strike/slope, payoff + wallet-state pure libs, Wave 0 tests + bundle-isolation arch test (DEFI-02, DEFI-04, DEFI-07) [wave 1]
+- [ ] 05-02-PLAN.md — Provider activation: getDefaultConfig migration + WalletConnect connectors + ochre HEX RainbowKit theme + (defi)/providers.tsx swap + live modal checkpoint (DEFI-01) [wave 2]
+- [ ] 05-03-PLAN.md — Instruments index (honest empty) + RiskCallout + InstrumentParams + es-CO-first i18n + index e2e/axe + live verify (DEFI-03, DEFI-05) [wave 2]
+- [ ] 05-04-PLAN.md — Per-instrument detail: WalletPanel 4-state + WalletStatusPill + recharts PayoffDiagram island + PoolStatePanel + detail page + wallet/instrument e2e + live verify (DEFI-02, DEFI-03, DEFI-04, DEFI-05, DEFI-06, DEFI-07) [wave 3]
 
 ---
 
@@ -177,7 +184,7 @@ Plans:
 | 2. Research Lab Presence and Iteration Catalog | 5/8 | In Progress|  |
 | 3. Data Layer and On-Chain Dashboard | 3/3 | Complete   | 2026-05-29 |
 | 4. Agent Surface (MCP) | 0/? | Not started | - |
-| 5. Read-First Wallet and DeFi Surface | 0/? | Not started | - |
+| 5. Read-First Wallet and DeFi Surface | 3/4 | In Progress|  |
 
 ---
 
@@ -234,6 +241,32 @@ Both phases depend on Phase 3 BFF routes. They share no other dependencies betwe
 **DEFI-* scope constraint:**
 All DEFI-* requirements are read-first only in v1. The transact path (writeContract, simulateContract, LP management) is v2 scope per the requirements document. No DEFI-* requirement in v1 exposes a write path.
 
+### Phase 05.2: DEFI-06 wallet connect-modal accessibility (keyboard nav, focus restoration on close, SR state announcements) (INSERTED) — ✓ COMPLETE 2026-06-02
+
+**Goal:** Wallet connect modal is fully keyboard-navigable, has no focus trap on close, and announces state changes to screen readers.
+**Requirements**: DEFI-06
+**Depends on:** Phase 5
+**Plans:** 1 plan (05.2-01 complete)
+**Deferred:** Real SR speech transcript (NVDA/VoiceOver) — no SR installable in CI; deferred to manual pre-production pass.
+
+Plans:
+- [x] 05.2-01: DEFI-06 a11y — scoped live region + focus restoration + guarded audit route + durable e2e
+
+### Phase 05.1: abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated) (INSERTED) — ✓ COMPLETE 2026-06-02
+
+**Goal:** A visitor or agent can open the cCOP/USD long-gamma instrument page and read an honestly-labeled, read-first, simulated surface — schematic convex payoff, backend-correct cash-flow waterfall, and Panoptic fork-fixture params — under a three-tier provenance model (fork-fixture / spec / schematic) with a SIMULADO badge, a read-only wallet, and no transact path or fabricated numbers.
+**Requirements**: Extends DEFI-02, DEFI-03, DEFI-04, DEFI-05, CROSS-01, CROSS-09, CROSS-10, AGENT-10. New: DEFI-08 (simulated/read-only instrument variant — three-tier provenance, SIMULADO badge, CashFlowWaterfall, SnapshotPoolPanel, read-only wallet, never passed to multicall), DEFI-09 (GitBook module page from docs/book/, excluded from Velite globbing).
+**Depends on:** Phase 5
+**Canonical spec:** `docs/superpowers/specs/2026-06-02-ccop-usd-long-gamma-instrument-frontend-design.md` (passed two-step review)
+**Verification:** passed 12/12 (`05.1-VERIFICATION.md`); full suite green on production build; Evidence Collector live-DOM gate passed.
+
+Plans:
+- [x] 05.1-00-PLAN.md — Wave 0: fix the 05-04 PayoffDiagram BLOCKER (0-height/contrast/#418) + 4 failing test stubs + resolve chunk-strike; Evidence Collector re-verify existing fixture route (DEFI-04, CROSS-01, CROSS-09, DEFI-08) [wave 0]
+- [x] 05.1-01-PLAN.md — Wave 1: data layer freeze — fixture.ts + payoff.ts schematic + cashflow.ts + instruments.ts discriminated union + 5 consumer narrowings; remove temp fixture (DEFI-08, DEFI-04, AGENT-10, CROSS-09) [wave 1]
+- [x] 05.1-02-PLAN.md — Wave 2: components — ProvenanceBadge/SimuladoBadge + SnapshotPoolPanel + CashFlowWaterfall + PayoffDiagram props extension + read-only wallet path (DEFI-08, DEFI-02, DEFI-04, CROSS-09, CROSS-01) [wave 2]
+- [x] 05.1-03-PLAN.md — Wave 3: detail-page simulated branch (before aggregator) + es-CO/en i18n keys + GitBook page + copy-review sign-off (DEFI-08, DEFI-03, DEFI-05, DEFI-09, CROSS-10, CROSS-09, AGENT-10) [wave 3]
+- [x] 05.1-04-PLAN.md — Wave 4: real e2e/a11y on the simulated route + full suite green + Evidence Collector live-DOM gate (DEFI-08, DEFI-03, DEFI-05, DEFI-02, CROSS-01, CROSS-09) [wave 4]
+
 ---
 *Roadmap created: 2026-05-11*
-*Last updated: 2026-05-11 after initial creation*
+*Last updated: 2026-06-02 — Phase 05.1 complete; roadmap recovered from gsd-tools truncation (see note)*

@@ -169,3 +169,133 @@ is the SUPERSET entry distinct from the Plan-B index-chrome line above.
 - [ ] Inverted-punctuation orthography (`¡Copiado!`) confirmed (native-authorship tell, not machine translation)
 - [ ] Anti-marketing-slop grep passes on `reading.*` keys (verified 2026-05-29: `grep -iIrnE '<banned>' messages/{es-CO,en}/research.json` → no matches)
 - [ ] Recursive i18n parity (`tests/unit/i18n-coverage.test.ts::assertKeyParity('research')`) green — es-CO ↔ en symmetric (verified 2026-05-29)
+
+---
+
+## Phase 05 review (instruments namespace — Plan 05-03)
+
+**Scope:** `messages/es-CO/instruments.json` and `messages/en/instruments.json` — the `instruments`
+namespace covering the instruments index (h1, empty-state copy, GitHub link) and the RiskCallout
+persistent risk disclosure (heading + body). Authored es-CO FIRST, en second. No machine translation.
+
+**New keys added (2026-05-30):**
+- `instruments.index.h1` — page heading
+- `instruments.index.empty_heading` / `instruments.index.empty_body` — honest empty state copy
+- `instruments.index.github_link` — link label for the wvs-finance contracts repo
+- `instruments.risk.heading` / `instruments.risk.body` — RiskCallout persistent disclosure
+- `instruments.params.*` — InstrumentParams table labels (id, chain, strike, slope, deployed_at, name)
+
+**es-CO authoring notes (Plan 05-03 author: Juan Serrano / jmsbpp):**
+- "Instrumento de cobertura — no es apalancamiento" — direct and precise; "cobertura" is the
+  standard Colombian-Spanish finance term for hedging; "apalancamiento" for leverage.
+- "Abrigo está diseñado para cubrir exposición cambiaria y macroeconómica" — "exposición" is the
+  established risk-management term in es-CO finance; "cambiaria" (FX) and "macroeconómica" pair
+  naturally.
+- "instrumento de cobertura convexo" — correct financial-Spanish; "convexo" is the accepted
+  adjective for instruments with positive gamma.
+- "Aún no hay instrumentos desplegados" — "desplegados" for deployed (on-chain contracts); "aún" is
+  natural es-CO for "not yet" (not "todavía" which is more colloquial in some registers).
+- "Esta página se actualizará automáticamente" — future tense with reflexive; natural register.
+- "Ver contratos pendientes en GitHub" — "Ver" (imperative/infinitive) over "Acceder" or "Consultar";
+  laconic, actionable, not corporate.
+- "Precio de activación" — standard es-CO finance term for strike price; avoids the anglicism "strike".
+- "Pendiente de cobertura" — "pendiente" for slope in the hedging context; clear and domain-appropriate.
+- Copy register: informational, laconic, economics-finance tone. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/instruments.json` | _pending native review_ | | |
+| `messages/en/instruments.json` | _pending native review_ | | |
+
+### Phase 05 instruments Sign-off (05-03 keys)
+
+- [ ] es-CO instruments copy reviewed by native Colombian Spanish speaker
+- [ ] Finance terminology (`cobertura`, `apalancamiento`, `exposición cambiaria`, `convexo`, `precio de activación`) reviewed against Colombian Spanish finance conventions
+- [ ] Anti-marketing-slop grep passes on `instruments.*` keys
+- [ ] i18n parity (es-CO ↔ en) symmetric across all `instruments.*` keys
+
+---
+
+## Phase 05 review (instruments detail-page keys — Plan 05-04)
+
+**Scope:** `instruments.wallet.*`, `instruments.pool.*`, `instruments.errors.*` — detail-page copy
+for the WalletPanel 4 states, PoolStatePanel, and route error boundary. Authored es-CO FIRST, en second.
+
+**New keys added (2026-05-30):**
+- `instruments.wallet.*` — 4-state wallet copy (disconnected prompt, connect label, connecting,
+  wrong-chain label + explanation template, switch CTA, connected-ready header, status pill labels)
+- `instruments.pool.*` — pool state labels (not-deployed message, pool balance, settlements,
+  participants, last block)
+- `instruments.errors.*` — route error boundary copy (not-found, route-error, back-home)
+
+**es-CO authoring notes (Plan 05-04 author: Juan Serrano / jmsbpp):**
+- "Conecta tu billetera para ver tu posición" — direct imperative; "billetera" is the standard
+  es-CO term for a crypto wallet (not "cartera" which is more Castilian/generic).
+- "Cambia a una red compatible" — "red" for network; "compatible" over "soportada" (more natural).
+- "Cambiar red" — imperative CTA; laconic, actionable.
+- "Posición actual" — finance term for current portfolio position; not "estado" (too generic).
+- "Balance del pool" / "Liquidaciones" / "Participantes" — standard finance/DeFi terms in es-CO.
+- "Algo salió mal al cargar esta página." — natural es-CO error copy; not "Ocurrió un error" (overly formal).
+- "Volver al inicio" — natural navigation label; "inicio" for home page.
+- Copy register: informational, laconic, finance-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/instruments.json` (wallet/pool/errors additions) | _pending native review_ | | |
+| `messages/en/instruments.json` (wallet/pool/errors additions) | _pending native review_ | | |
+
+### Phase 05-04 detail-page Sign-off
+
+- [ ] es-CO wallet/pool/errors copy reviewed by native Colombian Spanish speaker
+- [ ] "billetera" vs "cartera" usage confirmed against Colombian DeFi conventions
+- [ ] Anti-marketing-slop grep passes on new `wallet.*`, `pool.*`, `errors.*` keys
+- [ ] i18n parity (es-CO ↔ en) symmetric across all new keys
+
+---
+
+## Phase 05.1-03 review (simulated-surface copy — instruments.simulated/provenance/cashflow/params/wallet.read_only)
+
+**Scope:** `messages/es-CO/instruments.json` and `messages/en/instruments.json` — new key groups
+added in Plan 05.1-03 for the SIMULADO read-only surface. Authored es-CO FIRST (Juan Serrano /
+jmsbpp, 2026-06-02), en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `instruments.simulated.*` — SIMULADO badge, aria sentence, caption for the fork-only surface
+- `instruments.provenance.*` — fork_fixture / spec / schematic tier names + aria sentences per tier
+- `instruments.cashflow.*` — waterfall section heading + per-row labels
+- `instruments.params.*` additions — fork-test param labels
+- `instruments.wallet.read_only_status` / `instruments.wallet.read_only_label`
+
+**es-CO authoring notes (Plan 05.1-03 author: Juan Serrano / jmsbpp):**
+- "SIMULADO" — all-caps status badge, matching financial UI register. Not gendered.
+- "Base fork — pool simulado, sin despliegue en cadena" — "en cadena" is established Colombian DeFi vocabulary. "sin despliegue" is technically precise.
+- "Fork fixture" — retained as technical compound noun (no established Spanish equivalent in DeFi tooling).
+- "Valor sembrado en pruebas sobre pool simulado — no es dato de mercado" — "sembrado" (seeded) is the established agricultural metaphor imported into DeFi. "dato de mercado" uses partitive (no article), more natural in es-CO for abstract categories.
+- "Especificacion" — correct nominal register for spec-tier provenance; not "Especificado".
+- "Esquematico" — standard Spanish adjective; preferred over "ilustrativo" (aria sentence uses the longer form for precision).
+- "Funcion de liquidacion derivada del contrato" — "funcion de liquidacion" is established DeFi/finance terminology for settlement function.
+- "Flujo de caja" — standard Colombian finance term; not "flujo monetario" or calque "cash flow".
+- "Prima (deposito)" — "prima" is canonical options/insurance term in es-CO finance; "(deposito)" clarifies Panoptic deposit mechanics.
+- "Costo de datos medido" — "medido" for metered; "contabilizado" rejected (accounting-specific).
+- "Residual reclamable" — "reclamable" for claimable; "reclamar" is standard verb for claiming collateral residual.
+- "ya neteado en el colateral sobreviviente" — "neteado" is the es-CO DeFi verb for netted (widely used). "colateral sobreviviente" is the technical term from Panoptic share-burn.
+- "Strike del chunk (offset)" — "chunk" retained as Panoptic protocol vocabulary; "(offset)" clarifies tick-offset, not absolute strike.
+- "Liquidez sembrada" — extends the seeding metaphor for fork-fixture pool state.
+- "Tasa (semilla)" — "tasa" for rate; "(semilla)" clarifies test/seed value.
+- "Parametros de prueba de fork — no son geometria elegida" — "geometria elegida" is precise: fork artifacts from InvalidTickBound clearance, not designer-chosen hedge geometry.
+- "Solo lectura" — established UI term; no accent on "solo" (RAE 2010 adverb-accent deprecation; es-CO follows RAE).
+- "sin transaccion — fork simulado" — lower-case annotation; "sin transaccion" (singular) is more precise than plural.
+- Copy register: informational, laconic, finance/DeFi-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/instruments.json` (05.1-03 additions) | Juan Serrano (jmsbpp) | 2026-06-02 | PASS w/ 2 edits — `simulated.caption` "mock pool" → "pool simulado" (register consistency w/ `badge_aria`); `cashflow.already_netted` "ya neteado en el colateral sobreviviente" → "ya descontado del colateral sobreviviente" (anglicism). English DeFi terms (fork/chunk/strike/tick spacing/streamia) accepted as es-CO crypto register. |
+| `messages/en/instruments.json` (05.1-03 additions) | Juan Serrano (jmsbpp) | 2026-06-02 | PASS — "mock pool" / "already netted into surviving collateral" correct English; no edits. |
+
+### Phase 05.1-03 instruments Sign-off (CROSS-10 gate)
+
+- [x] es-CO simulated/provenance/cashflow/params/wallet.read_only copy reviewed by native Colombian Spanish speaker (Juan Serrano, 2026-06-02)
+- [x] Technical vocabulary reviewed against Colombian DeFi/finance conventions — "neteado" replaced with "descontado"; "sembrado", "liquidación", "Prima", "Residual reclamable" accepted
+- [x] "Solo lectura" (no accent on "solo") confirmed correct per RAE 2010 adverb-accent rule
+- [x] Anti-marketing-slop grep passes on all new `instruments.*` keys
+- [x] i18n parity gate: `pnpm vitest run tests/unit/i18n-coverage.test.ts` (instruments namespace) GREEN

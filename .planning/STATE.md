@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-05-29T23:20:05.421Z"
+status: completed
+stopped_at: 05.2-01 complete — DEFI-06 marked [x] in REQUIREMENTS.md; real SR speech deferred to manual NVDA/VoiceOver pass
+last_updated: "2026-06-02T18:03:34.375Z"
 progress:
-  total_phases: 6
-  completed_phases: 4
-  total_plans: 29
-  completed_plans: 27
-  percent: 93
+  total_phases: 8
+  completed_phases: 7
+  total_plans: 39
+  completed_plans: 38
+  percent: 97
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
-**Last updated:** 2026-05-13
-**Session type:** Plan execution (02-08 complete — Phase 2 plans 8/8)
-**Stopped at:** Completed 04-04-PLAN.md
+**Last updated:** 2026-06-02
+**Session type:** Plan execution (05.2-01 complete — DEFI-06 wallet connect modal a11y: scoped live region, lang fix, connect-success focus, durable e2e)
+**Stopped at:** 05.2-01 complete — DEFI-06 marked [x] in REQUIREMENTS.md; real SR speech deferred to manual NVDA/VoiceOver pass
 
 ---
 
@@ -33,20 +33,21 @@ progress:
 
 ## Current Position
 
-**Active phase:** 04 — Agent Surface (MCP)
-**Active plan:** 04-04 complete (drift-proof OpenAPI 3.1 generated from the canonical Zod registry via OpenApiGeneratorV31 + js-yaml; /.well-known/openapi.yaml serves the generated spec; /llms.txt refreshed to live URLs). Wave 2 done. 04-05/06 (Wave 3) next — they carry human-verify checkpoints.
-**Status:** Plan execution — Wave 2 complete
+**Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
+**Active plan:** 05.1-03 (Wave 3: simulated-branch page layout, full SIMULADO surface)
+**Status:** Milestone complete
 
 **Progress:**
-[█████████░] 93%
+[██████████] 97%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
-[          ] Phase 3: Data Layer and On-Chain Dashboard
-[          ] Phase 4: Agent Surface (MCP)
-[          ] Phase 5: Read-First Wallet and DeFi Surface
+[██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
+[██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
+[██████████] Phase 5: Read-First Wallet and DeFi Surface — COMPLETE (4/4 plans)
+[██████    ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 3/5 plans (05.1-00, 05.1-01, 05.1-02 complete; 05.1-03 next)
 
-Overall: 1/5 phases complete
+Overall: 4/5 phases complete (Phase 5.1 in progress)
 
 ---
 
@@ -81,19 +82,42 @@ Overall: 1/5 phases complete
 | Phase 04 P02 | 8 | 2 tasks | 5 files |
 | Phase 04 P03 | 8 | 2 tasks | 4 files |
 | Phase 04 P04 | 6 | 2 tasks | 5 files |
+| Phase 05 P01 | 5 | 3 tasks | 12 files |
+| Phase 05 P02 | 35 | 2 tasks | 4 files |
+| Phase 05 P03 | 35 | 2 tasks | 9 files |
+| Phase 05 P04 | 9 | 2 tasks | 14 files |
+| Phase 05.1 P01 | 6 | 3 tasks | 11 files |
+| Phase 05.1 P02 | 9 | 4 tasks | 11 files |
+| Phase 05.1 P03 | 11 | 3 tasks | 14 files |
+| Phase 05.1 P04 | 22 | 2 tasks | 6 files |
+| Phase 05.2 P01 | 13 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 - Phase 03.1 (Research Reading Surface) inserted after Phase 3, before Phase 4 (2026-05-29). Depth pass on `/research` (LAB-03): paper-grade math reading surface, build-time KaTeX, track filter, arXiv/PDF paper-bridge. Canonical spec: `docs/superpowers/specs/2026-05-29-research-reading-surface-design.md`. Citations deferred to v2.
+- Phase 05.1 (abrigo-somnia convex instrument frontend surface — cCOP/USD long-gamma, read-first simulated) inserted after Phase 5 (2026-06-02, URGENT). Module 1 extending the Phase-5 (defi) instrument-detail route: schematic convex payoff + backend-correct cash-flow waterfall + Panoptic fork-fixture params, three-tier provenance (fork-fixture / spec / schematic), SIMULADO badge, read-only wallet, no transact. Backend (abrigo-somnia) is fork-only/locked. Canonical spec: `docs/superpowers/specs/2026-06-02-ccop-usd-long-gamma-instrument-frontend-design.md` (passed two-step review).
 
 ### Key Decisions Made
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| Explicit role='status' DOM attribute blocked by Biome noRedundantRoles + useSemanticElements on <output> (Plan 05.2-01) | <output> already carries implicit role=status via HTML-AAM; Biome correctly blocks the redundant attribute; defense-in-depth via explicit aria-live='polite' which IS present | All WalletPanel live-region tests assert role attr is null + aria-live is 'polite'; do NOT add explicit role to <output> |
+| wagmi mock() connector is NOT surfaced in RainbowKit modal (Plan 05.2-01) | wagmi and RainbowKit use separate connector registries; mock() registers with wagmi only; RainbowKit's modal list comes from connectorsForWallets | Connect-success e2e must use TestConnectButton (outside modal); RainbowKit modal tests cover open/close/focus-return only |
+| Tab-loop navigation required in e2e tests for ConnectButton trigger (Plan 05.2-01) | ConnectButton trigger is tab stop ~7 after nav links; single page.keyboard.press('Tab') lands on first nav <a>, not the button; loop up to 15 presses checking activeElement | All e2e tests targeting ConnectButton via keyboard must use a Tab loop with activeElement check |
+| SimuladoBadge gains optional label prop for i18n-aware rendering (Plan 05.1-03) | Plan requires t('simulated.badge') as grep-verifiable key_link; component had text hardcoded; optional label with default='SIMULADO' is backward-compatible | All future SimuladoBadge usages should pass label={t('simulated.badge')} for locale-awareness |
+| veliteRoot + researchPattern exported from velite.config.ts for non-collision test (Plan 05.1-03) | Mechanical non-collision proof: test imports consts and asserts veliteRoot==='content' and pattern excludes docs/book — avoids fragile readFileSync+regex approach | Any future Velite config change must keep veliteRoot and researchPattern as exported consts |
+| READ_ONLY injected via WalletPanel.readOnly prop; deriveWalletState body untouched (Plan 05.1-02) | readOnly=true forces 'READ_ONLY' as const before deriveWalletState is called; the pure deriver remains a 4-output function | All future simulated-instrument pages use readOnly=true on WalletPanel; never add READ_ONLY to deriveWalletState |
+| useMounted guard in WalletStatusPill: READ_ONLY bypasses guard; others fall back to DISCONNECTED (Plan 05.1-02) | Fixes React #418 hydration mismatch where SSR emits DISCONNECTED but client briefly flashes CONNECTING during wagmi auto-reconnect | WalletStatusPill must always gate connection-derived states behind useMounted; prop-injected states (READ_ONLY) bypass the guard |
+| PayoffDiagram data= prop: RSC computes PayoffPoint[] and passes to client island (Plan 05.1-02) | Removed internal generatePayoffData call; caller (RSC page) generates data so the component is a pure renderer | All PayoffDiagram callers must generate the data array in the RSC body before passing to PayoffDiagramClient |
+| wagmi + rainbowkit vi.mock in wallet-read-only.test.tsx for hook-safe unit testing (Plan 05.1-02) | WalletPanel calls useAccount/useSwitchChain unconditionally (React hook rules); no provider tree in unit tests | All WalletPanel unit tests must mock wagmi and rainbowkit to avoid provider tree |
 | OpenAPI 3.1 spec generated from the canonical Zod registry, imported never re-declared (Phase 04-04) | lib/openapi/schemas.ts imports the schemas from @/lib/mcp-tools/contract; the single extendZodWithOpenApi stays in lib/dashboard/contract.ts; the conformance test proves live route ≡ schema so the spec cannot drift (Phase-2/3 burn class) | All future boundary artifacts are generated from the same Zod the routes conform to; the architecture grep test asserts the single extend call site |
 | MCP JSON-RPC endpoint documented in prose + example, not modelled as a schema (Phase 04-04) | OpenApiGeneratorV31 requires a schema per content entry, so /api/mcp/mcp content uses z.object({}).passthrough() placeholders; the method-dispatched JSON-RPC union lives in the path description prose + one example body | Any future JSON-RPC/transport endpoint uses prose+example+passthrough rather than a fabricated union schema |
 | MCP fake-server test harness applies the registered inputSchema before invoking the handler (Phase 04-03) | The capture-the-callback fake server passed raw input, so Zod `.default('abrigo')` never applied and `input.app` was undefined → ZodError. Real SDK applies inputSchema before the handler; the harness now mirrors that via `inputSchema.parse(input)` | All future MCP fake-server unit tests resolve schema defaults deterministically; output-envelope assertions stay strict |
+| RainbowKit accentColor must be HEX not oklch (#a87c3a) (Phase 05-02) | RainbowKit's vanilla-extract compositor requires a resolved color value at theme-injection time; CSS color functions (oklch) are not resolved and break the compositor. #a87c3a is the HEX serialization of the locked ochre token oklch(0.6 0.08 70) | All future RainbowKit theme configurations must use HEX values for accentColor and accentColorForeground |
+| ssr: false kept, no cookieToInitialState in wagmi getDefaultConfig migration (Phase 05-02) | Wallet state is client-only by design; adding cookieToInitialState/SSR-cookie hydration risks hydration mismatches. Explicit architectural choice per Pitfall 2 in 05-RESEARCH.md | All (defi) wallet state remains client-only; no server hydration path for wallet state |
+| PayoffDiagramClient 'use client' wrapper owns dynamic(ssr:false) — page.tsx RSC must never call next/dynamic (Phase 05-04 B1) | Next 16 build rule: ssr:false in an RSC is a compile-time error. Thin 'use client' wrapper delegates lazy import; RSC imports the wrapper directly. Bundle isolation preserved via client boundary | All recharts-style code-split islands must use a dedicated 'use client' wrapper; RSC pages import the wrapper |
+| recharts bundle is lazy-loaded (dynamic import) — absent from firstLoadChunkPaths of all routes (Phase 05-04 WAIVER-05-05) | dynamic(ssr:false) makes recharts a secondary lazy chunk, not a first-load chunk. route-bundle-stats.json confirms absence from all firstLoadChunkPaths. Non-(defi) routes never load recharts | WAIVER-05-05 bundle isolation confirmed via .next/diagnostics/route-bundle-stats.json after pnpm build |
 | On-chain/panel MCP tools return honest not_deployed/unavailable envelopes, never fabricated numerics (Phase 04-03) | Empty ABRIGO_INSTRUMENTS + unpublished HF panel; CROSS-09 anti-fishing. get_pool_state uses `pool_address ?? 'unknown'` (M4); serializeBigints wired as future-deployment path only; HF dataset name is a single UNVERIFIED constant never asserted in the note | Pre-launch agent queries branch on `status`, not on zero-filled fakes; bigint boundary correct when contracts land |
 | TheoremBlock = full 4-side ochre hairline border + bold ochre text label, NOT one-sided border-left (Phase 03.1-03) | impeccable@2.1.8 flags one-sided `border-left: Npx solid <color>` as the side-tab AI-tell; a uniform 4-side border is not a side-tab. Reconciles spec's "ochre rule + label", CROSS-09 (color+text), and the impeccable gate (exit 0 verified) | All anti-fishing callouts use full borders + text labels; never one-sided colored borders |
 | Reading page locale from NEXT_LOCALE cookie, not URL segment (Phase 03.1-03) | The /research/[slug] route has no [locale] segment; getLocale() resolves the cookie at render; generateStaticParams enumerates distinct slugs only; single-locale body per page | All locale-aware reading routes resolve locale from cookie, not path |
@@ -141,6 +165,15 @@ Overall: 1/5 phases complete
 | Production webServer in playwright.config.ts (Plan 03-02) | Replaced `pnpm dev` (Turbopack) with `pnpm build && pnpm start -p 3040`; Turbopack can silently honor route-segment config differently from webpack production build — the Phase-2 burn class | All future e2e specs test against the production webpack build, not Turbopack dev |
 | Anti-fishing null rule: instrument null fields render as em-dash placeholder (Plan 03-02) | null → '—' (em-dash); a real future '0' balance is semantically distinct from '—' no-data; never render 0 for missing data | DashboardContent and all future metric tile components follow this pattern |
 | Playwright strict mode requires .first() when labels repeat per chain row (Plan 03-02) | DashboardContent renders all 5 chains at equal visual weight; tile label "Pool balance" appears 5x; getByText fails with strict mode unless .first() is used | All e2e assertions on repeating tile labels must use .first() |
+| (defi)/(apps) route-group split for /apps/abrigo/* is intentional (Plan 05-03) | /apps/abrigo/dashboard lives under (apps) (no wallet tree); /apps/abrigo/instruments lives under (defi) (inherits wallet providers). Different provider trees — do NOT consolidate | Route-group coexistence (M5) verified in pnpm build; each new /apps/abrigo/* route must be placed in the appropriate group based on wallet dependency |
+| Instrument card links use numeric chainId segment (Plan 05-03) | /apps/abrigo/instruments/${id}/${chainId} uses the raw numeric chainId. Using a chain name slug would silently null the pool selector in 05-04's WalletPanel/PoolStatePanel | All future instrument link construction must use numeric chainId, not chain name/slug |
+| es-CO-first instruments copy authored; native sign-off pending (Plan 05-03) | instruments namespace authored in es-CO by developer per project policy; docs/copy-review.md row recorded but native Colombian Spanish reviewer sign-off must complete before v1 launch | Non-blocking for 05-04 execution; required before production deploy |
+| chunk.strike fixture value is OTM offset string "2000" not static absolute tick (Plan 05.1-00) | PanopticDataSeam.fork.t.sol L41: STRIKE_OFFSET=2000; L73: strike=((currentTick+2000)/tickSpacing)*tickSpacing. No static absolute exists — depends on live fork tick. Wave 1 fixture.ts uses value:"2000" with note explaining fork-tick dependency | Wave 1 fixture.ts must carry value:"2000" and the OTM-offset note; never fabricate absolute ticks for fork-dependent values |
+| Wave-0 RED stubs referencing not-yet-created modules excluded from tsconfig (Plan 05.1-00) | Three stub files (fixture.test.ts, cashflow.test.ts, provenance-badge.test.tsx) import Wave-1/2 modules that don't exist yet; exclusion lets tsc --noEmit pass pre-commit gate. Pattern: structured-data.test.tsx | All future Wave-0 RED stubs importing not-yet-created modules must be excluded from tsconfig until the module is created |
+| Type predicate required in aggregator filter for LiveInstrument narrowing (Plan 05.1-01) | Array.filter with a plain callback (i) => i.kind === 'live' does NOT narrow AbrigoInstrument[] to LiveInstrument[]; TypeScript requires a type predicate (i): i is LiveInstrument | All future discriminated-union filters that must produce a narrowed array type must use a type predicate |
+| Tasks 2+3 of 05.1-01 committed atomically — pre-commit tsc gate blocks mid-state (Plan 05.1-01) | Pre-commit lefthook runs tsc --noEmit; with the union in instruments.ts but consumers un-narrowed, tsc exits 2 and blocks the commit. Union + all 5 consumer narrowings must land in one atomic commit | When migrating a flat interface to a discriminated union, narrow all consumers in the same commit as the union definition |
+| WalletStatusPill hydration mismatch (React #418) deferred to Wave 2 (Plan 05.1-00) | SSR renders DISCONNECTED, client briefly renders CONNECTING during wagmi auto-reconnect before settling. Present since 05-04; not introduced by 05.1-00. User approved proceeding (2026-06-02). Fix: useMounted() gate or suppressHydrationWarning on pill root. Already in Wave 2 scope (05.1-02 rewrites WalletStatusPill.tsx, lib/wallet/state.ts, WalletPanel.tsx) | Wave 2 executor (05.1-02) must add a mounted guard to WalletStatusPill before turning wallet-read-only.test.tsx GREEN |
+| Curve stroke weight bump deferred to Wave 2 (Plan 05.1-00) | 2px ochre curve passes WCAG 1.4.11 (6.11:1) but is perceptually thin in screenshots. Not a spec violation. Wave 2 reviewer may bump to 2.5–3px if designer flags prominence | Wave 2 may increase stroke weight if perceptual review requires it |
 
 ### Critical Path Summary
 

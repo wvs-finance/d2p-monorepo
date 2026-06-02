@@ -77,6 +77,13 @@ export const researchSchema = s.object({
   order: s.number().int().positive().optional(),
 })
 
+// ── M2: exported consts for velite non-collision test (05.1-03) ──────────────
+// The test asserts veliteRoot === 'content' and researchPattern does NOT include
+// 'docs/book' — proving docs/book/ is outside the Velite glob and cannot perturb
+// the build (DEFI-09 non-collision invariant).
+export const veliteRoot = 'content'
+export const researchPattern = 'research/*.{es,en}.mdx'
+
 // ── research collection (SPLIT) ───────────────────────────────────────────────
 // The COLLECTION schema = researchSchema frontmatter fields + body + locale + toc.
 // Pattern changed from 'research/*.mdx' to 'research/*.{es,en}.mdx' for locale-split.
@@ -97,7 +104,7 @@ export const researchSchema = s.object({
 // the trailing '.es' or '.en' suffix.
 const research = defineCollection({
   name: 'Research',
-  pattern: 'research/*.{es,en}.mdx',
+  pattern: researchPattern,
   schema: researchSchema.extend({
     body: s.mdx({
       // CRITICAL: suppress Velite's auto-prepend of remarkGfm (see above).
@@ -120,7 +127,7 @@ const research = defineCollection({
 })
 
 export default defineConfig({
-  root: 'content',
+  root: veliteRoot,
   output: {
     data: '.velite',
     assets: 'public/static',

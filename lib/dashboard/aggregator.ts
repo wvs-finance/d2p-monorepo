@@ -1,6 +1,7 @@
 import {
   ABRIGO_ABI,
   ABRIGO_INSTRUMENTS,
+  type LiveInstrument,
   type SupportedChainId,
 } from '@/lib/apps/abrigo/instruments'
 import { publicClients } from '@/lib/chains/clients'
@@ -39,7 +40,11 @@ type MulticallResult = { status: 'success'; result: unknown } | { status: 'failu
 
 async function aggregateChain(chainId: SupportedChainId): Promise<ChainAggregationResult> {
   const chainName = CHAIN_NAMES[chainId]
-  const instruments = ABRIGO_INSTRUMENTS.filter((i) => i.chainId === chainId)
+  // Honesty invariant: filter to kind === 'live' BEFORE the multicall so a simulated
+  // entry (which has no address) is NEVER passed to the contract reader.
+  const instruments = ABRIGO_INSTRUMENTS.filter(
+    (i): i is LiveInstrument => i.chainId === chainId && i.kind === 'live',
+  )
 
   // SHORT-CIRCUIT FIRST (BA M-agg): return BEFORE touching publicClients.
   // No client is constructed/called on the empty path; the empty-registry result is

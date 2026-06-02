@@ -95,13 +95,15 @@ Each maps to exactly one phase in the roadmap.
 
 ### Wallet and Read-First DeFi
 
-- [ ] **DEFI-01**: RainbowKit v2 wallet connect integrated; supports mobile wallets via WalletConnect v2 (MetaMask Mobile, Rainbow, Coinbase Wallet, Valora for Celo)
-- [ ] **DEFI-02**: Wallet state machine has 4 explicit states — DISCONNECTED / CONNECTED_WRONG_CHAIN / CONNECTED_READY / CONNECTING — each with distinct UI affordance
-- [ ] **DEFI-03**: Per-instrument page at `/apps/abrigo/instruments/{id}/{chain}` shows parameters, payoff diagram, current pool state, recent participants — fully accessible without wallet connection
-- [ ] **DEFI-04**: Payoff diagram component renders CFMM payoff curve with axis labels in user's locale, showing strike, slope, current price marker
-- [ ] **DEFI-05**: Risk disclosure surfaces explicitly label every Abrigo instrument as "hedging product, not leverage" in both es-CO and en, visible without scrolling at 360px viewport on `/apps/abrigo/instruments/{id}/{chain}` pages
-- [ ] **DEFI-06**: Wallet connect modal is fully keyboard-navigable, has no focus trap on close, and announces state changes to screen readers
-- [ ] **DEFI-07**: Wallet UI distinguishes "wrong chain" from "unsupported chain" — user on Polygon sees a chain-switch CTA; user on a chain we don't deploy on sees an explanatory message
+- [x] **DEFI-01**: RainbowKit v2 wallet connect integrated; supports mobile wallets via WalletConnect v2 (MetaMask Mobile, Rainbow, Coinbase Wallet, Valora for Celo)
+- [x] **DEFI-02**: Wallet state machine has 4 explicit states — DISCONNECTED / CONNECTED_WRONG_CHAIN / CONNECTED_READY / CONNECTING — each with distinct UI affordance
+- [x] **DEFI-03**: Per-instrument page at `/apps/abrigo/instruments/{id}/{chain}` shows parameters, payoff diagram, current pool state, recent participants — fully accessible without wallet connection
+- [x] **DEFI-04**: Payoff diagram component renders CFMM payoff curve with axis labels in user's locale, showing strike, slope, current price marker
+- [x] **DEFI-05**: Risk disclosure surfaces explicitly label every Abrigo instrument as "hedging product, not leverage" in both es-CO and en, visible without scrolling at 360px viewport on `/apps/abrigo/instruments/{id}/{chain}` pages
+- [x] **DEFI-06**: Wallet connect modal is fully keyboard-navigable, has no focus trap on close, and announces state changes to screen readers — durable e2e guard in tests/e2e/wallet-connect-modal.spec.ts; real SR speech deferred to manual NVDA/VoiceOver pass (no SR in CI)
+- [x] **DEFI-07**: Wallet UI distinguishes "wrong chain" from "unsupported chain" — user on Polygon sees a chain-switch CTA; user on a chain we don't deploy on sees an explanatory message
+- [x] **DEFI-08**: Simulated/read-first instrument variant (fork-only backend) renders an honestly-labeled surface — three-tier provenance pills (fork-fixture / spec / schematic) with locale-aware labels, a SIMULADO badge above the fold, a backend-correct CashFlowWaterfall, a SnapshotPoolPanel of fork-fixture params, a schematic PayoffDiagram, and a read-only wallet; the simulated entry is never passed to the on-chain multicall and emits no fabricated numbers (em-dash never 0; JSON-LD carries no strike/slope/address). *(Added Phase 05.1)*
+- [x] **DEFI-09**: GitBook documentation page for the simulated instrument is published from the repo (`docs/book/`, git-synced via `.gitbook.yaml`) and excluded from Velite content globbing. *(Added Phase 05.1)*
 
 ### Cross-cutting
 
@@ -255,13 +257,15 @@ Populated by gsd-roadmapper — 2026-05-11.
 | AGENT-08 | Phase 4 | Complete |
 | AGENT-09 | Phase 4 | Complete |
 | AGENT-10 | Phase 4 | Complete |
-| DEFI-01 | Phase 5 | Pending |
-| DEFI-02 | Phase 5 | Pending |
-| DEFI-03 | Phase 5 | Pending |
-| DEFI-04 | Phase 5 | Pending |
-| DEFI-05 | Phase 5 | Pending |
-| DEFI-06 | Phase 5 | Pending |
-| DEFI-07 | Phase 5 | Pending |
+| DEFI-01 | Phase 5 | Complete |
+| DEFI-02 | Phase 5 | Complete |
+| DEFI-03 | Phase 5 | Complete |
+| DEFI-04 | Phase 5 | Complete |
+| DEFI-05 | Phase 5 | Complete |
+| DEFI-06 | Phase 05.2 | Complete — durable e2e; real SR speech deferred to manual pass |
+| DEFI-07 | Phase 5 | Complete |
+| DEFI-08 | Phase 05.1 | Complete |
+| DEFI-09 | Phase 05.1 | Complete |
 
 **Coverage:**
 - v1 requirements: 69 total (was 60; +8 NAV-* for umbrella nav + 1 APP-01 Abrigo overview page; renumbered AGENT-07 → AGENT-07-pool because `query_econometric_panel` re-used the slot)

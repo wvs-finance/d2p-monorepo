@@ -25,6 +25,9 @@ const webServer = REMOTE_TARGET
       url: 'http://localhost:3040',
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
+      // NEXT_PUBLIC_E2E: unlocks the /_a11y-wallet-check audit route in the production build.
+      // Without this flag the guarded route returns 404 in NODE_ENV=production.
+      env: { NEXT_PUBLIC_E2E: 'true' },
     }
 
 export default defineConfig({
