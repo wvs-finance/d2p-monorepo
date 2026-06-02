@@ -1,13 +1,18 @@
 /**
- * Unit tests for AgentStateJsonLd — the dashboard JSON-LD that MIRRORS the MCP
- * tool output schema (AGENT-10). An agent must be able to read the honest
- * pre-launch protocol state (status: not_deployed / empty) straight from the
- * HTML, with NO fabricated numeric pool balances (anti-fishing, CROSS-09).
+ * Unit tests for:
+ * 1. AgentStateJsonLd — the dashboard JSON-LD that MIRRORS the MCP
+ *    tool output schema (AGENT-10). An agent must be able to read the honest
+ *    pre-launch protocol state (status: not_deployed / empty) straight from the
+ *    HTML, with NO fabricated numeric pool balances (anti-fishing, CROSS-09).
+ * 2. InstrumentJsonLd — the per-instrument JSON-LD (AGENT-10 / DEFI-08).
+ *    Simulated branch: asserts NO strike/slope/address, simulated:true + provenance present.
  *
  * @vitest-environment jsdom
  */
 
 import { AgentStateJsonLd } from '@/components/AgentStateJsonLd'
+import { InstrumentJsonLd } from '@/components/defi/InstrumentJsonLd'
+import type { SimulatedInstrument } from '@/lib/apps/abrigo/instruments'
 import type { ChainAggregationResult } from '@/lib/dashboard/aggregator'
 import { cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -127,5 +132,64 @@ describe('AgentStateJsonLd — dashboard tool-mirroring JSON-LD', () => {
     const obj = JSON.parse(getScript(container).innerHTML)
     const status = obj.additionalProperty.find((p: { name: string }) => p.name === 'status')
     expect(status.value).toBe('live')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// InstrumentJsonLd — simulated branch honesty tests (AGENT-10 / DEFI-08 / CROSS-09)
+// ---------------------------------------------------------------------------
+
+const simulatedInstrument: SimulatedInstrument = {
+  kind: 'simulated',
+  id: 'ccop-usd-long-gamma',
+  name: 'Cobertura larga gamma cCOP/USD',
+  nameEn: 'cCOP/USD Long-Gamma Hedge',
+  chainId: 8453,
+  fixtureKey: 'ccop-usd-long-gamma',
+}
+
+describe('InstrumentJsonLd — simulated branch (anti-fishing honesty)', () => {
+  it('emits a single application/ld+json FinancialProduct block', () => {
+    const { container } = render(<InstrumentJsonLd instrument={simulatedInstrument} />)
+    const scripts = container.querySelectorAll('script[type="application/ld+json"]')
+    expect(scripts).toHaveLength(1)
+    const obj = JSON.parse(getScript(container).innerHTML)
+    expect(obj['@context']).toBe('https://schema.org')
+    expect(obj['@type']).toBe('FinancialProduct')
+  })
+
+  it('does NOT emit strike, slope, or address PropertyValue (anti-fishing — CROSS-09)', () => {
+    const { container } = render(<InstrumentJsonLd instrument={simulatedInstrument} />)
+    const html = getScript(container).innerHTML
+    // None of these fabricated fields may appear in the simulated JSON-LD
+    expect(html).not.toMatch(/\bstrike\b/i)
+    expect(html).not.toMatch(/\bslope\b/i)
+    expect(html).not.toMatch(/\baddress\b/i)
+    // Confirm no PropertyValue named strike/slope/address
+    const obj = JSON.parse(html)
+    const names = (obj.additionalProperty as Array<{ name: string }>).map((p) => p.name)
+    expect(names).not.toContain('strike')
+    expect(names).not.toContain('slope')
+    expect(names).not.toContain('address')
+  })
+
+  it('carries simulated:true PropertyValue (honest agent signal)', () => {
+    const { container } = render(<InstrumentJsonLd instrument={simulatedInstrument} />)
+    const obj = JSON.parse(getScript(container).innerHTML)
+    const simProp = (obj.additionalProperty as Array<{ name: string; value: string }>).find(
+      (p) => p.name === 'simulated',
+    )
+    expect(simProp).toBeDefined()
+    expect(simProp?.value).toBe('true')
+  })
+
+  it('carries provenance PropertyValue citing fork-fixture data source', () => {
+    const { container } = render(<InstrumentJsonLd instrument={simulatedInstrument} />)
+    const obj = JSON.parse(getScript(container).innerHTML)
+    const provProp = (obj.additionalProperty as Array<{ name: string; value: string }>).find(
+      (p) => p.name === 'provenance',
+    )
+    expect(provProp).toBeDefined()
+    expect(provProp?.value).toMatch(/fork-fixture/i)
   })
 })

@@ -2,8 +2,13 @@
 // Phase 2 Wave 0 — research collection schema tests
 // Mirrors the pattern from tests/unit/velite-schema.test.ts (iteration schema).
 // Uses safeParse directly on researchSchema — no Velite build pipeline invoked.
+//
+// Wave 3 (05.1-03): extends with velite non-collision assertion (DEFI-09).
+// Asserts that veliteRoot === 'content' and researchPattern does NOT include
+// 'docs/book' — proving docs/book/ is outside the Velite glob and never
+// perturbs the research build.
 import { describe, expect, it } from 'vitest'
-import { researchSchema } from '../../velite.config'
+import { researchPattern, researchSchema, veliteRoot } from '../../velite.config'
 
 const validBase = {
   slug: 'pair-d-dispatch-brief',
@@ -18,6 +23,23 @@ const validBase = {
     'Memo de diseño pre-comprometido para la etapa 2 del par D (Y=COP/USD, M=spread de swaps, X=par D).',
   summary_en: 'Pre-committed design memo for Pair D stage 2 (Y=COP/USD, M=swap spread, X=pair D).',
 }
+
+describe('velite config non-collision (DEFI-09)', () => {
+  // M2: veliteRoot and researchPattern exported from velite.config.ts
+  // These consts gate that docs/book/ is outside the Velite root and glob.
+
+  it('veliteRoot is "content" — docs/book/ is outside the Velite root', () => {
+    expect(veliteRoot).toBe('content')
+  })
+
+  it('researchPattern starts with "research/" — glob never reaches docs/book/', () => {
+    expect(researchPattern.startsWith('research/')).toBe(true)
+  })
+
+  it('researchPattern does NOT include "docs/book" — no build perturbation', () => {
+    expect(researchPattern.includes('docs/book')).toBe(false)
+  })
+})
 
 describe('velite research schema', () => {
   // Test 1: valid entry with all required fields and omitted optional external_url
