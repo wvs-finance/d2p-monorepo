@@ -4,6 +4,12 @@
 // Note: folder is a11y-wallet-check (no _ prefix) — Next.js treats _folders as private/non-routed.
 // Provides an isolated WagmiProvider wired with the mock connector so e2e tests
 // can drive a real DISCONNECTED→CONNECTING→CONNECTED transition.
+//
+// IMPORTANT: The wagmi mock() connector is NOT surfaced in the RainbowKit modal.
+// RainbowKit builds its visible wallet list from its own wallet registry (connectorsForWallets),
+// not from raw wagmi connectors passed to createConfig. The TEST-ONLY connect button below
+// (calling useConnect directly) is the deterministic path for the connect-SUCCESS e2e assertion.
+// The RainbowKit modal is exercised only for open/close/focus-return tests (which work fine).
 
 import '@rainbow-me/rainbowkit/styles.css'
 
@@ -13,7 +19,7 @@ import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { celo } from 'viem/chains'
-import { http, WagmiProvider, createConfig } from 'wagmi'
+import { http, WagmiProvider, createConfig, useConnect } from 'wagmi'
 
 // Minimal audit config: Celo only, mock connector, no WalletConnect (not needed here).
 // This provider tree is nested inside the layout's real DefiProviders; the inner
@@ -54,6 +60,26 @@ const rbkTheme = lightTheme({
   overlayBlur: 'none',
 })
 
+// TEST-ONLY connect control — sits OUTSIDE the RainbowKit modal.
+// Calls wagmi useConnect directly with the mock connector so the connect-success
+// focus assertion (focus → <output>) is deterministically drivable by e2e tests.
+// The RainbowKit modal does NOT surface the wagmi mock() connector (it uses its
+// own wallet registry) — this button is the correct connect path for tests.
+// data-testid="test-connect-btn" makes it easy to target without fragile text matching.
+function TestConnectButton() {
+  const { connect } = useConnect()
+  return (
+    <button
+      type="button"
+      data-testid="test-connect-btn"
+      onClick={() => connect({ connector: mockConnector })}
+      className="rounded-[var(--radius)] border border-border-default bg-bg-surface px-3 py-1.5 text-xs text-text-secondary"
+    >
+      [TEST] Conectar con mock
+    </button>
+  )
+}
+
 export function AuditShell() {
   const [queryClient] = useState(() => new QueryClient())
 
@@ -69,8 +95,11 @@ export function AuditShell() {
               <p className="text-sm text-text-muted">
                 Superficie de auditoría DEFI-06. Solo disponible en desarrollo y e2e.
               </p>
-              {/* Non-readOnly WalletPanel: renders ConnectButton in DISCONNECTED state */}
-              <WalletPanel strings={AUDIT_STRINGS} />
+              {/* Non-readOnly WalletPanel: renders ConnectButton in DISCONNECTED state.
+                  lang="es-CO" so the SR-only <output> status labels are pronounced correctly. */}
+              <WalletPanel strings={AUDIT_STRINGS} lang="es-CO" />
+              {/* TEST-ONLY: drives mock connect outside RainbowKit modal (see module comment above) */}
+              <TestConnectButton />
             </div>
           </main>
         </RainbowKitProvider>

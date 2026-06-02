@@ -256,8 +256,13 @@ export default async function InstrumentDetailPage({
 
           {/* Right column — 40% at md+ */}
           <div className="w-full md:w-2/5 mt-6 md:mt-0">
-            {/* WalletPanel readOnly — no connect/switch affordance for simulated */}
-            <WalletPanel strings={walletStrings} readOnly />
+            {/* WalletPanel readOnly — no connect/switch affordance for simulated.
+                lang threaded from RSC locale so SR pronounces es-CO labels correctly (WCAG 3.1.2). */}
+            <WalletPanel
+              strings={walletStrings}
+              readOnly
+              lang={locale.startsWith('es') ? 'es-CO' : 'en'}
+            />
           </div>
         </div>
       </main>
@@ -373,8 +378,9 @@ export default async function InstrumentDetailPage({
 
         {/* Right column — 40% at md+ */}
         <div className="w-full md:w-2/5 mt-6 md:mt-0">
-          {/* WalletPanel — per-instrument; NOT global header */}
-          <WalletPanel strings={walletStrings} />
+          {/* WalletPanel — per-instrument; NOT global header.
+              lang threaded from RSC locale so SR pronounces es-CO labels correctly (WCAG 3.1.2). */}
+          <WalletPanel strings={walletStrings} lang={locale.startsWith('es') ? 'es-CO' : 'en'} />
         </div>
       </div>
     </main>

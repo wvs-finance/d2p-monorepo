@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: 05.2-01 Tasks 1+2 complete — checkpoint Task 3 (Accessibility Auditor gate pending)
-last_updated: "2026-06-02T17:23:29.835Z"
+stopped_at: 05.2-01 complete — DEFI-06 marked [x] in REQUIREMENTS.md; real SR speech deferred to manual NVDA/VoiceOver pass
+last_updated: "2026-06-02T18:03:34.375Z"
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 39
-  completed_plans: 37
-  percent: 60
+  completed_plans: 38
+  percent: 97
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-02
-**Session type:** Plan execution (05.1-01 complete — data layer freeze: cashflow.ts, schematic payoff, discriminated union, all 5 consumers narrowed)
-**Stopped at:** 05.2-01 Tasks 1+2 complete — checkpoint Task 3 (Accessibility Auditor gate pending)
+**Session type:** Plan execution (05.2-01 complete — DEFI-06 wallet connect modal a11y: scoped live region, lang fix, connect-success focus, durable e2e)
+**Stopped at:** 05.2-01 complete — DEFI-06 marked [x] in REQUIREMENTS.md; real SR speech deferred to manual NVDA/VoiceOver pass
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Milestone complete
 
 **Progress:**
-[██████░░░░] 60%
+[██████████] 97%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -102,6 +102,9 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| Explicit role='status' DOM attribute blocked by Biome noRedundantRoles + useSemanticElements on <output> (Plan 05.2-01) | <output> already carries implicit role=status via HTML-AAM; Biome correctly blocks the redundant attribute; defense-in-depth via explicit aria-live='polite' which IS present | All WalletPanel live-region tests assert role attr is null + aria-live is 'polite'; do NOT add explicit role to <output> |
+| wagmi mock() connector is NOT surfaced in RainbowKit modal (Plan 05.2-01) | wagmi and RainbowKit use separate connector registries; mock() registers with wagmi only; RainbowKit's modal list comes from connectorsForWallets | Connect-success e2e must use TestConnectButton (outside modal); RainbowKit modal tests cover open/close/focus-return only |
+| Tab-loop navigation required in e2e tests for ConnectButton trigger (Plan 05.2-01) | ConnectButton trigger is tab stop ~7 after nav links; single page.keyboard.press('Tab') lands on first nav <a>, not the button; loop up to 15 presses checking activeElement | All e2e tests targeting ConnectButton via keyboard must use a Tab loop with activeElement check |
 | SimuladoBadge gains optional label prop for i18n-aware rendering (Plan 05.1-03) | Plan requires t('simulated.badge') as grep-verifiable key_link; component had text hardcoded; optional label with default='SIMULADO' is backward-compatible | All future SimuladoBadge usages should pass label={t('simulated.badge')} for locale-awareness |
 | veliteRoot + researchPattern exported from velite.config.ts for non-collision test (Plan 05.1-03) | Mechanical non-collision proof: test imports consts and asserts veliteRoot==='content' and pattern excludes docs/book — avoids fragile readFileSync+regex approach | Any future Velite config change must keep veliteRoot and researchPattern as exported consts |
 | READ_ONLY injected via WalletPanel.readOnly prop; deriveWalletState body untouched (Plan 05.1-02) | readOnly=true forces 'READ_ONLY' as const before deriveWalletState is called; the pure deriver remains a 4-output function | All future simulated-instrument pages use readOnly=true on WalletPanel; never add READ_ONLY to deriveWalletState |

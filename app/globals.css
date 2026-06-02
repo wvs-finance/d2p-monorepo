@@ -165,3 +165,17 @@ body {
   --rk-colors-modalText: var(--text-primary);
   --rk-colors-modalTextSecondary: var(--text-secondary);
 }
+
+/* DEFI-06 FIX 3 — ochre focus ring on the RainbowKit connect trigger (WCAG 2.4.7 / brand token).
+   The UA-default blue ring (rgb(11,87,208)) passes 2.4.7 but ignores the locked ochre accent.
+   This override applies the design system focus token to the ConnectButton trigger.
+   If RainbowKit's internal vanilla-extract cascade overrides this, see WAIVER-RBK-FOCUS below. */
+[data-rk] button:focus-visible {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+
+/* WAIVER-RBK-FOCUS: if the ochre focus ring above is suppressed by RainbowKit's own
+   vanilla-extract styles (higher specificity or inline styles), the UA-default blue ring
+   still passes WCAG 2.4.7. This is a brand-consistency issue, not an accessibility failure.
+   Record here alongside WAIVER-05-03 (accentColor contrast). Re-audit if RainbowKit is upgraded. */
