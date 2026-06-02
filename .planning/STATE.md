@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 07-00-PLAN.md
-last_updated: "2026-06-02T23:13:45.993Z"
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-06-02T23:27:59.705Z"
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 48
-  completed_plans: 44
-  percent: 92
+  completed_plans: 45
+  percent: 94
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-02
-**Session type:** Plan execution (05.2-01 complete — DEFI-06 wallet connect modal a11y: scoped live region, lang fix, connect-success focus, durable e2e)
-**Stopped at:** Completed 07-00-PLAN.md
+**Session type:** Plan execution (07-01 complete — DecisionPipelineTrace 6-stage vertical stepper + es-CO-first somnia.trace.* copy)
+**Stopped at:** Completed 07-01-PLAN.md
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Milestone complete
 
 **Progress:**
-[█████████░] 92%
+[█████████░] 94%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -97,6 +97,7 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 06 P02 | 8 | 2 tasks | 9 files |
 | Phase 06 P04 | 11 | 2 tasks | 9 files |
 | Phase 07-agent-reasoning-position-surface P00 | 8 | 2 tasks | 13 files |
+| Phase 07-agent-reasoning-position-surface P01 | 9 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,8 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| decisionToPositionDelta called with HedgeDecisionView-compatible shape (pending:false) at call site in DecisionPipelineTrace (Plan 07-01) | bridge.ts reads only action + sizeBps; DecisionTraceView carries both; pending:false is correct (trace view is always settled) | DecisionPipelineTrace.tsx inline shape construction — no bridge.ts changes needed, no type casting |
+| feed.consensusCaveat reused structurally via TraceStrings.consensusCaveat (MAJOR-9 enforced, Plan 07-01) | Avoids es-CO/en drift between feed and trace namespaces; single source of operator-supplied caveat copy | All Phase-7 trace pages thread consensusCaveat from feed.consensusCaveat; trace.consensusCaveat key absent from locale files |
 | getDecisionTraceById additive join by size-leg requestId; HedgeDecisionView.decisionId unchanged for Phase-6 compatibility (Plan 07-00) | Snapshot stores SIZE-leg requestId in decisionId field; additive DecisionTraceView does not touch this field; HedgeDecisionFeed/Card/somnia-reader tests compile and pass unchanged | All Phase-7 trace consumers use getDecisionTraceById; Phase-6 consumers use getHedgeDecisions unchanged |
 | LivenessSource<T> ships snapshot+polling only; liveness='live' structurally absent; honker-node never in package.json (Plan 07-00) | honker is an embedded N-API lib with no Dockerfile/SSE — deferred to Phase 7.x pending a continuous keeper cadence | Phase-7 UI uses snapshotSource by default; pollingSource for SOMNIA_LIVE; live slot reserved for deferred honker phase |
 | adaptWrapper is the single §2 chokepoint; stale baselines and realized-costs structurally unreachable; WRAPPER_DEPLOYED default false (Plan 07-00) | LongGammaWrapper ABI is mid-dev/moving; adapter encodes mapping rules so JSX cannot violate them; flag re-derives from final ABI before flipping | All Phase-7 position panel code imports only WrapperPositionView; never raw ABI types |
