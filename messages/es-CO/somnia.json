@@ -7,6 +7,8 @@
       "latestValue": "Valor más reciente",
       "history": "Histórico MacroReceived",
       "capturedLabel": "capturado",
+      "printTimestampLabel": "Marca de tiempo del precio",
+      "printTimestampUnavailable": "Marca de tiempo del precio — no disponible",
       "provenanceLabel": "Somnia testnet · agente macro (POC)",
       "provenanceAriaLabel": "Somnia testnet · impresión macro de agente (POC) · registrado",
       "caveat": "Datos de agente Somnia testnet. Solo para uso de laboratorio (POC). La entrada de consenso es suministrada por el operador, no por el mercado.",

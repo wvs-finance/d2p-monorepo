@@ -41,6 +41,8 @@ export default async function AgentPage() {
     latestValue: t('panel.latestValue'),
     history: t('panel.history'),
     capturedLabel: t('panel.capturedLabel'),
+    printTimestampLabel: t('panel.printTimestampLabel'),
+    printTimestampUnavailable: t('panel.printTimestampUnavailable'),
     provenanceLabel: t('panel.provenanceLabel'),
     provenanceAriaLabel: t('panel.provenanceAriaLabel'),
     caveat: t('panel.caveat'),

@@ -30,6 +30,8 @@ export interface MacroPanelStrings {
   latestValue: string
   history: string
   capturedLabel: string
+  printTimestampLabel: string
+  printTimestampUnavailable: string
   provenanceLabel: string
   provenanceAriaLabel: string
   caveat: string
@@ -135,11 +137,11 @@ export function MacroDataPanel({ locale, strings }: MacroDataPanelProps) {
               MacroPrintView has NO observedAt field — there is no real observation time.
               This cell MUST be "—"; never substitute any other date. */}
           <div className="flex items-start justify-between gap-4 py-3">
-            <dt className="sr-only">Marca de tiempo del precio</dt>
+            <dt className="sr-only">{strings.printTimestampLabel}</dt>
             <dd
               className="font-mono text-sm text-text-muted"
               data-testid="print-timestamp"
-              aria-label="Marca de tiempo del precio — no disponible"
+              aria-label={strings.printTimestampUnavailable}
             >
               {/* B3: unconditional em-dash */}
               {'—'}

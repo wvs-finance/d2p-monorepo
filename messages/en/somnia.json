@@ -7,6 +7,8 @@
       "latestValue": "Latest value",
       "history": "MacroReceived history",
       "capturedLabel": "captured",
+      "printTimestampLabel": "Price timestamp",
+      "printTimestampUnavailable": "Price timestamp — not available",
       "provenanceLabel": "Somnia testnet · macro agent (POC)",
       "provenanceAriaLabel": "Somnia testnet · agent macro print (POC) · recorded",
       "caveat": "Somnia testnet agent data. Laboratory use only (POC). Consensus input is operator-supplied, not market-derived.",

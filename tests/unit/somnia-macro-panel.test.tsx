@@ -55,6 +55,8 @@ const TEST_STRINGS = {
   latestValue: 'Valor más reciente',
   history: 'Histórico',
   capturedLabel: 'capturado',
+  printTimestampLabel: 'Marca de tiempo del precio',
+  printTimestampUnavailable: 'Marca de tiempo del precio — no disponible',
   provenanceLabel: 'Somnia testnet · agente macro (POC)',
   provenanceAriaLabel: 'Somnia testnet · agente macro (POC) · registrado',
   caveat: 'Datos de agente Somnia testnet. Solo para uso de laboratorio (POC).',
