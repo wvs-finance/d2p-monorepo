@@ -53,13 +53,13 @@ const STRINGS: WalletPanelStrings = {
   },
 }
 
-// Helper: get the scoped status node (<output> — implicit role="status" aria-live="polite").
+// Helper: get the scoped status node (<output> — explicit role="status" aria-live="polite").
 function getStatusNode(): HTMLOutputElement | null {
   return document.querySelector('output')
 }
 
-describe('WalletPanel DEFI-06 — scoped <output> live region (implicit role=status)', () => {
-  it('(a) an <output> element (implicit role=status) exists in the DISCONNECTED state', () => {
+describe('WalletPanel DEFI-06 — scoped <output> live region (implicit role=status + explicit aria-live + lang)', () => {
+  it('(a) an <output> element (implicit role=status) with explicit aria-live=polite exists in DISCONNECTED state', () => {
     mockWagmiStatus = 'disconnected'
     mockWagmiChain = undefined
 
@@ -68,6 +68,33 @@ describe('WalletPanel DEFI-06 — scoped <output> live region (implicit role=sta
     const statusNode = getStatusNode()
     expect(statusNode).not.toBeNull()
     expect(statusNode).toBeInTheDocument()
+    // role="status" is IMPLICIT on <output> (HTML-AAM).
+    // Biome's noRedundantRoles + useSemanticElements correctly block an explicit DOM attribute.
+    // Defense-in-depth: explicit aria-live="polite" (not all AT stacks apply implicit live region).
+    // The implicit role is verified via element type (output = status in HTML-AAM).
+    expect(statusNode?.getAttribute('role')).toBeNull()
+    expect(statusNode?.getAttribute('aria-live')).toBe('polite')
+    expect(statusNode?.tagName.toLowerCase()).toBe('output')
+  })
+
+  it('(a) lang defaults to es-CO on the <output> node (WCAG 3.1.2)', () => {
+    mockWagmiStatus = 'disconnected'
+    mockWagmiChain = undefined
+
+    render(<WalletPanel strings={STRINGS} />)
+
+    const statusNode = getStatusNode()
+    expect(statusNode?.getAttribute('lang')).toBe('es-CO')
+  })
+
+  it('(a) lang prop overrides default (en locale path)', () => {
+    mockWagmiStatus = 'disconnected'
+    mockWagmiChain = undefined
+
+    render(<WalletPanel strings={STRINGS} lang="en" />)
+
+    const statusNode = getStatusNode()
+    expect(statusNode?.getAttribute('lang')).toBe('en')
   })
 
   it('(a) the <output> node contains ONLY the state label text (DISCONNECTED)', () => {

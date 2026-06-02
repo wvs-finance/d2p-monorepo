@@ -8,6 +8,13 @@
 //   WCAG 4.1.3          — <output> (role=status) text changes across state transitions.
 //   connect-success     — focus lands on <output> node, not <body>, when trigger unmounts.
 //
+// IMPORTANT — RainbowKit / wagmi mock connector:
+//   The wagmi mock() connector is NOT surfaced in the RainbowKit modal UI (RainbowKit uses
+//   its own wallet registry, not raw wagmi connectors). The connect-success e2e path is
+//   therefore driven by the TEST-ONLY [data-testid="test-connect-btn"] button in AuditShell,
+//   which calls useConnect({ connector: mockConnector }) directly. This is the deterministic
+//   connect path. The RainbowKit modal is exercised only for open/close/focus-return tests.
+//
 // Prerequisites: pnpm build with NEXT_PUBLIC_E2E=true (set in playwright.config.ts webServer.env).
 
 import { expect, test } from '@playwright/test'
@@ -39,12 +46,24 @@ test.describe('DEFI-06 — keyboard operability', () => {
     // Wait for client hydration
     await page.waitForTimeout(800)
 
-    // Tab from body to the ConnectButton trigger
-    await page.keyboard.press('Tab')
+    // The ConnectButton trigger is NOT the first focusable element — the nav links come first
+    // (tab order: d2p Finance → Apps → Research → Team → About → lang switcher → ConnectButton).
+    // Tab through the document until we land on a button labelled with the connect text.
+    // Max 15 tabs to avoid infinite loop; the audit confirmed trigger is at index ~6-7.
+    let triggerFound = false
+    for (let i = 0; i < 15; i++) {
+      await page.keyboard.press('Tab')
+      const { tag, text } = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null
+        return { tag: el?.tagName?.toLowerCase() ?? '', text: el?.textContent?.trim() ?? '' }
+      })
+      if (tag === 'button' && /Conectar|Connect/i.test(text)) {
+        triggerFound = true
+        break
+      }
+    }
 
-    // The focused element must be the ConnectButton trigger (a button element)
-    const focusedTag = await page.evaluate(() => document.activeElement?.tagName?.toLowerCase())
-    expect(focusedTag).toBe('button')
+    expect(triggerFound, 'ConnectButton trigger must be reachable via Tab').toBe(true)
 
     // Focus ring must be visible (WCAG 2.4.7 — not asserting exact style, checking outline)
     const hasOutline = await page.evaluate(() => {
@@ -64,8 +83,17 @@ test.describe('DEFI-06 — keyboard operability', () => {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(800)
 
-    // Tab to trigger, press Enter
-    await page.keyboard.press('Tab')
+    // Tab through nav to reach the ConnectButton trigger (at tab index ~6-7, after nav links).
+    for (let i = 0; i < 15; i++) {
+      await page.keyboard.press('Tab')
+      const { tag, text } = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null
+        return { tag: el?.tagName?.toLowerCase() ?? '', text: el?.textContent?.trim() ?? '' }
+      })
+      if (tag === 'button' && /Conectar|Connect/i.test(text)) break
+    }
+
+    // Press Enter to open modal
     await page.keyboard.press('Enter')
 
     // RainbowKit modal should be visible (it renders a dialog or role=dialog)
@@ -86,11 +114,15 @@ test.describe('DEFI-06 — focus restoration on modal close', () => {
   })
 
   test('Escape closes modal and focus returns to the ConnectButton trigger', async ({ page }) => {
-    // Open modal via keyboard
-    await page.keyboard.press('Tab')
-    const triggerText = await page.evaluate(() =>
-      (document.activeElement as HTMLElement)?.textContent?.trim(),
-    )
+    // Tab through nav to reach the ConnectButton trigger (at tab index ~6-7, after nav links).
+    for (let i = 0; i < 15; i++) {
+      await page.keyboard.press('Tab')
+      const { tag, text } = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null
+        return { tag: el?.tagName?.toLowerCase() ?? '', text: el?.textContent?.trim() ?? '' }
+      })
+      if (tag === 'button' && /Conectar|Connect/i.test(text)) break
+    }
     await page.keyboard.press('Enter')
 
     // Wait for modal to open
@@ -114,16 +146,7 @@ test.describe('DEFI-06 — focus restoration on modal close', () => {
     await trigger.click()
     await expect(page.locator('[role="dialog"]').first()).toBeVisible({ timeout: 3000 })
 
-    // Find and click the close button inside the modal (RainbowKit close button)
-    const closeBtn = page
-      .locator('[role="dialog"]')
-      .first()
-      .locator('button[aria-label], button[title]')
-      .filter({ hasText: /close|cerrar/i })
-      .or(page.locator('[role="dialog"]').first().locator('button').filter({ hasText: '' }))
-      .first()
-
-    // Try to find the close button by aria-label pattern typical in RainbowKit
+    // Try to find and click the close button inside the modal (RainbowKit close button)
     const closeByAriaLabel = page.locator('[role="dialog"]').first().locator('[aria-label="Close"]')
     const closeByTitle = page.locator('[role="dialog"]').first().locator('[title="Close"]')
 
@@ -160,13 +183,46 @@ test.describe('DEFI-06 — SR announcement via <output> node', () => {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(800)
 
-    // <output> has implicit role="status" aria-live="polite"
+    // <output> has explicit role="status" aria-live="polite" (and implicit from HTML element)
     const outputNode = page.locator('output.sr-only')
     await expect(outputNode).toBeAttached()
     await expect(outputNode).toHaveText('Desconectado')
   })
 
-  test('<output> node text updates to CONNECTED_READY after mock connect', async ({ page }) => {
+  test('<output> has implicit role=status (via HTML-AAM element type) and explicit aria-live=polite (DEFI-06 Issue #3)', async ({
+    page,
+  }) => {
+    await page.goto(AUDIT_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(800)
+
+    // <output> has implicit role="status" per HTML-AAM — no DOM attribute needed or added
+    // (Biome noRedundantRoles + useSemanticElements block the explicit attr as redundant).
+    // Defense-in-depth is the explicit aria-live="polite" attribute, which IS present.
+    // Verified semantically: element type is 'output' + aria-live is explicit.
+    const outputNode = page.locator('output.sr-only')
+    await expect(outputNode).toBeAttached()
+    // No explicit role attribute (implicit from <output> element type per HTML-AAM)
+    const roleAttr = await outputNode.getAttribute('role')
+    expect(roleAttr, 'role is implicit on <output> — no DOM attribute needed').toBeNull()
+    // Explicit aria-live for AT stacks that do not apply the implicit live region
+    await expect(outputNode).toHaveAttribute('aria-live', 'polite')
+  })
+
+  test('<output> has lang="es-CO" so SR announces in correct voice (WCAG 3.1.2)', async ({
+    page,
+  }) => {
+    await page.goto(AUDIT_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(800)
+
+    const outputNode = page.locator('output.sr-only')
+    await expect(outputNode).toHaveAttribute('lang', 'es-CO')
+  })
+
+  test('<output> text updates to CONNECTED_READY after test-button mock connect (deterministic path)', async ({
+    page,
+  }) => {
     await page.goto(AUDIT_ROUTE)
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(800)
@@ -175,36 +231,14 @@ test.describe('DEFI-06 — SR announcement via <output> node', () => {
     const outputNode = page.locator('output.sr-only')
     await expect(outputNode).toHaveText('Desconectado')
 
-    // Open modal and connect via the Mock Connector
-    const trigger = page.locator('button', { hasText: /Conectar billetera/i }).first()
-    await trigger.click()
+    // Drive connect via the TEST-ONLY button (NOT the RainbowKit modal — mock connector is not
+    // surfaced in the RainbowKit wallet registry, so the modal UI cannot trigger connect-success).
+    const testConnectBtn = page.locator('[data-testid="test-connect-btn"]')
+    await expect(testConnectBtn).toBeVisible()
+    await testConnectBtn.click()
 
-    // Wait for RainbowKit modal
-    const modal = page.locator('[role="dialog"]').first()
-    await expect(modal).toBeVisible({ timeout: 3000 })
-
-    // Click "Mock Connector" option in the modal (wagmi mock connector name)
-    const mockOption = modal.locator('button, [role="option"], [role="radio"]', {
-      hasText: /Mock Connector|Mock/i,
-    })
-    const mockOptionCount = await mockOption.count()
-
-    if (mockOptionCount > 0) {
-      await mockOption.first().click()
-      // Wait for the state to update to CONNECTED_READY (mock connector resolves immediately)
-      await expect(outputNode).toHaveText('Conectado', { timeout: 5000 })
-    } else {
-      // Mock Connector not visible in modal UI (RainbowKit may not surface it without WalletConnect).
-      // Fall back: close the modal and assert the output node still functions.
-      await page.keyboard.press('Escape')
-      // Output node remains in DOM and contains the state label
-      await expect(outputNode).toBeAttached()
-      test.info().annotations.push({
-        type: 'note',
-        description:
-          'Mock Connector not visible in RainbowKit modal — full connect-success path requires Accessibility Auditor sign-off.',
-      })
-    }
+    // Wait for the state to update to CONNECTED_READY (mock connector resolves immediately)
+    await expect(outputNode).toHaveText('Conectado', { timeout: 5000 })
   })
 })
 
@@ -213,55 +247,38 @@ test.describe('DEFI-06 — SR announcement via <output> node', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('DEFI-06 — connect-success focus recovery', () => {
-  test('after successful connect, focus is on <output> node, not <body>', async ({ page }) => {
+  test('after successful connect (test button), focus lands on <output> node, not <body>', async ({
+    page,
+  }) => {
     await page.goto(AUDIT_ROUTE)
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(800)
 
-    // Open modal
-    const trigger = page.locator('button', { hasText: /Conectar billetera/i }).first()
-    await trigger.click()
+    // Drive connect via the TEST-ONLY button (deterministic mock connect path).
+    // The RainbowKit modal does NOT surface the wagmi mock() connector — see module comment.
+    const testConnectBtn = page.locator('[data-testid="test-connect-btn"]')
+    await expect(testConnectBtn).toBeVisible()
+    await testConnectBtn.click()
 
-    const modal = page.locator('[role="dialog"]').first()
-    await expect(modal).toBeVisible({ timeout: 3000 })
-
-    // Try to connect via Mock Connector
-    const mockOption = modal.locator('button, [role="option"], [role="radio"]', {
-      hasText: /Mock Connector|Mock/i,
+    // Wait for DISCONNECTED branch to unmount (ConnectButton disappears)
+    await expect(page.locator('button', { hasText: /Conectar billetera/i })).not.toBeVisible({
+      timeout: 5000,
     })
-    const mockOptionCount = await mockOption.count()
 
-    if (mockOptionCount > 0) {
-      await mockOption.first().click()
+    // The useEffect in WalletPanel should move focus to the <output> node
+    const focusedEl = await page.evaluate(() => {
+      const el = document.activeElement
+      return {
+        tagName: el?.tagName?.toLowerCase(),
+        isOutput: el?.tagName?.toLowerCase() === 'output',
+        isBody: el?.tagName?.toLowerCase() === 'body',
+      }
+    })
 
-      // Wait for DISCONNECTED branch to unmount (ConnectButton disappears)
-      await expect(page.locator('button', { hasText: /Conectar billetera/i })).not.toBeVisible({
-        timeout: 5000,
-      })
-
-      // The useEffect in WalletPanel should move focus to the <output> node
-      const focusedEl = await page.evaluate(() => {
-        const el = document.activeElement
-        return {
-          tagName: el?.tagName?.toLowerCase(),
-          isOutput: el?.tagName?.toLowerCase() === 'output',
-          isBody: el?.tagName?.toLowerCase() === 'body',
-        }
-      })
-
-      expect(focusedEl.isBody, 'focus must not fall to <body> on connect-success').toBe(false)
-      expect(
-        focusedEl.isOutput,
-        'focus must land on the <output> status node on connect-success',
-      ).toBe(true)
-    } else {
-      // Mock connector not in modal — skip with note for Auditor
-      await page.keyboard.press('Escape')
-      test.info().annotations.push({
-        type: 'note',
-        description:
-          'Mock Connector not surfaced by RainbowKit modal — connect-success focus path requires Accessibility Auditor verification.',
-      })
-    }
+    expect(focusedEl.isBody, 'focus must not fall to <body> on connect-success').toBe(false)
+    expect(
+      focusedEl.isOutput,
+      'focus must land on the <output> status node on connect-success',
+    ).toBe(true)
   })
 })

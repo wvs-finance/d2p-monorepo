@@ -56,9 +56,14 @@ interface WalletPanelProps {
   /** When true, wallet state is forced to READ_ONLY (no connect/switch affordance).
    *  Used on simulated-instrument pages (fork-only, no deployed contract). */
   readOnly?: boolean
+  /** BCP-47 language tag for the panel's copy (e.g. "es-CO" or "en").
+   *  Applied to the sr-only <output> node so screen readers pronounce
+   *  the es-CO status labels with the correct voice (WCAG 3.1.2).
+   *  Defaults to "es-CO" because all WalletPanel copy is es-CO-first. */
+  lang?: string
 }
 
-export function WalletPanel({ strings, readOnly }: WalletPanelProps) {
+export function WalletPanel({ strings, readOnly, lang = 'es-CO' }: WalletPanelProps) {
   const { status, chain } = useAccount()
   const { switchChain } = useSwitchChain()
 
@@ -83,9 +88,19 @@ export function WalletPanel({ strings, readOnly }: WalletPanelProps) {
     // SR announcements are scoped to the dedicated role=status node below.
     <div className="space-y-3">
       {/* DEFI-06: scoped announcement node — announces ONLY the state label, not the whole panel.
-          <output> has implicit role="status" + aria-live="polite" (HTML semantic element).
+          <output> has implicit role="status" (HTML-AAM). role= omitted because Biome
+          lint/a11y/noRedundantRoles + useSemanticElements correctly flag it as redundant —
+          the <output> element already carries the semantic. Defense-in-depth is provided by
+          the explicit aria-live="polite" attribute (not implicit on <output> in all AT stacks).
+          lang prop applies the BCP-47 tag so SRs pronounce es-CO labels correctly (WCAG 3.1.2).
           tabIndex={-1} so focus can be programmatically moved here on connect-success. */}
-      <output ref={statusNodeRef} tabIndex={-1} className="sr-only">
+      {/* DEFI-06 scoped announcement node — announces ONLY the state label, not the whole panel.
+          <output> has implicit role="status" (HTML-AAM) — Biome's noRedundantRoles + useSemanticElements
+          correctly block an explicit role="status" attr (redundant). Defense-in-depth is provided by
+          the explicit aria-live="polite" attribute (not all AT stacks apply implicit live region to <output>).
+          lang prop applies the BCP-47 tag so SRs pronounce es-CO labels correctly (WCAG 3.1.2).
+          tabIndex={-1} so focus can be programmatically moved here on connect-success. */}
+      <output ref={statusNodeRef} aria-live="polite" tabIndex={-1} lang={lang} className="sr-only">
         {strings.statusLabels[walletState]}
       </output>
 
