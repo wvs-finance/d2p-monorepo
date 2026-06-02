@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: "05.1-02 complete (4/4 tasks, 40 tests GREEN, all Wave-0 stubs flipped); next: 05.1-03"
-last_updated: "2026-06-02T15:07:27.277Z"
+stopped_at: 05.1-03 tasks 1-3 complete (checkpoint Task 4 awaiting native copy sign-off)
+last_updated: "2026-06-02T15:24:47.298Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
   percent: 60
 ---
 
@@ -17,7 +17,7 @@ progress:
 
 **Last updated:** 2026-06-02
 **Session type:** Plan execution (05.1-01 complete — data layer freeze: cashflow.ts, schematic payoff, discriminated union, all 5 consumers narrowed)
-**Stopped at:** 05.1-02 complete (4/4 tasks, 40 tests GREEN, all Wave-0 stubs flipped); next: 05.1-03
+**Stopped at:** 05.1-03 tasks 1-3 complete (checkpoint Task 4 awaiting native copy sign-off)
 
 ---
 
@@ -88,6 +88,7 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 05 P04 | 9 | 2 tasks | 14 files |
 | Phase 05.1 P01 | 6 | 3 tasks | 11 files |
 | Phase 05.1 P02 | 9 | 4 tasks | 11 files |
+| Phase 05.1 P03 | 11 | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
+| SimuladoBadge gains optional label prop for i18n-aware rendering (Plan 05.1-03) | Plan requires t('simulated.badge') as grep-verifiable key_link; component had text hardcoded; optional label with default='SIMULADO' is backward-compatible | All future SimuladoBadge usages should pass label={t('simulated.badge')} for locale-awareness |
+| veliteRoot + researchPattern exported from velite.config.ts for non-collision test (Plan 05.1-03) | Mechanical non-collision proof: test imports consts and asserts veliteRoot==='content' and pattern excludes docs/book — avoids fragile readFileSync+regex approach | Any future Velite config change must keep veliteRoot and researchPattern as exported consts |
 | READ_ONLY injected via WalletPanel.readOnly prop; deriveWalletState body untouched (Plan 05.1-02) | readOnly=true forces 'READ_ONLY' as const before deriveWalletState is called; the pure deriver remains a 4-output function | All future simulated-instrument pages use readOnly=true on WalletPanel; never add READ_ONLY to deriveWalletState |
 | useMounted guard in WalletStatusPill: READ_ONLY bypasses guard; others fall back to DISCONNECTED (Plan 05.1-02) | Fixes React #418 hydration mismatch where SSR emits DISCONNECTED but client briefly flashes CONNECTING during wagmi auto-reconnect | WalletStatusPill must always gate connection-derived states behind useMounted; prop-injected states (READ_ONLY) bypass the guard |
 | PayoffDiagram data= prop: RSC computes PayoffPoint[] and passes to client island (Plan 05.1-02) | Removed internal generatePayoffData call; caller (RSC page) generates data so the component is a pure renderer | All PayoffDiagram callers must generate the data array in the RSC body before passing to PayoffDiagramClient |

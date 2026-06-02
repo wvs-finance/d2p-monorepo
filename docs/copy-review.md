@@ -250,3 +250,52 @@ for the WalletPanel 4 states, PoolStatePanel, and route error boundary. Authored
 - [ ] "billetera" vs "cartera" usage confirmed against Colombian DeFi conventions
 - [ ] Anti-marketing-slop grep passes on new `wallet.*`, `pool.*`, `errors.*` keys
 - [ ] i18n parity (es-CO ↔ en) symmetric across all new keys
+
+---
+
+## Phase 05.1-03 review (simulated-surface copy — instruments.simulated/provenance/cashflow/params/wallet.read_only)
+
+**Scope:** `messages/es-CO/instruments.json` and `messages/en/instruments.json` — new key groups
+added in Plan 05.1-03 for the SIMULADO read-only surface. Authored es-CO FIRST (Juan Serrano /
+jmsbpp, 2026-06-02), en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `instruments.simulated.*` — SIMULADO badge, aria sentence, caption for the fork-only surface
+- `instruments.provenance.*` — fork_fixture / spec / schematic tier names + aria sentences per tier
+- `instruments.cashflow.*` — waterfall section heading + per-row labels
+- `instruments.params.*` additions — fork-test param labels
+- `instruments.wallet.read_only_status` / `instruments.wallet.read_only_label`
+
+**es-CO authoring notes (Plan 05.1-03 author: Juan Serrano / jmsbpp):**
+- "SIMULADO" — all-caps status badge, matching financial UI register. Not gendered.
+- "Base fork — pool simulado, sin despliegue en cadena" — "en cadena" is established Colombian DeFi vocabulary. "sin despliegue" is technically precise.
+- "Fork fixture" — retained as technical compound noun (no established Spanish equivalent in DeFi tooling).
+- "Valor sembrado en pruebas sobre pool simulado — no es dato de mercado" — "sembrado" (seeded) is the established agricultural metaphor imported into DeFi. "dato de mercado" uses partitive (no article), more natural in es-CO for abstract categories.
+- "Especificacion" — correct nominal register for spec-tier provenance; not "Especificado".
+- "Esquematico" — standard Spanish adjective; preferred over "ilustrativo" (aria sentence uses the longer form for precision).
+- "Funcion de liquidacion derivada del contrato" — "funcion de liquidacion" is established DeFi/finance terminology for settlement function.
+- "Flujo de caja" — standard Colombian finance term; not "flujo monetario" or calque "cash flow".
+- "Prima (deposito)" — "prima" is canonical options/insurance term in es-CO finance; "(deposito)" clarifies Panoptic deposit mechanics.
+- "Costo de datos medido" — "medido" for metered; "contabilizado" rejected (accounting-specific).
+- "Residual reclamable" — "reclamable" for claimable; "reclamar" is standard verb for claiming collateral residual.
+- "ya neteado en el colateral sobreviviente" — "neteado" is the es-CO DeFi verb for netted (widely used). "colateral sobreviviente" is the technical term from Panoptic share-burn.
+- "Strike del chunk (offset)" — "chunk" retained as Panoptic protocol vocabulary; "(offset)" clarifies tick-offset, not absolute strike.
+- "Liquidez sembrada" — extends the seeding metaphor for fork-fixture pool state.
+- "Tasa (semilla)" — "tasa" for rate; "(semilla)" clarifies test/seed value.
+- "Parametros de prueba de fork — no son geometria elegida" — "geometria elegida" is precise: fork artifacts from InvalidTickBound clearance, not designer-chosen hedge geometry.
+- "Solo lectura" — established UI term; no accent on "solo" (RAE 2010 adverb-accent deprecation; es-CO follows RAE).
+- "sin transaccion — fork simulado" — lower-case annotation; "sin transaccion" (singular) is more precise than plural.
+- Copy register: informational, laconic, finance/DeFi-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/instruments.json` (05.1-03 additions) | _pending native review_ | | |
+| `messages/en/instruments.json` (05.1-03 additions) | _pending native review_ | | |
+
+### Phase 05.1-03 instruments Sign-off (CROSS-10 gate)
+
+- [ ] es-CO simulated/provenance/cashflow/params/wallet.read_only copy reviewed by native Colombian Spanish speaker
+- [ ] Technical vocabulary ("neteado", "sembrado", "liquidacion", "Prima", "Residual reclamable") reviewed against Colombian DeFi/finance conventions
+- [ ] "Solo lectura" (no accent on "solo") confirmed correct per RAE 2010 adverb-accent rule
+- [ ] Anti-marketing-slop grep passes on all new `instruments.*` keys
+- [ ] i18n parity gate: `pnpm vitest run tests/unit/i18n-coverage.test.ts` (instruments namespace) GREEN
