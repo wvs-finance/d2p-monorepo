@@ -75,11 +75,13 @@ export function ProvenancePill({ tier, ariaLabel }: ProvenancePillProps) {
 // ---------------------------------------------------------------------------
 
 interface SimuladoBadgeProps {
+  /** Visible badge label (locale-aware). Defaults to "SIMULADO" for backward compat. */
+  label?: string | undefined
   /** Full sentence for screen readers: "Instrumento simulado — no ha sido desplegado en cadena" */
   ariaLabel: string
 }
 
-export function SimuladoBadge({ ariaLabel }: SimuladoBadgeProps) {
+export function SimuladoBadge({ label = 'SIMULADO', ariaLabel }: SimuladoBadgeProps) {
   // NOT the small pill — uses status-parked (amber) to signal non-production.
   // Visible at 360px (text-sm, not truncated).
   return (
@@ -88,7 +90,7 @@ export function SimuladoBadge({ ariaLabel }: SimuladoBadgeProps) {
       aria-label={ariaLabel}
     >
       <FlaskConical className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>SIMULADO</span>
+      <span>{label}</span>
     </span>
   )
 }
