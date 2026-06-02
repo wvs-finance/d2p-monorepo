@@ -249,3 +249,84 @@ test.describe('CROSS-09 — No fabricated live-only params on simulated route', 
     }
   })
 })
+
+// ---------------------------------------------------------------------------
+// CROSS-09 gate: all THREE provenance tiers render as pills on the simulated route
+// fork-fixture (params table) + spec (cashflow waterfall) + schematic (payoff diagram)
+// This test GATES the 3-pill decision — ensures no tier regresses to text-only annotation.
+// ---------------------------------------------------------------------------
+
+test.describe('CROSS-09 — three provenance tiers render as pills (gate)', () => {
+  test('fork-fixture pill renders as a span pill on the simulated detail route', async ({
+    page,
+  }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+
+    // ProvenancePill renders a span with aria-label (the full provenance sentence)
+    // and visible tier text. fork-fixture pill has aria-label containing 'fork-fixture_aria' text.
+    // Use the visible tier text 'fork-fixture' as the anchor.
+    const forkFixturePill = page
+      .locator('span[aria-label]')
+      .filter({ hasText: 'fork-fixture' })
+      .first()
+    await expect(forkFixturePill).toBeVisible()
+  })
+
+  test('spec pill renders as a span pill on the simulated detail route', async ({ page }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+
+    // spec tier pill — visible text is 'Especificación' (es-CO) or 'Specification' (en).
+    // Use aria-label presence to confirm it's a ProvenancePill, not freestanding text.
+    // The spec_aria key: "Especificado en planes Phase-8 de abrigo-somnia — aún no está en cadena"
+    const specPill = page
+      .locator('span[aria-label]')
+      .filter({ hasText: /especificac|specification/i })
+      .first()
+    await expect(specPill).toBeVisible()
+  })
+
+  test('schematic pill renders as a span pill adjacent to the payoff diagram', async ({ page }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+
+    // schematic tier pill — visible text is 'Esquemático' (es-CO) or 'Schematic' (en).
+    // aria-label is provenance.schematic_aria:
+    //   "Forma ilustrativa — no es una función de liquidación derivada del contrato"
+    const schematicPill = page
+      .locator('span[aria-label]')
+      .filter({ hasText: /esquemát|schematic/i })
+      .first()
+    await expect(schematicPill).toBeVisible()
+  })
+
+  test('all three provenance tiers are pills (aria-label present on each)', async ({ page }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+
+    // Collect all span[aria-label] elements on the page; confirm the three tier labels exist.
+    // This is a belt-and-suspenders check that EACH tier has the aria-label attribute
+    // (meaning it's a ProvenancePill, not a plain text node).
+    const allAriaSpans = page.locator('span[aria-label]')
+    const count = await allAriaSpans.count()
+    const ariaLabels: string[] = []
+    for (let i = 0; i < count; i++) {
+      const label = await allAriaSpans.nth(i).getAttribute('aria-label')
+      if (label) ariaLabels.push(label)
+    }
+
+    // At least one aria-label must reference each tier's provenance sentence
+    const hasForkFixture = ariaLabels.some(
+      (l) => l.includes('fork') || l.includes('fixture') || l.includes('sembrado'),
+    )
+    const hasSpec = ariaLabels.some((l) => l.includes('Phase-8') || l.includes('Specified'))
+    const hasSchematic = ariaLabels.some(
+      (l) => l.includes('ilustrativa') || l.includes('Illustrative'),
+    )
+
+    expect(hasForkFixture, 'fork-fixture provenance pill aria-label missing').toBe(true)
+    expect(hasSpec, 'spec provenance pill aria-label missing').toBe(true)
+    expect(hasSchematic, 'schematic provenance pill aria-label missing').toBe(true)
+  })
+})

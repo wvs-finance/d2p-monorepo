@@ -17,7 +17,7 @@ import { InstrumentJsonLd } from '@/components/defi/InstrumentJsonLd'
 import { InstrumentParams } from '@/components/defi/InstrumentParams'
 import { PayoffDiagramClient } from '@/components/defi/PayoffDiagramClient'
 import { PoolStatePanel } from '@/components/defi/PoolStatePanel'
-import { SimuladoBadge } from '@/components/defi/ProvenanceBadge'
+import { ProvenancePill, SimuladoBadge } from '@/components/defi/ProvenanceBadge'
 import { RiskCallout } from '@/components/defi/RiskCallout'
 import { SnapshotPoolPanel } from '@/components/defi/SnapshotPoolPanel'
 import { WalletPanel } from '@/components/defi/WalletPanel'
@@ -165,6 +165,11 @@ export default async function InstrumentDetailPage({
       aria: t('provenance.spec_aria'),
     }
 
+    const schematicPillStrings = {
+      label: t('provenance.schematic'),
+      aria: t('provenance.schematic_aria'),
+    }
+
     return (
       <main className="max-w-[1200px] mx-auto px-4 lg:px-8 py-12">
         {/* JSON-LD structured data — simulated branch: no strike/slope/address */}
@@ -206,6 +211,17 @@ export default async function InstrumentDetailPage({
             <section
               aria-label={locale.startsWith('es') ? 'Diagrama de rentabilidad' : 'Payoff diagram'}
             >
+              {/* CROSS-09: schematic provenance pill — color+icon+text+aria-label (never color alone) */}
+              <div className="flex items-center gap-3 mb-3">
+                <p className="text-sm font-medium text-text-secondary">
+                  {locale.startsWith('es') ? 'Diagrama de rentabilidad' : 'Payoff diagram'}
+                </p>
+                <ProvenancePill
+                  tier="schematic"
+                  fieldName="payoffDiagram"
+                  ariaLabel={schematicPillStrings.aria}
+                />
+              </div>
               <PayoffDiagramClient
                 data={payoffData}
                 ariaLabel={payoffAriaLabel}
