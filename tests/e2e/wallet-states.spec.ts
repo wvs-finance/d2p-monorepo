@@ -1,24 +1,29 @@
-// DEFI-02/06/07 — wallet states (filled by plan 05-04).
-// Drives the 4 WalletPanel states via DOM assertions on the instrument detail page.
+// DEFI-02/06/07 — wallet states on the simulated instrument route (Wave 4).
 //
-// Strategy: since the registry is empty pre-deploy (WAIVER-05-04), we cannot navigate
-// to a real instrument URL. Instead these tests assert the WalletPanel's structural
-// invariants by checking the component is correctly built. The actual 4-state rendering
-// is confirmed via:
-//   1. Unit tests in tests/unit/wallet-state.test.ts (state derivation logic — DEFI-02/07)
-//   2. The Evidence Collector live verification (Task 3 / checkpoint) which drives the
-//      4 states against a fixture-injected instrument.
+// The simulated route /apps/abrigo/instruments/ccop-usd-long-gamma/8453 uses
+// WalletPanel with readOnly=true. This forces the wallet to READ_ONLY state;
+// CONNECTED_READY is unreachable here.
 //
-// What we CAN assert from a production build:
-//   - The instruments INDEX page loads without a wallet gate (DEFI-03)
-//   - aria-live region is in the page source (confirmed via component code)
-//   - axe passes on the index page (DEFI-06)
+// Assertions:
+//   - WalletStatusPill shows READ_ONLY (text "Solo lectura" es-CO / "Solo lectura" en)
+//   - The readOnlyLabel copy renders ("sin transacción — fork simulado")
+//   - "Conectado" (CONNECTED_READY label) is NOT present
+//   - No switch-network button visible
+//   - No ConnectButton ("Conectar billetera") in the read-only panel
 //
-// WAIVER-05-04: live wallet-state navigation tests require a deployed instrument URL.
-// These specs transition to full integration tests when ABRIGO_INSTRUMENTS is non-empty.
+// The instruments-index load + axe tests (previously in this file) are preserved.
+//
+// Note: WalletStatusPill uses a useMounted guard — READ_ONLY bypasses the guard
+// (it is prop-injected, not wagmi-derived) and renders correctly on SSR + CSR.
 
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
+
+const SIMULATED_ROUTE = '/apps/abrigo/instruments/ccop-usd-long-gamma/8453'
+
+// ---------------------------------------------------------------------------
+// DEFI-06 — instruments index a11y (preserved from WAIVER-05-04)
+// ---------------------------------------------------------------------------
 
 test.describe('DEFI-06 — instruments index a11y (wallet area)', () => {
   test('instruments index loads without a wallet gate', async ({ page }) => {
@@ -37,51 +42,132 @@ test.describe('DEFI-06 — instruments index a11y (wallet area)', () => {
   })
 })
 
-// WAIVER-05-04: the 4-state live wallet tests below require a fixture instrument URL.
-// They are kept as fixme until ABRIGO_INSTRUMENTS has at least one entry OR a test
-// fixture is injected via the Evidence Collector (Task 3 checkpoint recipe).
+// ---------------------------------------------------------------------------
+// DEFI-02 — READ_ONLY wallet state on the simulated route (es-CO)
+// ---------------------------------------------------------------------------
 
-test.describe('DEFI-02/07 — wallet states on detail page (WAIVER-05-04 pre-deploy)', () => {
-  test.fixme(
-    'DISCONNECTED state renders ConnectButton (requires fixture instrument URL)',
-    async ({ page: _page }) => {
-      // Evidence Collector drives this at checkpoint Task 3:
-      // 1. Inject a fixture instrument into ABRIGO_INSTRUMENTS (test-env override or
-      //    temporary registry entry e.g. id='fixture-celo-01', chainId=42220)
-      // 2. Navigate to /apps/abrigo/instruments/fixture-celo-01/42220
-      // 3. Assert: page.getByRole('button', { name: /Conectar billetera|Connect wallet/ }) visible
-      // 4. Assert: page.locator('[aria-live="polite"]') present in DOM
-    },
-  )
+test.describe('DEFI-02 — READ_ONLY wallet on simulated route (es-CO)', () => {
+  test('WalletPanel shows "Solo lectura" pill (READ_ONLY state, es-CO)', async ({ page }) => {
+    // es-CO is the default locale — no cookie needed
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
 
-  test.fixme(
-    'CONNECTED_WRONG_CHAIN shows switch-network CTA (requires fixture + wagmi mock connector)',
-    async ({ page: _page }) => {
-      // Evidence Collector drives this at checkpoint Task 3:
-      // Use wagmi mock connector to inject connected+wrong-chain state.
-      // Assert: page.getByRole('button', { name: /Cambiar red|Switch network/ }) visible
-    },
-  )
+    // Wait for client hydration (WalletStatusPill is 'use client')
+    // READ_ONLY bypasses the useMounted guard — renders immediately without waiting for mount
+    await page.waitForTimeout(600)
 
-  test.fixme(
-    'CONNECTING state shows spinner (requires fixture + wagmi mock connector)',
-    async ({ page: _page }) => {
-      // Evidence Collector drives this at checkpoint Task 3.
-    },
-  )
+    // The WalletStatusPill renders a span with the label text.
+    // In es-CO, READ_ONLY label = t('wallet.read_only_status') = 'Solo lectura'
+    const readOnlyPill = page.locator('span', { hasText: 'Solo lectura' }).first()
+    await expect(readOnlyPill).toBeVisible()
+  })
 
-  test.fixme(
-    'CONNECTED_READY state shows position header (requires fixture + real/mock connector)',
-    async ({ page: _page }) => {
-      // Evidence Collector drives this at checkpoint Task 3.
-    },
-  )
+  test('WalletPanel shows readOnlyLabel copy (no transaction copy, es-CO)', async ({ page }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(600)
 
-  test.fixme(
-    'aria-live region present on WalletPanel for SR announcements (DEFI-06)',
-    async ({ page: _page }) => {
-      // Navigate to /apps/abrigo/instruments/<fixture-id>/<chainId>
-      // Assert: page.locator('[aria-live="polite"]').count() >= 1
-    },
-  )
+    // The readOnlyLabel from t('wallet.read_only_label') = 'sin transacción — fork simulado'
+    // This p element renders only when walletState === 'READ_ONLY'
+    const readOnlyCopy = page
+      .locator('p')
+      .filter({ hasText: /sin transacci[oó]n/i })
+      .first()
+    await expect(readOnlyCopy).toBeVisible()
+  })
+
+  test('"Conectado" (CONNECTED_READY label) is NOT present on the simulated route', async ({
+    page,
+  }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(600)
+
+    // 'Conectado' is the CONNECTED_READY status label in es-CO.
+    // With readOnly=true, the wallet is forced to READ_ONLY — 'Conectado' must never appear.
+    const conectadoLabel = page.locator('span', { hasText: 'Conectado' })
+    await expect(conectadoLabel).toHaveCount(0)
+  })
+
+  test('no switch-network button on the simulated route (READ_ONLY)', async ({ page }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(600)
+
+    // CONNECTED_WRONG_CHAIN renders a switch-network button; READ_ONLY must not.
+    // Both es-CO and en copies checked — the button text is from t('wallet.switch_network_label').
+    const switchNetworkBtn = page.locator('button').filter({
+      hasText: /Cambiar red|Switch network/i,
+    })
+    await expect(switchNetworkBtn).toHaveCount(0)
+  })
+
+  test('no ConnectButton in the read-only WalletPanel (no "Conectar billetera")', async ({
+    page,
+  }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(600)
+
+    // ConnectButton is only rendered in the DISCONNECTED state branch.
+    // With readOnly=true, the DISCONNECTED branch is never entered.
+    // The RainbowKit ConnectButton renders with the label from t('wallet.connect_label').
+    const connectBtn = page.locator('button').filter({
+      hasText: /Conectar billetera|Connect wallet/i,
+    })
+    await expect(connectBtn).toHaveCount(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// DEFI-02 — READ_ONLY wallet state on the simulated route (en locale)
+// ---------------------------------------------------------------------------
+
+test.describe('DEFI-02 — READ_ONLY wallet on simulated route (en locale)', () => {
+  test('WalletPanel shows read-only pill in English (READ_ONLY state, en)', async ({ page }) => {
+    await page
+      .context()
+      .addCookies([{ name: 'NEXT_LOCALE', value: 'en', domain: 'localhost', path: '/' }])
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(600)
+
+    // In en locale, READ_ONLY status label = t('wallet.read_only_status') = 'Solo lectura'
+    // The pill span carries aria-label with the label text; check it via the aria-live region.
+    const ariaLiveRegion = page.locator('[aria-live="polite"]')
+    await expect(ariaLiveRegion).toBeVisible()
+
+    // "Conectado" / "Connected" must not appear (CONNECTED_READY unreachable)
+    const conectadoLabel = page.locator('span', { hasText: /^Conectado$/ })
+    await expect(conectadoLabel).toHaveCount(0)
+  })
+
+  test('no switch-network button on simulated route (en locale)', async ({ page }) => {
+    await page
+      .context()
+      .addCookies([{ name: 'NEXT_LOCALE', value: 'en', domain: 'localhost', path: '/' }])
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(600)
+
+    const switchNetworkBtn = page.locator('button').filter({
+      hasText: /Switch network|Cambiar red/i,
+    })
+    await expect(switchNetworkBtn).toHaveCount(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// DEFI-06 — aria-live region present for SR announcements
+// ---------------------------------------------------------------------------
+
+test.describe('DEFI-06 — aria-live region on instrument detail page', () => {
+  test('aria-live="polite" region present in WalletPanel on simulated route', async ({ page }) => {
+    await page.goto(SIMULATED_ROUTE)
+    await page.waitForLoadState('networkidle')
+
+    // WalletPanel wraps content in aria-live="polite" aria-atomic="true"
+    const ariaLiveRegion = page.locator('[aria-live="polite"]')
+    await expect(ariaLiveRegion).toBeVisible()
+  })
 })

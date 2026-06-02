@@ -133,96 +133,98 @@ export function InstrumentParams({
       />
     ) : null
 
+  // Wrap in a fragment so the caption <p> can sit outside the <dl>.
+  // A <dl> must only contain <dt>/<dd>/<div>/<script>/<template> direct children.
+  // A <div><p>...</p></div> inside <dl> is non-conforming HTML (axe definition-list rule).
   return (
-    <dl className="divide-y divide-border-default">
-      {/* Shared rows (name, id) */}
-      {sharedRows.map(({ label, value }) => (
-        <div key={label} className="flex justify-between items-baseline py-2">
-          <dt className="text-sm font-normal text-text-secondary">{label}</dt>
-          <dd className="ml-4">{value}</dd>
-        </div>
-      ))}
-
-      {/* Chain row — co-located with fork-block qualifier */}
-      <div className="flex justify-between items-start py-2 gap-4">
-        <dt className="text-sm font-normal text-text-secondary">{labels.chain}</dt>
-        <dd className="ml-4 flex items-center gap-2">
-          <span className="font-mono text-sm font-normal text-text-muted">{chainQualified}</span>
-          {pill('chain')}
-        </dd>
-      </div>
-
-      {/* Fork-param section caption */}
+    <>
+      {/* Fork-param section caption — rendered OUTSIDE the <dl> (conforming HTML) */}
       {labels.fork_params_caption && (
-        <div className="py-2">
-          <p className="text-xs text-text-muted italic">{labels.fork_params_caption}</p>
-        </div>
+        <p className="text-xs text-text-muted italic mb-2">{labels.fork_params_caption}</p>
       )}
+      <dl className="divide-y divide-border-default">
+        {/* Shared rows (name, id) */}
+        {sharedRows.map(({ label, value }) => (
+          <div key={label} className="flex justify-between items-baseline py-2">
+            <dt className="text-sm font-normal text-text-secondary">{label}</dt>
+            <dd className="ml-4">{value}</dd>
+          </div>
+        ))}
 
-      {/* fork_block row */}
-      {labels.fork_block && (
+        {/* Chain row — co-located with fork-block qualifier */}
         <div className="flex justify-between items-start py-2 gap-4">
-          <dt className="text-sm font-normal text-text-secondary">{labels.fork_block}</dt>
+          <dt className="text-sm font-normal text-text-secondary">{labels.chain}</dt>
           <dd className="ml-4 flex items-center gap-2">
-            <span className="font-mono text-sm font-normal text-text-primary">
-              {fixture?.forkBlock.value ?? '—'}
-            </span>
-            {pill('fork_block')}
+            <span className="font-mono text-sm font-normal text-text-muted">{chainQualified}</span>
+            {pill('chain')}
           </dd>
         </div>
-      )}
 
-      {/* tick_spacing row */}
-      {labels.tick_spacing && (
-        <div className="flex justify-between items-start py-2 gap-4">
-          <dt className="text-sm font-normal text-text-secondary">{labels.tick_spacing}</dt>
-          <dd className="ml-4 flex items-center gap-2">
-            <span className="font-mono text-sm font-normal text-text-primary">
-              {fixture?.pool.tickSpacing.value ?? '—'}
-            </span>
-            {pill('tick_spacing')}
-          </dd>
-        </div>
-      )}
+        {/* fork_block row */}
+        {labels.fork_block && (
+          <div className="flex justify-between items-start py-2 gap-4">
+            <dt className="text-sm font-normal text-text-secondary">{labels.fork_block}</dt>
+            <dd className="ml-4 flex items-center gap-2">
+              <span className="font-mono text-sm font-normal text-text-primary">
+                {fixture?.forkBlock.value ?? '—'}
+              </span>
+              {pill('fork_block')}
+            </dd>
+          </div>
+        )}
 
-      {/* seeded_liquidity row — bigint-as-string, never Number() */}
-      {labels.seeded_liquidity && (
-        <div className="flex justify-between items-start py-2 gap-4">
-          <dt className="text-sm font-normal text-text-secondary">{labels.seeded_liquidity}</dt>
-          <dd className="ml-4 flex items-center gap-2">
-            <span className="font-mono text-sm font-normal text-text-primary break-all">
-              {fixture?.pool.seededLiquidity.value ?? '—'}
-            </span>
-            {pill('seeded_liquidity')}
-          </dd>
-        </div>
-      )}
+        {/* tick_spacing row */}
+        {labels.tick_spacing && (
+          <div className="flex justify-between items-start py-2 gap-4">
+            <dt className="text-sm font-normal text-text-secondary">{labels.tick_spacing}</dt>
+            <dd className="ml-4 flex items-center gap-2">
+              <span className="font-mono text-sm font-normal text-text-primary">
+                {fixture?.pool.tickSpacing.value ?? '—'}
+              </span>
+              {pill('tick_spacing')}
+            </dd>
+          </div>
+        )}
 
-      {/* chunk_strike row — OTM offset (value "2000"), labeled as offset */}
-      {labels.chunk_strike && (
-        <div className="flex justify-between items-start py-2 gap-4">
-          <dt className="text-sm font-normal text-text-secondary">{labels.chunk_strike}</dt>
-          <dd className="ml-4 flex items-center gap-2">
-            <span className="font-mono text-sm font-normal text-text-primary">
-              {fixture?.chunk.strike.value ?? '—'}
-            </span>
-            {pill('chunk_strike')}
-          </dd>
-        </div>
-      )}
+        {/* seeded_liquidity row — bigint-as-string, never Number() */}
+        {labels.seeded_liquidity && (
+          <div className="flex justify-between items-start py-2 gap-4">
+            <dt className="text-sm font-normal text-text-secondary">{labels.seeded_liquidity}</dt>
+            <dd className="ml-4 flex items-center gap-2">
+              <span className="font-mono text-sm font-normal text-text-primary break-all">
+                {fixture?.pool.seededLiquidity.value ?? '—'}
+              </span>
+              {pill('seeded_liquidity')}
+            </dd>
+          </div>
+        )}
 
-      {/* chunk width row */}
-      {labels.width && (
-        <div className="flex justify-between items-start py-2 gap-4">
-          <dt className="text-sm font-normal text-text-secondary">{labels.width}</dt>
-          <dd className="ml-4 flex items-center gap-2">
-            <span className="font-mono text-sm font-normal text-text-primary">
-              {fixture?.chunk.width.value ?? '—'}
-            </span>
-            {pill('width')}
-          </dd>
-        </div>
-      )}
-    </dl>
+        {/* chunk_strike row — OTM offset (value "2000"), labeled as offset */}
+        {labels.chunk_strike && (
+          <div className="flex justify-between items-start py-2 gap-4">
+            <dt className="text-sm font-normal text-text-secondary">{labels.chunk_strike}</dt>
+            <dd className="ml-4 flex items-center gap-2">
+              <span className="font-mono text-sm font-normal text-text-primary">
+                {fixture?.chunk.strike.value ?? '—'}
+              </span>
+              {pill('chunk_strike')}
+            </dd>
+          </div>
+        )}
+
+        {/* chunk width row */}
+        {labels.width && (
+          <div className="flex justify-between items-start py-2 gap-4">
+            <dt className="text-sm font-normal text-text-secondary">{labels.width}</dt>
+            <dd className="ml-4 flex items-center gap-2">
+              <span className="font-mono text-sm font-normal text-text-primary">
+                {fixture?.chunk.width.value ?? '—'}
+              </span>
+              {pill('width')}
+            </dd>
+          </div>
+        )}
+      </dl>
+    </>
   )
 }
