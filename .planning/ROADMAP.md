@@ -54,7 +54,7 @@
 
 ## Phases
 
-- [ ] **Phase 7: Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool** — Foundry Base-fork (UniV4 PoolManager), borrowed Panoptic-V2-lite behind `IPanopticData`, our own cCOP/USDC UniV4 demo pool, BUSL NOTICE + bulloak.
+- [x] **Phase 7: Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool** — Foundry Base-fork (UniV4 PoolManager), borrowed Panoptic-V2-lite behind `IPanopticData`, our own cCOP/USDC UniV4 demo pool, BUSL NOTICE + bulloak. (completed 2026-06-02)
 - [ ] **Phase 8: LongGammaWrapper cash-flow** — Wrapper owns the position; deposit upfront collateral → mint long-gamma → streamia accrues (read from the contract) → burn closes → residual from surviving collateral, with all involuntary-close branches.
 - [ ] **Phase 9: Premium split + data-cost reimbursement** — `PremiumSplitter` (π_panoptic + μ_LP + φ_data); `CapitalRemunerationVault` (ERC-4626) receives mutualized φ_data ($199 fixed) under a no-double-count conservation invariant; data-cost-weighted user residual.
 - [ ] **Phase 10: Oracle surprise route + position sizing** — `MacroOracle` exposes a CPI surprise (consensus + σ → `s_t`); `PositionBuilder` sizes notional/strike from `s_t` + the cCOP/USD mark, linkage flagged `linkage_validated:false`.
@@ -135,7 +135,7 @@ are LAST; delta-hedge is an external keeper add-on, not a Panoptic primitive).
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Base-fork harness + borrowed Panoptic V2 + pool | 2/5 | In Progress | - |
+| 7. Base-fork harness + borrowed Panoptic V2 + pool | 2/5 | Complete    | 2026-06-02 |
 | 8. LongGammaWrapper cash-flow | 0/0 | Not started | - |
 | 9. Premium split + data-cost reimbursement | 0/0 | Not started | - |
 | 10. Oracle surprise route + position sizing | 0/0 | Not started | - |

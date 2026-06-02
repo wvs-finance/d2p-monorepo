@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: PHASE 7 COMPLETE (FORK-03 GREEN) — borrowed Panoptic V2 stack factory-deployed on the Base fork via the REAL CWIA choreography (master copies + RiskEngine + `PanopticFactoryV4` §B-verbatim ctors → own MockCcop + `PoolKeyLib` PoolKey → `PoolManager.initialize` → `V4LpHelper` 1,000,000-ether seed → `factory.deployNewPool`), then ONE position minted+burned through `IPanopticData` only (dispatch mint ⇒ `getAccumulatedFeesAndPositionsData` len 1 ⇒ size-0 burn ⇒ len 0); collateral via `IERC4626` ct0/ct1 (B-1); seam test imports NEITHER panoptic-borrowed NOR the deploy helper; `test_mintBurn_single_position_through_IPanopticData` passes; bulloak clean; `.tree` committed before impl (mn-B)
-last_updated: "2026-06-01T03:30:00.000Z"
-last_activity: 2026-06-01 — completed 07-05-PLAN.md (FORK-03; Phase 7 done)
+status: planning
+last_updated: "2026-06-02T03:35:45.725Z"
+last_activity: 2026-06-01 — completed 07-05-PLAN.md (Phase 7 done)
 progress:
   total_phases: 4
   completed_phases: 1
@@ -36,7 +36,7 @@ data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-td
 - **Milestone:** v2.0 — convex-instrument
 - **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (COMPLETE — 5/5)
 - **Plan:** 07-05 complete (5/5); Phase 7 done (FORK-01/02/03 all green); next is Phase 8 (LongGammaWrapper)
-- **Status:** PHASE 7 COMPLETE (FORK-03 GREEN) — borrowed Panoptic V2 stack factory-deployed on the Base fork via the REAL CWIA choreography (master copies + RiskEngine + `PanopticFactoryV4` §B-verbatim ctors → own MockCcop + `PoolKeyLib` PoolKey → `PoolManager.initialize` → `V4LpHelper` 1,000,000-ether seed → `factory.deployNewPool`), then ONE position minted+burned through `IPanopticData` only; collateral via `IERC4626` ct0/ct1 (B-1); seam test imports NEITHER panoptic-borrowed NOR the deploy helper; `test_mintBurn_single_position_through_IPanopticData` passes; bulloak clean; `.tree` committed before impl (mn-B)
+- **Status:** Ready to plan
 - **Progress:** [██████████] 100%
 - **Last activity:** 2026-06-01 — completed 07-05-PLAN.md (Phase 7 done)
 
