@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: 05-04 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
-last_updated: "2026-05-30T21:56:53.798Z"
+status: Plan execution — Wave 3 (05-04 Tasks 1+2 committed; checkpoint Task 3 pending)
+stopped_at: 05.1-00 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
+last_updated: "2026-06-02T14:28:54.753Z"
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 33
-  completed_plans: 32
-  percent: 97
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 5
+  completed_plans: 1
+  percent: 98
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-05-30
 **Session type:** Plan execution (05-03 complete — instruments honest-empty index + RiskCallout + InstrumentParams)
-**Stopped at:** 05-04 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
+**Stopped at:** 05.1-00 Tasks 1+2 complete — at checkpoint Task 3 (Evidence Collector)
 
 ---
 
@@ -33,9 +33,9 @@ progress:
 
 ## Current Position
 
-**Active phase:** 05 — Read-First Wallet and DeFi Surface
-**Active plan:** 05-04 Tasks 1+2 complete (WalletPanel/WalletStatusPill/PayoffDiagram/PoolStatePanel/detail page + pool filter). At checkpoint Task 3 — awaiting Evidence Collector live verification of 4 wallet states + 360px above-fold risk + payoff tokens.
-**Status:** Plan execution — Wave 3 (05-04 Tasks 1+2 committed; checkpoint Task 3 pending)
+**Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
+**Active plan:** 05.1-00 Tasks 1+2 complete (PayoffDiagram BLOCKER fix + 4 Wave-0 RED test stubs + chunk-strike resolved). At checkpoint Task 3 — awaiting Evidence Collector live verification of fixed PayoffDiagram on /apps/abrigo/instruments/fixture-celo-01/42220.
+**Status:** Plan execution — Wave 0 (05.1-00 Tasks 1+2 committed; checkpoint Task 3 pending)
 
 **Progress:**
 [█████████░] 98%
@@ -90,6 +90,7 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 
 ### Roadmap Evolution
 - Phase 03.1 (Research Reading Surface) inserted after Phase 3, before Phase 4 (2026-05-29). Depth pass on `/research` (LAB-03): paper-grade math reading surface, build-time KaTeX, track filter, arXiv/PDF paper-bridge. Canonical spec: `docs/superpowers/specs/2026-05-29-research-reading-surface-design.md`. Citations deferred to v2.
+- Phase 05.1 (abrigo-somnia convex instrument frontend surface — cCOP/USD long-gamma, read-first simulated) inserted after Phase 5 (2026-06-02, URGENT). Module 1 extending the Phase-5 (defi) instrument-detail route: schematic convex payoff + backend-correct cash-flow waterfall + Panoptic fork-fixture params, three-tier provenance (fork-fixture / spec / schematic), SIMULADO badge, read-only wallet, no transact. Backend (abrigo-somnia) is fork-only/locked. Canonical spec: `docs/superpowers/specs/2026-06-02-ccop-usd-long-gamma-instrument-frontend-design.md` (passed two-step review).
 
 ### Key Decisions Made
 
@@ -152,6 +153,8 @@ Overall: 4/5 phases complete (Phase 5 in progress)
 | (defi)/(apps) route-group split for /apps/abrigo/* is intentional (Plan 05-03) | /apps/abrigo/dashboard lives under (apps) (no wallet tree); /apps/abrigo/instruments lives under (defi) (inherits wallet providers). Different provider trees — do NOT consolidate | Route-group coexistence (M5) verified in pnpm build; each new /apps/abrigo/* route must be placed in the appropriate group based on wallet dependency |
 | Instrument card links use numeric chainId segment (Plan 05-03) | /apps/abrigo/instruments/${id}/${chainId} uses the raw numeric chainId. Using a chain name slug would silently null the pool selector in 05-04's WalletPanel/PoolStatePanel | All future instrument link construction must use numeric chainId, not chain name/slug |
 | es-CO-first instruments copy authored; native sign-off pending (Plan 05-03) | instruments namespace authored in es-CO by developer per project policy; docs/copy-review.md row recorded but native Colombian Spanish reviewer sign-off must complete before v1 launch | Non-blocking for 05-04 execution; required before production deploy |
+| chunk.strike fixture value is OTM offset string "2000" not static absolute tick (Plan 05.1-00) | PanopticDataSeam.fork.t.sol L41: STRIKE_OFFSET=2000; L73: strike=((currentTick+2000)/tickSpacing)*tickSpacing. No static absolute exists — depends on live fork tick. Wave 1 fixture.ts uses value:"2000" with note explaining fork-tick dependency | Wave 1 fixture.ts must carry value:"2000" and the OTM-offset note; never fabricate absolute ticks for fork-dependent values |
+| Wave-0 RED stubs referencing not-yet-created modules excluded from tsconfig (Plan 05.1-00) | Three stub files (fixture.test.ts, cashflow.test.ts, provenance-badge.test.tsx) import Wave-1/2 modules that don't exist yet; exclusion lets tsc --noEmit pass pre-commit gate. Pattern: structured-data.test.tsx | All future Wave-0 RED stubs importing not-yet-created modules must be excluded from tsconfig until the module is created |
 
 ### Critical Path Summary
 
