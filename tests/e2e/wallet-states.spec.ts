@@ -133,9 +133,10 @@ test.describe('DEFI-02 — READ_ONLY wallet on simulated route (en locale)', () 
     await page.waitForTimeout(600)
 
     // In en locale, READ_ONLY status label = t('wallet.read_only_status') = 'Solo lectura'
-    // The pill span carries aria-label with the label text; check it via the aria-live region.
-    const ariaLiveRegion = page.locator('[aria-live="polite"]')
-    await expect(ariaLiveRegion).toBeVisible()
+    // DEFI-06 Wave 3: the live region is now a visually-hidden <output> element (sr-only).
+    // <output> has implicit role="status" aria-live="polite" — check it's in the DOM.
+    const ariaLiveRegion = page.locator('output.sr-only')
+    await expect(ariaLiveRegion).toBeAttached()
 
     // "Conectado" / "Connected" must not appear (CONNECTED_READY unreachable)
     const conectadoLabel = page.locator('span', { hasText: /^Conectado$/ })
@@ -161,13 +162,21 @@ test.describe('DEFI-02 — READ_ONLY wallet on simulated route (en locale)', () 
 // DEFI-06 — aria-live region present for SR announcements
 // ---------------------------------------------------------------------------
 
-test.describe('DEFI-06 — aria-live region on instrument detail page', () => {
-  test('aria-live="polite" region present in WalletPanel on simulated route', async ({ page }) => {
+test.describe('DEFI-06 — scoped <output> live region on instrument detail page', () => {
+  test('<output> sr-only node present in WalletPanel on simulated route (no panel-wide aria-atomic)', async ({
+    page,
+  }) => {
     await page.goto(SIMULATED_ROUTE)
     await page.waitForLoadState('networkidle')
 
-    // WalletPanel wraps content in aria-live="polite" aria-atomic="true"
-    const ariaLiveRegion = page.locator('[aria-live="polite"]')
-    await expect(ariaLiveRegion).toBeVisible()
+    // DEFI-06 Wave 3: the live region is now a dedicated visually-hidden <output> element
+    // (sr-only) with implicit role="status" aria-live="polite".
+    // Check it's in the DOM (sr-only elements are not "visible" but are reachable by AT).
+    const statusNode = page.locator('output.sr-only')
+    await expect(statusNode).toBeAttached()
+
+    // Confirm the outer WalletPanel wrapper does NOT carry aria-atomic (was the BLOCKER).
+    const ariaAtomicNode = page.locator('[aria-atomic="true"]')
+    await expect(ariaAtomicNode).toHaveCount(0)
   })
 })

@@ -43,9 +43,14 @@ const STRINGS: WalletPanelStrings = {
 const READ_ONLY_LABEL = 'Solo lectura'
 
 describe('WalletPanel readOnly — READ_ONLY state rendering', () => {
-  it('renders the READ_ONLY pill text', () => {
+  it('renders the READ_ONLY pill text (in the visible pill span)', () => {
     render(<WalletPanel strings={STRINGS} readOnly />)
-    expect(screen.getByText(READ_ONLY_LABEL)).toBeInTheDocument()
+    // DEFI-06 Wave 3: "Solo lectura" now appears in TWO nodes — the sr-only role=status
+    // announcement node AND the visible pill span. Use getAllByText and assert the pill span.
+    const matches = screen.getAllByText(READ_ONLY_LABEL)
+    // At least one match must be the visible pill span (not the sr-only p)
+    const pillSpan = matches.find((el) => el.tagName === 'SPAN')
+    expect(pillSpan).toBeInTheDocument()
   })
 
   it('does NOT render the CONNECTED_READY label in readOnly mode', () => {
@@ -61,7 +66,10 @@ describe('WalletPanel readOnly — READ_ONLY state rendering', () => {
   it('READ_ONLY pill is visible with icon+text (CROSS-09 invariant)', () => {
     render(<WalletPanel strings={STRINGS} readOnly />)
     // CROSS-09: status pills always encode color + icon + text, never color alone.
-    const pill = screen.getByText(READ_ONLY_LABEL)
-    expect(pill).toBeVisible()
+    // DEFI-06 Wave 3: the label text appears in both the sr-only status node and the pill span;
+    // query the pill span specifically (the visible one, not the sr-only announcement node).
+    const matches = screen.getAllByText(READ_ONLY_LABEL)
+    const pillSpan = matches.find((el) => el.tagName === 'SPAN')
+    expect(pillSpan).toBeVisible()
   })
 })

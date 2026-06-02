@@ -2,7 +2,8 @@
 
 // WalletPanel — 4-state client wallet panel (DEFI-02/06/07).
 // Derives state via deriveWalletState (lib/wallet/state.ts — NOT re-implemented here).
-// Wrapped in aria-live="polite" for SR announcements (DEFI-06).
+// DEFI-06 (Wave 3): scoped SR announcement via dedicated role=status node (NOT panel-wide
+// aria-atomic, which caused a double-read of the entire panel on every transition).
 // Accepts translated wallet.* strings as props (keeps it client-simple; caller is RSC page).
 // CROSS-09: DISCONNECTED prompt uses text-accent-text (WCAG AA small text).
 // DEFI-07: CONNECTED_WRONG_CHAIN → switch CTA via useSwitchChain (celo.id = 42220 primary).
@@ -12,12 +13,18 @@
 // When readOnly=true, walletState is forced to 'READ_ONLY' WITHOUT calling deriveWalletState.
 // READ_ONLY renders: WalletStatusPill + readOnlyLabel text. No ConnectButton, no switch CTA.
 // CONNECTED_READY is unreachable in readOnly mode.
+//
+// Wave 3 (DEFI-06): connect-success focus handling.
+// When walletState leaves DISCONNECTED/CONNECTING (ConnectButton trigger unmounts), focus is
+// explicitly moved to the role=status node so keyboard users are never stranded at <body>.
+// RainbowKit owns the in-modal focus trap — do NOT add a second one here.
 
 import { WalletStatusPill } from '@/components/defi/WalletStatusPill'
 import type { WalletStatus } from '@/components/defi/WalletStatusPill'
 import { deriveWalletState } from '@/lib/wallet/state'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { celo } from 'viem/chains'
 import { useAccount, useSwitchChain } from 'wagmi'
 
@@ -58,11 +65,31 @@ export function WalletPanel({ strings, readOnly }: WalletPanelProps) {
   // readOnly short-circuits deriveWalletState — READ_ONLY is injected here, never derived.
   const walletState = readOnly ? ('READ_ONLY' as const) : deriveWalletState({ status, chain })
 
+  // DEFI-06: ref to the scoped status node for connect-success focus handling.
+  // Uses HTMLOutputElement — <output> has implicit role="status" + aria-live="polite".
+  const statusNodeRef = useRef<HTMLOutputElement>(null)
+
+  // DEFI-06 connect-success focus: when walletState leaves DISCONNECTED/CONNECTING the
+  // ConnectButton trigger unmounts and focus would fall to <body>. Move it to the status
+  // node instead. The in-modal trap is RainbowKit's own — do NOT add a second one.
+  useEffect(() => {
+    if (walletState !== 'DISCONNECTED' && walletState !== 'CONNECTING') {
+      statusNodeRef.current?.focus()
+    }
+  }, [walletState])
+
   return (
-    // aria-live="polite" + aria-atomic="true" — the WE-OWN SR announcement boundary.
-    // RainbowKit owns its own focus trap (react-remove-scroll); do NOT add a second one.
-    <div aria-live="polite" aria-atomic="true" className="space-y-3">
-      {/* Status pill — always shown */}
+    // Outer div is plain — no aria-live/aria-atomic (panel-wide re-read was a DEFI-06 BLOCKER).
+    // SR announcements are scoped to the dedicated role=status node below.
+    <div className="space-y-3">
+      {/* DEFI-06: scoped announcement node — announces ONLY the state label, not the whole panel.
+          <output> has implicit role="status" + aria-live="polite" (HTML semantic element).
+          tabIndex={-1} so focus can be programmatically moved here on connect-success. */}
+      <output ref={statusNodeRef} tabIndex={-1} className="sr-only">
+        {strings.statusLabels[walletState]}
+      </output>
+
+      {/* Status pill — always shown (visible UI, outside the live region) */}
       <WalletStatusPill status={walletState} label={strings.statusLabels[walletState]} />
 
       {walletState === 'READ_ONLY' && (
