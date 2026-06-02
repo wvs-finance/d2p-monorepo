@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: Borrowed Panoptic V2 core + factory + IPanopticData seam + MockCcop vendored; `forge build` green under cancun
-last_updated: "2026-06-02T02:50:27.277Z"
-last_activity: 2026-06-02 — completed 07-02-PLAN.md (borrowed V2 core + IPanopticData + MockCcop)
+status: Base-fork harness GREEN — vm.createSelectFork(base, 46700000) touches the live UniV4 PoolManager via V4StateReader under cancun (FORK-01 fork-run proof); `.tree` BTT spec bulloak-clean
+last_updated: "2026-06-02T03:05:00.000Z"
+last_activity: 2026-06-02 — completed 07-03-PLAN.md (Base-fork harness)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 5
-  completed_plans: 2
-  percent: 40
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State: abrigo-somnia v2.0 — Convex Instrument
@@ -29,16 +29,16 @@ See: `.planning/PROJECT.md` (§ Current Milestone: v2.0, updated 2026-06-01)
 **Core value (this milestone):** A TE-sized long-gamma cCOP/USD hedge on borrowed-Panoptic-V2-data-model
 contracts (Base fork against our own cCOP/USDC UniV4 pool); premium = upfront collateral with
 data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-tdd.
-**Current focus:** Phase 7 executing — Plans 01 (toolchain + provenance) and 02 (borrowed Panoptic V2 core + factory + `IPanopticData` seam + MockCcop) complete; next is 07-03 (Base-fork harness wiring the factory + master copies).
+**Current focus:** Phase 7 executing — Plans 01 (toolchain), 02 (borrowed Panoptic V2 core + `IPanopticData` seam + MockCcop) and 03 (Base-fork harness: pinned-block fork + live PoolManager touch under cancun) complete; next is 07-04 (deploy the cCOP/USDC UniV4 pool, read `sqrtPriceX96`).
 
 ## Current Position
 
 - **Milestone:** v2.0 — convex-instrument
 - **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (Executing)
-- **Plan:** 07-02 complete (2/5); next 07-03
-- **Status:** Borrowed Panoptic V2 core + `PanopticFactoryV4` + `IPanopticData` swap-seam + 18-dp MockCcop vendored byte-intact @ fe55774; `forge build` green under cancun/0.8.24
-- **Progress:** [████░░░░░░] 40%
-- **Last activity:** 2026-06-02 — completed 07-02-PLAN.md
+- **Plan:** 07-03 complete (3/5); next 07-04
+- **Status:** Base-fork harness GREEN — `forge test --match-path test/fork/BaseForkHarness.t.sol --fork-url "$BASE_RPC_URL"` 2/2 at pinned block 46700000; live PoolManager `0x498581…2b2b` touched under cancun via borrowed `V4StateReader` (no v4-periphery state-view path, B-2); `.tree` committed before impl (mn-B)
+- **Progress:** [██████░░░░] 60%
+- **Last activity:** 2026-06-02 — completed 07-03-PLAN.md
 
 ## Decisions Log (v2.0)
 
@@ -48,6 +48,8 @@ data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-td
 - **2026-06-02 (07-02):** Borrowed V2 internal imports already use the §C `@`-aliases (Plan 01 repointed them at `panoptic-borrowed/`) ⇒ ZERO import rewrites (mn-A confirmed); only third-party prefixes were checked, all matched the §C remapping RHS verbatim. Borrowed via `gh api .../contents?ref=fe55774` raw to keep BUSL/GPL bytes intact.
 - **2026-06-02 (07-02):** `IPanopticData` kept to exactly the six §E-verified V2 functions (`dispatch`/`dispatchFrom`-payable/`getAccumulatedFeesAndPositionsData`/`getCurrentTick`/`getTWAP`/`numberOfLegs`); optional `getOracleTicks` deferred to Phase 8. FORK-03 compile-time conformance proof = `forge build` green (interface compiles vs borrowed V2 types), NOT an `IPanopticData(addr)` cast.
 - **2026-06-02 (07-02):** Phase 7 lives on branch `feat/keeper-vercel-buildoutput` (07-01 commits reachable only there), not `rescope/somi-leg-donor-transfer` as the prompt/STATE implied; executed + committed 07-02 in place (branching=none).
+- **2026-06-02 (07-03):** `BASE_FORK_BLOCK = 46700000` pinned as a Solidity `uint256 constant` in the harness source (M-4, NOT an env var) — archive-verified (`cast code <PoolManager>` = 48020 hex chars at that height; head ≈46789746). PoolManager touched via borrowed `V4StateReader.getSqrtPriceX96(IPoolManager, PoolId)` under cancun — NOT v4-periphery StateView (B-2, not installed). `forge test --fork-url "$BASE_RPC_URL"` 2/2 green = FORK-01 fork-run proof.
+- **2026-06-02 (07-03):** bulloak 0.9.2 infers the matching `.t.sol` STRICTLY same-dir as the `.tree` (no subtree search / path flag) ⇒ co-located `BaseForkHarness.tree` + `.t.sol` in `test/fork/` (deviation from the plan's `test/spec/` tree dir) so `bulloak check` exits 0 while the harness stays on the VALIDATION-verbatim `--match-path test/fork/...` path. The pre-existing `test/spec/*.tree` (MacroOracle, SomniaAgentConsumer.*) are un-parseable in 0.9.2 (`/`/`.` in branch text) — out-of-scope for FORK-01, so the full-glob `bulloak check test/spec/*.tree` is NOT a passing gate in this repo.
 
 ## Roadmap Summary (v2.0)
 

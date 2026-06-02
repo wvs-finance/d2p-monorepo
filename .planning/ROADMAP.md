@@ -75,7 +75,7 @@
 **Plans**: 5 plans (5 waves — fork-stack is dep-chained, not parallel)
 - [x] 07-01-PLAN.md — Toolchain + provenance: single cancun `foundry.toml`/`remappings.txt`/`.env.example`, install v4-core/v4-periphery/solmate + bulloak, BUSL `NOTICE` *(FORK-01)*
 - [x] 07-02-PLAN.md — Vendor minimal borrowed Panoptic V2 core (BUSL headers) + author `IPanopticData` (real V2 ABI) + `MockCcop` *(FORK-03)*
-- [ ] 07-03-PLAN.md — Base-fork harness `.tree`+test: pin block, touch live UniV4 PoolManager under cancun *(FORK-01)*
+- [x] 07-03-PLAN.md — Base-fork harness `.tree`+test: pin block 46700000 (Solidity constant), touch live UniV4 PoolManager under cancun via V4StateReader (2/2 fork test green) *(FORK-01)*
 - [ ] 07-04-PLAN.md — Deploy our cCOP/USDC UniV4 pool, read initialized `sqrtPriceX96` via StateView *(FORK-02)*
 - [ ] 07-05-PLAN.md — Mint+burn ONE position through `IPanopticData` only (swap seam intact) *(FORK-03)*
 > Note: 07-RESEARCH §5 retired the FORK-01 "multi-version solc matrix" — V2 is `^0.8.24`, a single cancun compile. Intentional supersession, not a gap.
