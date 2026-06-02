@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: 05.1-04 Tasks 1+2 complete — checkpoint Task 3 (Evidence Collector gate pending)
-last_updated: "2026-06-02T16:03:03.832Z"
+stopped_at: 05.1-04 gap-closure complete — schematic pill mounted, index specs updated, 3-pill gate PASS (23/23 e2e)
+last_updated: "2026-06-02T20:00:00.000Z"
 progress:
   total_phases: 1
   completed_phases: 1
