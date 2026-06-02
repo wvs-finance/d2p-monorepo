@@ -73,8 +73,8 @@
   4. The repo carries a BUSL-1.1 NOTICE recording the borrowed Panoptic V2 source commit + provenance, and `bulloak` is installed/pinned so `.tree` specs scaffold tests (the milestone's strict evm-tdd loop is operable). *(FORK-01 / process gate)*
 **Notes (PITFALLS):** P9-license — keep v2 strictly non-production (fork = permitted BUSL use); the NOTICE + non-production scoping is established here before any code is ported. P4-design — TWAP-vs-spot mark + liquidity-floor design settled in the wrapper interface here so the wrapper is not retrofitted later (the live real-cCOP-pool gates themselves are out of v1 scope; our demo pool is the v1 target).
 **Plans**: 5 plans (5 waves — fork-stack is dep-chained, not parallel)
-- [ ] 07-01-PLAN.md — Toolchain + provenance: single cancun `foundry.toml`/`remappings.txt`/`.env.example`, install v4-core/v4-periphery/solmate + bulloak, BUSL `NOTICE` *(FORK-01)*
-- [ ] 07-02-PLAN.md — Vendor minimal borrowed Panoptic V2 core (BUSL headers) + author `IPanopticData` (real V2 ABI) + `MockCcop` *(FORK-03)*
+- [x] 07-01-PLAN.md — Toolchain + provenance: single cancun `foundry.toml`/`remappings.txt`/`.env.example`, install v4-core/v4-periphery/solmate + bulloak, BUSL `NOTICE` *(FORK-01)*
+- [x] 07-02-PLAN.md — Vendor minimal borrowed Panoptic V2 core (BUSL headers) + author `IPanopticData` (real V2 ABI) + `MockCcop` *(FORK-03)*
 - [ ] 07-03-PLAN.md — Base-fork harness `.tree`+test: pin block, touch live UniV4 PoolManager under cancun *(FORK-01)*
 - [ ] 07-04-PLAN.md — Deploy our cCOP/USDC UniV4 pool, read initialized `sqrtPriceX96` via StateView *(FORK-02)*
 - [ ] 07-05-PLAN.md — Mint+burn ONE position through `IPanopticData` only (swap seam intact) *(FORK-03)*
@@ -135,7 +135,7 @@ are LAST; delta-hedge is an external keeper add-on, not a Panoptic primitive).
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Base-fork harness + borrowed Panoptic V2 + pool | 0/5 | Planned | - |
+| 7. Base-fork harness + borrowed Panoptic V2 + pool | 2/5 | In Progress | - |
 | 8. LongGammaWrapper cash-flow | 0/0 | Not started | - |
 | 9. Premium split + data-cost reimbursement | 0/0 | Not started | - |
 | 10. Oracle surprise route + position sizing | 0/0 | Not started | - |

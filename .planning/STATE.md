@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-06-02T02:41:01.873Z"
-last_activity: 2026-06-02 — completed 07-01-PLAN.md (Foundry cancun toolchain + §C dep pins + audit remappings + BUSL NOTICE + bulloak)
+status: Borrowed Panoptic V2 core + factory + IPanopticData seam + MockCcop vendored; `forge build` green under cancun
+last_updated: "2026-06-02T02:50:27.277Z"
+last_activity: 2026-06-02 — completed 07-02-PLAN.md (borrowed V2 core + IPanopticData + MockCcop)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State: abrigo-somnia v2.0 — Convex Instrument
@@ -29,22 +29,25 @@ See: `.planning/PROJECT.md` (§ Current Milestone: v2.0, updated 2026-06-01)
 **Core value (this milestone):** A TE-sized long-gamma cCOP/USD hedge on borrowed-Panoptic-V2-data-model
 contracts (Base fork against our own cCOP/USDC UniV4 pool); premium = upfront collateral with
 data-cost-weighted reimbursement; post-Keynesian/Shiller-grounded; strict evm-tdd.
-**Current focus:** Phase 7 executing — Plan 01 (toolchain + provenance) complete; next is 07-02 (port borrowed Panoptic V2 core into `panoptic-borrowed/`).
+**Current focus:** Phase 7 executing — Plans 01 (toolchain + provenance) and 02 (borrowed Panoptic V2 core + factory + `IPanopticData` seam + MockCcop) complete; next is 07-03 (Base-fork harness wiring the factory + master copies).
 
 ## Current Position
 
 - **Milestone:** v2.0 — convex-instrument
 - **Phase:** 7 — Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool (Executing)
-- **Plan:** 07-01 complete (1/5); next 07-02
-- **Status:** Foundry cancun single-profile + §C dep set + audit remappings + BUSL NOTICE + bulloak landed; `forge build` green
-- **Progress:** [██░░░░░░░░] 20% (1/5 Phase-7 plans)
-- **Last activity:** 2026-06-02 — completed 07-01-PLAN.md
+- **Plan:** 07-02 complete (2/5); next 07-03
+- **Status:** Borrowed Panoptic V2 core + `PanopticFactoryV4` + `IPanopticData` swap-seam + 18-dp MockCcop vendored byte-intact @ fe55774; `forge build` green under cancun/0.8.24
+- **Progress:** [████░░░░░░] 40%
+- **Last activity:** 2026-06-02 — completed 07-02-PLAN.md
 
 ## Decisions Log (v2.0)
 
 - **2026-06-02 (07-01):** Single `cancun`/`0.8.24` profile supersedes FORK-01's roadmap multi-version-solc-matrix wording (07-RESEARCH §5; Panoptic V2 is `^0.8.24` everywhere) — recorded in NOTICE + SUMMARY so the checker does not flag a false gap.
 - **2026-06-02 (07-01):** v4-periphery NOT installed and NO v4-periphery remapping (B-2) — its StateView/IStateView pull the undefined `@uniswap/v4-core/` alias + permit2; pool-state reads go via the already-borrowed `V4StateReader` + v4-core `StateLibrary` under the `v4-core/` alias.
 - **2026-06-02 (07-01):** `lib/` deps kept OUT of git (gitignored, restorable via `foundry.lock`); reverted a stray prior forge-install submodule registration to match the plan's restore model.
+- **2026-06-02 (07-02):** Borrowed V2 internal imports already use the §C `@`-aliases (Plan 01 repointed them at `panoptic-borrowed/`) ⇒ ZERO import rewrites (mn-A confirmed); only third-party prefixes were checked, all matched the §C remapping RHS verbatim. Borrowed via `gh api .../contents?ref=fe55774` raw to keep BUSL/GPL bytes intact.
+- **2026-06-02 (07-02):** `IPanopticData` kept to exactly the six §E-verified V2 functions (`dispatch`/`dispatchFrom`-payable/`getAccumulatedFeesAndPositionsData`/`getCurrentTick`/`getTWAP`/`numberOfLegs`); optional `getOracleTicks` deferred to Phase 8. FORK-03 compile-time conformance proof = `forge build` green (interface compiles vs borrowed V2 types), NOT an `IPanopticData(addr)` cast.
+- **2026-06-02 (07-02):** Phase 7 lives on branch `feat/keeper-vercel-buildoutput` (07-01 commits reachable only there), not `rescope/somi-leg-donor-transfer` as the prompt/STATE implied; executed + committed 07-02 in place (branching=none).
 
 ## Roadmap Summary (v2.0)
 
