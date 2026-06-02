@@ -31,6 +31,26 @@
       "pendingLabel": "pending",
       "provenanceLabel": "Somnia testnet · agent (POC)",
       "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded"
+    },
+    "bridge": {
+      "heading": "From macro surprise to position",
+      "macroLabel": "Macro print",
+      "consensusLabel": "Consensus",
+      "consensusCaveat": "operator-supplied — not market-derived",
+      "surpriseLabel": "Surprise",
+      "action": {
+        "HOLD": "Hold",
+        "ADD_LONG_GAMMA": "Add long gamma",
+        "REDUCE": "Reduce",
+        "EXIT": "Exit"
+      },
+      "sizeBpsLabel": "Size (bps)",
+      "deltaLabel": "Illustrative position delta",
+      "illustrativeMarker": "illustrative — simulated position",
+      "provenanceLabel": "Somnia testnet · agent (POC)",
+      "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded",
+      "emptyState": "—",
+      "emptyGamma": "No long-gamma decision recorded"
     }
   }
 }

@@ -389,3 +389,54 @@ jmsbpp, 2026-06-02), en second. No machine translation.
 - [ ] M4: no "consensus-verified" in any feed key (automated: `grep -ric "consensus-verified" messages/{es-CO,en}/somnia.json` must return 0)
 - [ ] Anti-marketing-slop grep passes on all `somnia.feed.*` keys
 - [ ] i18n key parity: es-CO ↔ en symmetric across all feed keys
+
+---
+
+## Phase 06-04 review (somnia.bridge namespace — HedgeDecisionBridge copy)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — `somnia.bridge.*` keys
+added for the HedgeDecisionBridge component (Component B). Authored es-CO FIRST (Juan Serrano /
+jmsbpp, 2026-06-02), en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `somnia.bridge.heading` — section heading for the surprise→position bridge card
+- `somnia.bridge.macroLabel` / `somnia.bridge.consensusLabel` / `somnia.bridge.surpriseLabel` — shared with feed (same concepts)
+- `somnia.bridge.consensusCaveat` — M4 operator-honesty caveat (same phrasing as feed for consistency)
+- `somnia.bridge.action.*` — all 4 HedgeActionLabel values (same as feed)
+- `somnia.bridge.sizeBpsLabel` — size in basis points label
+- `somnia.bridge.deltaLabel` — delta row label ("Delta ilustrativo de posición" / "Illustrative position delta")
+- `somnia.bridge.illustrativeMarker` — visible M6 marker ("ilustrativo — posición simulada" / "illustrative — simulated position")
+- `somnia.bridge.provenanceLabel` / `somnia.bridge.provenanceAriaLabel` — testnet-agent pill copy
+- `somnia.bridge.emptyState` — em-dash for null fields
+- `somnia.bridge.emptyGamma` — honest empty state when no ADD_LONG_GAMMA decision exists
+
+**es-CO authoring notes (Plan 06-04 author: Juan Serrano / jmsbpp):**
+- "De la sorpresa macro a la posición" — narrative heading; "la posición" refers to the long-gamma
+  instrument position (schematic); "sorpresa macro" is established Colombian finance vocabulary.
+- "Delta ilustrativo de posición" — "delta" is the standard options-finance term; "ilustrativo"
+  is the M6-required honesty marker; "de posición" clarifies it is the position delta (not P&L).
+- "ilustrativo — posición simulada" — the two-part marker: "ilustrativo" (M6 honesty) + "posición simulada"
+  (explicit instrument context); parenthetical in UI copy; no marketing tone.
+- "No se registró decisión de gamma larga" — honest empty state; "registró" (registered/recorded)
+  is precise for the on-chain event; "gamma larga" is the established es-CO options term.
+- All other keys (`macroLabel`, `consensusLabel`, `consensusCaveat`, `action.*`) are intentionally
+  identical to the feed keys — same concepts, same copy, no duplication confusion.
+- M6 compliance: no "ejecutada", "realizada", "executed", or "realized" in any key.
+- M4 compliance: no "consensus-verified" in any key.
+- B3 compliance: no "observ" in any key.
+- Copy register: informational, laconic, finance/DeFi-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` (bridge additions) | _pending native review_ | | |
+| `messages/en/somnia.json` (bridge additions) | _pending native review_ | | |
+
+### Phase 06-04 somnia.bridge Sign-off
+
+- [ ] es-CO bridge copy reviewed by native Colombian Spanish speaker
+- [ ] Finance terminology ("delta", "gamma larga", "ilustrativo", "posición simulada") reviewed against Colombian finance/options conventions
+- [ ] M6: "ilustrativo"/"illustrative" marker present in deltaLabel + illustrativeMarker keys (visual, not aria-only)
+- [ ] M4: no "consensus-verified" in any bridge key (automated: `grep -ric "consensus-verified" messages/{es-CO,en}/somnia.json` returns 0)
+- [ ] M6: no "ejecutad"/"realizad"/"executed"/"realized" in any bridge key (automated: `grep -ic "ejecutad|realizad|executed|realized" messages/{es-CO,en}/somnia.json` returns 0)
+- [ ] Anti-marketing-slop grep passes on all `somnia.bridge.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric across all bridge keys

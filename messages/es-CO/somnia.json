@@ -31,6 +31,26 @@
       "pendingLabel": "pendiente",
       "provenanceLabel": "Somnia testnet · agente (POC)",
       "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada"
+    },
+    "bridge": {
+      "heading": "De la sorpresa macro a la posición",
+      "macroLabel": "Impresión macro",
+      "consensusLabel": "Consenso",
+      "consensusCaveat": "suministrado por el operador — no por el mercado",
+      "surpriseLabel": "Sorpresa",
+      "action": {
+        "HOLD": "Mantener",
+        "ADD_LONG_GAMMA": "Añadir gamma larga",
+        "REDUCE": "Reducir",
+        "EXIT": "Salir"
+      },
+      "sizeBpsLabel": "Tamaño (bps)",
+      "deltaLabel": "Delta ilustrativo de posición",
+      "illustrativeMarker": "ilustrativo — posición simulada",
+      "provenanceLabel": "Somnia testnet · agente (POC)",
+      "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada",
+      "emptyState": "—",
+      "emptyGamma": "No se registró decisión de gamma larga"
     }
   }
 }
