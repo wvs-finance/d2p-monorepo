@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: 05.2-01 complete — DEFI-06 marked [x] in REQUIREMENTS.md; real SR speech deferred to manual NVDA/VoiceOver pass
-last_updated: "2026-06-02T18:03:34.375Z"
+stopped_at: "06-00 complete — Somnia Wave-0 data layer: deployments/snapshot/chain/ABI/reader/surprise/testnet-agent provenance tier"
+last_updated: "2026-06-02T19:34:32.875Z"
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 7
-  total_plans: 39
-  completed_plans: 38
-  percent: 97
+  total_plans: 44
+  completed_plans: 39
+  percent: 89
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-02
 **Session type:** Plan execution (05.2-01 complete — DEFI-06 wallet connect modal a11y: scoped live region, lang fix, connect-success focus, durable e2e)
-**Stopped at:** 05.2-01 complete — DEFI-06 marked [x] in REQUIREMENTS.md; real SR speech deferred to manual NVDA/VoiceOver pass
+**Stopped at:** 06-00 complete — Somnia Wave-0 data layer: deployments/snapshot/chain/ABI/reader/surprise/testnet-agent provenance tier
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Milestone complete
 
 **Progress:**
-[██████████] 97%
+[█████████░] 89%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -91,6 +91,7 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 05.1 P03 | 11 | 3 tasks | 14 files |
 | Phase 05.1 P04 | 22 | 2 tasks | 6 files |
 | Phase 05.2 P01 | 13 | 2 tasks | 8 files |
+| Phase 06 P00 | 16 | 3 tasks | 23 files |
 
 ## Accumulated Context
 
