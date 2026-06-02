@@ -51,7 +51,12 @@ export default async function AgentPage() {
 
   // Component A — HedgeDecisionFeed strings (06-02).
   // actionLabel maps all 4 HedgeActionLabel values (CROSS-09: equal weight, all keyed).
-  const feedStrings: DecisionCardStrings & { feedHeading: string; feedEmptyState: string } = {
+  // linkLabel: master→detail link affordance (07-03); threaded from trace.linkLabel.
+  const feedStrings: DecisionCardStrings & {
+    feedHeading: string
+    feedEmptyState: string
+    linkLabel?: string | undefined
+  } = {
     actionLabel: {
       HOLD: t('feed.action.HOLD'),
       ADD_LONG_GAMMA: t('feed.action.ADD_LONG_GAMMA'),
@@ -69,6 +74,9 @@ export default async function AgentPage() {
     emptyState: t('panel.emptyState'),
     feedHeading: t('feed.heading'),
     feedEmptyState: t('feed.emptyState'),
+    // 07-03: supply the master→detail link label so each card carries an identical
+    // accent+chevron+underline affordance (CROSS-09 equal-weight invariant).
+    linkLabel: t('trace.linkLabel'),
   }
 
   return (

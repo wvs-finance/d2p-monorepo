@@ -49,7 +49,10 @@
       "timestampLabel": "Marca de tiempo",
       "provenanceLabel": "Somnia testnet · agente (POC)",
       "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada",
-      "emptyState": "—"
+      "emptyState": "—",
+      "errorNotFound": "No se encontró la decisión solicitada. Vuelve al panel del agente para ver las decisiones registradas.",
+      "linkLabel": "Ver la traza de decisión",
+      "backToPanel": "Volver al panel del agente"
     },
     "bridge": {
       "heading": "De la sorpresa macro a la posición",

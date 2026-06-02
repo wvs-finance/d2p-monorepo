@@ -49,7 +49,10 @@
       "timestampLabel": "Timestamp",
       "provenanceLabel": "Somnia testnet · agent (POC)",
       "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded",
-      "emptyState": "—"
+      "emptyState": "—",
+      "errorNotFound": "The requested decision was not found. Return to the agent panel to see recorded decisions.",
+      "linkLabel": "View decision trace",
+      "backToPanel": "Back to the agent panel"
     },
     "bridge": {
       "heading": "From macro surprise to position",
