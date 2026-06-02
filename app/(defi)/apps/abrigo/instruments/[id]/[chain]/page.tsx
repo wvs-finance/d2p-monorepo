@@ -262,12 +262,13 @@ export default async function InstrumentDetailPage({
             {/* HedgeDecisionBridge — surprise→decision→instrument bridge.
                 Mounts ONLY in this simulated branch (kind==='simulated').
                 Reads the ADD_LONG_GAMMA decision from the snapshot reader seam.
-                NEVER calls aggregateAllChains (simulated entries never reach multicall — DEFI-08). */}
-            <section
-              aria-label={locale.startsWith('es') ? bridgeStrings.heading : bridgeStrings.heading}
-            >
+                NEVER calls aggregateAllChains (simulated entries never reach multicall — DEFI-08).
+                The component renders its own labeled <section data-testid="bridge-section">,
+                so this wrapper is a plain <div> — a second aria-label here would create a
+                duplicate landmark with an identical name (a11y) and break strict-mode locators. */}
+            <div>
               <HedgeDecisionBridge instrument={instrument} labels={bridgeStrings} locale={locale} />
-            </section>
+            </div>
 
             {/* SnapshotPoolPanel — fork-fixture pool state from fixture */}
             <section
