@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
+milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 06-04-PLAN.md — HedgeDecisionBridge Component B bridge
-last_updated: "2026-06-02T21:02:41.878Z"
+stopped_at: Phase 7 UI-SPEC approved
+last_updated: "2026-06-02T21:59:55.049Z"
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 8
   total_plans: 44
   completed_plans: 43
@@ -17,7 +17,7 @@ progress:
 
 **Last updated:** 2026-06-02
 **Session type:** Plan execution (05.2-01 complete — DEFI-06 wallet connect modal a11y: scoped live region, lang fix, connect-success focus, durable e2e)
-**Stopped at:** Completed 06-04-PLAN.md — HedgeDecisionBridge Component B bridge
+**Stopped at:** Phase 7 UI-SPEC approved
 
 ---
 
