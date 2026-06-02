@@ -241,6 +241,17 @@ Both phases depend on Phase 3 BFF routes. They share no other dependencies betwe
 **DEFI-* scope constraint:**
 All DEFI-* requirements are read-first only in v1. The transact path (writeContract, simulateContract, LP management) is v2 scope per the requirements document. No DEFI-* requirement in v1 exposes a write path.
 
+### Phase 05.2: DEFI-06 wallet connect-modal accessibility (keyboard nav, focus restoration on close, SR state announcements) (INSERTED) — ✓ COMPLETE 2026-06-02
+
+**Goal:** Wallet connect modal is fully keyboard-navigable, has no focus trap on close, and announces state changes to screen readers.
+**Requirements**: DEFI-06
+**Depends on:** Phase 5
+**Plans:** 1 plan (05.2-01 complete)
+**Deferred:** Real SR speech transcript (NVDA/VoiceOver) — no SR installable in CI; deferred to manual pre-production pass.
+
+Plans:
+- [x] 05.2-01: DEFI-06 a11y — scoped live region + focus restoration + guarded audit route + durable e2e
+
 ### Phase 05.1: abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated) (INSERTED) — ✓ COMPLETE 2026-06-02
 
 **Goal:** A visitor or agent can open the cCOP/USD long-gamma instrument page and read an honestly-labeled, read-first, simulated surface — schematic convex payoff, backend-correct cash-flow waterfall, and Panoptic fork-fixture params — under a three-tier provenance model (fork-fixture / spec / schematic) with a SIMULADO badge, a read-only wallet, and no transact path or fabricated numbers.
