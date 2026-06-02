@@ -1,9 +1,9 @@
 {
-  "capturedAt": "2026-06-02T19:16:00.000Z",
+  "capturedAt": "2026-06-02T19:38:06.314Z",
   "captureMethod": "rpc",
   "decisions": [
     {
-      "decisionId": "4149265",
+      "decisionId": "4083729",
       "action": "ADD_LONG_GAMMA",
       "sizeBps": "6800",
       "macroValue": "568",
@@ -13,7 +13,7 @@
       "sourceTxHash": "0x2a8ec99452956fb94ad3b138844957409b298daa05e2d9986b34676d643c36a5"
     },
     {
-      "decisionId": "4149277",
+      "decisionId": "4083997",
       "action": "REDUCE",
       "sizeBps": "568",
       "macroValue": "568",
@@ -35,7 +35,7 @@
         "dataKey": "0xb73053d3303a516ffee4ecf3fdcd9195da7e3192557a59fdecb0d83545c44841",
         "dataKeyLabel": "co/inflation-rate",
         "scaledValue": "568",
-        "capturedAt": "2026-06-02T19:16:00.000Z",
+        "capturedAt": "2026-06-02T17:15:47.000Z",
         "sourceTxHash": "0x89d7a29805d8493ee328b834378be430e4b42dba09c175a0982abce626286373"
       }
     ]
