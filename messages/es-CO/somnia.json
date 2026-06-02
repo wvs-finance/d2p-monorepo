@@ -11,6 +11,24 @@
       "provenanceAriaLabel": "Somnia testnet · impresión macro de agente (POC) · registrado",
       "caveat": "Datos de agente Somnia testnet. Solo para uso de laboratorio (POC). La entrada de consenso es suministrada por el operador, no por el mercado.",
       "emptyState": "—"
+    },
+    "feed": {
+      "heading": "Decisiones de cobertura",
+      "emptyState": "No hay decisiones registradas.",
+      "action": {
+        "HOLD": "Mantener",
+        "ADD_LONG_GAMMA": "Añadir gamma larga",
+        "REDUCE": "Reducir",
+        "EXIT": "Salir"
+      },
+      "sizeBpsLabel": "Tamaño (bps)",
+      "macroLabel": "Impresión macro",
+      "consensusLabel": "Consenso",
+      "consensusCaveat": "suministrado por el operador — no por el mercado",
+      "surpriseLabel": "Sorpresa",
+      "pendingLabel": "pendiente",
+      "provenanceLabel": "Somnia testnet · agente (POC)",
+      "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada"
     }
   }
 }

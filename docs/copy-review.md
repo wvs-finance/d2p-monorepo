@@ -343,3 +343,49 @@ Serrano / jmsbpp, 2026-06-02), en second. No machine translation.
 - [ ] M4: no "consensus-verified" in any somnia.json key (automated: `grep -ric "consensus-verified" messages/{es-CO,en}/somnia.json` must return 0)
 - [ ] Anti-marketing-slop grep passes on all `somnia.*` keys
 - [ ] i18n key parity: es-CO ↔ en symmetric
+
+---
+
+## Phase 06-02 review (somnia.feed namespace — HedgeDecisionFeed copy)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — `somnia.feed.*` keys
+added for the HedgeDecisionFeed component (Component A). Authored es-CO FIRST (Juan Serrano /
+jmsbpp, 2026-06-02), en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `somnia.feed.heading` — section heading for the decision feed
+- `somnia.feed.emptyState` — honest empty-state copy (no decisions recorded)
+- `somnia.feed.action.*` — all 4 HedgeActionLabel values: HOLD / ADD_LONG_GAMMA / REDUCE / EXIT
+- `somnia.feed.sizeBpsLabel` — size in basis points label
+- `somnia.feed.macroLabel` — macro print label
+- `somnia.feed.consensusLabel` — consensus field label
+- `somnia.feed.consensusCaveat` — operator-supplied caveat sentence (M4 honesty)
+- `somnia.feed.surpriseLabel` — surprise field label
+- `somnia.feed.pendingLabel` — pending state badge label
+- `somnia.feed.provenanceLabel` / `somnia.feed.provenanceAriaLabel` — testnet-agent pill copy
+
+**es-CO authoring notes (Plan 06-02 author: Juan Serrano / jmsbpp):**
+- "Decisiones de cobertura" — "cobertura" is the canonical es-CO finance term for hedging; "decisiones" standard noun for decisions.
+- "Añadir gamma larga" — translates ADD_LONG_GAMMA; "gamma larga" is established options-finance terminology in es-CO (positive gamma position).
+- "Reducir" — direct imperative verb; standard es-CO financial action label for REDUCE.
+- "Mantener" / "Salir" — natural es-CO action labels for HOLD / EXIT.
+- "Tamaño (bps)" — "tamaño" for size, "(bps)" retained as the international abbreviation.
+- "Impresión macro" — "impresión" for macro data print; standard es-CO term used in financial data publishing.
+- "suministrado por el operador — no por el mercado" — M4 operator-honesty caveat; "suministrado" is the established es-CO term for supplied/operator-provided. No marketing tone.
+- "Sorpresa" — established financial term for macro surprise (delta between print and consensus); "sorpresa inflacionaria" is standard es-CO financial press vocabulary.
+- "pendiente" — lowercase status label; standard es-CO pending state. Not "en espera" (more conversational).
+- Copy register: informational, laconic, finance/DeFi-appropriate. Passes banned-phrases check.
+- M4 compliance: zero occurrences of "consensus-verified" in all somnia.feed keys.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` (feed additions) | _pending native review_ | | |
+| `messages/en/somnia.json` (feed additions) | _pending native review_ | | |
+
+### Phase 06-02 somnia.feed Sign-off
+
+- [ ] es-CO decision-feed copy reviewed by native Colombian Spanish speaker
+- [ ] Finance terminology ("gamma larga", "impresión macro", "sorpresa") reviewed against Colombian finance/options conventions
+- [ ] M4: no "consensus-verified" in any feed key (automated: `grep -ric "consensus-verified" messages/{es-CO,en}/somnia.json` must return 0)
+- [ ] Anti-marketing-slop grep passes on all `somnia.feed.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric across all feed keys

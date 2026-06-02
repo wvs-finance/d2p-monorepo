@@ -11,6 +11,24 @@
       "provenanceAriaLabel": "Somnia testnet · agent macro print (POC) · recorded",
       "caveat": "Somnia testnet agent data. Laboratory use only (POC). Consensus input is operator-supplied, not market-derived.",
       "emptyState": "—"
+    },
+    "feed": {
+      "heading": "Hedge decisions",
+      "emptyState": "No recorded decisions.",
+      "action": {
+        "HOLD": "Hold",
+        "ADD_LONG_GAMMA": "Add long gamma",
+        "REDUCE": "Reduce",
+        "EXIT": "Exit"
+      },
+      "sizeBpsLabel": "Size (bps)",
+      "macroLabel": "Macro print",
+      "consensusLabel": "Consensus",
+      "consensusCaveat": "operator-supplied — not market-derived",
+      "surpriseLabel": "Surprise",
+      "pendingLabel": "pending",
+      "provenanceLabel": "Somnia testnet · agent (POC)",
+      "provenanceAriaLabel": "Somnia testnet · agent decision (POC) · recorded"
     }
   }
 }
