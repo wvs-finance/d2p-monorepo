@@ -20,7 +20,6 @@ import { ManagementControls } from '@/components/defi/somnia/ManagementControls'
 import type { ManagementControlsStrings } from '@/components/defi/somnia/ManagementControls'
 import { PositionPanel } from '@/components/defi/somnia/PositionPanel'
 import type { PositionPanelStrings } from '@/components/defi/somnia/PositionPanel'
-import { snapshotSource } from '@/lib/apps/abrigo/somnia/liveness'
 import { getDecisionTraceById } from '@/lib/apps/abrigo/somnia/reader'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
@@ -120,10 +119,6 @@ export default async function AgentDecisionDetailPage({
     ariaPolling: t('liveness.ariaPolling'),
   }
 
-  // snapshotSource for the liveness pill — snapshot default (WRAPPER_DEPLOYED unset).
-  // The seed string (the snapshot label) is the stable first-paint value (MAJOR-8).
-  const livenessSource = snapshotSource(t('liveness.snapshot'))
-
   // Page title for heading (locale-correct)
   const pageTitle = t('trace.title')
   // Section heading for the trace block (h2, introduces DecisionPipelineTrace for SR — MINOR-16)
@@ -134,8 +129,10 @@ export default async function AgentDecisionDetailPage({
       {/* Page header: h1 route title + liveness pill */}
       <div className="flex items-center gap-3 flex-wrap mb-8">
         <h1 className="text-[28px] font-semibold text-text-primary">{pageTitle}</h1>
-        {/* LivenessPill is a client island — placed near the title, describing whole surface freshness */}
-        <LivenessPill source={livenessSource} strings={livenessStrings} />
+        {/* LivenessPill is a client island — placed near the title, describing whole surface freshness.
+            liveness='snapshot' is a plain serializable string (safe RSC→client prop). The source
+            is constructed inside LivenessPill to avoid passing functions across the RSC boundary. */}
+        <LivenessPill liveness="snapshot" strings={livenessStrings} />
       </div>
 
       {/* Centerpiece: Decision pipeline trace */}

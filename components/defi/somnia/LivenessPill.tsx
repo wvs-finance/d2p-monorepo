@@ -12,12 +12,16 @@
 //   - No non-muted color token (neutral only — NEVER accent/non-default ring).
 //   - No collapse disclosure (MAJOR-10).
 //
-// Props: source (LivenessSource<string>) + pre-translated strings threaded from the page.
-// Default source: snapshotSource (liveness='snapshot').
+// Props: liveness ('snapshot' | 'polling') + pre-translated strings threaded from the page.
+//   liveness is a plain serializable string — safe to cross the RSC→client boundary.
+//   The LivenessSource is created INSIDE this client component (functions cannot cross
+//   the RSC serialization boundary as props — React RSC-to-client constraint).
+// Default liveness: 'snapshot' (not-deployed, no polling).
 // Placed in the page header by 07-03 — not inside the trace panels.
 
-import type { LivenessSource } from '@/lib/apps/abrigo/somnia/liveness'
+import { snapshotSource } from '@/lib/apps/abrigo/somnia/liveness'
 import { CircleDashed, RefreshCw } from 'lucide-react'
+import { useMemo } from 'react'
 import { useSyncExternalStore } from 'react'
 
 // ---------------------------------------------------------------------------
@@ -36,8 +40,12 @@ export interface LivenessPillStrings {
 }
 
 interface LivenessPillProps {
-  /** The LivenessSource driving this pill. Default: snapshotSource (not-deployed, no polling). */
-  source: LivenessSource<string>
+  /**
+   * The liveness tier. Phase 7: 'snapshot' (default) or 'polling' (SOMNIA_LIVE).
+   * A plain serializable string — safe to cross the RSC→client serialization boundary.
+   * The LivenessSource is constructed inside this client component (not passed as a prop).
+   */
+  liveness?: 'snapshot' | 'polling'
   strings: LivenessPillStrings
 }
 
@@ -55,20 +63,23 @@ const NEUTRAL_CLASS = 'text-text-muted ring-border-default bg-bg-surface'
 // LivenessPill component
 // ---------------------------------------------------------------------------
 
-export function LivenessPill({ source, strings }: LivenessPillProps) {
+export function LivenessPill({ liveness = 'snapshot', strings }: LivenessPillProps) {
+  // Create the LivenessSource inside the client component.
+  // Functions cannot cross the RSC serialization boundary as props — this is the fix.
+  // useMemo ensures the source is stable across re-renders (seed is the snapshot text).
+  const source = useMemo(() => snapshotSource(strings.snapshot), [strings.snapshot])
+
   // useSyncExternalStore with three arguments:
   //   1. subscribe — wires the interval (for polling) or no-op (for snapshot)
   //   2. getSnapshot — sync read (client)
   //   3. getServerSnapshot — stable seed so server + first client paint match (MAJOR-8)
   //
   // The third argument prevents React hydration mismatch #418:
-  //   - snapshotSource: getServerSnapshot() === getSnapshot() === seed (same reference)
-  //   - pollingSource: getServerSnapshot() returns the stable seed (not the interval value)
+  //   snapshotSource: getServerSnapshot() === getSnapshot() === seed (same reference)
   useSyncExternalStore(source.subscribe, source.getSnapshot, source.getServerSnapshot)
 
-  // Determine render state from source.liveness (snapshot or polling)
+  // Determine render state from liveness prop (snapshot or polling)
   // 'live' is structurally absent this phase — no branch for it.
-  const liveness = source.liveness
 
   if (liveness === 'polling') {
     return (
