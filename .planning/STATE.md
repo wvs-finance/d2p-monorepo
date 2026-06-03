@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-06-02T23:43:27.052Z"
+stopped_at: "Checkpoint Task 3 — 07-03-PLAN.md (human-verify: Evidence Collector live gate)"
+last_updated: "2026-06-03T00:02:40.350Z"
 progress:
   total_phases: 10
   completed_phases: 8
@@ -17,7 +17,7 @@ progress:
 
 **Last updated:** 2026-06-02
 **Session type:** Plan execution (07-01 complete — DecisionPipelineTrace 6-stage vertical stepper + es-CO-first somnia.trace.* copy)
-**Stopped at:** Completed 07-02-PLAN.md
+**Stopped at:** Checkpoint Task 3 — 07-03-PLAN.md (human-verify: Evidence Collector live gate)
 
 ---
 
@@ -99,6 +99,7 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 07-agent-reasoning-position-surface P00 | 8 | 2 tasks | 13 files |
 | Phase 07-agent-reasoning-position-surface P01 | 9 | 2 tasks | 7 files |
 | Phase 07-agent-reasoning-position-surface P02 | 9 | 2 tasks | 9 files |
+| Phase 07-agent-reasoning-position-surface P03 | 13 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
