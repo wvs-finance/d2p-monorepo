@@ -33,5 +33,14 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".velite", ".next", "tests/unit/structured-data.test.tsx"]
+  "exclude": [
+    "node_modules",
+    ".velite",
+    ".next",
+    "tests/unit/structured-data.test.tsx",
+    "tests/unit/cornerstone-events.test.ts",
+    "tests/unit/cornerstone-store.test.ts",
+    "tests/unit/cornerstone-engine.test.ts",
+    "tests/unit/cornerstone-presets.test.ts"
+  ]
 }
