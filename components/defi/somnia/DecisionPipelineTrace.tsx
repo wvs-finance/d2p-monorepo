@@ -22,6 +22,7 @@
 //              TraceStrings INCLUDES consensusCaveat threaded from feed.consensusCaveat (MAJOR-9).
 
 import { decisionToPositionDelta, formatFractionOfMax } from '@/lib/apps/abrigo/somnia/bridge'
+import { formatScaledPercent } from '@/lib/apps/abrigo/somnia/format'
 import { formatSurprise } from '@/lib/apps/abrigo/somnia/surprise'
 import type { DecisionTraceView, HedgeActionLabel } from '@/lib/apps/abrigo/somnia/types'
 import { DataRow, PipelineStage } from './PipelineStage'
@@ -59,6 +60,13 @@ export interface TraceStrings {
 interface DecisionPipelineTraceProps {
   decision: DecisionTraceView
   strings: TraceStrings
+  /**
+   * BCP-47 locale string (e.g. "es-CO", "en") — threaded from the RSC page.
+   * Used to format macroValue as a human-readable percent (5.68% / 5,68 %).
+   * Defaults to "en" when not provided (backward-compat for call sites that
+   * have not yet been updated, but BOTH call sites should pass locale).
+   */
+  locale?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -98,7 +106,11 @@ function formatTimestamp(ts: Date | null, emptyState: string): string {
 // DecisionPipelineTrace component
 // ---------------------------------------------------------------------------
 
-export function DecisionPipelineTrace({ decision, strings }: DecisionPipelineTraceProps) {
+export function DecisionPipelineTrace({
+  decision,
+  strings,
+  locale = 'en',
+}: DecisionPipelineTraceProps) {
   // Stage 6: illustrative position — REUSE bridge.ts (NEVER recompute)
   // decisionToPositionDelta expects HedgeDecisionView; pass the minimal shape it actually reads
   // (action + sizeBps) via a structurally compatible subset. DecisionTraceView carries both.
@@ -129,7 +141,8 @@ export function DecisionPipelineTrace({ decision, strings }: DecisionPipelineTra
       {/* -------------------------------------------------------------------- */}
       <PipelineStage title={strings.stage1} {...provProps}>
         <DataRow label="co/inflation-rate">
-          <span>{String(decision.macroValue)}</span>
+          {/* formatScaledPercent: 568n → "5.68%" (en) / "5,68 %" (es-CO). builtPrompt stays verbatim. */}
+          <span>{formatScaledPercent(decision.macroValue, locale)}</span>
         </DataRow>
         <DataRow label={strings.timestampLabel}>
           <span>{formatTimestamp(decision.decidedAt, strings.emptyState)}</span>

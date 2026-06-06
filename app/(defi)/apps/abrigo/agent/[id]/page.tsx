@@ -140,7 +140,7 @@ export default async function AgentDecisionDetailPage({
       <section aria-label={traceSection} className="mb-8">
         <h2 className="text-xl font-semibold text-text-primary mb-4">{traceSection}</h2>
         {/* DecisionPipelineTrace renders 6 PipelineStage children, each with an h3 stage title */}
-        <DecisionPipelineTrace decision={trace} strings={traceStrings} />
+        <DecisionPipelineTrace decision={trace} strings={traceStrings} locale={locale} />
       </section>
 
       {/* Position panel: not-deployed empty state under neutral fork-verified tier */}

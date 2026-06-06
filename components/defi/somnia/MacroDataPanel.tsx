@@ -14,6 +14,7 @@
 //        pattern — keeps MacroDataPanel free of getTranslations calls, mirrors InstrumentDetail).
 
 import { ProvenancePill } from '@/components/defi/ProvenanceBadge'
+import { formatScaledPercent } from '@/lib/apps/abrigo/somnia/format'
 import {
   getLatestMacroPrint,
   getMacroHistory,
@@ -41,21 +42,6 @@ export interface MacroPanelStrings {
 interface MacroDataPanelProps {
   locale: string
   strings: MacroPanelStrings
-}
-
-// ---------------------------------------------------------------------------
-// Percent formatter — scaledValue is bigint (e.g. 568n = 5.68%)
-// Scale = 2 decimal places. Convert at the format edge ONLY.
-// ---------------------------------------------------------------------------
-
-function formatScaledPercent(scaledValue: bigint, locale: string): string {
-  // 568n → 5.68 → format as percent
-  const raw = Number(scaledValue) / 100
-  return new Intl.NumberFormat(locale, {
-    style: 'percent',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(raw / 100)
 }
 
 // ---------------------------------------------------------------------------

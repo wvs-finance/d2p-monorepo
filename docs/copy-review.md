@@ -538,6 +538,64 @@ en second. No machine translation.
 | `messages/es-CO/somnia.json` (position/manage/liveness additions) | _pending native review_ | | |
 | `messages/en/somnia.json` (position/manage/liveness additions) | _pending native review_ | | |
 
+---
+
+## Phase 08-01 review (somnia.cornerstone namespace — HedgeDecisionCardV2 + MintCard copy)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — `somnia.cornerstone.*` keys
+added for the HedgeDecisionCardV2 and MintCard components (Plan 08-01). Authored es-CO FIRST (Juan
+Serrano / jmsbpp, 2026-06-06), en second. No machine translation.
+
+**New keys added (2026-06-06):**
+- `somnia.cornerstone.pageTitle` — route heading
+- `somnia.cornerstone.confirmCta` — primary Confirm CTA (simulated gate)
+- `somnia.cornerstone.confirmGateCaption` — gate caption (§0 honesty — nothing executes on-chain)
+- `somnia.cornerstone.idleHeading` / `somnia.cornerstone.idleBody` — idle/empty state copy
+- `somnia.cornerstone.agent1Label` — Agent-1 transcript entry label
+- `somnia.cornerstone.mockSubLabel` / `somnia.cornerstone.mockSubLabelAria` — FlaskConical neutral pill text + aria
+- `somnia.cornerstone.humanAuthoredLabel` — BLOCKER RC-B2: explicit label for free-text rationale
+- `somnia.cornerstone.mockUnit` — adjacent sibling label for every mock numeric ("ilustrativo" / "illustrative")
+- `somnia.cornerstone.maxLossLabel` / `somnia.cornerstone.upsideLabel` — special case field labels
+- `somnia.cornerstone.errorState` — decision-lookup miss honest error copy
+- `somnia.cornerstone.chip1Label` / `somnia.cornerstone.chip1Caption` / `somnia.cornerstone.chip2Label` / `somnia.cornerstone.chip2Caption` — preset chip copy
+- `somnia.cornerstone.forkVerifiedLabel` / `somnia.cornerstone.forkVerifiedAriaLabel` — fork-verified pill copy for both cards
+- `somnia.cornerstone.replayingMock` / `somnia.cornerstone.replayingMockAria` — LivenessPill replaying state
+- `somnia.cornerstone.field*` — DataRow field labels (market/strike/size/direction/school/volWidth/horizon/tickSpacing/asset/margin/tokenId)
+
+**es-CO authoring notes (Plan 08-01 author: Juan Serrano / jmsbpp):**
+- "Cornerstone — flujo de agente (mock)" — "flujo" for run/flow; "(mock)" parenthetical is the honesty marker.
+- "Confirmar (simulado)" — imperative CTA; "(simulado)" is the honesty qualifier; not "Ejecutar" (banned — implies real execution).
+- "Acción simulada — no se ejecuta en ninguna cadena." — precise §0 honesty sentence; "en ninguna cadena" (on any chain) more precise than "en cadena".
+- "Elige un ejemplo o describe tu vista macro" — direct imperative; "vista macro" for macro view is established Colombian finance vocabulary.
+- "no se infiere en vivo" — §0.6 compliance; "inferir" is the precise AI term for live inference; not "procesa" (too generic).
+- "mock · no en vivo" — bilingual register accepted in es-CO DeFi ("mock" is widely used); "en vivo" for live.
+- "explicación (autoría humana)" — RC-B2 BLOCKER label; "autoría humana" is precise and unambiguous; never "razonamiento del agente".
+- "ilustrativo" — the M6 honesty marker for adjacent mock numeric labels; established financial adjective in es-CO.
+- "= prima (máx. pérdida)" — "prima" is the canonical options/insurance term in es-CO; "(máx. pérdida)" clarifies the max-loss semantics.
+- "ilimitado (ilustrativo)" — "ilimitado" for unlimited upside; "(ilustrativo)" is the M6 honesty parenthetical.
+- "reproduciendo · mock" — "reproduciendo" (gerund) for replaying; middle-dot separator; "mock" retained as DeFi tooling term.
+- "verificado en fork · Agente 2" — "verificado en fork" reused from Phase 07 somnia.position; "Agente 2" identifies the card source.
+- Field labels: "Mercado" / "Strike" / "Tamaño" / "Dirección" / "Escuela" / "Horizonte" — established Colombian finance vocabulary. "Strike" retained as options term (not "precio de activación" — too long for a DataRow dt).
+- "Tick spacing" — technical DeFi term, no established es-CO equivalent; retained untranslated.
+- Compliance: no "ejecutad"/"realizad" in any key (M6). No "consensus-verified" (M4). No "observ" (B3). No "$" adjacent to values (MAJOR-13).
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` (cornerstone additions) | Juan Serrano (jmsbpp) | 2026-06-06 | PASS — developer authored es-CO first; native Colombian Spanish reviewer sign-off pending (non-blocking per project policy). |
+| `messages/en/somnia.json` (cornerstone additions) | Juan Serrano (jmsbpp) | 2026-06-06 | PASS — en second; no machine translation. |
+
+### Phase 08-01 somnia.cornerstone Sign-off
+
+- [ ] es-CO cornerstone copy reviewed by native Colombian Spanish speaker (pending — non-blocking)
+- [ ] RC-B2: `humanAuthoredLabel` = "explicación (autoría humana)" confirmed present in es-CO (automated)
+- [ ] M6: no "ejecutad"/"realizad"/"executed"/"realized" in any cornerstone key
+- [ ] M4: no "consensus-verified" in any cornerstone key
+- [ ] MAJOR-13: no dollar sign in any key value
+- [ ] Anti-marketing-slop grep passes on all `somnia.cornerstone.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric across all cornerstone keys
+
+---
+
 ### Phase 07-02 somnia.position/manage/liveness Sign-off
 
 - [ ] es-CO position/manage/liveness copy reviewed by native Colombian Spanish speaker

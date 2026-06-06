@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 07-03-PLAN.md — detail route + Evidence Collector 11/11 PASS
-last_updated: "2026-06-06T17:55:56.496Z"
+stopped_at: Completed 08-02-PLAN.md (bfa26f9 + 2a2c295); 08-03 optional/if-time; phase 08 verification run next
+last_updated: "2026-06-06T21:13:51.225Z"
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 9
-  total_plans: 48
-  completed_plans: 47
-  percent: 98
+  total_plans: 52
+  completed_plans: 50
+  percent: 96
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
-**Last updated:** 2026-06-02
-**Session type:** Plan execution (07-01 complete — DecisionPipelineTrace 6-stage vertical stepper + es-CO-first somnia.trace.* copy)
-**Stopped at:** Completed 07-03-PLAN.md — detail route + Evidence Collector 11/11 PASS
+**Last updated:** 2026-06-06
+**Session type:** Plan execution (08-02 complete — cornerstone RSC shell + PromptBox + RunTranscript + e2e + post-checkpoint live-verify fix)
+**Stopped at:** Completed 08-02-PLAN.md (bfa26f9 + 2a2c295); 08-03 optional/if-time; phase 08 verification run next
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Milestone complete
 
 **Progress:**
-[██████████] 98%
+[██████████] 96%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -101,6 +101,8 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 07-agent-reasoning-position-surface P02 | 9 | 2 tasks | 9 files |
 | Phase 07-agent-reasoning-position-surface P03 | 13 | 2 tasks | 9 files |
 | Phase 07-agent-reasoning-position-surface P03 | 13 | 3 tasks | 9 files |
+| Phase 08 P00 | 10 | 2 tasks | 9 files |
+| Phase 08-scenario1-agent-cornerstone P01 | 8 | 2 tasks | 8 files |
 
 ## Accumulated Context
 

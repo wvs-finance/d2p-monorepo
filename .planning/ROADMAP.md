@@ -19,6 +19,7 @@
 - [x] **Phase 05.2: DEFI-06 wallet connect-modal accessibility** *(INSERTED)* — scoped role=status live region, focus restoration (incl. connect-success), durable e2e; real-SR speech deferred to manual pass (completed 2026-06-02)
 - [x] **Phase 6: Somnia agent surface (MacroHedgeStrategist)** — Module 2: surface the live Somnia-testnet hedge-decision agent — live CPI panel + decision feed + agent-first MCP tools + surprise→decision→instrument bridge; testnet-agent provenance tier; reads an already-deployed contract (no new deploy) (completed 2026-06-02)
 - [ ] **Phase 7: Agent reasoning + position-execution surface** — Module 3: per-decision deterministic decision-pipeline trace + fork-verified/not-live LongGammaWrapper position panel (not-deployed empty state) with disabled management; frontend-only, read-first, no deploy (honker live-stream DEFERRED to 7.x, gated on a continuous keeper cadence)
+- [ ] **Phase 8: Scenario-1 Agentathon cornerstone** — Module 4: mock-driven chatbot-style run flow at /apps/abrigo/cornerstone — prompt → Agent-1 (REAL recorded consensus-verified decision, revealed) → Agent-2 mock decision card → confirm → mock mint; live-streamed workflow steps; honest (fork-verified+mock sub-label, single real factor, no fabricated CoT/PnL); frontend-only, no deploy; reuse + `motion`; monitor/history (idb) = if-time. Deadline ~June 11
 
 ---
 
@@ -322,6 +323,32 @@ Plans:
 - [ ] 07-03-PLAN.md — Wave 2 wire: /apps/abrigo/agent/[id] detail route assembling trace + position panel + disabled management + liveness pill + master→detail link (accent + ChevronRight + underline) + unknown-id error state + e2e honesty greps (no executed/realized, no $, no green, no live) + Evidence Collector live-verification gate (MOD3-TRACE, MOD3-POS, MOD3-MANAGE, MOD3-LIVE, CROSS-01, CROSS-09, CROSS-10) [wave 2]
 
 **Deferred to Phase 7.x:** MOD3-HONKER (bespoke honker live-stream sidecar) — gated on a continuous keeper cadence.
+
+---
+
+### Phase 8: Scenario-1 Agentathon cornerstone — Module 4
+
+**Goal:** A visitor/judge at `/apps/abrigo/cornerstone` types a macro-view prompt and watches the agent workflow run live, chatbot-style — the workflow STEPS stream progressively: Agent 1 reveals the REAL recorded consensus-verified Somnia decision (the autonomous-agent differentiator), Agent 2 presents a MOCK pool-representativeness decision card the user CONFIRMS, then a MOCK mint. Mock-driven (nothing live-callable; real wiring = backend Phase 15); honest throughout (real Agent-1 under `testnet-agent`/consensus-verified; Agent-2/mint under `fork-verified` + "mock · no en vivo" sub-label; single real factor `co/inflation-rate`, no fabricated chain-of-thought, no `$` PnL presented as real; reasoning collapses, the decision stays full-weight). Frontend-only; no Solidity; no deploy; no wallet-to-live-chain.
+
+**Requirements**: MOD4-FLOW (route + chatbot run transcript + workflow-store seam), MOD4-A1 (Agent-1 real-decision reveal reusing DecisionPipelineTrace, single-factor), MOD4-A2 (Agent-2 mock decision card from HedgeLegParamsView + confirm gate, focus-managed), MOD4-MINT (mock mint card); reuses CROSS-01/09/10, AGENT-01/02, the Phase-7 `fork-verified` tier + stepper + disclosure + `useSyncExternalStore` pattern. **If-time (NOT committed):** MOD4-MONITOR (basic read) + MOD4-HISTORY (idb run history). (New MOD4-* IDs introduced at planning; honesty acceptance lives in the spec §0 + each plan's must_haves.)
+**Depends on:** Phase 6 (real Somnia decision snapshot + reader) + Phase 7 (DecisionPipelineTrace, SystemPromptDisclosure, stepper, fork-verified tier, LivenessPill, the useSyncExternalStore pattern). Backend Scenario-1 (MacroHedgeExecutor/mint/monitor) is UNBUILT → mock only.
+**Canonical spec:** `docs/superpowers/specs/2026-06-06-module4-scenario1-cornerstone-design.md` (v2; passed 2-way review — Reality Checker + Frontend Developer; §0 = binding honesty)
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. At `/apps/abrigo/cornerstone` a visitor picks a curated preset (or free-text → nearest preset) and the workflow STEPS stream progressively into a chatbot transcript (`aria-live` announces each once); the Agent-1 step reveals the server-rendered `DecisionPipelineTrace` for the REAL recorded decision (single factor `co/inflation-rate`=5.68% → consensus → action+sizeBps) under the `testnet-agent` tier, labeled "recorded run · consensus-verified"; no fabricated chain-of-thought; `testnet-agent`+"consensus-verified" appear ONLY here.
+  2. Agent 2 presents a MOCK decision card from `HedgeLegParamsView` (market, strike 4.100, size, isLong, school label, vol→width, max-loss=premium, upside=unlimited, mock margin) under the `fork-verified` tier + a "mock · no en vivo"/"mock · not live" sub-label (never green); every mock numeric carries an adjacent mock/ilustrativo label; no `$` presented as real PnL; the card has no `<details>` and stays full visual weight; a Confirm button gates the mint and receives focus on entering the confirm state.
+  3. On confirm, a MOCK MintCard renders (TokenId, mock margin BalanceDelta, leg fields) under the mock label; rendered DOM contains no executed/realized/ejecutad/realizad and no raw `0x000…0`; no viem/wagmi client is constructed against the Polygon addresses.
+  4. The run is driven by a dedicated `workflow-store` (useSyncExternalStore-shaped, owns the reducer, stable RunState ref per emit, getServerSnapshot=idle so first paint is the idle prompt); the mock `WorkflowEngine` producer emits the provisional `WorkflowEvent`s behind a `fromMockEvent` adapter; `motion` entrance is mounted-gated + honors prefers-reduced-motion; the native `honker-node`/AI-SDK are absent and `idb` is absent unless the if-time history scope ships.
+
+**Honesty invariants (spec §0):** mock-driven (no live chain call, no wallet-to-live-Polygon); Agent-1 REAL/consensus-verified only; single real factor (no fabricated multi-factor CoT); Agent-2/mint MOCK under fork-verified+sub-label (never imply executed/realized, no real `$` PnL); reasoning collapses but the decision card does not; provisional event contract behind an adapter (Phase-15 reshape expected); es-CO-first; locked tokens; `impeccable`+token tests; no `--no-verify`. Phase 8 ships the MOCK UI; real wiring is a separate future phase.
+
+**Plans**: 3 committed + 1 if-time (Wave 0 data layer → Wave 1 cards → Wave 2 route-wire + e2e + live-verify; Wave 3 if-time monitor/history)
+
+Plans:
+- [ ] 08-00-PLAN.md — Wave 0 data layer (TDD): provisional WorkflowEvent contract + fromMockEvent adapter + HedgeLegParamsView + presets(→4083729/4083997) + dedicated workflow-store (owns reducer, stable-ref, getServerSnapshot=idle) + timed mock WorkflowEngine; failing-first (MOD4-FLOW) [wave 0]
+- [ ] 08-01-PLAN.md — Wave 1 cards (TDD): HedgeDecisionCardV2 (fork-verified + FlaskConical "mock · no en vivo", full weight, no <details>, adjacent ilustrativo labels, Confirm+confirmRef) + MintCard + es-CO-first somnia.cornerstone.* copy (MOD4-A2, MOD4-MINT) [wave 1]
+- [ ] 08-02-PLAN.md — Wave 2 wire: /apps/abrigo/cornerstone RSC shell (pre-renders DecisionPipelineTrace as children) + PromptBox + RunTranscript (useSyncExternalStore, aria-live, motion mounted-gate, focus-to-Confirm) + motion dep + e2e honesty greps + Evidence Collector live-verify (MOD4-FLOW, MOD4-A1, MOD4-A2, MOD4-MINT) [wave 2]
+- [ ] 08-03-PLAN.md — Wave 3 IF-TIME (NOT required for phase completion): MonitorPanel (basic mock read) + RunHistory (idb, lazy openDB, client-only) — adds idb ONLY here, off the critical path (MOD4-MONITOR, MOD4-HISTORY) [wave 3]
 
 ---
 *Roadmap created: 2026-05-11*
