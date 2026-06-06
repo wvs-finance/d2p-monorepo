@@ -4,7 +4,7 @@ milestone: v2.0
 milestone_name: milestone
 status: completed
 stopped_at: Completed 07-03-PLAN.md — detail route + Evidence Collector 11/11 PASS
-last_updated: "2026-06-06T17:48:26.637Z"
+last_updated: "2026-06-06T17:55:56.496Z"
 progress:
   total_phases: 10
   completed_phases: 9
