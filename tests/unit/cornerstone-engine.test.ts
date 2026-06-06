@@ -63,9 +63,10 @@ describe('runWorkflow — emission order and user-gated mint', () => {
 
     expect(emitted[0]).toBe('StrategistDecided')
 
-    // Resolve confirm so runWorkflow can finish
+    // Resolve confirm so runWorkflow can finish (advances past sleep(1800) + sleep(1200))
     resolveConfirm()
-    await vi.advanceTimersByTimeAsync(2000)
+    await vi.advanceTimersByTimeAsync(1900) // past sleep(1800)
+    await vi.advanceTimersByTimeAsync(1300) // past sleep(1200) after mint
     await enginePromise.catch(() => {})
   })
 
@@ -93,7 +94,7 @@ describe('runWorkflow — emission order and user-gated mint', () => {
     expect(emitted[1]).toBe('ExecutorDecided')
 
     resolveConfirm()
-    await vi.advanceTimersByTimeAsync(2000)
+    await vi.advanceTimersByTimeAsync(1300) // past sleep(1200) after mint
     await enginePromise.catch(() => {})
   })
 
@@ -122,7 +123,7 @@ describe('runWorkflow — emission order and user-gated mint', () => {
 
     // Now confirm
     resolveConfirm()
-    await vi.advanceTimersByTimeAsync(2000)
+    await vi.advanceTimersByTimeAsync(1300) // past sleep(1200) after mint
     await enginePromise.catch(() => {})
   })
 
@@ -187,7 +188,8 @@ describe('runWorkflow — emission order and user-gated mint', () => {
     expect((stratDecidedEvent as { recordedDecisionId: string }).recordedDecisionId).toBe('4083729')
 
     resolveConfirm()
-    await vi.advanceTimersByTimeAsync(2000)
+    await vi.advanceTimersByTimeAsync(1900) // past sleep(1800) for ExecutorDecided
+    await vi.advanceTimersByTimeAsync(1300) // past sleep(1200) after mint
     await enginePromise.catch(() => {})
   })
 })
