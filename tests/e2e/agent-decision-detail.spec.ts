@@ -77,7 +77,10 @@ test.describe('07-03 — /apps/abrigo/agent/4083729 (ADD_LONG_GAMMA, es-CO)', ()
     await page.waitForLoadState('networkidle')
 
     // formatFractionOfMax(6800n) === "68%" (verified in bridge.ts unit tests)
-    const fraction = page.locator('[data-testid="pipeline-trace"]').getByText('68%')
+    // exact:true so it does NOT also match the macro factor "5,68%"/"5.68%" (substring "68%")
+    const fraction = page
+      .locator('[data-testid="pipeline-trace"]')
+      .getByText('68%', { exact: true })
     await expect(fraction).toBeVisible()
   })
 
@@ -336,7 +339,7 @@ test.describe('07-03 — /apps/abrigo/agent/4083997 (REDUCE, es-CO)', () => {
 
     // formatFractionOfMax(568n) === "6%" (Number(568)/100 = 5.68 → Math.round → 6)
     // Verified in bridge.ts unit tests
-    const fraction = page.locator('[data-testid="pipeline-trace"]').getByText('6%')
+    const fraction = page.locator('[data-testid="pipeline-trace"]').getByText('6%', { exact: true })
     await expect(fraction).toBeVisible()
   })
 

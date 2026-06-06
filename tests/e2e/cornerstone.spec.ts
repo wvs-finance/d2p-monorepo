@@ -126,7 +126,10 @@ test.describe('Cornerstone route — /apps/abrigo/cornerstone', () => {
     await page.locator('[data-confirm]').click()
     await page.waitForSelector('[data-step="mint"]', { timeout: 5000 })
 
-    const bodyText = await page.locator('body').textContent()
+    // Scope to the rendered RUN content (the transcript), NOT body.textContent —
+    // body includes <script>/<style>/RainbowKit framework text (minified JS/CSS with
+    // "$"+digits, hex color vars), which are not app content and cause false positives.
+    const bodyText = await page.locator('[data-testid="transcript"]').textContent()
 
     // NO executed/realized/ejecutad/realizad
     expect(bodyText?.toLowerCase()).not.toMatch(/\bexecut(ed|ing)\b/)
@@ -163,7 +166,11 @@ test.describe('Cornerstone route — /apps/abrigo/cornerstone', () => {
     await page.getByRole('button', { name: /inflaci[oó]n.*sorprendi[oó].*alza/i }).click()
     await page.waitForSelector('[data-step="a2"]', { timeout: 10000 })
 
-    const detailsCount = await page.locator('details').count()
+    // Scope to the CARDS (a2 + mint). The A1 trace legitimately contains the SOLE
+    // licensed <details> (SystemPromptDisclosure) — page-wide count would include it.
+    const detailsCount = await page
+      .locator('[data-step="a2"] details, [data-step="mint"] details')
+      .count()
     expect(detailsCount).toBe(0)
   })
 
