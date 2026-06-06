@@ -32,6 +32,28 @@
       "provenanceLabel": "Somnia testnet · agente (POC)",
       "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada"
     },
+    "trace": {
+      "title": "Traza de la decisión",
+      "stage1": "Impresión macro",
+      "stage2": "Prompt construido (determinista)",
+      "stage2Caption": "Reconstruido de forma determinista a partir del dato real + consenso provisto por el operador",
+      "stage3": "Decisión de acción (Qwen3-30B, temp 0)",
+      "stage4": "Decisión de tamaño (Qwen3-30B, temp 0)",
+      "stage5": "Decisión",
+      "stage6": "Posición ilustrativa",
+      "systemPromptTrigger": "Ver prompt del sistema",
+      "illustrativeCaption": "Ilustrativo — no es una posición real en cadena",
+      "legLabelHeading": "Pierna",
+      "modelIdLabel": "ID del modelo",
+      "requestIdLabel": "ID de solicitud",
+      "timestampLabel": "Marca de tiempo",
+      "provenanceLabel": "Somnia testnet · agente (POC)",
+      "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada",
+      "emptyState": "—",
+      "errorNotFound": "No se encontró la decisión solicitada. Vuelve al panel del agente para ver las decisiones registradas.",
+      "linkLabel": "Ver la traza de decisión",
+      "backToPanel": "Volver al panel del agente"
+    },
     "bridge": {
       "heading": "De la sorpresa macro a la posición",
       "macroLabel": "Impresión macro",
@@ -51,6 +73,31 @@
       "provenanceAriaLabel": "Somnia testnet · decisión de agente (POC) · registrada",
       "emptyState": "—",
       "emptyGamma": "No se registró decisión de gamma larga"
+    },
+    "position": {
+      "heading": "Posición (LongGammaWrapper)",
+      "emptyHeading": "Sin posición en cadena",
+      "emptyBody": "El contrato está verificado en fork pero no desplegado. Cuando se despliegue, esta vista mostrará la posición real.",
+      "notLiveCaption": "No desplegado — verificado en fork, sin posición en cadena.",
+      "provenanceLabel": "verificado en fork · no desplegado",
+      "provenanceAriaLabel": "Fuente: verificado en fork — el contrato LongGammaWrapper no ha sido desplegado en cadena; no existe posición real.",
+      "fieldLegs": "Piernas / posición",
+      "fieldCollateral": "Colateral sobreviviente",
+      "fieldTokenId": "ID del token de posición",
+      "fieldResidual": "Residual",
+      "emptyState": "—"
+    },
+    "manage": {
+      "close": "Cerrar",
+      "claim": "Reclamar residual",
+      "agent": "Control del agente",
+      "caption": "No disponible — fork-verificado, no desplegado. Sin transacción."
+    },
+    "liveness": {
+      "snapshot": "instantánea · —",
+      "polling": "sondeo",
+      "ariaSnapshot": "Estado de actualización: instantánea — datos registrados, sin actualización en vivo.",
+      "ariaPolling": "Estado de actualización: sondeo periódico."
     }
   }
 }

@@ -18,6 +18,7 @@
 - [x] **Phase 05.1: abrigo-somnia convex instrument frontend surface** *(INSERTED)* — Read-first SIMULATED cCOP/USD long-gamma instrument surface; three-tier provenance, SIMULADO badge, read-only wallet, no fabricated numbers (completed 2026-06-02)
 - [x] **Phase 05.2: DEFI-06 wallet connect-modal accessibility** *(INSERTED)* — scoped role=status live region, focus restoration (incl. connect-success), durable e2e; real-SR speech deferred to manual pass (completed 2026-06-02)
 - [x] **Phase 6: Somnia agent surface (MacroHedgeStrategist)** — Module 2: surface the live Somnia-testnet hedge-decision agent — live CPI panel + decision feed + agent-first MCP tools + surprise→decision→instrument bridge; testnet-agent provenance tier; reads an already-deployed contract (no new deploy) (completed 2026-06-02)
+- [ ] **Phase 7: Agent reasoning + position-execution surface** — Module 3: per-decision deterministic decision-pipeline trace + fork-verified/not-live LongGammaWrapper position panel (not-deployed empty state) with disabled management; frontend-only, read-first, no deploy (honker live-stream DEFERRED to 7.x, gated on a continuous keeper cadence)
 
 ---
 
@@ -295,5 +296,33 @@ Plans:
 - [ ] 06-04-PLAN.md — B: surprise→decision→instrument bridge — decisionToPositionDelta (BigInt) + HedgeDecisionBridge RSC mounted in the kind==='simulated' branch of the instrument page (never on the multicall path) + es-CO-first copy + e2e (SOMNIA-B, CROSS-09, CROSS-10, CROSS-01, DEFI-08) [wave 2]
 
 ---
+
+### Phase 7: Agent reasoning + position-execution surface — Module 3
+
+**Goal:** A visitor or agent can see the DETERMINISTIC DECISION PIPELINE of the Somnia macro-hedge agent — a per-decision trace (macro print → deterministic built prompt → two-leg Qwen3-30B temp-0 inference: action then size → decision → illustrative position, with the real SYSTEM_PROMPT viewable) — and an honest `fork-verified / not-live` view of the `LongGammaWrapper` position it would open (not-deployed empty state) with disabled management. Honest split between live-on-testnet decisions (`testnet-agent` tier, real tx) and the fork-verified-but-not-deployed position (new `fork-verified / not-live` tier). Frontend-only; read-first; no Solidity; no deploy; no fabricated data. (honker live-stream DEFERRED — see Deferred.)
+
+**Requirements**: MOD3-TRACE (deterministic decision-pipeline trace), MOD3-POS (fork-verified/not-live position panel: typed `WrapperPositionView` + `adaptWrapper` adapter, gated on `WRAPPER_DEPLOYED`, renders not-deployed state), MOD3-MANAGE (disabled management affordances), MOD3-LIVE (liveness `refresh()` seam as a `useSyncExternalStore` contract: snapshot + flagged-poll realizations, honest pill); reuses CROSS-01/09/10, AGENT-01/02. **Deferred to Phase 7.x:** MOD3-HONKER (bespoke honker live-stream sidecar — gated on a continuous keeper cadence). (New MOD3-* IDs introduced at planning; honesty acceptance lives in the spec §0 + each plan's must_haves.)
+**Depends on:** Phase 6 (the `/apps/abrigo/agent` overview + reader seam + `testnet-agent` tier this extends); abrigo-somnia milestone v2.0 Phase 8 `LongGammaWrapper` (fork-verified, NOT deployed — read-only ABI, consumed via a typed adapter behind `WRAPPER_DEPLOYED=false`).
+**Canonical spec:** `docs/superpowers/specs/2026-06-02-module3-agent-reasoning-position-surface-design.md` (v2; passed 2-way review — Reality Checker + Backend Architect; §0 = binding honesty corrections)
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. At `/apps/abrigo/agent/[id]` a visitor sees the deterministic decision-pipeline trace for a real decision (requestId 4083729/4083997): macro print → built prompt (from actual+consensus) → Qwen3-30B temp-0 action leg → size leg → decision → illustrative position (sizeBps→fraction-of-max, never a `$` figure), with the real SYSTEM_PROMPT viewable; decision data carries the `testnet-agent` pill (real tx); no fabricated chain-of-thought; `consensus` labeled operator-supplied. (`HedgeDecisionRequested` added to `abi.ts`; the `decisionId→requestId[]` join is implemented.)
+  2. The same page shows a position-execution panel under a new neutral `fork-verified / not-live` provenance tier rendering the NOT-DEPLOYED empty state ("—"); a typed `WrapperPositionView` + single `adaptWrapper` chokepoint encode the real-ABI mapping rules (composed reads through `pool()/ct0()/ct1()`; never the `lastSurviving*`/`deposited*` baselines as "current"; `ResidualEroded.cause` typed `bytes32`, not a 3-way enum; no `realizedCosts`), gated behind `WRAPPER_DEPLOYED=false` (lazy server read); no live read executes and no number is fabricated in Phase 7.
+  3. Management controls (close/claim/agent) render visible-but-disabled with an honest "not live — fork-verified, not deployed" state; no wallet write, no transact; rendered DOM contains no "executed/realized/ejecutad/realizad" and no fabricated `$` notional.
+  4. A liveness `refresh()` seam (a `useSyncExternalStore`-shaped `LivenessSource<T>` contract) drives the UI with an honest pill (color+icon+text); Phase 7 ships the `snapshot` (default) + `polling` (`SOMNIA_LIVE`) realizations only (`live` ships with the deferred honker phase); the native `honker-node` addon never enters the frontend `package.json`.
+
+**Honesty invariants (spec §0):** wrapper NOT deployed → `fork-verified / not-live` neutral tier, position panel renders empty state, never imply executed/realized; no fabricated CoT (LLM output enum/clamped-int, `_buildPrompt` deterministic); disabled management (no transact); typed `adaptWrapper` adapter (NOT verbatim import) contains a moving ABI, re-derived before `WRAPPER_DEPLOYED` flips; es-CO-first; locked tokens; `impeccable` + token tests enforced; live RPC reads behind `SOMNIA_LIVE` (lazy), out of CI; honker DEFERRED (embedded in-process lib, no Dockerfile/SSE; no continuous keeper → nothing live to stream yet).
+
+**Plans**: 4 plans (Wave 0 data-layer foundation → Wave 1 trace + position-panel parallel slices → Wave 2 detail-route wire + e2e + live-verify)
+
+Plans:
+- [ ] 07-00-PLAN.md — Wave 0 data layer (TDD): add HedgeDecisionRequested + LongGammaWrapper read-only ABI; typed WrapperPositionView + single adaptWrapper chokepoint gated behind WRAPPER_DEPLOYED=false; deterministic prompt-trace reconstruction; LivenessSource<T> snapshot/polling-only contract; extend snapshot capture with real leg events (route key = requestId, field renamed honestly); fork-verified neutral provenance tier; 5 failing-first stubs (MOD3-TRACE, MOD3-POS, MOD3-MANAGE, MOD3-LIVE, CROSS-09) [wave 0]
+- [ ] 07-01-PLAN.md — Wave 1 trace: DecisionPipelineTrace vertical-stepper (6 equal-weight stages) + collapsible real SYSTEM_PROMPT + illustrative position as sizeBps→fraction-of-max (never $) + es-CO-first/en trace.* copy; no fabricated CoT (MOD3-TRACE, CROSS-09, CROSS-10, CROSS-01) [wave 1]
+- [ ] 07-02-PLAN.md — Wave 1 position: not-deployed PositionPanel under the neutral fork-verified tier (em-dash values, no stale baselines) + disabled ManagementControls (perceivable beyond color: aria-disabled + aria-describedby + Lock + caption) + LivenessPill useSyncExternalStore (snapshot/polling only, no live) + position/manage/liveness copy (MOD3-POS, MOD3-MANAGE, MOD3-LIVE, CROSS-09, CROSS-01, CROSS-10) [wave 1]
+- [ ] 07-03-PLAN.md — Wave 2 wire: /apps/abrigo/agent/[id] detail route assembling trace + position panel + disabled management + liveness pill + master→detail link (accent + ChevronRight + underline) + unknown-id error state + e2e honesty greps (no executed/realized, no $, no green, no live) + Evidence Collector live-verification gate (MOD3-TRACE, MOD3-POS, MOD3-MANAGE, MOD3-LIVE, CROSS-01, CROSS-09, CROSS-10) [wave 2]
+
+**Deferred to Phase 7.x:** MOD3-HONKER (bespoke honker live-stream sidecar) — gated on a continuous keeper cadence.
+
+---
 *Roadmap created: 2026-05-11*
-*Last updated: 2026-06-02 — Phase 6 (Somnia agent surface) planned: 5 plans (06-00 Wave-0 data layer → 06-01/02/03 D/A/C reader-parallel → 06-04 B bridge)*
+*Last updated: 2026-06-02 — Phase 7 (agent reasoning + position-execution surface, Module 3) planned: 4 plans (07-00 data layer → 07-01/02 trace+position parallel → 07-03 detail-route wire + live-verify); MOD3-HONKER deferred to 7.x*

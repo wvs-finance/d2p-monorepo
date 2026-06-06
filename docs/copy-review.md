@@ -440,3 +440,109 @@ jmsbpp, 2026-06-02), en second. No machine translation.
 - [ ] M6: no "ejecutad"/"realizad"/"executed"/"realized" in any bridge key (automated: `grep -ic "ejecutad|realizad|executed|realized" messages/{es-CO,en}/somnia.json` returns 0)
 - [ ] Anti-marketing-slop grep passes on all `somnia.bridge.*` keys
 - [ ] i18n key parity: es-CO ↔ en symmetric across all bridge keys
+
+---
+
+## Phase 07-01 review (somnia.trace namespace — DecisionPipelineTrace copy)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — `somnia.trace.*` keys
+added for the DecisionPipelineTrace component (Plan 07-01). Authored es-CO FIRST (Juan Serrano /
+jmsbpp, 2026-06-02), en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `somnia.trace.title` — detail-route heading
+- `somnia.trace.stage1` through `somnia.trace.stage6` — 6 stage labels
+- `somnia.trace.stage2Caption` — deterministic reconstruction caveat
+- `somnia.trace.systemPromptTrigger` — disclosure trigger label
+- `somnia.trace.illustrativeCaption` — M6 honesty marker (BLOCKER-2 reworded)
+- `somnia.trace.legLabelHeading` — leg dt heading (value "Action"/"Size" is on-chain literal, not localized)
+- `somnia.trace.modelIdLabel` / `somnia.trace.requestIdLabel` / `somnia.trace.timestampLabel` — data row labels
+- `somnia.trace.provenanceLabel` / `somnia.trace.provenanceAriaLabel` — testnet-agent pill copy
+- `somnia.trace.emptyState` — em-dash for null fields
+- NOTE: `somnia.trace.consensusCaveat` is intentionally ABSENT — REUSES `somnia.feed.consensusCaveat` (MAJOR-9)
+
+**es-CO authoring notes (Plan 07-01 author: Juan Serrano / jmsbpp):**
+- "Traza de la decisión" — "traza" is established software/analytics vocabulary for trace in es-CO; not "rastro" (too informal) or "pista" (ambiguous).
+- "Impresión macro" — reused from somnia.feed; "impresión" for macro data print is established es-CO finance vocabulary.
+- "Prompt construido (determinista)" — "construido" for built; "(determinista)" parenthetical clarifies the reconstruction is deterministic, not inferred.
+- "Reconstruido de forma determinista a partir del dato real + consenso provisto por el operador" — precise technical sentence; "dato real" for actual (on-chain data); "provisto" for supplied; no marketing tone.
+- "Decisión de acción / Decisión de tamaño" — "acción" and "tamaño" mirror the on-chain enum concepts; "Qwen3-30B, temp 0" retained as model identifiers (not translated).
+- "Ver prompt del sistema" — "Ver" (imperative, not "Visualizar" which is corporate); "prompt del sistema" retains "prompt" as the established DeFi/AI term in es-CO (widely used untranslated).
+- "Ilustrativo — no es una posición real en cadena" — BLOCKER-2 reword: "no es una posición real en cadena" (not "ejecutada" which implies executed); "en cadena" is established Colombian DeFi vocabulary.
+- "Pierna" — established options/DeFi term for leg in es-CO finance; not "segmento" or "tramo".
+- "ID del modelo" / "ID de solicitud" / "Marca de tiempo" — standard technical labels; "marca de tiempo" is the established es-CO term for timestamp.
+- "Somnia testnet · decisión de agente (POC) · registrada" — "registrada" for recorded; feminine agreement with "decisión".
+- Compliance: no "ejecutad"/"realizad"/"executed"/"realized" in any key (BLOCKER-2). No "consensus-verified" (M4). No "observ" (B3). No "razonamiento"/"pensamiento" (MINOR-14).
+- Copy register: informational, laconic, finance/DeFi-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` (somnia.trace additions) | _pending native review_ | | |
+| `messages/en/somnia.json` (somnia.trace additions) | _pending native review_ | | |
+
+### Phase 07-01 somnia.trace Sign-off
+
+- [ ] es-CO trace copy reviewed by native Colombian Spanish speaker
+- [ ] BLOCKER-2: "no es una posición real en cadena" (NOT "ejecutada"/"executed") confirmed
+- [ ] MAJOR-9: `somnia.trace.consensusCaveat` key is ABSENT from both locale files (REUSES feed.consensusCaveat)
+- [ ] Finance/AI terminology ("traza", "pierna", "prompt del sistema", "determinista") reviewed against Colombian DeFi/finance conventions
+- [ ] M4: no "consensus-verified" in any trace key
+- [ ] M6: no "ejecutad"/"realizad"/"executed"/"realized" in any trace key
+- [ ] Anti-marketing-slop grep passes on all `somnia.trace.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric across all trace keys (17 keys in both locales)
+
+---
+
+## Phase 07-02 review (somnia.position/manage/liveness namespaces — PositionPanel + ManagementControls + LivenessPill copy)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — `somnia.position.*`,
+`somnia.manage.*`, and `somnia.liveness.*` keys added for the PositionPanel, ManagementControls,
+and LivenessPill components (Plan 07-02). Authored es-CO FIRST (Juan Serrano / jmsbpp, 2026-06-02),
+en second. No machine translation.
+
+**New keys added (2026-06-02):**
+- `somnia.position.heading` — position panel heading "Posición (LongGammaWrapper)"
+- `somnia.position.emptyHeading` — not-deployed empty state heading
+- `somnia.position.emptyBody` — not-deployed empty state body (honest, fork-verified but not live)
+- `somnia.position.notLiveCaption` — sub-heading caption under panel heading
+- `somnia.position.provenanceLabel` / `somnia.position.provenanceAriaLabel` — fork-verified pill copy
+- `somnia.position.fieldLegs` / `somnia.position.fieldCollateral` / `somnia.position.fieldTokenId` /
+  `somnia.position.fieldResidual` — WrapperPositionView safe display field labels
+- `somnia.position.emptyState` — em-dash for all not-deployed values
+- `somnia.manage.close` / `somnia.manage.claim` / `somnia.manage.agent` — disabled button labels
+- `somnia.manage.caption` — persistent inline caption (not-available, fork-verified, no transaction)
+- `somnia.liveness.snapshot` / `somnia.liveness.polling` — liveness pill visible text
+- `somnia.liveness.ariaSnapshot` / `somnia.liveness.ariaPolling` — liveness pill aria-labels
+
+**es-CO authoring notes (Plan 07-02 author: Juan Serrano / jmsbpp):**
+- "Posición (LongGammaWrapper)" — retains the contract name as a proper noun (no translation).
+- "Sin posición en cadena" — "en cadena" is established Colombian DeFi vocabulary; "sin" for no/without.
+- "verificado en fork · no desplegado" — "fork" retained as DeFi tooling term; "desplegado" for deployed.
+- "Fuente: verificado en fork — el contrato LongGammaWrapper no ha sido desplegado en cadena; no existe posición real." — honest full sentence; "no existe posición real" is precise (not "no hay datos").
+- "Piernas / posición" — "pierna" is established options/DeFi term for leg in es-CO finance.
+- "Colateral sobreviviente" — "sobreviviente" is the Panoptic/options term for surviving collateral.
+- "ID del token de posición" — "ID" retained (international abbreviation); "posición" for position.
+- "Residual" — cognate; standard finance term in es-CO for residual value.
+- "Reclamar residual" — "reclamar" is standard es-CO verb for claiming collateral; "reclamable" form used in 05.1-03.
+- "Control del agente" — "control" is the established DeFi/ops term for agent control/management.
+- "No disponible — fork-verificado, no desplegado. Sin transacción." — two-sentence caption; "Sin transacción" (singular, no article) is more precise than "sin transacciones".
+- "instantánea · —" — "instantánea" for snapshot in es-CO (photo/data snapshot context); middle dot separator; em-dash signals no live value.
+- "sondeo" — "sondeo" for polling in es-CO (technical data-polling context); not "encuesta" (survey).
+- "Estado de actualización: instantánea — datos registrados, sin actualización en vivo." — precise aria description; "actualización en vivo" for live update.
+- "Estado de actualización: sondeo periódico." — laconic; "periódico" for periodic.
+- Honesty compliance: no "ejecutad", "realizad" in any key. No "en vivo" pill label (live deferred). No dollar sign. No fabricated numbers.
+- Copy register: informational, laconic, DeFi-appropriate. Passes banned-phrases check.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` (position/manage/liveness additions) | _pending native review_ | | |
+| `messages/en/somnia.json` (position/manage/liveness additions) | _pending native review_ | | |
+
+### Phase 07-02 somnia.position/manage/liveness Sign-off
+
+- [ ] es-CO position/manage/liveness copy reviewed by native Colombian Spanish speaker
+- [ ] "pierna", "colateral sobreviviente", "sondeo", "instantánea" reviewed against Colombian DeFi/finance conventions
+- [ ] MAJOR-13: no dollar sign in any key value (automated: `grep -F '$' messages/{es-CO,en}/somnia.json` returns 0)
+- [ ] No "ejecutad"/"realizad"/"executed"/"realized" in any position/manage/liveness key
+- [ ] Anti-marketing-slop grep passes on all new `somnia.position.*`, `somnia.manage.*`, `somnia.liveness.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric across all new keys

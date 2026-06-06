@@ -9,9 +9,12 @@
 // evaluating env at import time and to keep the snapshot path server-bundle-safe.
 
 import deployments from './deployments.json'
+import { buildPromptTrace } from './prompt-trace'
 import snapshotData from './snapshot.json'
+import { computeSurprise } from './surprise'
 import { HEDGE_ACTION } from './types'
 import type {
+  DecisionTraceView,
   HedgeActionLabel,
   HedgeDecisionView,
   MacroPrintView,
@@ -118,6 +121,70 @@ export function getSnapshotProvenance(): SnapshotProvenance {
     subState: 'recorded',
     capturedAt: new Date(snapshotData.capturedAt),
     chainId: 50312,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Trace reader — decision-pipeline trace (additive; does NOT change HedgeDecisionView)
+// ---------------------------------------------------------------------------
+
+/**
+ * getDecisionTraceById(id) — join snapshot decision row by the size-leg requestId (route key).
+ *
+ * The snapshot stores the SIZE-leg requestId in `decisions[].decisionId`.
+ * The `legs` block (added in Phase 7) carries FULL-FIDELITY leg data from the verified
+ * getLogs recipe:
+ *   - sizeRequestId, sizeTimestamp (always present)
+ *   - actionRequestId (DERIVED = uint256(decisionId topic) — always real)
+ *   - actionTimestamp (null when action-leg log fell outside the 1000-block window → em-dash)
+ *
+ * BigInt/Date rehydration happens here at the boundary — callers receive typed values.
+ * Returns null for unknown ids (callers render a 404 or "not found" state).
+ */
+export function getDecisionTraceById(id: string): DecisionTraceView | null {
+  // Join by decisionId (= the size-leg requestId / route key)
+  const raw = snapshotData.decisions.find((d) => d.decisionId === id)
+  if (!raw) return null
+
+  // Rehydrate core fields (mirrors rehydrateDecision)
+  const decidedAtNum = Number(raw.decidedAt)
+  let action: HedgeActionLabel
+  if (VALID_ACTIONS.has(raw.action)) {
+    action = raw.action as HedgeActionLabel
+  } else {
+    const mapped = HEDGE_ACTION[Number(raw.action)]
+    if (!mapped) throw new Error(`Unknown action label for: ${raw.action}`)
+    action = mapped
+  }
+  const sizeBps = BigInt(raw.sizeBps)
+  const macroValue = BigInt(raw.macroValue)
+  const consensus = BigInt(raw.consensus)
+
+  // Leg block — added in Phase 7 (always present in the extended snapshot)
+  const legs = raw.legs
+
+  // SIZE-leg timestamp: always present
+  const legSizeTimestamp = new Date(Number(legs.sizeTimestamp) * 1000)
+
+  // ACTION-leg timestamp: null when outside the 1000-block window → em-dash (honest)
+  const legActionTimestamp =
+    legs.actionTimestamp !== null ? new Date(Number(legs.actionTimestamp) * 1000) : null
+
+  return {
+    requestId: raw.decisionId,
+    action,
+    sizeBps,
+    macroValue,
+    consensus,
+    surprise: computeSurprise(macroValue, consensus),
+    builtPrompt: buildPromptTrace(macroValue, consensus),
+    legSizeRequestId: legs.sizeRequestId,
+    legActionRequestId: legs.actionRequestId,
+    decisionId: legs.decisionIdTopic,
+    legSizeTimestamp,
+    legActionTimestamp,
+    sourceTxHash: raw.sourceTxHash,
+    decidedAt: decidedAtNum === 0 ? null : new Date(decidedAtNum * 1000),
   }
 }
 

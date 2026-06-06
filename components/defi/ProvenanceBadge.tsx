@@ -7,14 +7,27 @@
 //   spec         → text-status-in-progress ring-status-in-progress bg-status-in-progress/10
 //   schematic    → text-text-muted ring-border-default bg-bg-surface
 
-import { Archive, Database, FileText, FlaskConical, PenLine, Radio } from 'lucide-react'
+import {
+  Archive,
+  Database,
+  FileText,
+  FlaskConical,
+  PenLine,
+  Radio,
+  ShieldCheck,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // ProvenanceTier union
 // ---------------------------------------------------------------------------
 
-export type ProvenanceTier = 'fork-fixture' | 'spec' | 'schematic' | 'testnet-agent'
+export type ProvenanceTier =
+  | 'fork-fixture'
+  | 'spec'
+  | 'schematic'
+  | 'testnet-agent'
+  | 'fork-verified'
 
 // ---------------------------------------------------------------------------
 // Internal config map — matches the WalletStatusPill pattern
@@ -44,6 +57,13 @@ const TIER_CONFIG: Record<ProvenanceTier, ProvenanceConfig> = {
   // Provenance copy: "Somnia testnet · agent decision (POC) · consensus = operator-supplied"
   'testnet-agent': {
     Icon: Archive, // default icon; overridden per subState in ProvenancePill
+    className: 'text-text-muted ring-border-default bg-bg-surface',
+  },
+  // fork-verified: NEUTRAL token — NEVER green/emerald/status-pass.
+  // For fork-verified but NOT deployed contracts (e.g. LongGammaWrapper).
+  // Honest sub-label: "fork-verified · not deployed". ShieldCheck signals verified-but-inert.
+  'fork-verified': {
+    Icon: ShieldCheck,
     className: 'text-text-muted ring-border-default bg-bg-surface',
   },
 }

@@ -6,9 +6,12 @@
 // All four actions (HOLD / ADD_LONG_GAMMA / REDUCE / EXIT) render at IDENTICAL weight.
 // consensus is labeled operator-supplied; surprise is gated behind that caveat.
 // testnet-agent provenance pill (recorded sub-state) per card.
+// Each card carries a DecisionTraceLink to /apps/abrigo/agent/[id] (07-03 master→detail).
+//   The link affordance is IDENTICAL for every card (equal-weight invariant preserved).
 //
 // Props: strings + locale threaded from RSC page (no getTranslations inside this component).
 
+import { DecisionTraceLink } from '@/components/defi/somnia/DecisionTraceLink'
 import { HedgeDecisionCard } from '@/components/defi/somnia/HedgeDecisionCard'
 import type { DecisionCardStrings } from '@/components/defi/somnia/HedgeDecisionCard'
 import { getHedgeDecisions } from '@/lib/apps/abrigo/somnia/reader'
@@ -19,6 +22,8 @@ interface HedgeDecisionFeedProps {
     feedHeading?: string | undefined
     /** Empty-state copy for the feed (zero decisions) */
     feedEmptyState?: string | undefined
+    /** Master→detail link label (trace.linkLabel from the RSC page) */
+    linkLabel?: string | undefined
   }
   locale: string
   /** Optional data key to filter decisions (defaults to reader default) */
@@ -52,12 +57,14 @@ export function HedgeDecisionFeed({ strings, locale, dataKey }: HedgeDecisionFee
       {/* Equal-weight card list — CROSS-09: identical spacing/sizing for every card */}
       <div className="space-y-4">
         {decisions.map((decision) => (
-          <HedgeDecisionCard
-            key={decision.decisionId}
-            decision={decision}
-            strings={strings}
-            locale={locale}
-          />
+          <div key={decision.decisionId} className="space-y-2">
+            <HedgeDecisionCard decision={decision} strings={strings} locale={locale} />
+            {/* Master→detail link — IDENTICAL affordance for every card (equal-weight invariant).
+                CROSS-09: color + icon + underline (color is not the sole signal). */}
+            {strings.linkLabel ? (
+              <DecisionTraceLink requestId={decision.decisionId} label={strings.linkLabel} />
+            ) : null}
+          </div>
         ))}
       </div>
     </section>

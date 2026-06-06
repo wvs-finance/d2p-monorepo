@@ -14,6 +14,10 @@ export const env = createEnv({
     // NEVER NEXT_PUBLIC_: this must stay server-only (RPC is not a public endpoint).
     // Default: undefined (snapshot mode).
     SOMNIA_LIVE: z.coerce.boolean().optional(),
+    // Server-only (NEVER NEXT_PUBLIC_). Default undefined/false → position panel renders
+    // not-deployed empty state. Re-derive adaptWrapper from the final ABI before flipping
+    // (ABI is mid-dev/moving). Phase 7 default: false.
+    WRAPPER_DEPLOYED: z.coerce.boolean().optional(),
   },
   client: {
     // client-safe (NEXT_PUBLIC_*): public RPCs, WalletConnect ID, app URL
@@ -30,6 +34,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
     SOMNIA_LIVE: process.env.SOMNIA_LIVE,
+    WRAPPER_DEPLOYED: process.env.WRAPPER_DEPLOYED,
     NEXT_PUBLIC_RPC_CELO_PRIMARY: process.env.NEXT_PUBLIC_RPC_CELO_PRIMARY,
     NEXT_PUBLIC_RPC_ETH_PRIMARY: process.env.NEXT_PUBLIC_RPC_ETH_PRIMARY,
     NEXT_PUBLIC_RPC_BASE_PRIMARY: process.env.NEXT_PUBLIC_RPC_BASE_PRIMARY,
