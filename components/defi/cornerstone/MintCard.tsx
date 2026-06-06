@@ -95,7 +95,7 @@ export function MintCard({ mint, strings }: MintCardProps) {
         />
 
         {/* Inline neutral mock sub-label pill — verbatim shell string.
-            PILL_SHELL/NEUTRAL_CLASS are module-local to LivenessPill — NOT importable.
+            PILL_SHELL/NEUTRAL_CLASS are module-local to the liveness pill — NOT importable.
             Color + icon + text + aria-label (CROSS-09). Never green/amber. */}
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-normal ring-1 ring-inset text-text-muted ring-border-default bg-bg-surface"
