@@ -342,7 +342,13 @@ Plans:
 
 **Honesty invariants (spec §0):** mock-driven (no live chain call, no wallet-to-live-Polygon); Agent-1 REAL/consensus-verified only; single real factor (no fabricated multi-factor CoT); Agent-2/mint MOCK under fork-verified+sub-label (never imply executed/realized, no real `$` PnL); reasoning collapses but the decision card does not; provisional event contract behind an adapter (Phase-15 reshape expected); es-CO-first; locked tokens; `impeccable`+token tests; no `--no-verify`. Phase 8 ships the MOCK UI; real wiring is a separate future phase.
 
-**Plans**: TBD at planning (after `gsd:ui-phase` UI-SPEC).
+**Plans**: 3 committed + 1 if-time (Wave 0 data layer → Wave 1 cards → Wave 2 route-wire + e2e + live-verify; Wave 3 if-time monitor/history)
+
+Plans:
+- [ ] 08-00-PLAN.md — Wave 0 data layer (TDD): provisional WorkflowEvent contract + fromMockEvent adapter + HedgeLegParamsView + presets(→4083729/4083997) + dedicated workflow-store (owns reducer, stable-ref, getServerSnapshot=idle) + timed mock WorkflowEngine; failing-first (MOD4-FLOW) [wave 0]
+- [ ] 08-01-PLAN.md — Wave 1 cards (TDD): HedgeDecisionCardV2 (fork-verified + FlaskConical "mock · no en vivo", full weight, no <details>, adjacent ilustrativo labels, Confirm+confirmRef) + MintCard + es-CO-first somnia.cornerstone.* copy (MOD4-A2, MOD4-MINT) [wave 1]
+- [ ] 08-02-PLAN.md — Wave 2 wire: /apps/abrigo/cornerstone RSC shell (pre-renders DecisionPipelineTrace as children) + PromptBox + RunTranscript (useSyncExternalStore, aria-live, motion mounted-gate, focus-to-Confirm) + motion dep + e2e honesty greps + Evidence Collector live-verify (MOD4-FLOW, MOD4-A1, MOD4-A2, MOD4-MINT) [wave 2]
+- [ ] 08-03-PLAN.md — Wave 3 IF-TIME (NOT required for phase completion): MonitorPanel (basic mock read) + RunHistory (idb, lazy openDB, client-only) — adds idb ONLY here, off the critical path (MOD4-MONITOR, MOD4-HISTORY) [wave 3]
 
 ---
 *Roadmap created: 2026-05-11*
