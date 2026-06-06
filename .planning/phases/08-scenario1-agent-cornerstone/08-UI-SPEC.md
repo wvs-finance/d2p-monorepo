@@ -1,7 +1,8 @@
 ---
 phase: 8
 slug: scenario1-agent-cornerstone
-status: draft
+status: approved
+reviewed_at: 2026-06-06
 shadcn_initialized: true
 preset: "new-york (existing — components.json present since Phase 1)"
 created: 2026-06-06
@@ -88,7 +89,7 @@ Accent is NOT used for: provenance pills (neutral by contract), mock sub-label, 
 - `fork-verified` tier renders the NEUTRAL token ONLY (`text-text-muted ring-border-default bg-bg-surface`). It MUST NEVER render `--status-pass` / any green/emerald token. (acceptance grep)
 - `testnet-agent` tier is also NEUTRAL; recorded/live sub-state is encoded by ICON swap (Archive=recorded, Radio=live), never by color.
 - Status pills (LivenessPill "replaying · mock", provenance pills, mock sub-label) encode **color + icon + text + aria-label**, never color alone (CROSS-09).
-- The "mock · no en vivo" sub-label renders as: neutral-token pill + lucide `FlaskConical` (or `TriangleAlert`) icon + text. Color alone never carries the mock meaning.
+- The "mock · no en vivo" sub-label renders as: neutral-token pill + lucide `FlaskConical` icon (LOCKED — not `TriangleAlert`, which wrongly connotes error for a benign mock) + text. Color alone never carries the mock meaning.
 
 ---
 
@@ -174,11 +175,11 @@ New runtime dep `motion` (MIT, React-19-safe) is an npm package, NOT a shadcn re
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending
