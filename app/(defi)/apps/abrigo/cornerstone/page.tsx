@@ -20,7 +20,7 @@ import type { TraceStrings } from '@/components/defi/somnia/DecisionPipelineTrac
 import { PRESETS } from '@/lib/apps/abrigo/cornerstone/presets'
 import { getDecisionTraceById } from '@/lib/apps/abrigo/somnia/reader'
 import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('somnia')
@@ -31,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CornerstonePage() {
+  const locale = await getLocale()
   const t = await getTranslations('somnia')
 
   // TraceStrings — threaded from RSC exactly like the [id] route.
@@ -66,7 +67,9 @@ export default async function CornerstonePage() {
         <p className="text-text-muted text-sm py-4">{t('cornerstone.errorState')}</p>
       )
     } else {
-      traceNodes[preset.id] = <DecisionPipelineTrace decision={trace} strings={traceStrings} />
+      traceNodes[preset.id] = (
+        <DecisionPipelineTrace decision={trace} strings={traceStrings} locale={locale} />
+      )
     }
   }
 

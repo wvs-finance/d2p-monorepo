@@ -14,6 +14,7 @@
 
 import { ProvenancePill } from '@/components/defi/ProvenanceBadge'
 import type { PositionMintedView } from '@/lib/apps/abrigo/cornerstone/events'
+import { formatTokenAmount } from '@/lib/apps/abrigo/somnia/format'
 import { FlaskConical } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -114,17 +115,17 @@ export function MintCard({ mint, strings }: MintCardProps) {
         {/* TokenId — rendered as string (no raw bigint). RC-M6. */}
         <DataRow label={strings.tokenIdLabel} value={mint.positionId} sibling={strings.mockUnit} />
 
-        {/* marginToken0 — SIGNED int256; sign preserved. */}
+        {/* marginToken0 — SIGNED int256 WAD; formatted via formatTokenAmount (no raw bigint). RC-M6. */}
         <DataRow
           label={strings.marginToken0Label}
-          value={String(mint.marginToken0)}
+          value={formatTokenAmount(mint.marginToken0)}
           sibling={strings.mockUnit}
         />
 
-        {/* marginToken1 — SIGNED int256; sign preserved. */}
+        {/* marginToken1 — SIGNED int256 WAD; formatted via formatTokenAmount (no raw bigint). RC-M6. */}
         <DataRow
           label={strings.marginToken1Label}
-          value={String(mint.marginToken1)}
+          value={formatTokenAmount(mint.marginToken1)}
           sibling={strings.mockUnit}
         />
       </dl>

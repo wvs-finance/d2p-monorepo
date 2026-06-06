@@ -102,20 +102,29 @@ function make4083997(): DecisionTraceView {
 describe('DecisionPipelineTrace — 4083729 (ADD_LONG_GAMMA)', () => {
   it('renders exactly 6 pipeline-stage nodes', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const stages = document.querySelectorAll('[data-testid="pipeline-stage"]')
     expect(stages).toHaveLength(6)
   })
 
   it('has the pipeline-trace wrapper', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     expect(document.querySelector('[data-testid="pipeline-trace"]')).not.toBeNull()
+  })
+
+  it('stage 1 macro DataRow renders formatted CPI percent (5.68%), NOT raw 568', () => {
+    const decision = make4083729()
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
+    // macroValue=568n → formatScaledPercent(568n, "en") → "5.68%"
+    expect(screen.getByText('5.68%')).toBeTruthy()
+    // raw integer "568" must NOT appear as a standalone text node (it lives in builtPrompt pre, not Stage-1)
+    // The pre contains "scaled int): 568" — that's intentional and we do NOT assert its absence.
   })
 
   it('stage 2 built-prompt pre contains route-correct consensus 500', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const preElements = document.querySelectorAll('pre')
     const builtPromptPre = Array.from(preElements).find((el) =>
       el.textContent?.includes('Consensus expectation (scaled int): 500'),
@@ -128,7 +137,7 @@ describe('DecisionPipelineTrace — 4083729 (ADD_LONG_GAMMA)', () => {
 
   it('stage 6 renders bridge output "68%" — not a dollar figure', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const fraction = formatFractionOfMax(
       decisionToPositionDelta({
         decisionId: decision.requestId,
@@ -150,26 +159,26 @@ describe('DecisionPipelineTrace — 4083729 (ADD_LONG_GAMMA)', () => {
 
   it('renders the operator-supplied consensusCaveat', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     expect(document.body.textContent).toContain('operator-supplied — not market-derived')
   })
 
   it('renders legActionRequestId "4079637" (real, not invented)', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     expect(document.body.textContent).toContain('4079637')
   })
 
   it('renders em-dash for null legActionTimestamp', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     // legActionTimestamp is null → should render em-dash
     expect(document.body.textContent).toContain('—')
   })
 
   it('contains no reasoning/razonamiento vocabulary in rendered DOM', () => {
     const decision = make4083729()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const text = document.body.textContent ?? ''
     expect(text).not.toMatch(/\breasoning\b/i)
     expect(text).not.toMatch(/\bthoughts\b/i)
@@ -186,14 +195,14 @@ describe('DecisionPipelineTrace — 4083729 (ADD_LONG_GAMMA)', () => {
 describe('DecisionPipelineTrace — 4083997 (REDUCE)', () => {
   it('renders exactly 6 pipeline-stage nodes', () => {
     const decision = make4083997()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const stages = document.querySelectorAll('[data-testid="pipeline-stage"]')
     expect(stages).toHaveLength(6)
   })
 
   it('stage 2 built-prompt pre contains route-correct consensus 900', () => {
     const decision = make4083997()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const preElements = document.querySelectorAll('pre')
     const builtPromptPre = Array.from(preElements).find((el) =>
       el.textContent?.includes('Consensus expectation (scaled int): 900'),
@@ -206,7 +215,7 @@ describe('DecisionPipelineTrace — 4083997 (REDUCE)', () => {
 
   it('stage 6 renders bridge output for 568n — not a dollar figure', () => {
     const decision = make4083997()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const fraction = formatFractionOfMax(
       decisionToPositionDelta({
         decisionId: decision.requestId,
@@ -229,19 +238,19 @@ describe('DecisionPipelineTrace — 4083997 (REDUCE)', () => {
 
   it('renders legActionRequestId "4083984" (real)', () => {
     const decision = make4083997()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     expect(document.body.textContent).toContain('4083984')
   })
 
   it('renders the operator-supplied consensusCaveat', () => {
     const decision = make4083997()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     expect(document.body.textContent).toContain('operator-supplied — not market-derived')
   })
 
   it('contains no reasoning/razonamiento vocabulary in rendered DOM', () => {
     const decision = make4083997()
-    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} />)
+    render(<DecisionPipelineTrace decision={decision} strings={TEST_TRACE_STRINGS} locale="en" />)
     const text = document.body.textContent ?? ''
     expect(text).not.toMatch(/\breasoning\b/i)
     expect(text).not.toMatch(/\bthoughts\b/i)

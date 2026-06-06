@@ -14,11 +14,14 @@ import { describe, expect, it } from 'vitest'
 // Mock PositionMintedView
 // ---------------------------------------------------------------------------
 
+// WAD (1e18) mock values matching the real workflow-engine mock (workflow-engine.ts:123-128).
+// marginToken0: -500000000000000000n → formatTokenAmount → "-0.5"
+// marginToken1:  1000000000000000000n → formatTokenAmount → "1.0"
 const MOCK_MINT: PositionMintedView = {
   kind: 'PositionMinted',
   positionId: '4083729',
-  marginToken0: 500n,
-  marginToken1: -200n,
+  marginToken0: -500000000000000000n,
+  marginToken1: 1000000000000000000n,
 }
 
 // ---------------------------------------------------------------------------
@@ -89,14 +92,16 @@ describe('MintCard — honesty + visual contract', () => {
     expect(screen.getByText('4083729')).toBeVisible()
   })
 
-  it('renders marginToken0 value', () => {
+  it('renders marginToken0 as human-scaled token amount (not raw WAD)', () => {
     renderCard()
-    expect(screen.getByText('500')).toBeVisible()
+    // -500000000000000000n (WAD) → formatTokenAmount → "-0.5"
+    expect(screen.getByText('-0.5')).toBeVisible()
   })
 
-  it('renders marginToken1 value (negative bigint, sign preserved)', () => {
+  it('renders marginToken1 as human-scaled token amount, sign preserved', () => {
     renderCard()
-    expect(screen.getByText('-200')).toBeVisible()
+    // 1000000000000000000n (WAD) → formatTokenAmount → "1.0"
+    expect(screen.getByText('1.0')).toBeVisible()
   })
 
   // --- Every mock numeric has adjacent mock/ilustrativo sibling label ---
@@ -109,8 +114,9 @@ describe('MintCard — honesty + visual contract', () => {
   })
 
   it('marginToken0 value has adjacent sibling label containing "ilustrativo" or "mock"', () => {
-    const { container } = renderCard()
-    const node = screen.getByText('500')
+    renderCard()
+    // -500000000000000000n → "-0.5"
+    const node = screen.getByText('-0.5')
     const parentRow = node.closest('div')
     expect(parentRow?.textContent).toMatch(/ilustrativo|mock/i)
   })
