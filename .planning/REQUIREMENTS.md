@@ -103,16 +103,16 @@ Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exact
 | XCHAIN-01 | Deferred | Future (no active phase) |
 | HEDGE-01 | Deferred | Future (no active phase) |
 | LIVEDEP-01 | Phase 17 (v2.1) | Pending |
-| LIVEDEP-02 | Phase 17 (v2.1) | Pending |
-| LIVEDEP-03 | Phase 17 (v2.1) | Pending |
-| LIVEDEP-04 | Phase 17 (v2.1) | Pending |
-| LIVEDEP-05 | Phase 17 (v2.1) | Pending |
+| LIVEDEP-02 | Phase 18 (v2.1) | Pending |
+| LIVEDEP-03 | Phase 18 (v2.1) | Pending |
+| LIVEDEP-04 | Phase 18 (v2.1) | Pending |
+| LIVEDEP-05 | Phase 18 (v2.1) | Pending |
 
 ---
 
 ## v2.1 Requirements — Live Agent Integration (Somnia two-leg strategist deploy)
 
-**Defined:** 2026-06-07. **Source:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2 deliverable, §3 acceptance, §4 constraints). Backend half of the frontend live-Agent-1 path; phases continue at 17.
+**Defined:** 2026-06-07. **Source:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2 deliverable, §3 acceptance, §4 constraints). Backend half of the frontend live-Agent-1 path; phases 17 (deploy + pre-flight surface verification) + 18 (decision-moves proof + publish).
 
 ### Live Deploy
 
@@ -136,4 +136,4 @@ Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exact
 | Decommissioning v1 | v1 backs the frontend replay fallback — must stay reachable |
 
 ---
-*Requirements defined: 2026-06-01 (v2.0, phases 7–10). v2.1 LIVEDEP appended 2026-06-07 (phase 17).*
+*Requirements defined: 2026-06-01 (v2.0, phases 7–10). v2.1 LIVEDEP appended 2026-06-07 (roadmapped 2026-06-08 into phases 17–18).*

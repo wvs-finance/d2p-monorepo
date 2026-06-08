@@ -248,3 +248,93 @@ Plans:
 
 ---
 *Roadmap created: 2026-06-01 — v2.0 convex-instrument; REPLACES the M1 roadmap (snapshotted at `.planning/ROADMAP-M1-donor-transfer-2026-06-01.md`). Phase numbering starts at 7. Build order from ARCHITECTURE/SUMMARY: (7) Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool → (8) LongGammaWrapper cash-flow → (9) PremiumSplitter + ERC-4626 vault + data-cost residual → (10) MacroOracle surprise route + PositionBuilder sizing. All phase PLANs must pass the three-step planning-review gate before execution.*
+
+---
+
+## v2.1 — Live Agent Integration (phase 17+)
+
+**Created:** 2026-06-08
+**Milestone:** v2.1 — Live Agent Integration (Somnia two-leg strategist live deploy)
+**Granularity:** standard — a small, tightly-scoped deploy + prove + publish deliverable, split into **2 phases** for ONE genuine sequencing reason (re-confirm the volatile testnet surface BEFORE spending STT — §4).
+**Source of truth:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2 deliverable, §3 acceptance, §4 constraints) + `.planning/PROJECT.md` (§ Current Milestone: v2.1) + `.planning/REQUIREMENTS.md` (§ v2.1 LIVEDEP-01..05).
+
+> **Parallel-track note.** This APPENDS to the OPEN v2.0 roadmap (phases 7–16 above). v2.0 (Convex Instrument)
+> remains **OPEN** — cornerstone E2E-01 demo video pending, phases 9–10 deferred. v2.1 runs alongside as a
+> focused backend deploy serving the frontend live-Agent-1 path; it does NOT close, renumber, or supersede
+> any v2.0 phase. Phase numbering continues at **17** (v2.0 ended at 16 on disk).
+>
+> **This is a DEPLOY + on-chain PROOF + PUBLISH, not new contract development.** The two-leg
+> `MacroHedgeStrategist` (`StrategistDecided` API) already EXISTS in source and is **offline-proven**
+> (Phase 12, 19/19 vs MockPlatform). The contract DEPLOYED on Somnia 50312 (`0xfA428171…`) is still the
+> **v1** shape (`HedgeDecisionMade`/`getDecision`) and is **not upgradeable** → REDEPLOY to a new address.
+> The runner to ADAPT (not author) is `contracts/script/macro-hedge-strategist-e2e.sh` (currently the v1 runner).
+
+### Why two phases (the sequencing reason)
+
+§4 mandates: *"Re-confirm the volatile `LLM_AGENT_ID 12847293847561029384` AND platform
+`0x037Bb9…6776` against the Agent Explorer BEFORE spending STT (a `DecisionFailed`/no-callback ⇒ the
+constant is wrong)."* A wrong constant burns STT on a dead run and produces no verifiable proof. So the
+deploy + a single cheap school-leg probe (which doubles as the agent-ID/platform liveness probe) is its
+own gate (**Phase 17**) that MUST pass before the full decision-moves prove + publish run (**Phase 18**)
+commits STT and writes the published artifact. This is a genuine spend-gating dependency, not arbitrary
+decomposition.
+
+## v2.1 Coverage Summary
+
+- v2.1 requirements: 5 (LIVEDEP-01..05)
+- Mapped to active phases: 5 (100%)
+- Orphans: 0
+- v2.1 phases: 17 (deploy + pre-flight surface verification) → 18 (decision-moves proof + publish)
+- Total v2.1 success criteria: 7 (all on-chain / grep / CLI-verifiable)
+
+## v2.1 Phases
+
+- [ ] **Phase 17: Live deploy + pre-flight surface verification** — Redeploy the two-leg `StrategistDecided` strategist to Somnia 50312 (NEW address), wire it to the live platform / LLM agent / `MacroOracle`, and re-confirm the volatile `LLM_AGENT_ID` + platform via ONE cheap school-leg probe BEFORE the full STT-spending prove run.
+- [ ] **Phase 18: On-chain decision-moves proof + publish** — Run the adapted two-leg e2e on the live deploy to prove a well-formed `HedgeMandate` + decision-moves (different consensus → different mandate) with real tx hashes, then publish `somnia-strategist-deployment.json` + the committed ABI + the reversed §6 handoff guidance.
+
+## v2.1 Phase Details
+
+### Phase 17: Live deploy + pre-flight surface verification
+**Goal**: The two-leg `MacroHedgeStrategist` (`StrategistDecided` API) is deployed live on Somnia testnet 50312 at a NEW address, wired to the live platform / LLM agent / `MacroOracle`, and the volatile testnet surface is re-confirmed correct — BEFORE any full STT-spending prove run.
+**Depends on**: Nothing new (the contract source + offline proof exist from Phase 12; the funded STT key is in `contracts/.env`). First v2.1 phase.
+**Requirements**: LIVEDEP-01
+**Success Criteria** (what must be TRUE):
+  1. `cast code <new-address> --rpc-url <somnia-50312>` returns non-empty bytecode at a NEW address (≠ the v1 `0xfA428171E1F5B56f92C67C002De1d8e90B053EE1`), and the deployed strategist's constructor-wired immutables read back as platform `0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776`, LLM agent `12847293847561029384`, and `MacroOracle` `0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f`. *(LIVEDEP-01)*
+  2. A single cheap `requestSchoolDecision` school-leg probe against the new address returns a real validator callback (NOT a `DecisionFailed` / no-callback) — proving the volatile `LLM_AGENT_ID` + platform constants are LIVE and correct before the full prove run spends more STT. *(LIVEDEP-01 / §4 constraint)*
+  3. `cast code 0xfA428171E1F5B56f92C67C002De1d8e90B053EE1 --rpc-url <somnia-50312>` STILL returns the v1 bytecode — the v1 contract remains reachable (it backs the frontend replay fallback; not decommissioned). *(§4 constraint guardrail)*
+**Constraint guardrails (from §4):** re-confirm volatile `LLM_AGENT_ID 12847293847561029384` + platform `0x037Bb9…6776` against the Agent Explorer FIRST (the school-leg probe doubles as the agent-ID liveness probe); keep v1 `0xfA428171…` reachable; do NOT alter the join's hardcoded `chainId = 137` (the 137→31337 override is a documented frontend accommodation, NOT a backend change); funded STT (>50 STT) key is in `contracts/.env` — a recorded run is acceptable, an unverifiable claim is not.
+**Notes**: NO new contract development — the two-leg API is source-complete + offline-proven (Phase 12, 19/19). This phase REDEPLOYS the existing source (non-upgradeable → new address). The runner `contracts/script/macro-hedge-strategist-e2e.sh` (v1) is ADAPTED here: re-point `requestActionDecision`/`requestSizeDecision`/`getDecision` → `requestSchoolDecision`/`requestNotionalDecision`/`getMandate`+`decisionState`, and the polled log sig `HedgeDecisionMade(...)` → `StrategistDecided(bytes32,string,(address,bytes32,uint256,uint32,bool))`.
+**Plans**: TBD
+
+### Phase 18: On-chain decision-moves proof + publish
+**Goal**: The live deploy is PROVEN on-chain — a real prompt yields a well-formed `HedgeMandate` (with `schoolSet && notionalSet`), a different consensus yields a DIFFERENT mandate (decision-moves), all captured as real tx hashes — and the address + ABI + exact call inputs are PUBLISHED so the frontend can mirror them.
+**Depends on**: Phase 17 (the live, surface-verified deploy + the adapted runner).
+**Requirements**: LIVEDEP-02, LIVEDEP-03, LIVEDEP-04, LIVEDEP-05
+**Success Criteria** (what must be TRUE):
+  1. A `StrategistDecided` tx on Somnia 50312 from the NEW address has a non-empty `school` and a decoded `HedgeMandate` with `economicTheory != 0x0` and `targetNotional ∈ [1_000, 100_000_000]`; `cast call <new-address> "decisionState(bytes32)" <decisionId>` returns `schoolSet == true && notionalSet == true`. *(LIVEDEP-02)*
+  2. A SECOND run with a different consensus (or userIntent) yields a DIFFERENT mandate — the school label and/or `targetNotional` differ from run 1 (the decision-moves-with-consensus proof, mirroring the Phase-11 precedent). *(LIVEDEP-03)*
+  3. `contracts/script/out/somnia-strategist-deployment.json` exists, parses as JSON, and contains the NEW `strategist` address plus THREE real tx hashes (`schoolTx`, `notionalTx`, `strategistDecidedTx`) that resolve on the Somnia 50312 explorer; the generated ABI at `contracts/out/MacroHedgeStrategist.sol/…` is committed. *(LIVEDEP-04)*
+  4. `docs/UI-AGENT-HANDOFF.md` marks the two-leg strategist ✅ LIVE with the new address, and its §6 "do NOT subscribe to a live `StrategistDecided` on Somnia" guidance is REVERSED (grep confirms the prohibition line is replaced with the LIVE-subscribe instruction + new address). *(LIVEDEP-05)*
+**Constraint guardrails (from §4):** real tx hashes are MANDATORY (a recorded run is acceptable, an unverifiable claim is not); Somnia validator-callback latency is variable (the runner tolerates async per-leg polling + timeouts); do NOT alter the join's `chainId = 137`.
+**Notes**: the decision-moves proof reuses the Phase-11 precedent (two consensus values → two distinct decisions). The published artifact mirrors the shape of `contracts/script/out/buildbear-deployments.json`. This phase spends STT — Phase 17's surface verification de-risks that spend.
+**Plans**: TBD
+
+## v2.1 Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 17. Live deploy + pre-flight surface verification | 0/0 | Not started | - |
+| 18. On-chain decision-moves proof + publish | 0/0 | Not started | - |
+
+## v2.1 Traceability (LIVEDEP requirements → phases)
+
+| Requirement | Phase | Status |
+|---|---|---|
+| LIVEDEP-01 | Phase 17 | Pending |
+| LIVEDEP-02 | Phase 18 | Pending |
+| LIVEDEP-03 | Phase 18 | Pending |
+| LIVEDEP-04 | Phase 18 | Pending |
+| LIVEDEP-05 | Phase 18 | Pending |
+
+---
+*v2.1 roadmap appended: 2026-06-08 — Live Agent Integration (Somnia two-leg strategist live deploy). APPENDS to the OPEN v2.0 roadmap (phases 7–16 untouched). Phase numbering continues at 17. Split into 2 phases for the §4 spend-gating sequencing reason (verify volatile surface → THEN spend STT on the prove run). Source of truth: `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md`. All phase PLANs must pass the three-step planning-review gate (CLAUDE.md) before execution.*

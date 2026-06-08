@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Live Agent Integration
-status: defining_requirements
-stopped_at: v2.1 started — defining requirements (Somnia two-leg strategist live deploy)
-last_updated: "2026-06-07T10:46:25.797Z"
+status: roadmapped
+stopped_at: v2.1 roadmapped — phases 17 (live deploy + pre-flight surface verification) + 18 (decision-moves proof + publish); next is plan-phase 17
+last_updated: "2026-06-08T00:00:00.000Z"
 last_activity: "2026-06-07 — completed 14-03-PLAN.md (cornerstone Wave 3: `resolveFromMandate` FORK-PROVEN — a `HedgeMandate` flows through the deterministic regime-conditional geometry → the Fix-C sink → a real wCOP/USDC Panoptic position at the EXACT structural K_hi tick 360360 + `numberOfLegs(exec)>0`; the 8-param `ExecutorDecided` honesty flag (`nonErgodicDisclosed==true`) + TEMPLATE caveat decoded from the live mint; behavioral LLM-independence via `MockRevertingPlatform`; the direct-path size>127 guard. UNBLOCKED by a gate-passed `volToWidth` even-width invariant — odd widths snap to even so symmetric Panoptic leg bounds stay tickSpacing-aligned — landed as a real RED→GREEN evm-TDD split (`f92b0f7` test → `e686d4d` fix, per-file ancestry verified). demo fork 6/6, fork EXEC 7/7, Representativeness 17/17, onResult 4/4, fork-free 114/114, build exit 0)"
 progress:
   total_phases: 10
@@ -21,6 +21,20 @@ progress:
 > the artifact. Phases continue at **17**. Source: `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md`.
 > **v2.0 (Convex Instrument) remains OPEN** (parallel track — cornerstone E2E-01 video pending, phases 9–10
 > deferred); the v2.0 state below is preserved verbatim and is NOT closed by v2.1.
+
+## Current Position (v2.1 — Live Agent Integration)
+
+- **Milestone:** v2.1 — Live Agent Integration (Somnia two-leg strategist live deploy)
+- **Phase:** 17 — Live deploy + pre-flight surface verification (NOT STARTED — roadmapped, awaiting plan-phase)
+- **Plan:** none yet (next: `/gsd:plan-phase 17`)
+- **Status:** Roadmapped — phases 17 + 18 defined; coverage 5/5 LIVEDEP requirements mapped
+- **Next phase:** 18 — On-chain decision-moves proof + publish (depends on 17)
+- **Source of truth:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2/§3/§4)
+- **Spend-gate reason for the split:** §4 mandates re-confirming the volatile `LLM_AGENT_ID`/platform BEFORE spending STT — Phase 17 (deploy + cheap school-leg liveness probe) gates Phase 18 (the full STT-spending decision-moves prove + publish).
+- **Guardrails:** keep v1 `0xfA428171…` reachable; do NOT alter the join's `chainId = 137`; funded STT key in `contracts/.env`; real tx hashes mandatory.
+- **Runner to adapt (not author):** `contracts/script/macro-hedge-strategist-e2e.sh` (currently v1).
+
+---
 
 ---
 
