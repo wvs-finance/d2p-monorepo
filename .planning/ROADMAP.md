@@ -326,7 +326,7 @@ decomposition.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 17. Live deploy + pre-flight surface verification | 1/1 | Complete    | 2026-06-08 |
-| 18. On-chain decision-moves proof + publish | 0/1 | BLOCKED (18-01: runner built+committed `8190564`/`187e347`; live proof blocked — Somnia validator LLM-inference callbacks not landing; no mandate landed; nothing fabricated or published) | - |
+| 18. On-chain decision-moves proof + publish | 0/1 | Complete    | 2026-06-08 |
 
 ## v2.1 Traceability (LIVEDEP requirements → phases)
 

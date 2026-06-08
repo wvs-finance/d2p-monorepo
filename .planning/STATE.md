@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Live Agent Integration
-status: complete
-stopped_at: 18-01 COMPLETE (2026-06-08) — decisionId-PARSE bug fixed (the 3 prior "BLOCKs" were FALSE: the runner polled the LLM_AGENT_ID instead of the HedgeDecisionRequested decisionId; validators were responsive). Two full two-leg mandates landed on Somnia 50312 (decisionState==(true,true)), decision MOVES (SHILLER 0x5 → POST_KEYNESIAN 0x6), §2.4 JSON + ABI published, §6 handoff reversed to ✅ LIVE
-last_updated: "2026-06-08T18:12:00Z"
+status: completed
+stopped_at: Phase 16 context gathered (Shiller-differentiated representativeness)
+last_updated: "2026-06-08T18:15:51.989Z"
 last_activity: "2026-06-07 — completed 14-03-PLAN.md (cornerstone Wave 3: `resolveFromMandate` FORK-PROVEN — a `HedgeMandate` flows through the deterministic regime-conditional geometry → the Fix-C sink → a real wCOP/USDC Panoptic position at the EXACT structural K_hi tick 360360 + `numberOfLegs(exec)>0`; the 8-param `ExecutorDecided` honesty flag (`nonErgodicDisclosed==true`) + TEMPLATE caveat decoded from the live mint; behavioral LLM-independence via `MockRevertingPlatform`; the direct-path size>127 guard. UNBLOCKED by a gate-passed `volToWidth` even-width invariant — odd widths snap to even so symmetric Panoptic leg bounds stay tickSpacing-aligned — landed as a real RED→GREEN evm-TDD split (`f92b0f7` test → `e686d4d` fix, per-file ancestry verified). demo fork 6/6, fork EXEC 7/7, Representativeness 17/17, onResult 4/4, fork-free 114/114, build exit 0)"
 progress:
   total_phases: 12
-  completed_phases: 9
-  total_plans: 36
+  completed_phases: 10
+  total_plans: 37
   completed_plans: 32
   percent: 100
 ---
@@ -27,7 +27,7 @@ progress:
 - **Milestone:** v2.1 — Live Agent Integration (Somnia two-leg strategist live deploy)
 - **Phase:** 18 — On-chain decision-moves proof + publish (**COMPLETE** — 1/1 plan landed; LIVEDEP-02/03/04/05 all verified on-chain)
 - **Plan:** 18-01 **COMPLETE (2026-06-08)** — the 3 prior "BLOCKs" were a FALSE NEGATIVE from a decisionId-**parse** bug, NOT Somnia infra. ROOT CAUSE: the `requestSchoolDecision` tx emits TWO ≥3-topic logs on the consumer — log#1 (sig `0x9bb846…`) carries the LLM_AGENT_ID (`0x…b24ac1afbcefc708`), log#2 is `HedgeDecisionRequested` (sig `0x4a4643…`) carrying the REAL decisionId. The old jq (`address + topics>=3 + head -n1`) grabbed log#1, so the poller read `decisionState(agentId)`=`(false,false)` forever — the validators were responsive the whole time (proof: `decisionState(0x566afb)` from a prior attempt read `(true,false,0,"SHILLER_MACRO_RISK")`). **FIX** (`5a192c8`): filter `topics[0]==0x4a4643…` before `.topics[2]` + a regression assertion that the parsed id != the agent-id constant; a second Rule-1 fix (`fa8828a`) strips the `cast` int annotation (`58400000 [5.84e7]`) that false-blocked the targetNotional check. **PROVEN ON-CHAIN** against the reused live CONSUMER `0xf0570CcB1271FFaFf4caCA628F3632257f177b1D`: RUN-1 decisionId `0x…56745e` `decisionState==(true,true)` school `SHILLER_MACRO_RISK` econ `0x5` notional 58400000 (schoolTx `0x98727835…`, notionalTx `0x96beca0d…`, strategistDecidedTx `0x0a00e0ab…` mined block 403979970); RUN-2 decisionId `0x…56747b` school `POST_KEYNESIAN` econ `0x6` (divergent intent+consensus 900). **DECISION-MOVES PROVEN** (school moved 0x5→0x6). Published `contracts/script/out/somnia-strategist-deployment.json` (§2.4) + `MacroHedgeStrategist.abi.json` (force-staged), reversed BOTH §6 handoff prohibitions to ✅ LIVE-subscribe. ~0.5 STT/pass, bounded. chainId=137 untouched, CONSUMER reused (no `forge create`), no secret committed.
-- **Status:** COMPLETE — LIVEDEP-02/03/04/05 all on-chain-verifiable; frontend live-Agent-1 path UNBLOCKED.
+- **Status:** Milestone complete
 - **Next phase:** v2.1 backend deliverable complete; frontend wiring (separate repo) consumes the published artifact.
 - **Source of truth:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2/§3/§4)
 - **Spend-gate reason for the split:** §4 mandates re-confirming the volatile `LLM_AGENT_ID`/platform BEFORE spending STT — Phase 17 (deploy + cheap school-leg liveness probe) gates Phase 18 (the full STT-spending decision-moves prove + publish).
