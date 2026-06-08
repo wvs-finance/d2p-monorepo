@@ -4,7 +4,7 @@ milestone: v2.0
 milestone_name: milestone
 status: completed
 stopped_at: Completed 09-05-PLAN.md — Phase 9 all 5 plans done
-last_updated: "2026-06-08T17:32:18.051Z"
+last_updated: "2026-06-08T17:38:09.961Z"
 progress:
   total_phases: 12
   completed_phases: 10
@@ -35,7 +35,7 @@ progress:
 
 **Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
 **Active plan:** 05.1-03 (Wave 3: simulated-branch page layout, full SIMULADO surface)
-**Status:** Milestone complete
+**Status:** v2.0 milestone complete
 
 **Progress:**
 [██████████] 96%
