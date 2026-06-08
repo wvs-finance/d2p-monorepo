@@ -21,6 +21,12 @@ on:
 permissions:
   contents: read
 
+# Cancel superseded PR runs (saves the 2× playwright-with-deps installs); let every
+# main commit finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # ----------------------------- BACKEND (Foundry) -----------------------------
   backend-build-test:
@@ -37,8 +43,11 @@ jobs:
         run: forge fmt --check
       - name: forge build (vendored libs — no submodule init, no forge install)
         run: forge build
+      # [Ff]ork — case-insensitive: excludes BOTH *.fork.t.sol AND test/fork/BaseForkHarness.t.sol
+      # (capital F), which does vm.createSelectFork in setUp + has runnable test_ fns. A lowercase
+      # 'fork' glob would leak that harness into this secret-free lane and fail keyless.
       - name: forge test (fork-excluded, SECRET-FREE — exits 0 with no RPC secret)
-        run: forge test --no-match-path 'test/**/*fork*'
+        run: forge test --no-match-path 'test/**/*[Ff]ork*'
 
   backend-fork:
     if: github.event_name != 'deployment_status'
@@ -64,7 +73,7 @@ jobs:
             echo "::warning::BASE_RPC_URL not set — skipping Base-fork tests (not a failure)."
             exit 0
           fi
-          n=0; until forge test --match-path 'test/**/*fork*' -vvv; do
+          n=0; until forge test --match-path 'test/**/*[Ff]ork*' -vvv; do
             n=$((n+1)); [ "$n" -ge 3 ] && { echo "::error::Base-fork tests failed after $n attempts"; exit 1; }
             echo "::warning::Base-fork attempt $n failed (likely RPC 429) — retrying in 5s"; sleep 5
           done
@@ -130,6 +139,7 @@ jobs:
           node-version-file: packages/frontend/.nvmrc
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
+      - run: pnpm velite build  # app/ may import generated .velite; build it before scanning
       - run: npx --yes impeccable detect app/
 
   frontend-e2e:
@@ -178,7 +188,9 @@ jobs:
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm playwright install --with-deps chromium
-      - run: pnpm playwright test tests/a11y/
+      # explicit --project=axe (the a11y project; testMatch a11y/**/*.spec.ts). NEXT_PUBLIC_E2E
+      # is injected by the playwright webServer (local prod build), not this env block.
+      - run: pnpm playwright test --project=axe
 
   # ----------------------------- LIGHTHOUSE (preview) --------------------------
   lighthouse:
