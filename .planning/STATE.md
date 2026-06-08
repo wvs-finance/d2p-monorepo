@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Phase 9 UI-SPEC approved
-last_updated: "2026-06-08T02:05:00.572Z"
+stopped_at: "Completed 09-01-PLAN.md (data layer: replay freeze + ABIs + decoders + proxy)"
+last_updated: "2026-06-08T16:18:50.560Z"
 progress:
   total_phases: 12
   completed_phases: 9
-  total_plans: 52
-  completed_plans: 50
-  percent: 96
+  total_plans: 57
+  completed_plans: 51
+  percent: 89
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-06
 **Session type:** Plan execution (08-02 complete — cornerstone RSC shell + PromptBox + RunTranscript + e2e + post-checkpoint live-verify fix)
-**Stopped at:** Phase 9 UI-SPEC approved
+**Stopped at:** Completed 09-01-PLAN.md (data layer: replay freeze + ABIs + decoders + proxy)
 
 ---
 
@@ -38,7 +38,7 @@ progress:
 **Status:** Milestone complete
 
 **Progress:**
-[██████████] 96%
+[█████████░] 89%
 [██████████] 100% (8/8 plans complete for Phase 1)
 [██████████] Phase 1: Foundation and Scaffold — COMPLETE
 [██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
@@ -103,6 +103,7 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 07-agent-reasoning-position-surface P03 | 13 | 3 tasks | 9 files |
 | Phase 08 P00 | 10 | 2 tasks | 9 files |
 | Phase 08-scenario1-agent-cornerstone P01 | 8 | 2 tasks | 8 files |
+| Phase 09-cornerstone-live-tx-integration P01 | 16 | 4 tasks | 14 files |
 
 ## Accumulated Context
 
