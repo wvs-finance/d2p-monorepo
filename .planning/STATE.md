@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Live Agent Integration
-status: roadmapped
-stopped_at: v2.1 roadmapped — phases 17 (live deploy + pre-flight surface verification) + 18 (decision-moves proof + publish); next is plan-phase 17
-last_updated: "2026-06-08T00:00:00.000Z"
+status: in-progress
+stopped_at: Completed 17-01-PLAN.md — two-leg StrategistDecided strategist LIVE on Somnia 50312 at NEW 0xf0570CcB1271FFaFf4caCA628F3632257f177b1D (≠ v1), immutables wired live, school-leg probe schoolSet==true (label SHILLER_MACRO_RISK); next is plan-phase 18 (decision-moves proof + publish)
+last_updated: "2026-06-08T13:08:00.000Z"
 last_activity: "2026-06-07 — completed 14-03-PLAN.md (cornerstone Wave 3: `resolveFromMandate` FORK-PROVEN — a `HedgeMandate` flows through the deterministic regime-conditional geometry → the Fix-C sink → a real wCOP/USDC Panoptic position at the EXACT structural K_hi tick 360360 + `numberOfLegs(exec)>0`; the 8-param `ExecutorDecided` honesty flag (`nonErgodicDisclosed==true`) + TEMPLATE caveat decoded from the live mint; behavioral LLM-independence via `MockRevertingPlatform`; the direct-path size>127 guard. UNBLOCKED by a gate-passed `volToWidth` even-width invariant — odd widths snap to even so symmetric Panoptic leg bounds stay tickSpacing-aligned — landed as a real RED→GREEN evm-TDD split (`f92b0f7` test → `e686d4d` fix, per-file ancestry verified). demo fork 6/6, fork EXEC 7/7, Representativeness 17/17, onResult 4/4, fork-free 114/114, build exit 0)"
 progress:
   total_phases: 10
@@ -25,10 +25,10 @@ progress:
 ## Current Position (v2.1 — Live Agent Integration)
 
 - **Milestone:** v2.1 — Live Agent Integration (Somnia two-leg strategist live deploy)
-- **Phase:** 17 — Live deploy + pre-flight surface verification (NOT STARTED — roadmapped, awaiting plan-phase)
-- **Plan:** none yet (next: `/gsd:plan-phase 17`)
-- **Status:** Roadmapped — phases 17 + 18 defined; coverage 5/5 LIVEDEP requirements mapped
-- **Next phase:** 18 — On-chain decision-moves proof + publish (depends on 17)
+- **Phase:** 17 — Live deploy + pre-flight surface verification (COMPLETE — 1/1 plan, LIVEDEP-01 ✅)
+- **Plan:** 17-01 complete (2026-06-08) — adapted the runner to the two-leg `StrategistDecided` API (FREE pre-spend surface gate + scripted oracle-freshness gate), deployed LIVE to Somnia 50312 at NEW `0xf0570CcB1271FFaFf4caCA628F3632257f177b1D` (≠ v1, code len 19439), read back all three immutables (PLATFORM `0x037Bb9…6776` / ORACLE `0xAcA751…983f` / LLM_AGENT_ID `12847293847561029384`), and the cheap `requestSchoolDecision` liveness probe returned a real validator callback → `schoolSet==true`, mapped label `SHILLER_MACRO_RISK` (economicTheory 0x5). v1 `0xfA428171…` still reachable. Real tx hashes: deploy `0x6e19500c…875032f`, school-leg `0xdbc1e636…1d165b`, oracle-refresh `0x5180a842…dbf9530d`. SUCCESS (no retry/PARTIAL needed). Spent ~0.30 STT (json refresh + school infer). 0 deviations.
+- **Status:** Phase 17 complete — next: `/gsd:plan-phase 18`
+- **Next phase:** 18 — On-chain decision-moves proof + publish (depends on 17; reuses the deployed address + adapted runner)
 - **Source of truth:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2/§3/§4)
 - **Spend-gate reason for the split:** §4 mandates re-confirming the volatile `LLM_AGENT_ID`/platform BEFORE spending STT — Phase 17 (deploy + cheap school-leg liveness probe) gates Phase 18 (the full STT-spending decision-moves prove + publish).
 - **Guardrails:** keep v1 `0xfA428171…` reachable; do NOT alter the join's `chainId = 137`; funded STT key in `contracts/.env`; real tx hashes mandatory.

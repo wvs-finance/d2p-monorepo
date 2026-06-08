@@ -289,7 +289,7 @@ decomposition.
 
 ## v2.1 Phases
 
-- [ ] **Phase 17: Live deploy + pre-flight surface verification** — Redeploy the two-leg `StrategistDecided` strategist to Somnia 50312 (NEW address), wire it to the live platform / LLM agent / `MacroOracle`, and re-confirm the volatile `LLM_AGENT_ID` + platform via ONE cheap school-leg probe BEFORE the full STT-spending prove run.
+- [x] **Phase 17: Live deploy + pre-flight surface verification** — Redeploy the two-leg `StrategistDecided` strategist to Somnia 50312 (NEW address), wire it to the live platform / LLM agent / `MacroOracle`, and re-confirm the volatile `LLM_AGENT_ID` + platform via ONE cheap school-leg probe BEFORE the full STT-spending prove run. (completed 2026-06-08)
 - [ ] **Phase 18: On-chain decision-moves proof + publish** — Run the adapted two-leg e2e on the live deploy to prove a well-formed `HedgeMandate` + decision-moves (different consensus → different mandate) with real tx hashes, then publish `somnia-strategist-deployment.json` + the committed ABI + the reversed §6 handoff guidance.
 
 ## v2.1 Phase Details
@@ -305,7 +305,7 @@ decomposition.
 **Constraint guardrails (from §4):** re-confirm volatile `LLM_AGENT_ID 12847293847561029384` + platform `0x037Bb9…6776` against the Agent Explorer FIRST (the school-leg probe doubles as the agent-ID liveness probe); keep v1 `0xfA428171…` reachable; do NOT alter the join's hardcoded `chainId = 137` (the 137→31337 override is a documented frontend accommodation, NOT a backend change); funded STT (>50 STT) key is in `contracts/.env` — a recorded run is acceptable, an unverifiable claim is not.
 **Notes**: NO new contract development — the two-leg API is source-complete + offline-proven (Phase 12, 19/19). This phase REDEPLOYS the existing source (non-upgradeable → new address). The runner `contracts/script/macro-hedge-strategist-e2e.sh` (v1) is ADAPTED here: re-point `requestActionDecision`/`requestSizeDecision`/`getDecision` → `requestSchoolDecision`/`requestNotionalDecision`/`getMandate`+`decisionState`, and the polled log sig `HedgeDecisionMade(...)` → `StrategistDecided(bytes32,string,(address,bytes32,uint256,uint32,bool))`.
 **Plans**: 1 plan (1 wave — deploy + cheap school-leg liveness probe are a strict spend-gated chain in ONE autonomous plan; the surface re-confirm gates the STT spend intra-plan per §4)
-- [ ] 17-01-PLAN.md — Adapt the v1 e2e runner to the two-leg `StrategistDecided` API + a pre-spend surface re-confirm gate, then deploy live to Somnia 50312 (NEW address), verify the three immutables, run ONE `requestSchoolDecision` liveness probe (`schoolSet==true`, NOT `DecisionFailed`), and re-confirm v1 `0xfA428171…` reachable *(LIVEDEP-01)*
+- [x] 17-01-PLAN.md — Adapt the v1 e2e runner to the two-leg `StrategistDecided` API + a pre-spend surface re-confirm gate, then deploy live to Somnia 50312 (NEW address), verify the three immutables, run ONE `requestSchoolDecision` liveness probe (`schoolSet==true`, NOT `DecisionFailed`), and re-confirm v1 `0xfA428171…` reachable *(LIVEDEP-01)* ✅ 2026-06-08 (NEW `0xf0570CcB…7b1D`, schoolSet==true label `SHILLER_MACRO_RISK`, v1 reachable; school-leg tx `0xdbc1e636…1d165b`)
 
 ### Phase 18: On-chain decision-moves proof + publish
 **Goal**: The live deploy is PROVEN on-chain — a real prompt yields a well-formed `HedgeMandate` (with `schoolSet && notionalSet`), a different consensus yields a DIFFERENT mandate (decision-moves), all captured as real tx hashes — and the address + ABI + exact call inputs are PUBLISHED so the frontend can mirror them.
@@ -324,14 +324,14 @@ decomposition.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 17. Live deploy + pre-flight surface verification | 0/1 | Planned | - |
+| 17. Live deploy + pre-flight surface verification | 1/1 | Complete   | 2026-06-08 |
 | 18. On-chain decision-moves proof + publish | 0/0 | Not started | - |
 
 ## v2.1 Traceability (LIVEDEP requirements → phases)
 
 | Requirement | Phase | Status |
 |---|---|---|
-| LIVEDEP-01 | Phase 17 | Pending |
+| LIVEDEP-01 | Phase 17 | Complete |
 | LIVEDEP-02 | Phase 18 | Pending |
 | LIVEDEP-03 | Phase 18 | Pending |
 | LIVEDEP-04 | Phase 18 | Pending |
