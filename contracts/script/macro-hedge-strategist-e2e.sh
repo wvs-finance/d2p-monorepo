@@ -81,28 +81,30 @@ FLOOR=$(cast call "$PLATFORM" "getRequestDeposit()(uint256)" --rpc-url "$RPC")
 FLOOR=${FLOOR%% *}                         # strip any trailing unit annotation (e.g. "[3e16]")
 JSON_DEPOSIT=$(( FLOOR + JSON_TERM_WEI ))   # the oracle refresh leg
 LLM_DEPOSIT=$(( FLOOR + LLM_TERM_WEI ))     # the ONE school-leg infer probe
-# Phase-17 single-probe footprint: ONE json refresh + ONE school-leg infer (NOT the v1 2-run demo).
-# CONSERVATIVE OVER-RESERVE (spend-honesty): JSON_DEPOSIT covers the cold/first run where the oracle
-# datum is stale and Step 2 fires a json-fetch refresh. On the idempotent fresh-retry path
-# (MACRO_ORACLE reused + datum already fresh, deliveredAt != 0) NO json-fetch fires, so the actual
-# probe spends LESS than NEED_PER_RUN — the over-reserve only leaves headroom, never strands funds;
-# the conditional refresh is honestly the only json spend.
-NEED_PER_RUN=$(( JSON_DEPOSIT + LLM_DEPOSIT ))
+# Phase-18 TWO-LEG footprint: each run = ONE json refresh (conditional, cold only) + TWO LLM legs
+# (school infer + notional infer). The decision-moves proof fires RUNS=2 full runs, with MAX_RETRY=1
+# of headroom. The Step-0b gate pre-reserves the FULL profile BEFORE the first irreversible send so an
+# under-funded wallet FAILS the gate rather than stranding a half-open decision mid-flow.
+RUNS="${RUNS:-2}"
+MAX_RETRY="${MAX_RETRY:-1}"
+NEED_PER_RUN=$(( JSON_DEPOSIT + LLM_DEPOSIT + LLM_DEPOSIT ))      # json refresh + 2 LLM legs (school + notional)
+NEED_TOTAL=$(( (RUNS + MAX_RETRY) * NEED_PER_RUN ))              # full profile: (RUNS + MAX_RETRY) runs
 
 echo "  floor=$FLOOR"
 echo "  json_deposit=$JSON_DEPOSIT (refresh, json-fetch 0.09 — conditional, cold run only)"
-echo "  llm_deposit=$LLM_DEPOSIT  (the ONE school-leg infer probe, llm-inference 0.21)"
-echo "  need_per_run=$NEED_PER_RUN  (single probe: json refresh + one school-leg infer)"
+echo "  llm_deposit=$LLM_DEPOSIT  (EACH infer leg: school + notional, llm-inference 0.21)"
+echo "  need_per_run=$NEED_PER_RUN  (json refresh + 2 LLM legs)"
+echo "  need_total=$NEED_TOTAL  ((RUNS=$RUNS + MAX_RETRY=$MAX_RETRY) x need_per_run — full reserve)"
 
-echo "== Step 0b: deployer balance vs single-probe budget =="
+echo "== Step 0b: deployer balance vs FULL-profile budget (NEED_TOTAL) =="
 BAL=$(cast balance "$ADDR" --rpc-url "$RPC")
 BAL=${BAL%% *}
 echo "  balance=$BAL wei  (wallet $ADDR)"
 # Big-int-safe comparison: wei balances exceed bash's signed 64-bit range (a 20-digit wei value
 # overflows `[ -lt ]`). Compare by digit-count, then lexically for equal lengths (no leading zeros).
-if [ "${#BAL}" -lt "${#NEED_PER_RUN}" ] || { [ "${#BAL}" -eq "${#NEED_PER_RUN}" ] && [[ "$BAL" < "$NEED_PER_RUN" ]]; }; then
-  echo "FAIL: insufficient STT for the single probe. Fund $ADDR at https://testnet.somnia.network/"
-  echo "      (faucet is browser-only; need >= $NEED_PER_RUN wei, have $BAL)."
+if [ "${#BAL}" -lt "${#NEED_TOTAL}" ] || { [ "${#BAL}" -eq "${#NEED_TOTAL}" ] && [[ "$BAL" < "$NEED_TOTAL" ]]; }; then
+  echo "FAIL: insufficient STT for the FULL decision-moves profile. Fund $ADDR at https://testnet.somnia.network/"
+  echo "      (faucet is browser-only; need >= $NEED_TOTAL wei (NEED_TOTAL), have $BAL)."
   exit 1
 fi
 
@@ -140,6 +142,38 @@ poll_log() {
     fi
     [ "$now" -ge "$deadline" ] && { echo "  FAIL: $label — timeout ${TIMEOUT_S}s with no callback"; return 1; }
     sleep "$POLL_S"
+  done
+}
+
+# tx-hash extractor (MINOR-3): reads `.transactionHash // .hash` from a `cast send/receipt --json` blob.
+# A zero-cost literal self-test runs at Step 0d BELOW, BEFORE the first STT spend, so the three
+# artifact hashes are guaranteed non-empty AFTER STT is irreversibly spent.
+extract_txhash() {
+  jq -r '.transactionHash // .hash // empty' 2>/dev/null
+}
+
+echo "== Step 0d: tx-hash extractor self-test (zero-cost — MUST pass BEFORE the first STT spend) =="
+SELFTEST=$(printf '%s' '{"transactionHash":"0xabc"}' | extract_txhash)
+[ "$SELFTEST" = "0xabc" ] || { echo "FAIL: extract_txhash self-test returned '$SELFTEST' != 0xabc — aborting 0-cost before any spend"; exit 1; }
+SELFTEST2=$(printf '%s' '{"hash":"0xdef"}' | extract_txhash)
+[ "$SELFTEST2" = "0xdef" ] || { echo "FAIL: extract_txhash .hash-fallback self-test returned '$SELFTEST2' != 0xdef — aborting 0-cost"; exit 1; }
+echo "  extract_txhash self-test PASS (.transactionHash + .hash fallback) — safe to spend"
+
+# parse_result PREFIX <line> : split a `RESULT decisionId=… school=… …` line into PREFIX_* vars.
+# Sets <PREFIX>_DECISIONID/_SCHOOL/_NOTIONAL/_SCHOOLTX/_NOTIONALTX/_STRATEGISTTX in the caller's scope.
+parse_result() {
+  local prefix="$1" line="$2" kv k v
+  for kv in $line; do
+    case "$kv" in RESULT) continue;; *=*) : ;; *) continue;; esac
+    k="${kv%%=*}"; v="${kv#*=}"
+    case "$k" in
+      decisionId)   printf -v "${prefix}_DECISIONID" '%s' "$v" ;;
+      school)       printf -v "${prefix}_SCHOOL" '%s' "$v" ;;
+      notional)     printf -v "${prefix}_NOTIONAL" '%s' "$v" ;;
+      schoolTx)     printf -v "${prefix}_SCHOOLTX" '%s' "$v" ;;
+      notionalTx)   printf -v "${prefix}_NOTIONALTX" '%s' "$v" ;;
+      strategistTx) printf -v "${prefix}_STRATEGISTTX" '%s' "$v" ;;
+    esac
   done
 }
 
@@ -198,44 +232,187 @@ RB_AGENT=$(cast call "$CONSUMER" "LLM_AGENT_ID()(uint256)" --rpc-url "$RPC"); RB
 [ "$(lc "$CONSUMER")" != "0xfa428171e1f5b56f92c67c002de1d8e90b053ee1" ] || { echo "FAIL: deployed at the v1 address — expected a NEW address"; exit 1; }
 echo "  immutables OK: PLATFORM=$RB_PLATFORM ORACLE=$RB_ORACLE LLM_AGENT_ID=$RB_AGENT (NEW address, != v1)"
 
-echo "== Step 4: SCHOOL leg — the cheap LLM_AGENT_ID liveness probe (Phase 18 does notional + join) =="
+# =====================================================================================================
+# run_two_leg INTENT CONSENSUS : drive ONE full school->notional->StrategistDecided flow against the
+# live reused CONSUMER, every capture bound to THIS run's decisionId. On success echoes EXACTLY one
+# parseable line on stdout:
+#   RESULT decisionId=<id> school=<label> notional=<n> schoolTx=<h> notionalTx=<h> strategistTx=<h>
+# On a documented BLOCK it prints "  BLOCK: …" to stderr and returns 1 (a missing notional callback is
+# a BLOCK here — LIVEDEP-02 REQUIRES a full mandate, unlike the Phase-17 school-only probe).
+# =====================================================================================================
+run_two_leg() {
+  local intent="$1" consensus="$2"
+  local fromblk_s school_tx req_log decision_id school_set
+  local fromblk_n notional_tx notional_req_id notional_set
+  local mandate econ_theory target_notional school_label sd_log strategist_tx
+
+  # ---- SCHOOL leg ------------------------------------------------------------------------------
+  fromblk_s=$(cast block-number --rpc-url "$RPC")
+  school_tx=$(cast send "$CONSUMER" "requestSchoolDecision(string,bytes32,int256)" "$intent" "$DATA_KEY" "$consensus" \
+    --value "$LLM_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" --json | extract_txhash)
+  [ -n "$school_tx" ] || { echo "  BLOCK: requestSchoolDecision returned no tx hash (intent='$intent')" >&2; return 1; }
+  # decisionId is topics[2] of THIS send's HedgeDecisionRequested log (binds the id to the run's send,
+  # NOT address-only). topics[0]=sig, topics[1]=requestId, topics[2]=decisionId.
+  req_log=$(cast receipt "$school_tx" --rpc-url "$RPC" --json 2>/dev/null)
+  decision_id=$(printf '%s' "$req_log" | jq -r --arg a "$(printf '%s' "$CONSUMER" | tr 'A-Z' 'a-z')" \
+    '.logs[] | select((.address|ascii_downcase)==$a) | select(.topics|length>=3) | .topics[2]' 2>/dev/null | head -n1)
+  [ -n "$decision_id" ] && [ "$decision_id" != "null" ] || { echo "  BLOCK: could not bind decisionId from school tx $school_tx receipt" >&2; return 1; }
+  echo "  [run] school_tx=$school_tx decisionId=$decision_id (intent='$intent', consensus=$consensus)" >&2
+
+  # Poll schoolSet==true (decisionState member-1), with a DecisionFailed poll BOUND to this decisionId
+  # (school requestId == uint256(decisionId), so the indexed requestId topic == decision_id).
+  local start_s deadline_s
+  start_s=$(date +%s); deadline_s=$(( start_s + TIMEOUT_S )); school_set="false"
+  while :; do
+    if cast logs --rpc-url "$RPC" --address "$CONSUMER" "DecisionFailed(uint256,uint8)" "$decision_id" --from-block "$fromblk_s" 2>/dev/null | grep -q .; then
+      echo "  BLOCK: DecisionFailed (school leg) for decisionId=$decision_id — validators returned Failed (deposit at risk)" >&2; return 1
+    fi
+    school_set=$(cast call "$CONSUMER" "decisionState(bytes32)((bool,bool,uint64,string))" "$decision_id" --rpc-url "$RPC" 2>/dev/null | tr -d '()' | awk -F',' 'NR==1{gsub(/ /,"",$1); print $1}')
+    [ "$school_set" = "true" ] && break
+    [ "$(date +%s)" -ge "$deadline_s" ] && break
+    sleep "$POLL_S"
+  done
+  [ "$school_set" = "true" ] || { echo "  BLOCK: schoolSet never landed for decisionId=$decision_id (timeout ${TIMEOUT_S}s) — LLM_AGENT_ID/platform DEAD or WRONG" >&2; return 1; }
+
+  # ---- NOTIONAL leg ----------------------------------------------------------------------------
+  # GUARD: requestNotionalDecision reverts UnknownDecision unless schoolSet==true && notionalSet==false
+  # (satisfied above). Capture FROMBLK_N BEFORE the send so the StrategistDecided log is in range.
+  fromblk_n=$(cast block-number --rpc-url "$RPC")
+  notional_tx=$(cast send "$CONSUMER" "requestNotionalDecision(bytes32)" "$decision_id" \
+    --value "$LLM_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" --json | extract_txhash)
+  [ -n "$notional_tx" ] || { echo "  BLOCK: requestNotionalDecision returned no tx hash for decisionId=$decision_id" >&2; return 1; }
+  # The notional leg's requestId = topics[1] of the HedgeDecisionRequested log whose topics[2]==decision_id.
+  notional_req_id=$(cast receipt "$notional_tx" --rpc-url "$RPC" --json 2>/dev/null | jq -r --arg a "$(printf '%s' "$CONSUMER" | tr 'A-Z' 'a-z')" --arg d "$decision_id" \
+    '.logs[] | select((.address|ascii_downcase)==$a) | select(.topics|length>=3) | select(.topics[2]==$d) | .topics[1]' 2>/dev/null | head -n1)
+  echo "  [run] notional_tx=$notional_tx notional_req_id=${notional_req_id:-<unresolved>}" >&2
+
+  local start_n deadline_n
+  start_n=$(date +%s); deadline_n=$(( start_n + TIMEOUT_S )); notional_set="false"
+  while :; do
+    if [ -n "$notional_req_id" ] && [ "$notional_req_id" != "null" ]; then
+      if cast logs --rpc-url "$RPC" --address "$CONSUMER" "DecisionFailed(uint256,uint8)" "$notional_req_id" --from-block "$fromblk_n" 2>/dev/null | grep -q .; then
+        echo "  BLOCK: DecisionFailed (notional leg) requestId=$notional_req_id for decisionId=$decision_id" >&2; return 1
+      fi
+    fi
+    notional_set=$(cast call "$CONSUMER" "decisionState(bytes32)((bool,bool,uint64,string))" "$decision_id" --rpc-url "$RPC" 2>/dev/null | tr -d '()' | awk -F',' 'NR==1{gsub(/ /,"",$2); print $2}')
+    [ "$notional_set" = "true" ] && break
+    [ "$(date +%s)" -ge "$deadline_n" ] && break
+    sleep "$POLL_S"
+  done
+  [ "$notional_set" = "true" ] || { echo "  BLOCK: notionalSet never landed for decisionId=$decision_id (timeout ${TIMEOUT_S}s) — full mandate REQUIRED for LIVEDEP-02 (documented BLOCK, not a pass)" >&2; return 1; }
+
+  # ---- Full-mandate assertion (MINOR-4, positional awk) ----------------------------------------
+  # getMandate returns (address economicTheory, bytes32 underlyingMarket, uint256 targetNotional,
+  # uint32 chainId, bool isLong): economicTheory = field $1, targetNotional = field $3.
+  mandate=$(cast call "$CONSUMER" "getMandate(bytes32)((address,bytes32,uint256,uint32,bool))" "$decision_id" --rpc-url "$RPC" 2>/dev/null)
+  econ_theory=$(printf '%s' "$mandate" | tr -d '()' | awk -F',' '{gsub(/ /,"",$1); print $1}'); econ_theory=${econ_theory%% *}
+  target_notional=$(printf '%s' "$mandate" | tr -d '()' | awk -F',' '{gsub(/ /,"",$3); print $3}'); target_notional=${target_notional%% *}
+  [ -n "$econ_theory" ] && [ "$econ_theory" != "0x0000000000000000000000000000000000000000" ] || { echo "  BLOCK: getMandate economicTheory is 0x0 for decisionId=$decision_id" >&2; return 1; }
+  case "$target_notional" in ''|*[!0-9]*) echo "  BLOCK: getMandate targetNotional non-numeric ('$target_notional') for decisionId=$decision_id" >&2; return 1;; esac
+  { [ "$target_notional" -ge 1000 ] && [ "$target_notional" -le 100000000 ]; } || { echo "  BLOCK: targetNotional $target_notional out of [1000,100000000] for decisionId=$decision_id" >&2; return 1; }
+  # schoolLabel = decisionState member-4 ($4); non-empty.
+  school_label=$(cast call "$CONSUMER" "decisionState(bytes32)((bool,bool,uint64,string))" "$decision_id" --rpc-url "$RPC" 2>/dev/null | tr -d '()' | awk -F',' '{gsub(/^ +| +$/,"",$4); print $4}')
+  school_label=$(printf '%s' "$school_label" | tr -d '"')
+  [ -n "$school_label" ] || { echo "  BLOCK: schoolLabel empty for decisionId=$decision_id" >&2; return 1; }
+
+  # ---- StrategistDecided capture, decisionId-BOUND (BLOCKER-1) ----------------------------------
+  # Filtered by the indexed decisionId topic so run-2 can NEVER capture run-1's log on the reused CONSUMER.
+  sd_log=$(cast logs --rpc-url "$RPC" --address "$CONSUMER" \
+    "StrategistDecided(bytes32,string,(address,bytes32,uint256,uint32,bool))" "$decision_id" --from-block "$fromblk_n" 2>/dev/null)
+  printf '%s' "$sd_log" | grep -q . || { echo "  BLOCK: no decisionId-bound StrategistDecided log for decisionId=$decision_id" >&2; return 1; }
+  strategist_tx=$(printf '%s' "$sd_log" | awk '/transactionHash:/{print $2; exit}')
+  [ -n "$strategist_tx" ] || { echo "  BLOCK: StrategistDecided log carried no transactionHash for decisionId=$decision_id" >&2; return 1; }
+
+  echo "  [run] mandate: school='$school_label' economicTheory=$econ_theory targetNotional=$target_notional strategist_tx=$strategist_tx" >&2
+  echo "RESULT decisionId=$decision_id school=$school_label notional=$target_notional schoolTx=$school_tx notionalTx=$notional_tx strategistTx=$strategist_tx"
+  return 0
+}
+
+echo "== Step 4: TWO-LEG decision-moves proof (RUN 1 + a DIVERGENT-input RUN 2; bounded) =="
+# Run-1 intent (SHILLER-leaning surprise) vs run-2 intent (POST_KEYNESIAN structural/regime risk) +
+# distinct consensus, to MAXIMIZE divergence. school+notional are LLM outputs, so movement is NOT assumed.
 USER_INTENT="${USER_INTENT:-Hedge COP depreciation from a rate-hike surprise}"
-FROMBLK_A=$(cast block-number --rpc-url "$RPC")
-cast send "$CONSUMER" "requestSchoolDecision(string,bytes32,int256)" "$USER_INTENT" "$DATA_KEY" "$CONSENSUS" \
-  --value "$LLM_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" >/dev/null
-echo "  requestSchoolDecision sent (intent='$USER_INTENT', consensus=$CONSENSUS, --value $LLM_DEPOSIT);"
-echo "  awaiting HedgeDecisionRequested (school leg, emitted synchronously)..."
-# decisionId is topics[2] of HedgeDecisionRequested(uint256,bytes32,uint8): topics[0]=sig,
-# topics[1]=requestId, topics[2]=decisionId. Parse the 3rd 64-hex value AFTER the "topics:" marker.
-REQ_LOG=$(poll_log "$CONSUMER" "HedgeDecisionRequested(uint256,bytes32,uint8)" "" "$FROMBLK_A" "school request") || {
-  echo "FAIL: HedgeDecisionRequested (school leg) never observed — school send likely reverted."; exit 1; }
-DECISION_ID=$(printf '%s' "$REQ_LOG" | awk '/topics:/{t=1} t && match($0,/0x[0-9a-fA-F]{64}/){ if(++n==3){ print substr($0,RSTART,RLENGTH); exit } }')
-[ -n "$DECISION_ID" ] || { echo "FAIL: could not parse decisionId topic from HedgeDecisionRequested log:"; printf '%s\n' "$REQ_LOG"; exit 1; }
-echo "  decisionId (from the school leg's HedgeDecisionRequested topic) = $DECISION_ID"
+USER_INTENT2="${USER_INTENT2:-Hedge structural post-Keynesian regime risk: persistent fiscal-dominance COP devaluation under a non-ergodic balance-of-payments constraint}"
+CONSENSUS2="${CONSENSUS2:-900}"
 
-echo "  awaiting the SCHOOL callback to land (schoolSet) — the affirmative liveness proof..."
-# decisionState(bytes32) returns (bool schoolSet, bool notionalSet, uint64 decidedAt, string schoolLabel).
-# POSITION-EXPLICIT: decode the FIRST member only (schoolSet) — a positional-blind grep would also
-# match notionalSet (also a bool). This school-only probe leaves notionalSet false, but the read is
-# pinned to member 1 regardless.
-START_A=$(date +%s); DEADLINE_A=$(( START_A + TIMEOUT_S )); SCHOOL_SET="false"
-while :; do
-  if cast logs --rpc-url "$RPC" --address "$CONSUMER" "DecisionFailed(uint256,uint8)" --from-block "$FROMBLK_A" 2>/dev/null | grep -q .; then
-    echo "  DecisionFailed — agent ANSWERED but the school label is UNMAPPED in MacroThesisRegistry"
-    echo "  (agent LIVE; re-run with an adjusted USER_INTENT). NOT a wrong-constant signal."
-    exit 1
-  fi
-  SCHOOL_SET=$(cast call "$CONSUMER" "decisionState(bytes32)((bool,bool,uint64,string))" "$DECISION_ID" --rpc-url "$RPC" 2>/dev/null | tr -d '()' | awk -F',' 'NR==1{gsub(/ /,"",$1); print $1}')
-  [ "$SCHOOL_SET" = "true" ] && break
-  [ "$(date +%s)" -ge "$DEADLINE_A" ] && break
-  sleep "$POLL_S"
-done
-if [ "$SCHOOL_SET" != "true" ]; then
-  echo "  FAIL: no callback / timeout ${TIMEOUT_S}s — LLM_AGENT_ID $LLM_AGENT_ID / platform likely DEAD or WRONG (§4)."
-  echo "        (deposit at risk; rebate unconfirmed on Somnia.)"
-  exit 1
+OUT_DIR="script/out"; mkdir -p "$OUT_DIR"
+RUN1_STATE="$OUT_DIR/.run1-state.env"
+RUNS_STATE="$OUT_DIR/.runs-state.env"
+
+# ---- RUN 1 (idempotent: skip if already persisted) ----
+if [ -f "$RUN1_STATE" ]; then
+  echo "  [idempotent] $RUN1_STATE exists — SKIP run-1 (no re-spend, reuse its decisionId)"
+  # shellcheck disable=SC1090
+  . "$RUN1_STATE"
+else
+  echo "  -- RUN 1 (intent='$USER_INTENT', consensus=$CONSENSUS) --"
+  RUN1_LINE=$(run_two_leg "$USER_INTENT" "$CONSENSUS") || { echo "FAIL: RUN 1 hit a documented BLOCK (above) — full mandate REQUIRED for LIVEDEP-02"; exit 1; }
+  parse_result RUN1 "$RUN1_LINE"
+  # Persist run-1 IMMEDIATELY, BEFORE run-2's first send (MAJOR-2 idempotency).
+  {
+    echo "RUN1_DECISIONID='$RUN1_DECISIONID'"
+    echo "RUN1_SCHOOL='$RUN1_SCHOOL'"
+    echo "RUN1_NOTIONAL='$RUN1_NOTIONAL'"
+    echo "RUN1_SCHOOLTX='$RUN1_SCHOOLTX'"
+    echo "RUN1_NOTIONALTX='$RUN1_NOTIONALTX'"
+    echo "RUN1_STRATEGISTTX='$RUN1_STRATEGISTTX'"
+    echo "RUN1_CONSENSUS='$CONSENSUS'"
+    echo "RUN1_USERINTENT='$USER_INTENT'"
+  } > "$RUN1_STATE"
+  echo "  [persist] run-1 saved to $RUN1_STATE (re-invoke skips run-1)"
 fi
-echo "== probe PASS: requestSchoolDecision callback landed (schoolSet=true) — volatile surface LIVE =="
+echo "  RUN1: decisionId=$RUN1_DECISIONID school='$RUN1_SCHOOL' notional=$RUN1_NOTIONAL"
 
-echo "== Phase-17 done: CONSUMER=$CONSUMER decisionId=$DECISION_ID schoolSet=true =="
-# Phase 18 adapts THIS runner further: add requestNotionalDecision + StrategistDecided join + the somnia-strategist-deployment.json publish.
+# ---- RUN 2 (genuinely divergent input) ----
+echo "  -- RUN 2 (DIVERGENT intent='$USER_INTENT2', consensus=$CONSENSUS2) --"
+DECISION_MOVED="false"; MOVE_NOTE=""
+RUN2_DECISIONID=""; RUN2_SCHOOL=""; RUN2_NOTIONAL=""
+RUN2_SCHOOLTX=""; RUN2_NOTIONALTX=""; RUN2_STRATEGISTTX=""
+if RUN2_LINE=$(run_two_leg "$USER_INTENT2" "$CONSENSUS2"); then
+  parse_result RUN2 "$RUN2_LINE"
+  echo "  RUN2: decisionId=$RUN2_DECISIONID school='$RUN2_SCHOOL' notional=$RUN2_NOTIONAL"
+  if [ "$RUN1_SCHOOL" != "$RUN2_SCHOOL" ] || [ "$RUN1_NOTIONAL" != "$RUN2_NOTIONAL" ]; then
+    DECISION_MOVED="true"
+    echo "== DECISION-MOVES PROVEN: run1(school='$RUN1_SCHOOL',notional=$RUN1_NOTIONAL) != run2(school='$RUN2_SCHOOL',notional=$RUN2_NOTIONAL) =="
+  else
+    MOVE_NOTE="decision did not move for these inputs — agent-sensitivity finding, NOT a silent pass"
+    echo "== DOCUMENTED NO-MOVE: run1(school='$RUN1_SCHOOL',notional=$RUN1_NOTIONAL) == run2(school='$RUN2_SCHOOL',notional=$RUN2_NOTIONAL): $MOVE_NOTE =="
+  fi
+else
+  MOVE_NOTE="run-2 BLOCK surfaced above — decision-moves unproven for these inputs, NOT a silent pass"
+  echo "== DOCUMENTED NO-MOVE: $MOVE_NOTE (run-1 mandate stands; decisionIds: run1=$RUN1_DECISIONID run2=<no result>) =="
+fi
+
+# ---- Persist BOTH runs for Task 3's publish + the SUMMARY ----
+{
+  echo "CONSUMER='$CONSUMER'"
+  echo "MACRO_ORACLE='$MACRO_ORACLE'"
+  echo "DATA_KEY='$DATA_KEY'"
+  echo "RPC='$RPC'"
+  echo "PLATFORM='$PLATFORM'"
+  echo "LLM_AGENT_ID='$LLM_AGENT_ID'"
+  echo "LLM_DEPOSIT='$LLM_DEPOSIT'"
+  echo "RUN1_DECISIONID='$RUN1_DECISIONID'"
+  echo "RUN1_SCHOOL='$RUN1_SCHOOL'"
+  echo "RUN1_NOTIONAL='$RUN1_NOTIONAL'"
+  echo "RUN1_SCHOOLTX='$RUN1_SCHOOLTX'"
+  echo "RUN1_NOTIONALTX='$RUN1_NOTIONALTX'"
+  echo "RUN1_STRATEGISTTX='$RUN1_STRATEGISTTX'"
+  echo "RUN1_CONSENSUS='$CONSENSUS'"
+  echo "RUN1_USERINTENT='$USER_INTENT'"
+  echo "RUN2_DECISIONID='$RUN2_DECISIONID'"
+  echo "RUN2_SCHOOL='$RUN2_SCHOOL'"
+  echo "RUN2_NOTIONAL='$RUN2_NOTIONAL'"
+  echo "RUN2_SCHOOLTX='$RUN2_SCHOOLTX'"
+  echo "RUN2_NOTIONALTX='$RUN2_NOTIONALTX'"
+  echo "RUN2_STRATEGISTTX='$RUN2_STRATEGISTTX'"
+  echo "RUN2_CONSENSUS='$CONSENSUS2'"
+  echo "RUN2_USERINTENT='$USER_INTENT2'"
+  echo "DECISION_MOVED='$DECISION_MOVED'"
+  echo "MOVE_NOTE='$MOVE_NOTE'"
+} > "$RUNS_STATE"
+echo "  [persist] both runs saved to $RUNS_STATE"
+
+echo "== Phase-18 done: CONSUMER=$CONSUMER run1=$RUN1_DECISIONID run2=${RUN2_DECISIONID:-<none>} decisionMoved=$DECISION_MOVED =="
+# A no-move / run-2-BLOCK is a DOCUMENTED finding (exit 0). Run-1 with a full mandate is the LIVEDEP-02 floor.
+exit 0
