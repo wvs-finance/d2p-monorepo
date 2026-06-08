@@ -1,0 +1,163 @@
+{
+  "env": {
+    "UNIV4_POOL_MANAGER": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+    "GUARDIAN_ADMIN": "0xC3D385022d082Acd6b8744A85ad1766a01f522F7",
+    "TREASURER": "0xD8c5EbfeEA9B35695e54FFe0AaF9cFC521C9190d"
+  },
+  "dataContracts": [
+    {
+      "address": "0x0000000000001Ab7fFe789237c76dc00D3DD4e57",
+      "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1c8461cdf60b8f001ba0800fb",
+      "nonce": 12
+    },
+    {
+      "address": "0x0000000000002D8d91e89eCf009A972d4740c694",
+      "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1ed047358c36ded037ea55a3e",
+      "nonce": 30
+    },
+    {
+      "address": "0x0000000000002dE9B30f908AD171257aB30023df",
+      "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a10e5616825afef5019d7963d3",
+      "nonce": 27
+    },
+    {
+      "address": "0x0000000000002eA0f5D36a076D5570b400800dDd",
+      "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a143b45da357028301c483cbeb",
+      "nonce": 15
+    },
+    {
+      "address": "0x00000000000046C4Faaf5b9C6ef32295009050d4",
+      "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1d263ec1953bfef0013be9038",
+      "nonce": 6
+    },
+    {
+      "address": "0x00000000000049f100c3061e84D62D34Cbae777C",
+      "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1689152f23c045902982053c8",
+      "nonce": 7
+    },
+    {
+      "address": "0x0000000000005b4Ff0F09cbe5DfF259aCc00607a",
+      "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a182e1956d28b60302a25a6c8e",
+      "nonce": 14
+    }
+  ],
+  "sharedCreationCode": {
+    "BuilderWallet": {
+      "contracts": ["BuilderFactory", "RiskEngine"],
+      "initCodeHash": "0xeb1a92c570c29805c1a47de21c2623cbff81cd1b2017741cf4cb5e3de955f185"
+    }
+  },
+  "logicContracts": {
+    "PanopticMath": {
+      "path": "./contracts/libraries/PanopticMath.sol",
+      "deployment": {
+        "address": "0x000000000000301F5BC0171C75967b8e78a92b10",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1bc5d6619dc76e10040968f05",
+        "nonce": 19
+      },
+      "optimizeRuns": 9999999
+    },
+    "InteractionHelper": {
+      "path": "./contracts/libraries/InteractionHelper.sol",
+      "deployment": {
+        "address": "0x00000000000040ae7CD505F4E0e3F34195D8c08C",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1dad371cb8531ff01a299df0b",
+        "nonce": 4
+      },
+      "optimizeRuns": 9999999,
+      "links": ["PanopticMath"]
+    },
+    "CollateralTrackerV2": {
+      "path": "./contracts/CollateralTracker.sol",
+      "deployment": {
+        "address": "0x0000000000002038055dB8f2B2Fd356598935C51",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1230404d17c30be0129de179d",
+        "nonce": 21
+      },
+      "optimizeRuns": 9999999,
+      "links": ["InteractionHelper"]
+    },
+    "PanopticGuardian": {
+      "path": "./contracts/PanopticGuardian.sol",
+      "deployment": {
+        "address": "0x0000000000000C99fD9F3234eDf924E436331569",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a15a2670b95d1d2a02b144a8f6",
+        "nonce": 8
+      },
+      "optimizeRuns": 9999999,
+      "constructorArgs": [
+        ["$GUARDIAN_ADMIN", "$TREASURER"],
+        ["address", "address"]
+      ]
+    },
+    "BuilderFactory": {
+      "path": "./contracts/Builder.sol",
+      "deployment": {
+        "address": "0x00000000000008D41F2cd5bF144F61cEB3661F98",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a11844a45ce33c51028b019714",
+        "nonce": 7
+      },
+      "optimizeRuns": 1,
+      "constructorArgs": [["@PanopticGuardian"], ["address"]]
+    },
+    "RiskEngine": {
+      "path": "./contracts/RiskEngine.sol",
+      "deployment": {
+        "address": "0x0000000000000e673aECBDB5f5fE5DFAf4a8e9Ac",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a199a5e1fb2076b602ea79c489",
+        "nonce": 2
+      },
+      "optimizeRuns": 1,
+      "constructorArgs": [
+        [10000000, 10000000, "@PanopticGuardian", "@BuilderFactory"],
+        ["uint256", "uint256", "address", "address"]
+      ]
+    },
+    "SemiFungiblePositionManagerV4": {
+      "path": "./contracts/SemiFungiblePositionManagerV4.sol",
+      "deployment": {
+        "address": "0x000000000000047534b9E1D528ED997169865a64",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a112d5cd9dd5333000adeb0150",
+        "nonce": 28
+      },
+      "optimizeRuns": 9999999,
+      "constructorArgs": [
+        ["$UNIV4_POOL_MANAGER", 2100000000000000000000, 2100000000000000000000, 10000],
+        ["address", "uint256", "uint256", "uint256"]
+      ]
+    },
+    "PanopticPoolV2": {
+      "path": "./contracts/PanopticPool.sol",
+      "deployment": {
+        "address": "0x00000000000010bb6695dAAC60D0515c0A01a948",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1ddbe95d03ad68500e15b1cdd",
+        "nonce": 26
+      },
+      "optimizeRuns": 399,
+      "links": ["InteractionHelper", "PanopticMath"],
+      "constructorArgs": [["@SemiFungiblePositionManagerV4"], ["address"]]
+    },
+    "PanopticFactoryV4": {
+      "path": "./contracts/PanopticFactoryV4.sol",
+      "deployment": {
+        "address": "0x000000000000048a877bF34C0cF3F25510667a1e",
+        "salt": "0x82bf455e9ebd6a541ef10b683de1edcaf05ce7a1a589fdba3c446401fc2e7389",
+        "nonce": 27
+      },
+      "optimizeRuns": 9999999,
+      "links": ["PanopticMath"],
+      "constructorArgs": [
+        [
+          "@SemiFungiblePositionManagerV4",
+          "$UNIV4_POOL_MANAGER",
+          "@PanopticPoolV2",
+          "@CollateralTrackerV2",
+          "$MD_PROPERTIES",
+          "$MD_INDICES",
+          "$MD_POINTERS"
+        ],
+        ["address", "address", "address", "address", "bytes32[]", "uint256[][]", "uint256[][]"]
+      ]
+    }
+  }
+}

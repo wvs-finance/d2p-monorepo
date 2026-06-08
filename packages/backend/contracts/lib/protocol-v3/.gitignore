@@ -1,0 +1,32 @@
+cache/
+out/
+out-ir/
+broadcast/
+.env*
+.idea/
+.DS_Store
+lcov.info
+.vscode
+**/latest
+**.zip
+## Recon
+/medusa
+/crytic-export
+/echidna
+recon.json
+**/*.log
+**/anvil/*.json
+**/env/anvil.json
+**/anvil
+**/*.bak
+## Recon Separate Configs
+/medusa-core
+/medusa-aggregator
+/registry/**/*.json
+.cursor
+
+## Spell validation cache
+spell-cache/
+
+script/registry/node_modules
+script/registry/package-lock.json

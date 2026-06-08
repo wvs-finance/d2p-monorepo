@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+pragma solidity >=0.5.0;
+
+import {IRoot} from "./IRoot.sol";
+import {ISafe} from "./ISafe.sol";
+
+import {IGateway} from "../../core/messaging/interfaces/IGateway.sol";
+import {IScheduleAuthMessageSender} from "../../core/messaging/interfaces/IGatewaySenders.sol";
+
+interface IProtocolGuardian {
+    error NotTheAuthorizedSafe();
+    error FileUnrecognizedParam();
+    error NotTheAuthorizedSafeOrItsOwner();
+
+    event File(bytes32 indexed what, address data);
+
+    /// @notice Pause the protocol
+    /// @dev callable by both safe and owners
+    function pause() external;
+
+    /// @notice Unpause the protocol
+    /// @dev callable by safe only
+    function unpause() external;
+
+    /// @notice Schedule relying a target address on Root
+    /// @dev callable by safe only
+    function scheduleRely(address target) external;
+
+    /// @notice Cancel a scheduled rely
+    /// @dev callable by safe only
+    function cancelRely(address target) external;
+
+    /// @notice Schedule an upgrade (scheduled rely) on a specific chain
+    /// @dev    Only supports EVM targets today
+    /// @param centrifugeId The chain ID where the upgrade will be scheduled
+    /// @param target The address to schedule as a ward
+    /// @param refund Address to receive unused gas refund
+    function scheduleUpgrade(uint16 centrifugeId, address target, address refund) external payable;
+
+    /// @notice Cancel an upgrade (scheduled rely) on a specific chain
+    /// @dev    Only supports EVM targets today
+    /// @param centrifugeId The chain ID where the upgrade will be cancelled
+    /// @param target The address to cancel the scheduled rely for
+    /// @param refund Address to receive unused gas refund
+    function cancelUpgrade(uint16 centrifugeId, address target, address refund) external payable;
+
+    /// @notice Recover tokens on a specific chain
+    /// @dev    Only supports EVM targets today
+    /// @param refund Address to receive unused gas refund
+    function recoverTokens(
+        uint16 centrifugeId,
+        address target,
+        address token,
+        uint256 tokenId,
+        address to,
+        uint256 amount,
+        address refund
+    ) external payable;
+
+    /// @notice Block or unblock outgoing messages for global pool
+    /// @dev Local-only operation for fast emergency response
+    /// @param centrifugeId Target chain ID to block/unblock
+    /// @param isBlocked True to block outgoing messages, false to unblock
+    function blockOutgoing(uint16 centrifugeId, bool isBlocked) external;
+
+    /// @notice Updates a contract parameter
+    /// @param what Accepts a bytes32 representation of 'safe', 'gateway', or 'sender'
+    /// @param data New value for the parameter
+    function file(bytes32 what, address data) external;
+
+    //----------------------------------------------------------------------------------------------
+    // View methods
+    //----------------------------------------------------------------------------------------------
+
+    /// @notice Root authority that manages ward permissions and timelocked upgrades
+    function root() external view returns (IRoot);
+
+    /// @notice Multisig that authorizes protocol-level guardian operations
+    function safe() external view returns (ISafe);
+
+    /// @notice Gateway used for cross-chain upgrade scheduling and outgoing message blocking
+    function gateway() external view returns (IGateway);
+
+    /// @notice Dispatches cross-chain messages for remote upgrade scheduling and cancellation
+    function sender() external view returns (IScheduleAuthMessageSender);
+}
