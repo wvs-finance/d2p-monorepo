@@ -103,10 +103,10 @@ Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exact
 | XCHAIN-01 | Deferred | Future (no active phase) |
 | HEDGE-01 | Deferred | Future (no active phase) |
 | LIVEDEP-01 | Phase 17 (v2.1) | Complete |
-| LIVEDEP-02 | Phase 18 (v2.1) | Pending |
-| LIVEDEP-03 | Phase 18 (v2.1) | Pending |
-| LIVEDEP-04 | Phase 18 (v2.1) | Pending |
-| LIVEDEP-05 | Phase 18 (v2.1) | Pending |
+| LIVEDEP-02 | Phase 18 (v2.1) | Complete |
+| LIVEDEP-03 | Phase 18 (v2.1) | Complete |
+| LIVEDEP-04 | Phase 18 (v2.1) | Complete |
+| LIVEDEP-05 | Phase 18 (v2.1) | Complete |
 
 ---
 
@@ -117,10 +117,10 @@ Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exact
 ### Live Deploy
 
 - [x] **LIVEDEP-01**: The two-leg `MacroHedgeStrategist` (`StrategistDecided` API: `requestSchoolDecision` → `requestNotionalDecision` → `StrategistDecided`) is deployed to Somnia 50312 at a NEW address, wired to the live platform `0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776`, LLM agent `12847293847561029384`, and `MacroOracle` `0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f`.
-- [ ] **LIVEDEP-02**: An on-chain run produces a `StrategistDecided` tx from the new address with non-empty `school` + decoded `HedgeMandate` (`economicTheory != 0x0`, `targetNotional ∈ [1_000, 100_000_000]`), and `decisionState(decisionId)` returns `schoolSet == true && notionalSet == true`.
-- [ ] **LIVEDEP-03**: A second run with a different consensus (or userIntent) yields a DIFFERENT mandate (school label and/or `targetNotional` differ) — the decision-moves-with-consensus proof.
-- [ ] **LIVEDEP-04**: `contracts/script/out/somnia-strategist-deployment.json` exists with the new `strategist` address + the three real tx hashes (school / notional / strategistDecided), and the generated ABI (`contracts/out/MacroHedgeStrategist.sol/…`) is committed.
-- [ ] **LIVEDEP-05**: `docs/UI-AGENT-HANDOFF.md` marks the two-leg strategist ✅ LIVE with the new address and reverses the §6 "do NOT subscribe to a live `StrategistDecided` on Somnia" guidance.
+- [x] **LIVEDEP-02**: An on-chain run produces a `StrategistDecided` tx from the new address with non-empty `school` + decoded `HedgeMandate` (`economicTheory != 0x0`, `targetNotional ∈ [1_000, 100_000_000]`), and `decisionState(decisionId)` returns `schoolSet == true && notionalSet == true`. ✅ 2026-06-08 — RUN-1 `0x…56745e` `decisionState==(true,true)`, econ `0x5` SHILLER, notional 58400000; strategistDecidedTx `0x0a00e0ab…` mined block 403979970.
+- [x] **LIVEDEP-03**: A second run with a different consensus (or userIntent) yields a DIFFERENT mandate (school label and/or `targetNotional` differ) — the decision-moves-with-consensus proof. ✅ 2026-06-08 — RUN-2 `0x…56747b` POST_KEYNESIAN `0x6` (divergent intent + consensus 900) vs RUN-1 SHILLER `0x5`; school label MOVED.
+- [x] **LIVEDEP-04**: `contracts/script/out/somnia-strategist-deployment.json` exists with the new `strategist` address + the three real tx hashes (school / notional / strategistDecided), and the generated ABI (`contracts/out/MacroHedgeStrategist.sol/…`) is committed. ✅ 2026-06-08 — §2.4 JSON + `MacroHedgeStrategist.abi.json` force-staged (gitignored `out/`); strategistDecidedTx resolves on-chain.
+- [x] **LIVEDEP-05**: `docs/UI-AGENT-HANDOFF.md` marks the two-leg strategist ✅ LIVE with the new address and reverses the §6 "do NOT subscribe to a live `StrategistDecided` on Somnia" guidance. ✅ 2026-06-08 — BOTH §6 prohibition sentences replaced by a LIVE-subscribe instruction; row 🟡→✅ LIVE at `0xf0570CcB…7b1D`.
 
 ### Constraints (from request §4)
 - Re-confirm the volatile `LLM_AGENT_ID` + platform against the Agent Explorer BEFORE spending STT (a `DecisionFailed`/no-callback ⇒ wrong constant).

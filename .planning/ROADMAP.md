@@ -290,7 +290,7 @@ decomposition.
 ## v2.1 Phases
 
 - [x] **Phase 17: Live deploy + pre-flight surface verification** — Redeploy the two-leg `StrategistDecided` strategist to Somnia 50312 (NEW address), wire it to the live platform / LLM agent / `MacroOracle`, and re-confirm the volatile `LLM_AGENT_ID` + platform via ONE cheap school-leg probe BEFORE the full STT-spending prove run. (completed 2026-06-08)
-- [ ] **Phase 18: On-chain decision-moves proof + publish** — Run the adapted two-leg e2e on the live deploy to prove a well-formed `HedgeMandate` + decision-moves (different consensus → different mandate) with real tx hashes, then publish `somnia-strategist-deployment.json` + the committed ABI + the reversed §6 handoff guidance.
+- [x] **Phase 18: On-chain decision-moves proof + publish** — Ran the adapted two-leg e2e on the live deploy to prove a well-formed `HedgeMandate` + decision-moves (divergent intent+consensus → different mandate) with real tx hashes, then published `somnia-strategist-deployment.json` + the committed ABI + the reversed §6 handoff guidance. (completed 2026-06-08 — decisionId-parse bug fixed; the 3 prior "BLOCKs" were FALSE NEGATIVES; decision moved SHILLER 0x5 → POST_KEYNESIAN 0x6)
 
 ## v2.1 Phase Details
 
@@ -319,7 +319,7 @@ decomposition.
 **Constraint guardrails (from §4):** real tx hashes are MANDATORY (a recorded run is acceptable, an unverifiable claim is not); Somnia validator-callback latency is variable (the runner tolerates async per-leg polling + timeouts); do NOT alter the join's `chainId = 137`.
 **Notes**: the decision-moves proof reuses the Phase-11 precedent (two consensus values → two distinct decisions). The published artifact mirrors the shape of `contracts/script/out/buildbear-deployments.json`. This phase spends STT — Phase 17's surface verification de-risks that spend.
 **Plans**: 1 plan (1 wave — the two-leg full-mandate run + the decision-moves second run + the publish are a strict spend-gated chain on the SAME reused deploy; checkpoint-free, all CLI/jq/cast-verifiable)
-- [ ] 18-01-PLAN.md — extend the Phase-17 runner with the notional leg (full HedgeMandate, `decisionState==(true,true)`), a second distinct-consensus decision-moves run, then publish `somnia-strategist-deployment.json` (§2.4 schema, 3 real tx hashes) + the committed ABI + reverse the §6 handoff prohibition; REUSES `0xf0570CcB…7b1D` (no redeploy) *(LIVEDEP-02, LIVEDEP-03, LIVEDEP-04, LIVEDEP-05)*
+- [x] 18-01-PLAN.md — extended the Phase-17 runner with the notional leg (full HedgeMandate, `decisionState==(true,true)`), a second divergent-input decision-moves run, then published `somnia-strategist-deployment.json` (§2.4 schema, 3 real tx hashes) + the committed ABI + reversed the §6 handoff prohibition; REUSED `0xf0570CcB…7b1D` (no redeploy) *(LIVEDEP-02, LIVEDEP-03, LIVEDEP-04, LIVEDEP-05)* ✅ 2026-06-08 — decisionId-PARSE bug fixed (`5a192c8` sig-filter + regression assertion, `fa8828a` annotation-strip); RUN-1 `0x…56745e` `(true,true)` SHILLER 0x5 (strategistDecidedTx `0x0a00e0ab…` block 403979970); RUN-2 `0x…56747b` POST_KEYNESIAN 0x6; DECISION-MOVES PROVEN
 
 ## v2.1 Progress
 
