@@ -604,3 +604,61 @@ Serrano / jmsbpp, 2026-06-06), en second. No machine translation.
 - [ ] No "ejecutad"/"realizad"/"executed"/"realized" in any position/manage/liveness key
 - [ ] Anti-marketing-slop grep passes on all new `somnia.position.*`, `somnia.manage.*`, `somnia.liveness.*` keys
 - [ ] i18n key parity: es-CO ↔ en symmetric across all new keys
+
+---
+
+## Phase 09-04 review (somnia.cornerstone.live namespace — Mode banner, live-tx surfaces, evidence panel, cost placeholder, gate copy)
+
+**Scope:** `messages/es-CO/somnia.json` and `messages/en/somnia.json` — `somnia.cornerstone.live.*`
+keys added for the six new Phase-9 surfaces (Plan 09-04). Authored es-CO FIRST (Juan Serrano /
+jmsbpp, 2026-06-08), en second. No machine translation.
+
+**New keys added (2026-06-08):**
+- `somnia.cornerstone.live.modeLiveLabel` / `modeReplayLabel` / `modeMockLabel` — mode banner labels
+- `somnia.cornerstone.live.disclosureEs` / `disclosureEn` — verbatim §0.2 no-bridge disclosure (non-translatable, both langs always visible)
+- `somnia.cornerstone.live.forkVerifiedLabel` — fork-verified pill label for evidence panels
+- `somnia.cornerstone.live.explorerAgent1Label` / `explorerAgent2Label` — explorer tx link labels
+- `somnia.cornerstone.live.txState*` — tx state labels (submitting/pending/confirmed/reverted/error/cancelled)
+- `somnia.cornerstone.live.copyHashAriaLabel` / `copyTokenIdAriaLabel` — copy button aria-labels
+- `somnia.cornerstone.live.evidence*` — evidence panel heading + back-ref disclosure
+- `somnia.cornerstone.live.rationale*` — executor rationale panel heading + field labels
+- `somnia.cornerstone.live.regimeLabel*` — regimeZt label map (Contracción/Expansión/Neutro)
+- `somnia.cornerstone.live.boolean*` — boolean pill labels (sí/no)
+- `somnia.cornerstone.live.costPanel*` — static cost placeholder heading + body (§5.3 verbatim)
+- `somnia.cornerstone.live.gate*` — freshness gate button labels + advisory copy
+- `somnia.cornerstone.live.narrativeConstantStrike` — narrative copy stating strike is constant 360360
+
+**es-CO authoring notes (Plan 09-04 author: Juan Serrano / jmsbpp):**
+- "en vivo · fork de Polygon (BuildBear)" — "en vivo" is standard es-CO broadcast/live indicator; middle dot separator; "fork de Polygon" is the precise technical description.
+- "modo repetición · recibos reales" — "repetición" for replay (literal playback); "recibos reales" for real captured receipts (accurate, not "grabación" which implies recording in progress).
+- "modo demostración (sin cadena)" — "demostración" for demo (not "prueba" = test, not "simulación" which implies active simulation); "(sin cadena)" is the precise es-CO term for off-chain.
+- §0.2 verbatim disclosure: NOT translated — both languages rendered exactly as specified in spec §0.2. Reviewed for accuracy against the spec text.
+- "Evidencia en cadena" — "evidencia" for evidence (DeFi/legal register); "en cadena" is established Colombian DeFi vocabulary.
+- "Sobre un fork de Polygon (BuildBear) — sin puente." — "sin puente" is the honest negative disclosure; laconic back-reference to the full §0.2.
+- "Razonamiento del ejecutor (ExecutorDecided)" — "Razonamiento" is used here as it describes the event data fields (geometry/rationale), not live agent reasoning (which would be banned); the `(ExecutorDecided)` technical qualifier clarifies it is decoded event data.
+- "Régimen Zt" — "régimen" is established macroeconomics/monetary policy vocabulary in es-CO; "Zt" retained as the technical symbol.
+- "Ajuste inflación" — DataRow dt label; laconic; "ajuste" for adjustment.
+- "Ancho de régimen" — "ancho" for width; "régimen" for regime context.
+- "Contabilidad de costos del agente" — "contabilidad de costos" is standard Colombian accounting terminology; "del agente" identifies the cost owner.
+- "Implementada on-chain (`OperationalCostManagement`) — no desplegada para esta demo." — "Implementada" (implemented/coded) vs "Desplegada" (deployed/running); distinction is precise and honest.
+- "Confirmar y acuñar en fork" — "acuñar" is the established es-CO DeFi term for minting (token minting); "en fork" is technically precise.
+- "Cambiar a fork de Polygon" — imperative CTA; "Cambiar" for switch; "fork de Polygon" identifies the target chain.
+- Compliance: no "ejecutad"/"realizad"/"ejecutar"/"realizado" in any key. No "$" realized PnL. No "bridge" used positively (only "sin puente"). No "empower"/"revolucionar"/"seamless" or other marketing slop.
+
+| File | Reviewer | Date | Pass / Findings |
+|------|----------|------|-----------------|
+| `messages/es-CO/somnia.json` (cornerstone.live additions) | Juan Serrano (jmsbpp) | 2026-06-08 | PASS — developer authored es-CO first; native Colombian Spanish reviewer sign-off pending (non-blocking per project policy). |
+| `messages/en/somnia.json` (cornerstone.live additions) | Juan Serrano (jmsbpp) | 2026-06-08 | PASS — en second; no machine translation. |
+
+### Phase 09-04 somnia.cornerstone.live Sign-off
+
+- [ ] es-CO cornerstone.live copy reviewed by native Colombian Spanish speaker (pending — non-blocking)
+- [ ] §0.2 verbatim disclosure strings match spec exactly (es-CO + en)
+- [ ] §5.3 verbatim cost body strings match spec exactly (es-CO + en)
+- [ ] `OperationalCostManagement` contract name present in costPanelBodyEs key
+- [ ] No "ejecutad"/"realizad"/"executed"/"realized" in any live key (automated grep)
+- [ ] No "$" adjacent to any value in any live key (automated grep)
+- [ ] "bridge" only in negative ("sin puente" / "NO cross-chain bridge") — never used positively
+- [ ] narrativeConstantStrike key states strike is constant 360360 and only targetNotional varies
+- [ ] Anti-marketing-slop grep passes on all `somnia.cornerstone.live.*` keys
+- [ ] i18n key parity: es-CO ↔ en symmetric across all cornerstone.live keys (38 keys each)

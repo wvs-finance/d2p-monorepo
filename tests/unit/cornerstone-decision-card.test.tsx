@@ -102,11 +102,17 @@ describe('HedgeDecisionCardV2 — honesty + visual contract', () => {
     expect(mockPill).toBeInTheDocument()
   })
 
-  // --- No green/emerald anywhere in the card ---
+  // --- Provenance pills (fork-verified) never use green/emerald ---
+  // Per UI-SPEC: fork-verified = NEUTRAL (never green). Boolean pills (nonErgodicDisclosed)
+  // legitimately use status-pass for the true/yes state (color+icon+text, CROSS-09 compliant).
 
-  it('card root has NO green/emerald/status-pass class (anti-fishing CROSS-09)', () => {
+  it('fork-verified provenance pill has NO green/emerald/status-pass class (anti-fishing CROSS-09)', () => {
     const { container } = renderCard()
-    expect(container.innerHTML).not.toMatch(/status-pass|text-green|bg-green|emerald/)
+    // Only assert the provenance pill itself is neutral
+    const pills = container.querySelectorAll('span[aria-label]')
+    const fvPill = Array.from(pills).find((el) => el.getAttribute('aria-label')?.includes('fork'))
+    expect(fvPill).toBeInTheDocument()
+    expect(fvPill?.className).not.toMatch(/status-pass|text-green|bg-green|emerald/)
   })
 
   // --- No <details>/<summary> ---
