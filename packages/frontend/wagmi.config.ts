@@ -13,9 +13,10 @@ import { foundry, react } from '@wagmi/cli/plugins'
 // NOTE: 'contracts:gen' is intentionally NOT in prebuild (per plan 09-01 must_haves).
 // Run `pnpm contracts:gen` manually when updating ABIs.
 //
-// Absolute project path required: wagmi foundry plugin resolves `project` relative to cwd,
-// which is /home/jmsbpp/apps/d2p/frontend. Using absolute path avoids resolution issues.
-// The abrigo-somnia/contracts dir contains foundry.toml; artifacts are in out/.
+// Monorepo-relative project path: the wagmi foundry plugin resolves `project`
+// relative to cwd (packages/frontend). In the monorepo the Foundry project lives at
+// packages/backend/contracts, i.e. ../backend/contracts from here.
+// That dir contains foundry.toml; artifacts are in out/ (forge build first).
 //
 // MacroOracle.latest(bytes32) generated from MacroOracle.json:
 //   latest(bytes32) → (dataKey: bytes32, scaledValue: int256, observedAt: uint64, deliveredAt: uint64)
@@ -29,7 +30,7 @@ export default defineConfig({
   out: 'lib/contracts/generated.ts',
   plugins: [
     foundry({
-      project: '/home/jmsbpp/apps/d2p/abrigo/abrigo-somnia/contracts',
+      project: '../backend/contracts',
       forge: { build: false },
       include: [
         'MacroHedgeStrategist.sol/MacroHedgeStrategist.json',
