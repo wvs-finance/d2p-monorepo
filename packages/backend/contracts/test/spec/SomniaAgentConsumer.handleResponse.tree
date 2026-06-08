@@ -1,0 +1,15 @@
+SomniaAgentConsumer::handleResponse
+├── when the caller is not the platform
+│   └── it should revert.
+└── when the caller is the platform
+    ├── given the request id is not pending
+    │   └── it should revert.
+    └── given the request id is pending
+        ├── it should clear the pending flag before dispatching.
+        ├── it should dispatch to _onResult with the responses and the status.
+        ├── given the status is Success with at least one response
+        │   └── it should dispatch with the successful responses.
+        ├── given the status is Failed or TimedOut
+        │   └── it should dispatch with the failure status and not revert.
+        └── given the same request id is delivered a second time
+            └── it should revert.

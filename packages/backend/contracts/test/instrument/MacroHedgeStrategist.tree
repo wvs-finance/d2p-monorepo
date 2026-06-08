@@ -1,0 +1,50 @@
+MacroHedgeStrategist::lifecycle
+├── when requestSchoolDecision is called with a known dataKey
+│   ├── it reads the oracle scaledValue as actual
+│   ├── it allocates a fresh decisionId from the school requestId
+│   ├── it sends an inferString school payload to the LLM agent id with the registry school labels
+│   └── it marks the school requestId pending and emits HedgeDecisionRequested
+├── when requestSchoolDecision is called with an unknown dataKey
+│   └── it should revert UnknownKey
+├── when requestNotionalDecision is called with a known decisionId whose school callback has completed
+│   ├── it sends an inferNumber notional payload to the LLM agent id
+│   └── it binds the notional requestId to the same decisionId
+├── when requestNotionalDecision is called and the decision is not ready
+│   ├── given the decisionId is unknown
+│   │   └── it should revert UnknownDecision
+│   ├── given the school callback has not completed
+│   │   └── it should revert UnknownDecision
+│   └── given the notional leg already completed
+│       └── it should revert UnknownDecision
+├── when the school callback arrives from the platform
+│   ├── given the school string maps to a registry label
+│   │   └── it stores the school handle and sets schoolSet true
+│   ├── given the school string does not map to any registry label
+│   │   └── it emits DecisionFailed and leaves schoolSet false and not fire StrategistDecided
+│   └── given the school payload is an int encoded thirty two byte blob
+│       └── it emits DecisionFailed and leaves schoolSet false
+├── when the notional callback arrives from the platform after the school leg completed
+│   ├── given the notional is strictly within MIN_NOTIONAL and MAX_NOTIONAL
+│   │   └── it stores the notional unchanged
+│   ├── given the notional exceeds MAX_NOTIONAL
+│   │   └── it clamps the stored notional to MAX_NOTIONAL
+│   ├── given the notional raw is positive but below MIN_NOTIONAL
+│   │   └── it floors the stored notional up to MIN_NOTIONAL
+│   ├── given the notional raw int is negative
+│   │   └── it floors the stored notional to MIN_NOTIONAL
+│   └── given the notional payload is not thirty two bytes
+│       └── it emits DecisionFailed and leaves notionalSet false
+├── when both school and notional callbacks have arrived on the same decisionId
+│   ├── it emits StrategistDecided with the decisionId school and mandate
+│   └── given the two callbacks land in different blocks
+│       └── it should still emit StrategistDecided
+├── when a mandate is assembled
+│   ├── it anchors underlyingMarket to the polygon wcop usdc pool id
+│   ├── it resolves the school handle to a non zero thesis
+│   ├── it bounds the target notional in range
+│   ├── it sets chainId to 137 and isLong true
+│   └── it lines up the mandate field types with the hedge leg params hand off
+└── when a callback caller is not the platform
+    ├── it should revert NotPlatform
+    └── given an unknown or replayed requestId
+        └── it should revert UnknownRequest

@@ -1,0 +1,23 @@
+OperationalCostManagementTest
+├── when accrueAgentCost is called on a fresh decision and leg
+│   ├── it should increase costOf agentCostSomi by the amount
+│   ├── it should increase cummCostSomi by the amount
+│   └── it should emit AgentCostAccrued
+├── when accrueAgentCost is called a second time for the same decision and leg
+│   ├── it should leave cummCostSomi unchanged after the second call
+│   └── it should leave costOf agentCostSomi unchanged after the second call
+├── when accrueAgentCost is called for the same decision but a different leg
+│   ├── it should accrue the second leg under the same decision
+│   └── it should add both legs into cummCostSomi
+├── when accrueDataCost is called on a fresh decision
+│   ├── it should increase costOf dataCost by the amount
+│   ├── it should increase cummDataCost by the amount
+│   └── it should emit DataCostAccrued
+├── when accrueDataCost is called a second time for the same decision
+│   ├── it should leave cummDataCost unchanged after the second call
+│   └── it should leave costOf dataCost unchanged after the second call
+├── when totalCost is read for a decision
+│   └── it should return the accrued agent SOMI and data cost for that decision
+└── when many decisions and legs have been accrued
+    ├── it should hold cummCostSomi equal to the sum over decisions of costOf agentCostSomi
+    └── it should hold cummDataCost equal to the sum over decisions of costOf dataCost

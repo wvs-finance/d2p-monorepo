@@ -1,0 +1,7 @@
+MacroWorkflow
+├── when the same macro-risk scenario is resolved across both schools
+│   └── it derives different strike or width or size geometry per school
+├── when each school resolves the same scenario
+│   └── it surfaces the distinct per-school TEMPLATE honesty
+└── when the four Colombian scenarios run under both schools
+    └── it mints successfully for each school and scenario

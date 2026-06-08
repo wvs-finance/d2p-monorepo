@@ -1,0 +1,106 @@
+[
+  {
+    "anonymous": false,
+    "type": "event",
+    "name": "RequestCreated",
+    "inputs": [
+      { "name": "requestId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+      { "name": "agentId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+      { "name": "perAgentBudget", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "payload", "type": "bytes", "indexed": false, "internalType": "bytes" },
+      { "name": "subcommittee", "type": "address[]", "indexed": false, "internalType": "address[]" }
+    ]
+  },
+  {
+    "anonymous": false,
+    "type": "event",
+    "name": "RequestFinalized",
+    "inputs": [
+      { "name": "requestId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+      { "name": "status", "type": "uint8", "indexed": false, "internalType": "enum ResponseStatus" }
+    ]
+  },
+  {
+    "anonymous": false,
+    "type": "event",
+    "name": "SubcommitteePaid",
+    "inputs": [
+      { "name": "requestId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+      { "name": "totalPaid", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "perMember", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ]
+  },
+  {
+    "anonymous": false,
+    "type": "event",
+    "name": "CommitteeDepositFailed",
+    "inputs": [
+      { "name": "requestId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+      { "name": "attemptedAmount", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ]
+  },
+  {
+    "anonymous": false,
+    "type": "event",
+    "name": "NativeTransferFailed",
+    "inputs": [
+      { "name": "recipient", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "getRequest",
+    "stateMutability": "view",
+    "inputs": [
+      { "name": "requestId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct Request",
+        "components": [
+          { "name": "id", "type": "uint256", "internalType": "uint256" },
+          { "name": "requester", "type": "address", "internalType": "address" },
+          { "name": "callbackAddress", "type": "address", "internalType": "address" },
+          { "name": "callbackSelector", "type": "bytes4", "internalType": "bytes4" },
+          { "name": "subcommittee", "type": "address[]", "internalType": "address[]" },
+          {
+            "name": "responses",
+            "type": "tuple[]",
+            "internalType": "struct Response[]",
+            "components": [
+              { "name": "validator", "type": "address", "internalType": "address" },
+              { "name": "result", "type": "bytes", "internalType": "bytes" },
+              { "name": "status", "type": "uint8", "internalType": "enum ResponseStatus" },
+              { "name": "receipt", "type": "uint256", "internalType": "uint256" },
+              { "name": "timestamp", "type": "uint256", "internalType": "uint256" },
+              { "name": "executionCost", "type": "uint256", "internalType": "uint256" }
+            ]
+          },
+          { "name": "responseCount", "type": "uint256", "internalType": "uint256" },
+          { "name": "failureCount", "type": "uint256", "internalType": "uint256" },
+          { "name": "threshold", "type": "uint256", "internalType": "uint256" },
+          { "name": "createdAt", "type": "uint256", "internalType": "uint256" },
+          { "name": "deadline", "type": "uint256", "internalType": "uint256" },
+          { "name": "status", "type": "uint8", "internalType": "enum ResponseStatus" },
+          { "name": "consensusType", "type": "uint8", "internalType": "enum ConsensusType" },
+          { "name": "remainingBudget", "type": "uint256", "internalType": "uint256" },
+          { "name": "perAgentBudget", "type": "uint256", "internalType": "uint256" }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "hasRequest",
+    "stateMutability": "view",
+    "inputs": [
+      { "name": "requestId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      { "name": "", "type": "bool", "internalType": "bool" }
+    ]
+  }
+]

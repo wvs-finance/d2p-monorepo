@@ -1,0 +1,52 @@
+# IAgentRequester subgraph schema (INDEX-01, KPD-08).
+#
+# Entity model: ~165k Request entities (CommitteeDepositFailed folded by
+# requestId into a non-lossy accumulator — the counter is a FIELD, not a new
+# entity, so the count is multiplicity-independent) → under the 300k free cap.
+# sumExecutionCost filled off-chain (Arch B, Plan 03-04 — NO in-subgraph eth_call).
+#
+# DTYPE discipline: uint256 ids/amounts are GraphQL BigInt (serialize as a decimal
+# string → consumed as pl.Utf8 downstream), NEVER a numeric narrow type.
+#
+# NO per-member `Response` entity and NO first-class `CommitteeEvent` entity:
+# a per-occurrence CommitteeEvent would push ≈330k+ entities, brushing the cap —
+# REJECTED. The retryable CommitteeDepositFailed folds into Request as a counter
+# + running totals instead.
+
+type Request @entity {
+  # requestId as a decimal string (uint256 → BigInt id).
+  id: ID!
+
+  # --- RequestCreated payload --------------------------------------------- #
+  agentId: BigInt!
+  perAgentBudget: BigInt!
+  subcommittee: [Bytes!]!
+
+  # --- Arrival-ordering key: (blockNumber, logIndex) ---------------------- #
+  blockNumber: BigInt!
+  logIndex: BigInt!
+  txHash: Bytes!
+  # blockTimestamp is a COARSE SECONDARY signal (whole-second source) — NEVER
+  # the arrival sort key. Sort on (blockNumber, logIndex).
+  blockTimestamp: BigInt!
+
+  # --- RequestFinalized (set on finalize; null until then) ---------------- #
+  status: Int                # ResponseStatus enum (uint8): Success=2/Failed=3/TimedOut=4
+  finalizedBlock: BigInt
+  finalizedLogIndex: BigInt
+
+  # --- CommitteeDepositFailed NON-LOSSY fold (requestId-keyed accumulator) - #
+  # CommitteeDepositFailed is a structural invariant (NOT an error, Phase-2
+  # note 2) AND is RETRYABLE (NatSpec: fires when the committee-deposit call
+  # reverts) → it can fire >1× per requestId. A scalar overwrite would lose
+  # retry attempts, so we ACCUMULATE: a counter + a running total. The fold key
+  # is requestId (1:1 with Request) so the ENTITY COUNT is unaffected.
+  committeeDepositFailedCount: Int!                  # ++ each occurrence (default 0)
+  committeeDepositFailedAttemptedTotal: BigInt!      # += attemptedAmount each occurrence (default 0)
+  committeeDepositFailedLastAmount: BigInt           # last-attempted (nullable, reference only)
+
+  # --- Architecture B off-chain post-pass (Plan 03-04) -------------------- #
+  # Left NULL here; filled by the off-chain getRequest decode (selector
+  # 0xc58343ef) → Σ responses[].executionCost. NO in-subgraph eth_call.
+  sumExecutionCost: BigInt
+}

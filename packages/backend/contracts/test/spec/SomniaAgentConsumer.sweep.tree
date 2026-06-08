@@ -1,0 +1,15 @@
+SomniaAgentConsumer::sweep
+├── when the caller is not the owner
+│   └── it should revert with NotOwner.
+└── when the caller is the owner
+    ├── when the recipient is the zero address
+    │   └── it should revert with ZeroRecipient.
+    └── when the recipient is non-zero
+        ├── it should transfer the full contract balance to the recipient.
+        ├── it should return the swept amount.
+        └── it should leave the contract balance at zero.
+
+# Egress (B-1 fix). receive() is the only value inflow on the reusable base; without an
+# outflow every platform rebate / over-fund surplus would be permanently trapped. sweep()
+# is the base-level rescue (owner set at deploy). Subclasses with real escrow accounting
+# govern egress themselves. CEI-safe: no state mutated after the external call.

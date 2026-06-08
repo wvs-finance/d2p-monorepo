@@ -1,0 +1,51 @@
+# IAgentRequester subgraph manifest (KPD-08, INDEX-01).
+#
+# OFFLINE artifact: `graph codegen && graph build` is the toolchain validity
+# check, run at deploy time (Plan 03-04) — NOT in CI (graph-cli not vendored).
+# The static manifest-lint in tests/test_index01_manifest.py validates this file
+# without a toolchain.
+#
+# specVersion 1.2.0: pinned floor. >=1.2.0 is strictly required only when a
+# declared eth_call is used; Architecture B uses NO in-subgraph eth_call
+# (sumExecutionCost is filled off-chain in Plan 03-04), but we pin 1.2.0 anyway.
+#
+# DEPLOY-PROBE caveat (03-RESEARCH Open Q1): the network slug `somnia` is the
+# mainnet candidate; mainnet "somnia" vs "somnia-mainnet" is UNVERIFIED (testnet
+# docs show "somnia-testnet"). Resolve at deploy time (Plan 03-04). See README.
+#
+# B3 invariant: source.address is the PINNED proxy 0x5E5205CF…163E6 — NEVER null.
+# The proxy + startBlock are also carried in networks.json (kept out of the
+# manifest body for `graph deploy --network` reuse); both must agree.
+specVersion: 1.2.0
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: IAgentRequester
+    network: somnia
+    source:
+      address: "0x5E5205CF39E766118C01636bED000A54D93163E6"
+      abi: IAgentRequester
+      startBlock: 283417317
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - Request
+      abis:
+        - name: IAgentRequester
+          file: ./abis/IAgentRequester.json
+      # Register ONLY the three OBSERVED events, using the topic0_map_v1.json
+      # RESOLVED roles (NOT the scout's inverted labels). RequestFinalized status
+      # is uint8 (ResponseStatus enum canonicalizes to uint8). SubcommitteePaid +
+      # NativeTransferFailed are ABI-carried (for getRequest/completeness) but are
+      # never emitted on-chain → intentionally NOT registered as handlers.
+      eventHandlers:
+        - event: RequestCreated(uint256 indexed,uint256 indexed,uint256,bytes,address[])
+          handler: handleRequestCreated
+        - event: RequestFinalized(uint256 indexed,uint8)
+          handler: handleRequestFinalized
+        - event: CommitteeDepositFailed(uint256 indexed,uint256)
+          handler: handleCommitteeDepositFailed

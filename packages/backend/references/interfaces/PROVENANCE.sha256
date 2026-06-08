@@ -1,0 +1,6 @@
+# git blob SHA (git hash-object), content-addressed ABI pin
+# Reproduce: git hash-object references/interfaces/IAgentRequester.sol
+# This is the immutable git BLOB SHA of the recovered emrestay/somnia-agents-skills
+# IAgentRequester.sol (NOT a commit SHA, NOT a sha256sum). It pins the source-of-truth
+# ABI that topic0_map_v1.json resolves against (abi_source.blob_sha).
+e15d4e94ef9a0c09c8971ac1061098b929325028  IAgentRequester.sol

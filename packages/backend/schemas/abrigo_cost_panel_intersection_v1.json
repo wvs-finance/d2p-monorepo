@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/wvs-finance/abrigo-somnia/schemas/abrigo_cost_panel_intersection_v1.json",
+  "title": "abrigo_cost_panel_intersection_v1",
+  "description": "Machine-loadable JSON-Schema (draft 2020-12) for the strict joint-analysis intersection columns of the Abrigo cost panel. Joint-analysis consumers in abrigo-analytics join on the intersection PK (chain_id, tx_hash, request_id). Each property carries an x-polars-dtype annotation so a consumer maps every column to its polars dtype WITHOUT inferring from data (PITFALLS E1 — a null-only early partition would otherwise infer a Null column type and break later reads). This schema is v1-K_AI-anchored: the columns are derived from the K_AI (agent-payment) leg and carry a documented breakage budget for when K_D (abrigo-x402) ships its panel. DTYPE SCOPE RULE (B1): uint256 ID columns (request_id) are Utf8 ONLY (never Int64, never Decimal(38,0) — keccak-derived uint256 = up to 78 digits > Decimal128's 38-digit cap); wei amounts (gross_cost_native) may be Utf8 or Decimal(38,0) (provably <= 38 digits).",
+  "type": "object",
+  "x-schema-anchor": "v1-K_AI-anchored",
+  "x-intersection-pk": ["chain_id", "tx_hash", "request_id"],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "uint256 request identifier as a decimal string. Utf8 ONLY — NEVER Int64, NEVER Decimal(38,0): a keccak/topic-derived uint256 is up to 78 decimal digits, exceeding Decimal128's 38-digit cap. PK part.",
+      "x-polars-dtype": "Utf8"
+    },
+    "tx_hash": {
+      "type": "string",
+      "description": "Transaction hash (0x-prefixed 32-byte hex). PK part; consistent with event_schema_v1.md.",
+      "x-polars-dtype": "Utf8"
+    },
+    "block_number": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Block number. UInt64, NOT NULL — consistent with event_schema_v1.md arrival-ordering PK part 1.",
+      "x-polars-dtype": "UInt64"
+    },
+    "block_ts_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Block timestamp (UTC, microsecond precision). COARSE SECONDARY — whole-second source, never sort-primary; consistent with event_schema_v1.md.",
+      "x-polars-dtype": "Datetime(time_unit='us', time_zone='UTC')"
+    },
+    "chain_id": {
+      "type": "integer",
+      "description": "EVM chain id (Somnia L1 = 5031). Int64; PK part. Consistent with event_schema_v1.md.",
+      "x-polars-dtype": "Int64"
+    },
+    "gross_cost_native": {
+      "type": "string",
+      "description": "Gross cost in native wei as a decimal string. Wei amount provably <= 38 digits (SOMI wei ~1e16-1e17 ~17-18 digits) — Utf8 OR Decimal(38,0), never Int64.",
+      "x-polars-dtype": "Utf8"
+    },
+    "gross_cost_usd": {
+      "type": ["number", "null"],
+      "description": "Gross cost in USD. Nullable (FX may be stale; no native SOMI/USD on-chain oracle).",
+      "x-polars-dtype": "Float64"
+    },
+    "net_cost_usd": {
+      "type": ["number", "null"],
+      "description": "Net cost in USD after burn/validator rebate accounting. Nullable.",
+      "x-polars-dtype": "Float64"
+    },
+    "fx_rate": {
+      "type": ["number", "null"],
+      "description": "SOMI/USD cross-rate applied to derive gross_cost_usd. Nullable (off-chain source, may be stale).",
+      "x-polars-dtype": "Float64"
+    },
+    "fx_source_ts_utc": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Timestamp of the FX observation applied (UTC). Nullable.",
+      "x-polars-dtype": "Datetime(time_unit='us', time_zone='UTC')"
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version tag (abrigo_cost_panel_intersection_v1). NOT NULL — required for the explicit cross-version read filter (PITFALLS E4).",
+      "x-polars-dtype": "Utf8"
+    }
+  },
+  "required": [
+    "request_id",
+    "tx_hash",
+    "block_number",
+    "block_ts_utc",
+    "chain_id",
+    "gross_cost_native",
+    "schema_version"
+  ],
+  "additionalProperties": false
+}

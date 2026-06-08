@@ -1,0 +1,25 @@
+MacroOracle::requestMacro
+├── when the dataKey is not in the catalog
+│   └── it should revert with UnknownKey.
+└── when the dataKey is in the catalog
+    ├── given the endpoint kind is Uint
+    │   └── it should send a fetchUint payload over PROXY_BASE+proxyPath, selector "value", decimals 0.
+    ├── given the endpoint kind is Int
+    │   └── it should send a fetchInt payload over PROXY_BASE+proxyPath, selector "value", decimals 0.
+    ├── it should map requestId -> dataKey and mark the request pending.
+    └── it should emit MacroRequested.
+
+MacroOracle::onResult
+├── given Failed/TimedOut status or empty responses
+│   └── it should emit MacroFailed and store nothing.
+├── given a non-32-byte result
+│   └── it should emit MacroFailed and not revert the callback.
+├── given Success on a Uint endpoint
+│   └── it should store scaledValue = decoded uint (>int256.max -> MacroFailed, no wrap) + emit MacroReceived.
+└── given Success on an Int endpoint
+    └── it should store the signed scaledValue (negatives preserved) + emit MacroReceived.
+
+# Agent-call semantics (proven for fetchUint 2026-06-01): selector "value" (no dot), decimals 0
+# (proxy pre-scales). Endpoint.decimals is interpretation metadata, NOT passed to the agent.
+# observedAt stays 0 (agent fetches only "value", not the proxy "ts"). fetchInt path is
+# structurally analogous to fetchUint but not yet live-verified on-chain.

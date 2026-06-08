@@ -1,0 +1,15 @@
+{
+  "name": "abrigo-iagentrequester-subgraph",
+  "version": "1.0.0",
+  "description": "INDEX-01 (KPD-08): Somnia IAgentRequester arrival-series subgraph. Proxy-pinned (B3), startBlock 283417317, three observed-event handlers, flat Request entity with a non-lossy CommitteeDepositFailed fold. sumExecutionCost filled off-chain (Architecture B, Plan 03-04).",
+  "private": true,
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --network somnia"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.98.1",
+    "@graphprotocol/graph-ts": "0.38.2"
+  }
+}

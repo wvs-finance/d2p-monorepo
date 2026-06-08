@@ -1,0 +1,11 @@
+LongGammaWrapperClaimResidual
+├── when claimResidual is called after the position is Closed
+│   ├── it reconciles surviving collateral and sets the claimed flag before any redeem
+│   ├── it computes per token residual as max of surviving minus cost and zero
+│   ├── it redeems the cap aware minimum of residual shares and maxRedeem to the stored user
+│   ├── it pays a figure derived from surviving collateral and not from the upfront deposit
+│   └── it emits ResidualClaimed
+├── when claimResidual is called while the position is still Open
+│   └── it reverts WrongState because numberOfLegs is not zero
+└── when claimResidual is called a second time
+    └── it reverts AlreadyClaimed

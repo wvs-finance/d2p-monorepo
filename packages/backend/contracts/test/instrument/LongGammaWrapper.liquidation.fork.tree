@@ -1,0 +1,5 @@
+LongGammaWrapperLiquidation
+└── when the wrapper is insolvent at all four ticks and a liquidator calls dispatchFrom with an empty final list
+    ├── it burns all positions and drives numberOfLegs of the wrapper to zero
+    ├── it floors the residual at zero when surviving collateral is wiped
+    └── it never lets the wrapper pay more than it holds

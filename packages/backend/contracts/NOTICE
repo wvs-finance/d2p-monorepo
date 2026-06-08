@@ -1,0 +1,75 @@
+NOTICE — Borrowed Panoptic V2 core (BUSL-1.1 provenance)
+========================================================
+
+This repository (abrigo-somnia) depends on the Panoptic V2 core Solidity contracts as a
+**forge-installed, pinned dependency** (NOT a vendored in-tree copy) for a NON-PRODUCTION
+hackathon demo / Base-fork / testnet exercise only. This NOTICE records the dependency's
+provenance and the BUSL-1.1 terms under which it is used.
+
+Borrowed source (forge-installed; lib/ is gitignored — restored by script/ci-install-deps.sh)
+--------------------------------------------------------------------------------------------
+- Dependency repo   : github.com/panoptic-labs/panoptic-v2-core
+- Pinned commit     : d20b0aed127ab5d3e5ca17c5399782aad2f0ff4c (post-audit `main`)
+- Restored to       : contracts/lib/panoptic-v2-core/ (the `@contracts/`,`@types/`,
+                      `@libraries/`,`@base/`,`@tokens/` remappings resolve here)
+- Audit lineage     : this build was PREVIOUSLY vendored from the Code4rena "Panoptic:
+                      Next Core" audit snapshot github.com/code-423n4/2025-12-panoptic
+                      @ fe557748210a529ae414d7c487b6514be0d9e220 (frozen 2025-12-23).
+                      The pinned d20b0aed is POST-AUDIT `main` and DIVERGES from that
+                      snapshot — see the "Post-audit-mirror build note" + deltas below.
+                      (Migrated on branch `chore/panoptic-v2-forge-install`, 2026-06-02.)
+
+Licence (verbatim from lib/panoptic-v2-core/LICENSE @ d20b0aed)
+--------------------------------------------------------------
+- Licence           : BUSL-1.1 (Business Source License 1.1)
+- Licensed Work     : Panoptic V2, (c) 2023-2026 Axicon Labs Limited
+- Licensor          : Axicon Labs Limited
+- Change Date       : the earlier of 2028-03-01 or a date specified at
+                      v2-license-date.panoptic.eth
+- Change License    : GNU General Public License v2.0 or later
+- Additional Use Grant : any uses listed at v2-license-grants.panoptic.eth
+- "Display the License" obligation is satisfied by the dependency's own
+  `lib/panoptic-v2-core/LICENSE`, restored alongside the source.
+
+Scope of use (BUSL-permitted mode)
+----------------------------------
+The Panoptic V2 dependency under `lib/panoptic-v2-core/` is used in a NON-PRODUCTION
+fork/demo context only — the use mode BUSL-1.1 permits prior to the Change Date. It is
+NOT deployed to a production network for commercial use. Each upstream file retains its
+original `// SPDX-License-Identifier: BUSL-1.1` header in the restored dependency. This
+repository's own wrapper/interface code (`src/instrument/**` and the existing `src/**`
+Somnia code) is separately licensed (MIT) and is NOT part of the borrowed BUSL-1.1 surface.
+
+Post-audit-mirror build note (d20b0aed — UNAUDITED relative to the snapshot)
+---------------------------------------------------------------------------
+As of branch `chore/panoptic-v2-forge-install`, the demo no longer compiles against
+the vendored `contracts/panoptic-borrowed/` audit snapshot. The Solidity build is
+forge-installed from the canonical mirror `lib/panoptic-v2-core` pinned at commit
+`d20b0aed127ab5d3e5ca17c5399782aad2f0ff4c` (post-audit `main`). This is POST-AUDIT
+code: it carries changes made AFTER the Code4rena snapshot fe55774 and is therefore
+UNAUDITED relative to that snapshot. The demo's behavioral assertions (WRAP-01..04)
+were re-run green against d20b0aed without weakening any proof.
+
+Behavioral / ABI deltas vs the audited snapshot fe55774 reconciled in this port:
+  1. Contracts renamed: PanopticPool→PanopticPoolV2, CollateralTracker→CollateralTrackerV2,
+     SemiFungiblePositionManager→SemiFungiblePositionManagerV4, PanopticFactory→PanopticFactoryV4.
+  2. PanopticPoolV2 / CollateralTrackerV2 now inherit TransientReentrancyGuard (EIP-1153
+     transient-storage reentrancy guard). The dispatch/dispatchFrom reentrancy paths exercised
+     by the settleLong / forceExercise / liquidation proofs remain green under it.
+  3. CollateralTrackerV2() constructor dropped its flat commission-fee arg (vendored
+     CT_COMMISSION_FEE=10). Commission is now a RiskParameters-driven notional/premium fee
+     resolved through the RiskEngine — a behavioral change in fee derivation, not just a signature.
+  4. PanopticPool read renamed+extended: getAccumulatedFeesAndPositionsData →
+     getFullPositionsData, with two appended return values (collateralRequirements,
+     netPremiaPerPosition). The first three returns are byte-identical; the streamia seam
+     consumes only longPremium, so the swap-seam (IPanopticData) is preserved.
+  5. types/TokenId.sol added a riskPartnerIndex validation
+     (reverts Errors.InvalidTokenIdParameter(3) when riskPartnerIndex > numLegs-1). The
+     demo's TokenId construction satisfies it without modification (all wrapper open/mint
+     proofs pass), so no test TokenId had to be rebuilt.
+
+Single-compile note (intentional, not a gap)
+---------------------------------------------
+FORK-01's roadmap wording references a multi-version solc matrix; 07-RESEARCH §5
+retired it — Panoptic V2 is `^0.8.24` for every file, so this repo uses a single
+`evm_version="cancun"` / `solc 0.8.24` compile profile. This is intentional, not a gap.

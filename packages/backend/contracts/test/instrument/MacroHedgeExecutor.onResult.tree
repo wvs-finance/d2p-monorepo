@@ -1,0 +1,11 @@
+MacroHedgeExecutorOnResultTest::decodeAndAuth
+├── when the platform delivers a response whose result is an abi encoded HedgeLegParams
+│   ├── it should decode the result bytes into a well formed HedgeLegParams
+│   └── it should route the decoded params to the mint sink
+├── when a callback caller is not the platform
+│   └── it should revert NotPlatform
+└── when an unknown or replayed requestId is delivered
+    ├── given the requestId was never registered
+    │   └── it should revert UnknownRequest
+    └── given the requestId was already delivered and cleared by the callback
+        └── it should revert UnknownRequest

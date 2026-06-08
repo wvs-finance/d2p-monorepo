@@ -1,0 +1,31 @@
+name: keeper-live
+
+# Opt-in live smoke that uses the REAL paid key. Manual trigger only, bound to a
+# protected Environment (`live-api`) — set required reviewers / branch restriction
+# on GitHub so fork PRs can never reach it. Never triggered by pull_request(_target).
+# [spec: Secret unreachable from untrusted CI]
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read # least privilege
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    environment: live-api # protected; holds the secret TRADING_ECONOMICS_API_KEY
+    defaults:
+      run:
+        working-directory: keeper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci
+      - name: Live TE smoke (key from protected Environment; output discarded)
+        env:
+          TRADING_ECONOMICS_API_KEY: ${{ secrets.TRADING_ECONOMICS_API_KEY }}
+        # Pipe to /dev/null so TE data is not dumped to public CI logs; the key is
+        # redacted by teClient regardless. Exit non-zero if the fetch fails.
+        run: node src/teClient.ts country/colombia > /dev/null && echo "live TE OK (key hidden)"

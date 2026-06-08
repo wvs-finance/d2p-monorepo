@@ -1,0 +1,104 @@
+{
+  "schema_version": "topic0_map_v1",
+  "abi_source": {
+    "repo": "emrestay/somnia-agents-skills",
+    "path": "references/interfaces/IAgentRequester.sol",
+    "blob_sha": "e15d4e94ef9a0c09c8971ac1061098b929325028",
+    "blob_sha_note": "git BLOB SHA (git hash-object), NOT a commit SHA; content-addressed, immutable",
+    "utc_fetch_ts": "2026-05-29T22:04Z"
+  },
+  "field_layout_hash_spec": "field_layout_hash = '0x' + keccak( '<EventName>(<canonical_type>:<I|D>,…)' ) over args in SOURCE ORDER; canonical types (enum->uint8, struct->tuple); I=indexed, D=data. Independent of topic0 (which omits indexed/data info).",
+  "keccak_tooling": "eth_hash.auto.keccak (pycryptodome backend). Verified: keccak('Upgraded(address)') == 0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b. NEVER hashlib.sha3_256.",
+  "decode_status_enum": ["resolved", "unresolved_abi", "unresolved_impl_transition"],
+  "indexed_dynamic_field_count": 0,
+  "schema_v2_bump_required": false,
+  "sc5_note": "SC#5: every indexed arg across all 5 events is a value type (uint256/address). Zero indexed-dynamic fields -> no event_schema_v1.md -> v2 bump (confirm-and-document, not a migration).",
+  "resolver": [
+    {
+      "implementation_address": "0x9af59c5683bb8686596b0d56e4f67655c6b73edd",
+      "topic0": "0xb62339927ed9948fd837358a55f5b9a824f7b047043faece66965593ed726889",
+      "signature": "RequestCreated(uint256,uint256,uint256,bytes,address[])",
+      "event_name": "RequestCreated",
+      "indexed_args": [
+        {"name": "requestId", "type": "uint256"},
+        {"name": "agentId", "type": "uint256"}
+      ],
+      "data_args": [
+        {"name": "perAgentBudget", "type": "uint256"},
+        {"name": "payload", "type": "bytes"},
+        {"name": "subcommittee", "type": "address[]"}
+      ],
+      "field_layout_hash": "0x9b58ba757cb55c0f041e54b88e3bfa0fe42457e16705c55bafb82c312fd39dd2",
+      "decode_status": "resolved",
+      "observed_on_chain": true,
+      "abi_source": {"blob_sha": "e15d4e94ef9a0c09c8971ac1061098b929325028", "path": "references/interfaces/IAgentRequester.sol"}
+    },
+    {
+      "implementation_address": "0x9af59c5683bb8686596b0d56e4f67655c6b73edd",
+      "topic0": "0x65db1ef5b3bcd84fe4fb8dbbe1cadc9fe6643bb261ab2e01d65c281c3d466af2",
+      "signature": "RequestFinalized(uint256,uint8)",
+      "event_name": "RequestFinalized",
+      "indexed_args": [
+        {"name": "requestId", "type": "uint256"}
+      ],
+      "data_args": [
+        {"name": "status", "type": "uint8", "abi_note": "ResponseStatus enum canonicalized to uint8"}
+      ],
+      "field_layout_hash": "0x74f8ce05e28e9ff61d36d9be14d7d7cc9ce9c3d43cbc52187af9c91bd8bdb54a",
+      "decode_status": "resolved",
+      "observed_on_chain": true,
+      "abi_source": {"blob_sha": "e15d4e94ef9a0c09c8971ac1061098b929325028", "path": "references/interfaces/IAgentRequester.sol"}
+    },
+    {
+      "implementation_address": "0x9af59c5683bb8686596b0d56e4f67655c6b73edd",
+      "topic0": "0x5c090ef48df2b4d8a01bd0639355d62c318b623aed749bdd12325f789e37a2cf",
+      "signature": "CommitteeDepositFailed(uint256,uint256)",
+      "event_name": "CommitteeDepositFailed",
+      "indexed_args": [
+        {"name": "requestId", "type": "uint256"}
+      ],
+      "data_args": [
+        {"name": "attemptedAmount", "type": "uint256"}
+      ],
+      "field_layout_hash": "0x339975745037e6cb8b23e221eda665d215e357cdf109e34c1eb20476a5c664c2",
+      "decode_status": "resolved",
+      "observed_on_chain": true,
+      "abi_source": {"blob_sha": "e15d4e94ef9a0c09c8971ac1061098b929325028", "path": "references/interfaces/IAgentRequester.sol"}
+    },
+    {
+      "implementation_address": "0x9af59c5683bb8686596b0d56e4f67655c6b73edd",
+      "topic0": "0x15863241ef82702f42fe12b9bc93f3fbc82b50dbc2a3962c70f3249939db605e",
+      "signature": "SubcommitteePaid(uint256,uint256,uint256)",
+      "event_name": "SubcommitteePaid",
+      "indexed_args": [
+        {"name": "requestId", "type": "uint256"}
+      ],
+      "data_args": [
+        {"name": "totalPaid", "type": "uint256"},
+        {"name": "perMember", "type": "uint256"}
+      ],
+      "field_layout_hash": "0x1ee9ac7ddeb708624e5d501a4ed8eee3c4488eec678e9444b7c62cf4db5d7d0e",
+      "decode_status": "resolved",
+      "observed_on_chain": false,
+      "registration_note": "Defined in the ABI but NOT observed on-chain in any sampled window. Registered (cost-zero) to prevent a future unresolved_abi false positive (RESEARCH Open Question 2).",
+      "abi_source": {"blob_sha": "e15d4e94ef9a0c09c8971ac1061098b929325028", "path": "references/interfaces/IAgentRequester.sol"}
+    },
+    {
+      "implementation_address": "0x9af59c5683bb8686596b0d56e4f67655c6b73edd",
+      "topic0": "0xa5b05eec8040da65485bf3ab248b47c42271aa50a9234ed8f116e568dc285cc6",
+      "signature": "NativeTransferFailed(address,uint256)",
+      "event_name": "NativeTransferFailed",
+      "indexed_args": [
+        {"name": "recipient", "type": "address"}
+      ],
+      "data_args": [
+        {"name": "amount", "type": "uint256"}
+      ],
+      "field_layout_hash": "0x7ff516fb216d7ffb8557ba63daa82aaaaa07f0f236f8aab1303a494ebad3477a",
+      "decode_status": "resolved",
+      "observed_on_chain": false,
+      "registration_note": "Defined in the ABI but NOT observed on-chain in any sampled window. Registered (cost-zero) to prevent a future unresolved_abi false positive (RESEARCH Open Question 2).",
+      "abi_source": {"blob_sha": "e15d4e94ef9a0c09c8971ac1061098b929325028", "path": "references/interfaces/IAgentRequester.sol"}
+    }
+  ]
+}

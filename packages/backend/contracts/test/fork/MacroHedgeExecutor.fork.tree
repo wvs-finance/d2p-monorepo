@@ -1,0 +1,12 @@
+MacroHedgeExecutorForkTest::deployableMint
+├── when resolveAndMint is called with the demo long call params and a positive size
+│   ├── it should mint the demo position through the executor
+│   ├── it should leave numberOfLegs of the executor greater than zero
+│   └── it should emit PositionMinted and RepresentativenessAssessed with requestId zero on the direct path
+├── when quoteCollateralRequirements is read after the funded mint
+│   └── it should return a BalanceDelta without reverting
+├── when a second executor is funded with nonzero collateral far below the position requirement and called with the identical params
+│   ├── it should revert AccountInsolvent on the resolveAndMint call
+│   └── it should leave numberOfLegs of the underfunded executor at zero after the revert
+└── when resolveAndMint is called with legParams size exceeding one hundred twenty seven
+    └── it should revert on the shared sink optionRatio overflow guard

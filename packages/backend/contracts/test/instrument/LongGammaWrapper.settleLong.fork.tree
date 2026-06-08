@@ -1,0 +1,5 @@
+LongGammaWrapperSettleLong
+└── when a seller settles the wrappers long premium via dispatchFrom with equal to and final lists
+    ├── it erodes the wrapper collateral while the position stays Open
+    ├── it leaves numberOfLegs of the wrapper unchanged and greater than zero
+    └── it emits ResidualEroded from syncResidual when surviving dropped
