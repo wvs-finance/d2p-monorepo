@@ -9,6 +9,7 @@ reviewed_at: 2026-06-07
 review: "gsd-ui-checker APPROVED 6/6 (2 non-blocking FLAGs: focal-point declaration, 12px banner exception); all honesty-contract checks PASS"
 focal_point: "Persistent anchor = the always-visible Mode Banner (above the fold). After a confirmed mint, the first content focal point is the On-Chain Evidence Panel heading (real tx hash + strike + TokenId); the expandable ExecutorDecided rationale and the static cost placeholder are secondary appendices below it."
 spacing_exception: "12px = the Mode Banner vertical padding only (compact persistent element); it is a multiple of 4 but intentionally NOT added to the 4/8/16/24/32/48/64 scale — do not normalize to 8/16; treat as a one-off documented in the banner component."
+backend_handoff_v3: "Reconciled to abrigo-somnia/docs/UI-AGENT-HANDOFF.md (2026-06-07). D1 (Davidson honesty split): nonErgodicDisclosed (honesty flag) + the '(TEMPLATE)'-marked rationale render ON the Agent-2 decision card at FULL weight (color+icon+text rows, never <details>); the OTHER ExecutorDecided fields (regimeZt, inflationAdjustment, strikeTick, regimeWidth, parametricHedged) stay in the expandable post-mint evidence panel. This refines Surface 4 — the rationale moves onto the card, the panel keeps the geometry fields. See spec v3 §5.2."
 ---
 
 # Phase 9 — UI Design Contract
