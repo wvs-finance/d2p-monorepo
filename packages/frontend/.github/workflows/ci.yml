@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  deployment_status:
+
+jobs:
+  lint:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm biome check .
+
+  typecheck:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm velite build
+      - run: pnpm tsc --noEmit
+
+  test-unit:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm velite build
+      - run: pnpm vitest run
+
+  impeccable:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Run impeccable detector
+        run: npx --yes impeccable detect app/
+        # Non-zero exit code from impeccable fails this step.
+        # No --fail-on-error flag needed; the binary exits non-zero (code 2) on
+        # any detected anti-pattern. Verified with impeccable v2.1.8 — the only
+        # flags available are --fast and --json. See docs/impeccable-flag.md for
+        # the live-verified CLI flag situation.
+
+  # e2e + a11y run against a LOCAL prod build (playwright.config webServer), NOT the
+  # deployed preview: the suite is localhost-oriented (cookie scoping) and the preview is
+  # SSO-protected. Public RPC endpoints + a placeholder WalletConnect id satisfy lib/env.ts
+  # at build time (these pages don't make on-chain calls). NO secrets needed.
+  test-e2e:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_RPC_CELO_PRIMARY: https://forno.celo.org
+      NEXT_PUBLIC_RPC_ETH_PRIMARY: https://ethereum.publicnode.com
+      NEXT_PUBLIC_RPC_BASE_PRIMARY: https://mainnet.base.org
+      NEXT_PUBLIC_RPC_ARB_PRIMARY: https://arb1.arbitrum.io/rpc
+      NEXT_PUBLIC_RPC_OP_PRIMARY: https://mainnet.optimism.io
+      NEXT_PUBLIC_WALLETCONNECT_ID: placeholder_walletconnect_id_for_ci
+      NEXT_PUBLIC_APP_URL: http://localhost:3040
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm playwright install --with-deps chromium
+      - run: pnpm playwright test --project=chromium
+
+  a11y:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_RPC_CELO_PRIMARY: https://forno.celo.org
+      NEXT_PUBLIC_RPC_ETH_PRIMARY: https://ethereum.publicnode.com
+      NEXT_PUBLIC_RPC_BASE_PRIMARY: https://mainnet.base.org
+      NEXT_PUBLIC_RPC_ARB_PRIMARY: https://arb1.arbitrum.io/rpc
+      NEXT_PUBLIC_RPC_OP_PRIMARY: https://mainnet.optimism.io
+      NEXT_PUBLIC_WALLETCONNECT_ID: placeholder_walletconnect_id_for_ci
+      NEXT_PUBLIC_APP_URL: http://localhost:3040
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm playwright install --with-deps chromium
+      - run: pnpm playwright test tests/a11y/
+
+  lighthouse:
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dlx @lhci/cli@^0.15 autorun
+        env:
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+          LHCI_COLLECT__URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}

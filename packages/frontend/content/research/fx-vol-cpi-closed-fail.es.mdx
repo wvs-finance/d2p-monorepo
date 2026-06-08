@@ -1,0 +1,21 @@
+---
+slug: fx-vol-cpi-closed-fail
+title_es: "FX-vol vs sorpresa CPI — cierre por fracaso (disposición)"
+title_en: "FX-vol vs CPI surprise — closed-fail disposition"
+authors: ["Juan Serrano"]
+date: "2026-04-15"
+type: "decision-memo"
+track: abrigo-hedge-design
+readable_on_site: true
+external_url: "https://github.com/wvs-finance/abrigo-analytics/tree/main/notebooks/fx_vol_cpi_surprise/Colombia"
+summary_es: "Disposición de fracaso disciplinado para la hipótesis de respuesta de la volatilidad FX a las sorpresas CPI. β̂ = -0.000685, IC 90% [-0.003635, 0.002265] sobre n = 947. Conservada como ejemplo de honestidad epistémica."
+summary_en: "Disciplined-failure disposition for the hypothesis of FX vol response to CPI surprise. β̂ = -0.000685, 90% CI [-0.003635, 0.002265] over n = 947. Retained as epistemic-honesty example."
+tags: ["fx-vol", "cpi", "closed-fail", "decision-memo"]
+order: 2
+---
+
+La iteración FX-vol-on-CPI-surprise testó la hipótesis de que las sorpresas del IPC colombiano predicen la volatilidad realizada semanal del COP/USD. La especificación primaria fue la Columna 6 de OLS de RV^(1/3) semanal sobre la sorpresa CPI filtrada por AR(1) más seis controles de control, estimada sobre el panel semanal colombiano de 2008-01-07 a 2026-02-23 (n = 947 observaciones).
+
+El resultado headline: β̂_CPI = -0.000685, SE HAC(4) = 0.001794, IC 90% = [-0.003635, 0.002265]. La regla de gate primaria T3b (β̂_CPI − 1.28·SE > 0 unilateral) no se satisface — veredicto FAIL. Las pruebas auxiliares T1 (consenso de racionalidad Mincer-Zarnowitz F) y T2 (Levene canal de anuncio) también fallan. Siete especificaciones de sensibilidad completan el forest plot; dos filas (A1 cadencia mensual, A4 día de publicación excluido) muestran IC 90% excluyendo cero en dirección positiva, pero el protocolo anti-fishing prohíbe su promoción para revisión del gate.
+
+Esta disposición de fracaso se conserva en el catálogo con igual peso narrativo que las iteraciones aprobadas, en cumplimiento del invariante de honestidad epistémica del laboratorio: el rechazo es un resultado, no un fracaso del investigador.

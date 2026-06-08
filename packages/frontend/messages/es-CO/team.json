@@ -1,0 +1,9 @@
+{
+  "team": {
+    "h1": "Equipo",
+    "subheading": "Contribuidores del laboratorio y responsabilidades actuales.",
+    "github_link_label": "Ver perfil en GitHub",
+    "current_iteration_label": "Iteración actual",
+    "no_assignment_label": "Sin asignación activa"
+  }
+}

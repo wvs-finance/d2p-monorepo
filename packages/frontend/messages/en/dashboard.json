@@ -1,0 +1,27 @@
+{
+  "dashboard": {
+    "page_title": "Live Dashboard — Abrigo",
+    "page_subtitle": "On-chain state of deployed Abrigo instruments across all supported networks.",
+    "live_banner": "Live once contracts deploy",
+    "chain_selector_label": "Chain",
+    "tile_pool_balance": "Pool balance",
+    "tile_settlement_events": "Settlement events",
+    "tile_lp_positions": "LP positions",
+    "tile_last_block": "Last block synced",
+    "empty_value": "—",
+    "open_dashboard": "Open the dashboard",
+    "open_dashboard_aria": "Open the live Abrigo dashboard",
+    "status": {
+      "page_title": "System status",
+      "page_subtitle": "Real-time health of RPC connections and application deployment.",
+      "rpc_health_heading": "RPC health by chain",
+      "build_hash_label": "Build hash",
+      "freshness_label": "Updated",
+      "app_rollup_heading": "Application status",
+      "health_healthy": "Healthy",
+      "health_degraded": "Degraded",
+      "app_prelaunch_label": "Pre-launch",
+      "instruments_deployed": "{count} instruments deployed"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "about": {
+    "h1": "Methodology",
+    "subheading": "The lab's anti-fishing discipline: pre-committed specs, structural workflow, and epistemic honesty.",
+    "intro": {
+      "p1": "We research before we deploy. Every hedging instrument the lab ships must clear structural-econometrics validation — not post-hoc analysis, not favorable-outcome selection, not narrative.",
+      "p2": "This page documents the discipline we apply to every iteration. The five stages and four commitments are live: they apply equally to success and failure."
+    },
+    "steps": {
+      "01": {
+        "number": "01",
+        "title": "Spec",
+        "body": "We pre-commit the hypothesis, data universe, instrumental identifiers, and test thresholds BEFORE looking at results. The spec is published as a citable document."
+      },
+      "02": {
+        "number": "02",
+        "title": "Data",
+        "body": "We pull the macro and micro panels from the registry fixed in the spec. Any later adjustment — cleaning, imputation, trimming — is documented in a decision-citation block before being applied."
+      },
+      "03": {
+        "number": "03",
+        "title": "Estimation",
+        "body": "Structural OLS with HAC standard errors. Robustness checks (window, sub-panel, transform sensitivity) run automatically — they are not optional."
+      },
+      "04": {
+        "number": "04",
+        "title": "Tests",
+        "body": "Every code cell passes a trio checkpoint: the cell runs, the outputs are what we expected, and a reviewer confirms. Without the trio, the cell is not considered resolved."
+      },
+      "05": {
+        "number": "05",
+        "title": "Disposition",
+        "body": "The iteration closes with a disposition memo: pass, fail, or parked. The memo explains the outcome — and, on rejection, what was learned. Rejection carries equal narrative weight as approval."
+      }
+    },
+    "commitments": {
+      "intro": "Lab commitments on every iteration:",
+      "item_1": "Decision-citation block precedes every test",
+      "item_2": "Trio checkpoint after every code cell",
+      "item_3": "HALT on spec–data conflict",
+      "item_4": "Rejection carries equal narrative weight as approval"
+    },
+    "reference": {
+      "heading": "Methodology reference",
+      "link_label": "Read abrigo-analytics methodology"
+    }
+  }
+}

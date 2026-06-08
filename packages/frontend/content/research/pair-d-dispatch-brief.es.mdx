@@ -1,0 +1,27 @@
+---
+slug: pair-d-dispatch-brief
+title_es: "Pair D Stage 2 — informe de despacho (M-sketch)"
+title_en: "Pair D Stage 2 — M-sketch dispatch brief"
+authors: ["Juan Serrano"]
+date: "2026-04-30"
+type: "decision-memo"
+track: abrigo-hedge-design
+readable_on_site: true
+external_url: "https://github.com/wvs-finance/abrigo-analytics/blob/main/scratch/2026-04-30-stage-2-m-sketch-dispatch-brief-pair-d.md"
+summary_es: "Resumen del despacho de la M-sketch para Pair D: hipótesis pre-comprometidas, especificación estructural, y resultado β̂ = +0.137 con p ≈ 1.5×10⁻⁸. Stage-2 desbloqueado."
+summary_en: "M-sketch dispatch summary for Pair D: pre-committed hypotheses, structural spec, and result β = +0.137 with p ≈ 1.5×10⁻⁸. Stage-2 unblocked."
+tags: ["pair-d", "stage-2", "m-sketch", "decision-memo"]
+order: 1
+---
+
+La validación empírica simple-β de Pair D cerró con PASS el 28 de abril de 2026: β_composite = +0.13670985, SE HAC = 0.02465, t = +5.5456, p_one = 1.46×10⁻⁸. El patrón de rezagos β_6/β_9/β_12 es positivo en todos los horizontes, con β_6 capturando aproximadamente el 80% del efecto compuesto (dominancia de rezago-6, Bandera RC #3). Las cuatro pruebas de robustez R1-R4 acuerdan el signo; ninguna activa SUBSTRATE_TOO_NOISY. La prueba conjunta del paso 4(a) §8.1 devuelve PASS, desbloqueando Stage-2.
+
+La afirmación empírica que viaja al M-sketch: una depreciación del peso colombiano del 1% hoy se asocia con un incremento medible en la participación de servicios de trabajadores jóvenes, concentrado en el horizonte de seis meses y dentro —pero no de forma uniforme— del ventana de contratación BPO de 6-12 meses. La relación es estadísticamente muy sólida, aunque la correlación es identificada; el canal causal no lo es (Bandera RC #1).
+
+El informe de despacho especifica los requisitos del M-sketch: geometría de posición, forma del payoff
+
+$$
+\Pi(\sigma_T) \approx \hat{K} \cdot \sigma_T \tag{1}
+$$
+
+bajo la linealización de Carr-Madan, donde el estimador $\hat{\beta}=+0.137$ ancla la calibración del factor de escala $\hat{K}$. La estructura del oráculo de referencia (precio spot USDm/COPm del FPMM V3 de Mento), cadencia del premium, estructura de términos y la herencia del protocolo anti-fishing de Phase 3.

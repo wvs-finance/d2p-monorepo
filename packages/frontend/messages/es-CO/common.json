@@ -1,0 +1,13 @@
+{
+  "nav": {
+    "skip_to_content": "Saltar al contenido"
+  },
+  "footer": {
+    "org_link": "Organización en GitHub"
+  },
+  "language_switcher": {
+    "label": "Idioma",
+    "es-CO": "Español (Colombia)",
+    "en": "English"
+  }
+}

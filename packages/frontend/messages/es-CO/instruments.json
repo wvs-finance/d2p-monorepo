@@ -1,0 +1,79 @@
+{
+  "instruments": {
+    "index": {
+      "h1": "Instrumentos Abrigo",
+      "empty_heading": "Aún no hay instrumentos desplegados",
+      "empty_body": "Los instrumentos de cobertura Abrigo se habilitarán una vez que los contratos se desplieguen en cadena. Esta página se actualizará automáticamente.",
+      "github_link": "Ver contratos pendientes en GitHub"
+    },
+    "risk": {
+      "heading": "Instrumento de cobertura — no es apalancamiento",
+      "body": "Abrigo está diseñado para cubrir exposición cambiaria y macroeconómica. No amplifica pérdidas ni ganancias: es un instrumento de cobertura convexo, no un producto de apalancamiento."
+    },
+    "simulated": {
+      "badge": "SIMULADO",
+      "badge_aria": "Base fork — pool simulado, sin despliegue en cadena",
+      "caption": "Base fork — pool simulado, sin despliegue."
+    },
+    "provenance": {
+      "fork_fixture": "Fork fixture",
+      "fork_fixture_aria": "Valor sembrado en pruebas sobre pool simulado — no es dato de mercado",
+      "spec": "Especificación",
+      "spec_aria": "Especificado en planes Phase-8 de abrigo-somnia — aún no está en cadena",
+      "schematic": "Esquemático",
+      "schematic_aria": "Forma ilustrativa — no es una función de liquidación derivada del contrato"
+    },
+    "cashflow": {
+      "heading": "Flujo de caja",
+      "premium": "Prima (depósito)",
+      "streamia": "Streamia",
+      "commission": "Comisión",
+      "data_cost": "Costo de datos medido",
+      "residual": "Residual reclamable",
+      "already_netted": "ya descontado del colateral sobreviviente"
+    },
+    "params": {
+      "id": "Identificador",
+      "chain": "Red",
+      "strike": "Precio de activación",
+      "slope": "Pendiente de cobertura",
+      "deployed_at": "Fecha de despliegue",
+      "name": "Nombre",
+      "chunk_strike": "Strike del chunk (offset)",
+      "width": "Ancho del chunk",
+      "tick_spacing": "Tick spacing",
+      "pair": "Par",
+      "fork_block": "Bloque de fork",
+      "seeded_liquidity": "Liquidez sembrada",
+      "human_rate": "Tasa (semilla)",
+      "fork_params_caption": "Parámetros de prueba de fork — no son geometría elegida"
+    },
+    "wallet": {
+      "disconnected_prompt": "Conecta tu billetera para ver tu posición",
+      "connect_label": "Conectar billetera",
+      "connecting_label": "Conectando…",
+      "wrong_chain_label": "Cambia a una red compatible",
+      "wrong_chain_explanation": "Estás en {chain}. Abrigo opera en Celo, Ethereum, Base, Arbitrum y Optimism.",
+      "switch_network_label": "Cambiar red",
+      "connected_ready_label": "Posición actual",
+      "status_disconnected": "Desconectado",
+      "status_connecting": "Conectando",
+      "status_wrong_chain": "Red incorrecta",
+      "status_connected": "Conectado",
+      "read_only_status": "Solo lectura",
+      "read_only_label": "sin transacción — fork simulado"
+    },
+    "pool": {
+      "not_deployed": "No hay datos de pool disponibles — el contrato aún no está desplegado.",
+      "pool_balance": "Balance del pool",
+      "settlement_count": "Liquidaciones",
+      "participants": "Participantes",
+      "last_block": "Último bloque sincronizado"
+    },
+    "errors": {
+      "not_found": "Este instrumento no existe o aún no está disponible.",
+      "route_error": "Algo salió mal al cargar esta página.",
+      "back_home": "Volver al inicio"
+    }
+  }
+}

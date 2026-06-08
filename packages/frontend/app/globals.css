@@ -1,0 +1,181 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ============================================================
+   Section 1 — Semantic value definitions (light mode = :root)
+   All neutrals are tinted toward the lab accent (muted ochre, hue 70-80).
+   Pure black, pure white, and raw stone/gray/zinc literals are forbidden.
+   Lab accent hue: ~70 (muted ochre), locked 2026-05-12.
+   NOT violet, NOT purple-blue gradient (impeccable anti-pattern).
+   ============================================================ */
+:root {
+  /* Neutrals — tinted toward hue 70-80 (warm ochre/parchment register) */
+  --bg-canvas: oklch(0.97 0.005 80);
+  --bg-surface: oklch(0.94 0.008 75);
+  --bg-elevated: oklch(0.99 0.003 80);
+
+  --text-primary: oklch(0.2 0.01 80);
+  --text-secondary: oklch(0.4 0.01 75);
+  /* Darkened from 0.58 → 0.5 so muted small text clears WCAG AA 4.5:1 on bg-surface
+     (was 3.56:1). Verified via axe in Plan 03.1-04. */
+  --text-muted: oklch(0.5 0.008 70);
+
+  --border-default: oklch(0.86 0.012 75);
+
+  /* Accent — LOCKED muted ochre (#a87c3a). Used for fills, borders, icons, large text. */
+  --accent-default: oklch(0.6 0.08 70);
+  --accent-hover: oklch(0.54 0.09 70);
+  --accent-subtle: oklch(0.6 0.08 70 / 0.12);
+  /* AA-safe ochre for SMALL text only (CTAs, links, labels): the locked accent (0.6)
+     is 3.33:1 on bg-surface — sub-AA for <18.66px text. This darker variant clears
+     4.5:1 while keeping the ochre identity. Do NOT use for fills/large headings. */
+  --accent-text: oklch(0.48 0.08 70);
+
+  /* Status — epistemic-honesty discipline: equal saturation/lightness (CROSS-09 + ITER-02)
+     Lightness at 0.38-0.42 ensures WCAG AA 4.5:1 text contrast against near-white canvas
+     (bg-canvas L≈0.97 + /10 opacity tinted pill background ≈ effective L≈0.95).
+     Status colors are hue-independent; they carry forward from Phase 1 unchanged. */
+  --status-pass: oklch(0.38 0.17 145); /* green, darkened for AA contrast */
+  --status-fail: oklch(0.4 0.19 30); /* warm red, darkened for AA contrast */
+  --status-parked: oklch(0.42 0.13 60); /* amber, darkened for AA contrast */
+  --status-in-progress: oklch(0.38 0.16 230); /* blue, darkened for AA contrast */
+
+  --destructive: oklch(0.52 0.19 25);
+  --ring: oklch(0.6 0.08 70);
+
+  --radius: 0.5rem;
+}
+
+/* ============================================================
+   Section 2 — Dark mode parallel set (same semantic names)
+   All neutrals remain tinted (nonzero chroma), never pure achromatic.
+   Hue shifted from Phase 1 165° to 70° to align with muted ochre system.
+   ============================================================ */
+.dark {
+  --bg-canvas: oklch(0.13 0.015 70);
+  --bg-surface: oklch(0.17 0.013 70);
+  --bg-elevated: oklch(0.18 0.013 70);
+
+  --text-primary: oklch(0.93 0.005 80);
+  --text-secondary: oklch(0.78 0.008 75);
+  --text-muted: oklch(0.68 0.01 75);
+
+  --border-default: oklch(0.3 0.01 75);
+
+  /* Accent — slightly brighter/more saturated for contrast against dark canvas */
+  --accent-default: oklch(0.7 0.1 70);
+  --accent-hover: oklch(0.76 0.11 70);
+  --accent-subtle: oklch(0.7 0.1 70 / 0.18);
+  /* Dark mode: the brighter accent (0.7) already clears AA on the dark canvas; the
+     small-text variant tracks it (kept slightly brighter for parity with light intent). */
+  --accent-text: oklch(0.72 0.1 70);
+  --ring: oklch(0.7 0.1 70);
+
+  /* Dark mode: lightened for readability against dark canvas (L≈0.13) */
+  --status-pass: oklch(0.62 0.17 145);
+  --status-fail: oklch(0.62 0.19 30);
+  --status-parked: oklch(0.65 0.13 60);
+  --status-in-progress: oklch(0.62 0.16 230);
+
+  --destructive: oklch(0.62 0.19 25);
+}
+
+/* ============================================================
+   Section 3 — Tailwind v4 @theme inline bridge
+   The `inline` keyword keeps these as var() references (not build-time-resolved values)
+   so dark mode toggling works without re-emitting duplicate utility classes.
+   (RESEARCH Pattern 1; PITFALLS Pitfall 1 — the `inline` keyword is MANDATORY)
+   ============================================================ */
+@theme inline {
+  --color-bg-canvas: var(--bg-canvas);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-border-default: var(--border-default);
+
+  --color-accent-default: var(--accent-default);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-text: var(--accent-text);
+
+  --color-status-pass: var(--status-pass);
+  --color-status-fail: var(--status-fail);
+  --color-status-parked: var(--status-parked);
+  --color-status-in-progress: var(--status-in-progress);
+
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+
+  /* shadcn/ui semantic aliases — map shadcn's expected token names to our semantic tokens */
+  --color-background: var(--bg-canvas);
+  --color-foreground: var(--text-primary);
+  --color-card: var(--bg-elevated);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--bg-elevated);
+  --color-popover-foreground: var(--text-primary);
+  --color-primary: var(--accent-default);
+  --color-primary-foreground: var(--bg-canvas);
+  --color-secondary: var(--bg-surface);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted: var(--bg-surface);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--bg-surface);
+  --color-accent-foreground: var(--text-primary);
+  --color-border: var(--border-default);
+  --color-input: var(--border-default);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Typography — IBM Plex font variables wired from next/font/google in app/layout.tsx */
+  --font-sans: var(--font-plex-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "Courier New", monospace;
+
+  /* Spacing — 5xl token for hero section vertical rhythm */
+  --spacing-5xl: 120px;
+}
+
+/* ============================================================
+   Base reset — minimal
+   Font stack: IBM Plex Sans via next/font variable; banned typefaces not present (CROSS-04)
+   ============================================================ */
+body {
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+/* ============================================================
+   Section 5 — RainbowKit modal surface overrides
+   Scoped under [data-rk] so they only affect RainbowKit's own DOM.
+   accentColor is set via lightTheme() in HEX — not overridable here
+   because RainbowKit's compositor needs the HEX value directly.
+   These vars override the modal surface colors to match the design system.
+   ============================================================ */
+[data-rk] {
+  --rk-fonts-body: var(--font-plex-sans), system-ui, sans-serif;
+  --rk-colors-modalBackground: var(--bg-elevated);
+  --rk-colors-modalBorder: var(--border-default);
+  --rk-colors-modalText: var(--text-primary);
+  --rk-colors-modalTextSecondary: var(--text-secondary);
+}
+
+/* DEFI-06 FIX 3 — ochre focus ring on the RainbowKit connect trigger (WCAG 2.4.7 / brand token).
+   The UA-default blue ring (rgb(11,87,208)) passes 2.4.7 but ignores the locked ochre accent.
+   This override applies the design system focus token to the ConnectButton trigger.
+   If RainbowKit's internal vanilla-extract cascade overrides this, see WAIVER-RBK-FOCUS below. */
+[data-rk] button:focus-visible {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+
+/* WAIVER-RBK-FOCUS: if the ochre focus ring above is suppressed by RainbowKit's own
+   vanilla-extract styles (higher specificity or inline styles), the UA-default blue ring
+   still passes WCAG 2.4.7. This is a brand-consistency issue, not an accessibility failure.
+   Record here alongside WAIVER-05-03 (accentColor contrast). Re-audit if RainbowKit is upgraded. */

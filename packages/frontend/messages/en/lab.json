@@ -1,0 +1,52 @@
+{
+  "hero": {
+    "wordmark": "d2p Finance",
+    "tagline": "Verified convex hedges for wage-earner macro risk in frontier markets."
+  },
+  "iteration_counts": {
+    "heading": "Published iterations",
+    "pass": "Confirmed",
+    "fail": "Refuted",
+    "parked": "Parked",
+    "in_progress": "In progress"
+  },
+  "status": {
+    "pass": { "label": "PASS" },
+    "fail": { "label": "FAIL" },
+    "parked": { "label": "PARKED" },
+    "in_progress": { "label": "IN PROGRESS" }
+  },
+  "lab": {
+    "hero": {
+      "h1": "DS2P Labs",
+      "subline": "Hedging instruments for macro-risk exposure"
+    },
+    "mission": {
+      "body": "We design and deploy permissionless convex-hedge instruments on EVM ecosystems, validated by structural econometrics before deployment. First instrument: Abrigo, for Colombian workers exposed to COP/USD macro risk."
+    },
+    "what_is_d2pi": {
+      "heading": "What is d2-π?",
+      "body": "d2-π (DS2P Labs) is a research lab that designs convex financial instruments. π denotes the payoff; the ∂² operator captures convexity — the curvature of payoff with respect to the underlying. Every instrument the lab incubates must clear structural evidence before deployment."
+    },
+    "apps": {
+      "heading": "Active instruments",
+      "abrigo": {
+        "name": "Abrigo",
+        "description": "Convex hedges for Colombian wage-earners — ∂²Π gamma",
+        "cta": "Explore Abrigo"
+      }
+    },
+    "counts": {
+      "heading": "Catalog status",
+      "empty": "No iterations recorded yet."
+    },
+    "research": {
+      "heading": "Research",
+      "body": "The lab publishes its finished work — papers, decision memos, and write-ups — on the research page and on X. The underlying econometric exercise lives in the lab's repository, not on this site.",
+      "cta": "Read the research"
+    },
+    "github": {
+      "label": "wvs-finance on GitHub"
+    }
+  }
+}

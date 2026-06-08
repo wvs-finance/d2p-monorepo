@@ -1,0 +1,21 @@
+---
+slug: fx-vol-cpi-closed-fail
+title_es: "FX-vol vs sorpresa CPI — cierre por fracaso (disposición)"
+title_en: "FX-vol vs CPI surprise — closed-fail disposition"
+authors: ["Juan Serrano"]
+date: "2026-04-15"
+type: "decision-memo"
+track: abrigo-hedge-design
+readable_on_site: true
+external_url: "https://github.com/wvs-finance/abrigo-analytics/tree/main/notebooks/fx_vol_cpi_surprise/Colombia"
+summary_es: "Disposición de fracaso disciplinado para la hipótesis de respuesta de la volatilidad FX a las sorpresas CPI. β̂ = -0.000685, IC 90% [-0.003635, 0.002265] sobre n = 947. Conservada como ejemplo de honestidad epistémica."
+summary_en: "Disciplined-failure disposition for the hypothesis of FX vol response to CPI surprise. β̂ = -0.000685, 90% CI [-0.003635, 0.002265] over n = 947. Retained as epistemic-honesty example."
+tags: ["fx-vol", "cpi", "closed-fail", "decision-memo"]
+order: 2
+---
+
+The FX-vol-on-CPI-surprise iteration tested the hypothesis that Colombian CPI surprises predict weekly realised COP/USD volatility. The primary specification was Column-6 OLS of weekly RV^(1/3) on the AR(1)-filtered CPI surprise plus six controls, estimated on the Colombian weekly panel from 2008-01-07 to 2026-02-23 (n = 947 observations).
+
+Headline result: β̂_CPI = -0.000685, HAC(4) SE = 0.001794, 90% CI = [-0.003635, 0.002265]. The primary T3b gate rule (β̂_CPI − 1.28·SE > 0 one-sided) is not satisfied — verdict FAIL. Auxiliary tests T1 (Mincer-Zarnowitz F consensus rationality) and T2 (Levene announcement channel) also fail. Seven sensitivity specifications complete the forest plot; two rows (A1 monthly cadence, A4 release-day-excluded) show 90% CI excluding zero in the positive direction, but the anti-fishing protocol prohibits their promotion for gate revision.
+
+This failure disposition is retained in the catalog at equal narrative weight with passing iterations, in compliance with the lab's epistemic-honesty invariant: rejection is a result, not a researcher's failure.

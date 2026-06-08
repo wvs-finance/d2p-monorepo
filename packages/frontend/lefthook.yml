@@ -1,0 +1,17 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc}"
+      run: pnpm biome check --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true
+    typecheck:
+      run: pnpm tsc --noEmit --incremental
+    velite-validate:
+      glob: "content/**/*.{md,mdx}"
+      run: pnpm velite build --clean false
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}

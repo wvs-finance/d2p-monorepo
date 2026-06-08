@@ -1,0 +1,25 @@
+{
+  "nav": {
+    "apps": "Apps",
+    "research": "Research",
+    "team": "Team",
+    "about": "About",
+    "language": "Language",
+    "menu_open": "Open menu",
+    "menu_close": "Close menu"
+  },
+  "apps": {
+    "menu_label": "Apps menu",
+    "external_link_label": "Open external page in new tab",
+    "status_active": "Active",
+    "status_coming_soon": "Coming Soon",
+    "status_archived": "Archived",
+    "abrigo": {
+      "description": "Convex hedges for Colombian wage-earners — ∂²Π gamma",
+      "mission": "Abrigo designs and deploys permissionless convex-hedge instruments targeting the macro-risk exposure of Colombian wage earners. The ∂²Π gamma structure — second partial derivative of the payoff — delivers convex protection against COP/USD depreciation, CPI surprises, and labor-market shocks without requiring leverage or speculation.",
+      "headline": "Abrigo — ∂²Π gamma",
+      "dashboard_body": "Once contracts are deployed, this page will show live on-chain protocol state: active instruments, hedge parameters, and risk metrics.",
+      "github_body": "Documentation and contract addresses will be published here once the app is ready and contracts are live."
+    }
+  }
+}
