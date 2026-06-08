@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 09-04-PLAN.md (mode switch + 6 surfaces)
-last_updated: "2026-06-08T17:04:35.848Z"
+stopped_at: "09-05 checkpoint: Task 1 done (d77f1e8); awaiting EC live-DOM gate (Task 2)"
+last_updated: "2026-06-08T17:08:56.993Z"
 progress:
   total_phases: 12
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 57
-  completed_plans: 54
+  completed_plans: 55
   percent: 95
 ---
 
@@ -17,7 +17,7 @@ progress:
 
 **Last updated:** 2026-06-06
 **Session type:** Plan execution (08-02 complete — cornerstone RSC shell + PromptBox + RunTranscript + e2e + post-checkpoint live-verify fix)
-**Stopped at:** Completed 09-04-PLAN.md (mode switch + 6 surfaces)
+**Stopped at:** 09-05 checkpoint: Task 1 done (d77f1e8); awaiting EC live-DOM gate (Task 2)
 
 ---
 
@@ -107,6 +107,7 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 09-cornerstone-live-tx-integration P02 | 25 | 2 tasks | 7 files |
 | Phase 09 P03 | 25 | 3 tasks | 8 files |
 | Phase 09 P04 | 45 | 2 tasks | 9 files |
+| Phase 09 P05 | 15 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
