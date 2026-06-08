@@ -187,17 +187,29 @@ if [ -z "${MACRO_ORACLE:-}" ]; then
 fi
 echo "  MACRO_ORACLE=$MACRO_ORACLE  (PROXY_BASE=$PROXY_BASE)   <-- record both in the run log"
 
-echo "== Step 2: oracle refresh (json-fetch) — populate latest(DATA_KEY) BEFORE the strategist reads it =="
+echo "== Step 2: oracle refresh (json-fetch) — CONDITIONAL: only on a cold (undelivered) datum =="
 echo "  DATA_KEY=$DATA_KEY"
-FROMBLK_O=$(cast block-number --rpc-url "$RPC")    # capture BEFORE the send so no event is skipped
-cast send "$MACRO_ORACLE" "requestMacro(bytes32)" "$DATA_KEY" \
-  --value "$JSON_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" >/dev/null
-echo "  requestMacro sent (--value $JSON_DEPOSIT); awaiting MacroReceived..."
-if ! poll_log "$MACRO_ORACLE" "MacroReceived(bytes32,int256)" "MacroFailed(uint256,bytes32,uint8)" "$FROMBLK_O" "oracle refresh"; then
-  echo "FAIL: oracle refresh did not land — the strategist would revert UnknownKey on an unset datum."
-  exit 1
+# The refresh is the json-fetch leg's ONE STT spend and is "conditional, cold run only" (see Step 0).
+# A datum ALREADY delivered on-chain (deliveredAt != 0) satisfies the strategist's latest(DATA_KEY)
+# read — it will NOT revert UnknownKey. The keeper-proxy json-fetch source is intermittently flaky
+# (MacroFailed/TimedOut, e.g. a 404 at the proxy root), so re-firing a refresh on an already-delivered
+# datum needlessly risks burning the json deposit AND can hard-fail the whole proof for no benefit.
+# Pre-check delivery; refresh ONLY if cold. Either way Step 2b is the load-bearing freshness gate.
+PRE_FRESH=$(cast call "$MACRO_ORACLE" "latest(bytes32)((bytes32,int256,uint64,uint64))" "$DATA_KEY" --rpc-url "$RPC" 2>/dev/null)
+PRE_DELIVERED=$(printf '%s' "$PRE_FRESH" | tr -d '()' | awk -F',' '{gsub(/ /,"",$4); print $4}'); PRE_DELIVERED=${PRE_DELIVERED%% *}
+if [ -n "$PRE_DELIVERED" ] && [ "$PRE_DELIVERED" != "0" ]; then
+  echo "  [conditional] datum ALREADY delivered (deliveredAt=$PRE_DELIVERED) — SKIP refresh (no json-fetch STT spend)"
+else
+  FROMBLK_O=$(cast block-number --rpc-url "$RPC")    # capture BEFORE the send so no event is skipped
+  cast send "$MACRO_ORACLE" "requestMacro(bytes32)" "$DATA_KEY" \
+    --value "$JSON_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" >/dev/null
+  echo "  requestMacro sent (--value $JSON_DEPOSIT, cold datum); awaiting MacroReceived..."
+  if ! poll_log "$MACRO_ORACLE" "MacroReceived(bytes32,int256)" "MacroFailed(uint256,bytes32,uint8)" "$FROMBLK_O" "oracle refresh"; then
+    echo "FAIL: oracle refresh did not land on a COLD datum — the strategist would revert UnknownKey on an unset datum."
+    exit 1
+  fi
+  echo "  oracle refresh OK — latest($DATA_KEY) is populated."
 fi
-echo "  oracle refresh OK — latest($DATA_KEY) is populated."
 
 echo "== Step 2b: oracle-freshness gate (read-only — before any LLM-deposit spend) =="
 # The MacroDatum struct is 4 members: (bytes32 dataKey, int256 scaledValue, uint64 observedAt,
