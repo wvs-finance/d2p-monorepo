@@ -1,5 +1,11 @@
 import { execSync } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+
+// Resolve the frontend package root relative to this test file (../../ from
+// tests/unit/) so the test works regardless of checkout location (monorepo path).
+const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
 // In CI, the dedicated `impeccable` GitHub Actions job runs `npx impeccable detect app/`
 // directly and is the canonical anti-pattern gate. These tests duplicate that as a local
@@ -30,7 +36,7 @@ function runImpeccable(path: string): { stdout: string; exitCode: number } {
     // the assertions below. The documented contract is 2.1.8 (docs/impeccable-flag.md).
     stdout = execSync(`npx --yes impeccable@2.1.8 detect "${path}"`, {
       encoding: 'utf8',
-      cwd: '/home/jmsbpp/apps/d2p/frontend',
+      cwd: PACKAGE_ROOT,
     })
   } catch (err: unknown) {
     const e = err as {
