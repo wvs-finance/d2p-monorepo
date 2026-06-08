@@ -318,14 +318,15 @@ decomposition.
   4. `docs/UI-AGENT-HANDOFF.md` marks the two-leg strategist ✅ LIVE with the new address, and its §6 "do NOT subscribe to a live `StrategistDecided` on Somnia" guidance is REVERSED (grep confirms the prohibition line is replaced with the LIVE-subscribe instruction + new address). *(LIVEDEP-05)*
 **Constraint guardrails (from §4):** real tx hashes are MANDATORY (a recorded run is acceptable, an unverifiable claim is not); Somnia validator-callback latency is variable (the runner tolerates async per-leg polling + timeouts); do NOT alter the join's `chainId = 137`.
 **Notes**: the decision-moves proof reuses the Phase-11 precedent (two consensus values → two distinct decisions). The published artifact mirrors the shape of `contracts/script/out/buildbear-deployments.json`. This phase spends STT — Phase 17's surface verification de-risks that spend.
-**Plans**: TBD
+**Plans**: 1 plan (1 wave — the two-leg full-mandate run + the decision-moves second run + the publish are a strict spend-gated chain on the SAME reused deploy; checkpoint-free, all CLI/jq/cast-verifiable)
+- [ ] 18-01-PLAN.md — extend the Phase-17 runner with the notional leg (full HedgeMandate, `decisionState==(true,true)`), a second distinct-consensus decision-moves run, then publish `somnia-strategist-deployment.json` (§2.4 schema, 3 real tx hashes) + the committed ABI + reverse the §6 handoff prohibition; REUSES `0xf0570CcB…7b1D` (no redeploy) *(LIVEDEP-02, LIVEDEP-03, LIVEDEP-04, LIVEDEP-05)*
 
 ## v2.1 Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 17. Live deploy + pre-flight surface verification | 1/1 | Complete    | 2026-06-08 |
-| 18. On-chain decision-moves proof + publish | 0/0 | Not started | - |
+| 18. On-chain decision-moves proof + publish | 0/1 | Planned | - |
 
 ## v2.1 Traceability (LIVEDEP requirements → phases)
 
