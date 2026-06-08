@@ -102,6 +102,38 @@ Mapped by the roadmapper (2026-06-01). Coverage: 12/12 v1 requirements → exact
 | PAY-01 | Deferred | Future (no active phase) |
 | XCHAIN-01 | Deferred | Future (no active phase) |
 | HEDGE-01 | Deferred | Future (no active phase) |
+| LIVEDEP-01 | Phase 17 (v2.1) | Pending |
+| LIVEDEP-02 | Phase 17 (v2.1) | Pending |
+| LIVEDEP-03 | Phase 17 (v2.1) | Pending |
+| LIVEDEP-04 | Phase 17 (v2.1) | Pending |
+| LIVEDEP-05 | Phase 17 (v2.1) | Pending |
 
 ---
-*Requirements defined: 2026-06-01. Traceability filled by the roadmapper 2026-06-01 (phases 7–10).*
+
+## v2.1 Requirements — Live Agent Integration (Somnia two-leg strategist deploy)
+
+**Defined:** 2026-06-07. **Source:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2 deliverable, §3 acceptance, §4 constraints). Backend half of the frontend live-Agent-1 path; phases continue at 17.
+
+### Live Deploy
+
+- [ ] **LIVEDEP-01**: The two-leg `MacroHedgeStrategist` (`StrategistDecided` API: `requestSchoolDecision` → `requestNotionalDecision` → `StrategistDecided`) is deployed to Somnia 50312 at a NEW address, wired to the live platform `0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776`, LLM agent `12847293847561029384`, and `MacroOracle` `0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f`.
+- [ ] **LIVEDEP-02**: An on-chain run produces a `StrategistDecided` tx from the new address with non-empty `school` + decoded `HedgeMandate` (`economicTheory != 0x0`, `targetNotional ∈ [1_000, 100_000_000]`), and `decisionState(decisionId)` returns `schoolSet == true && notionalSet == true`.
+- [ ] **LIVEDEP-03**: A second run with a different consensus (or userIntent) yields a DIFFERENT mandate (school label and/or `targetNotional` differ) — the decision-moves-with-consensus proof.
+- [ ] **LIVEDEP-04**: `contracts/script/out/somnia-strategist-deployment.json` exists with the new `strategist` address + the three real tx hashes (school / notional / strategistDecided), and the generated ABI (`contracts/out/MacroHedgeStrategist.sol/…`) is committed.
+- [ ] **LIVEDEP-05**: `docs/UI-AGENT-HANDOFF.md` marks the two-leg strategist ✅ LIVE with the new address and reverses the §6 "do NOT subscribe to a live `StrategistDecided` on Somnia" guidance.
+
+### Constraints (from request §4)
+- Re-confirm the volatile `LLM_AGENT_ID` + platform against the Agent Explorer BEFORE spending STT (a `DecisionFailed`/no-callback ⇒ wrong constant).
+- Keep the v1 contract (`0xfA428171…`) reachable — it backs the frontend replay fallback; do NOT decommission.
+- Do NOT alter the join's hardcoded `chainId = 137` (the 137→31337 override is a documented frontend accommodation, not a backend change).
+- Funded STT account (>50 STT) is in `contracts/.env`; a recorded run is acceptable, an unverifiable claim is not.
+
+### Out of Scope (v2.1)
+| Feature | Reason |
+|---|---|
+| Frontend live-wiring | tracked in the `d2p-frontend` repo's own GSD (its Phase 9) + `cornerstone-live-twochain-PLAN.md` |
+| Upgradeable proxy for the strategist | v1 is non-upgradeable; v2.1 redeploys to a new address (proxy migration out of scope) |
+| Decommissioning v1 | v1 backs the frontend replay fallback — must stay reachable |
+
+---
+*Requirements defined: 2026-06-01 (v2.0, phases 7–10). v2.1 LIVEDEP appended 2026-06-07 (phase 17).*
