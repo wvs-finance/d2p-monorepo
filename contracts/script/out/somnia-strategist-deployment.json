@@ -1,0 +1,45 @@
+{
+  "strategist": "0xf0570CcB1271FFaFf4caCA628F3632257f177b1D",
+  "platform": "0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776",
+  "llmAgentId": "12847293847561029384",
+  "macroOracle": "0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f",
+  "chainId": 50312,
+  "rpcUrl": "https://api.infra.testnet.somnia.network",
+  "dataKey": "0xb73053d3303a516ffee4ecf3fdcd9195da7e3192557a59fdecb0d83545c44841",
+  "consensus": 500,
+  "userIntent": "Hedge COP depreciation from a rate-hike surprise",
+  "schoolDepositSTT": "240000000000000000",
+  "notionalDepositSTT": "240000000000000000",
+  "decisionId_example": "0x000000000000000000000000000000000000000000000000000000000056745e",
+  "schoolTx": "0x9872783590b7ccfbce5aa56d6cfde8418badc1dd204649e51348c949d8cc1518",
+  "notionalTx": "0x96beca0dfe6a5f01fd4774ce7a0973f72beeb03cc9f0a2ff4005cfb1c1a57339",
+  "strategistDecidedTx": "0x0a00e0ab63a415af8e3164f5029daae3439001adef4df59760c83085712dd9b8",
+  "capturedAt": "2026-06-08T18:09:33Z",
+  "source": "contracts/script/macro-hedge-strategist-e2e.sh (Phase 18 v2.1, decisionId-parse bug fixed) — two full two-leg StrategistDecided runs on Somnia 50312; decision-moves PROVEN (run-1 SHILLER_MACRO_RISK 0x5 vs run-2 POST_KEYNESIAN 0x6)",
+  "decisionMovesProof": {
+    "run1": {
+      "decisionId": "0x000000000000000000000000000000000000000000000000000000000056745e",
+      "userIntent": "Hedge COP depreciation from a rate-hike surprise",
+      "consensus": 500,
+      "school": "SHILLER_MACRO_RISK",
+      "economicTheory": "0x0000000000000000000000000000000000000005",
+      "targetNotional": 58400000,
+      "schoolTx": "0x9872783590b7ccfbce5aa56d6cfde8418badc1dd204649e51348c949d8cc1518",
+      "notionalTx": "0x96beca0dfe6a5f01fd4774ce7a0973f72beeb03cc9f0a2ff4005cfb1c1a57339",
+      "strategistDecidedTx": "0x0a00e0ab63a415af8e3164f5029daae3439001adef4df59760c83085712dd9b8"
+    },
+    "run2": {
+      "decisionId": "0x000000000000000000000000000000000000000000000000000000000056747b",
+      "userIntent": "Hedge structural post-Keynesian regime risk: persistent fiscal-dominance COP devaluation under a non-ergodic balance-of-payments constraint",
+      "consensus": 900,
+      "school": "POST_KEYNESIAN",
+      "economicTheory": "0x0000000000000000000000000000000000000006",
+      "targetNotional": 58400000,
+      "schoolTx": "0x965b28b578f8f0aeb5ebec2ed59712f4366b0547033121a2f694a84ef341cee5",
+      "notionalTx": "0xf805dbbceb4eb676a10bb3f66dc3e540ce0950025c977b76d021443141b28018",
+      "strategistDecidedTx": "0xcad34b2c51c6f70d6ed9d43ed3bb6ecc5666d1358c91a841b6f2d8bf2d27dc78"
+    },
+    "decisionMoved": true,
+    "note": "school label moved SHILLER_MACRO_RISK -> POST_KEYNESIAN on a divergent user intent + consensus; targetNotional held (oracle-clamped) — movement proven on the school dimension"
+  }
+}
