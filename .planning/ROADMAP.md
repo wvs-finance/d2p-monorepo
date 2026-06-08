@@ -366,10 +366,12 @@ Plans:
 
 **Open item carried to planning/research:** CORS/browser-origin JSON-RPC to the BuildBear RPC — decide via an `eth_chainId` browser probe whether a Next.js Route-Handler proxy is mandatory (spec §7.2).
 
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 9 to break down — likely Wave 0 ABI/chain data layer → Wave 1 live producer + freshness gate → Wave 2 surfaces + route wire + e2e + live-verify)
+- [ ] 09-01-PLAN.md — Wave 0 data layer (TDD): wagmi-codegen ABIs from contracts/out/ + mirrored buildbear artifact + isExpired loader + isolated buildbear chain + BalanceDelta sign-extend decoder + Panoptic extractStrike(===360360) (MOD5-ABI, MOD5-CHAIN) [wave 0]
+- [ ] 09-02-PLAN.md — Wave 1 live producer (TDD): reconcile events.ts to 8-field ExecutorDecided + fromChainLog (strict:false) + register fork as 6th wagmi chain (D2) + freshness-gate logic + RPC proxy + runWorkflowLive with the D4 mandate.chainId=31337 override + post-mint quoteMargin (MOD5-ABI, MOD5-CHAIN, MOD5-LIVE, MOD5-FALLBACK) [wave 1]
+- [ ] 09-03-PLAN.md — Wave 2 surfaces + wire: 6 surfaces (mode banner + verbatim no-bridge disclosure, live-tx rows, on-chain evidence, expandable rationale, static cost placeholder, freshness gate) + D1 Davidson split on HedgeDecisionCardV2 + es-CO/en copy + freshness-probe page wire + e2e honesty greps + Evidence Collector live-verify (MOD5-SURFACE, MOD5-FALLBACK, MOD5-LIVE) [wave 2]
 
 ---
 *Roadmap created: 2026-05-11*
