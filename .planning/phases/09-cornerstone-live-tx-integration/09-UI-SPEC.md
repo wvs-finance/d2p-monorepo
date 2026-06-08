@@ -1,10 +1,14 @@
 ---
 phase: 9
 slug: cornerstone-live-tx-integration
-status: draft
+status: approved
 shadcn_initialized: true
 preset: "new-york / neutral / cssVariables / lucide"
 created: 2026-06-07
+reviewed_at: 2026-06-07
+review: "gsd-ui-checker APPROVED 6/6 (2 non-blocking FLAGs: focal-point declaration, 12px banner exception); all honesty-contract checks PASS"
+focal_point: "Persistent anchor = the always-visible Mode Banner (above the fold). After a confirmed mint, the first content focal point is the On-Chain Evidence Panel heading (real tx hash + strike + TokenId); the expandable ExecutorDecided rationale and the static cost placeholder are secondary appendices below it."
+spacing_exception: "12px = the Mode Banner vertical padding only (compact persistent element); it is a multiple of 4 but intentionally NOT added to the 4/8/16/24/32/48/64 scale — do not normalize to 8/16; treat as a one-off documented in the banner component."
 ---
 
 # Phase 9 — UI Design Contract
