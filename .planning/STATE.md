@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: milestone
-status: completed
-stopped_at: Completed 09-05-PLAN.md — Phase 9 all 5 plans done
-last_updated: "2026-06-08T17:38:09.961Z"
+milestone: v3.0
+milestone_name: Judge-Runnable Live BuildBear Demo
+status: defining_requirements
+stopped_at: Milestone v3.0 started — defining requirements
+last_updated: "2026-06-08T18:43:00.000Z"
 progress:
-  total_phases: 12
-  completed_phases: 10
-  total_plans: 57
-  completed_plans: 55
-  percent: 96
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
@@ -33,21 +33,14 @@ progress:
 
 ## Current Position
 
-**Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
-**Active plan:** 05.1-03 (Wave 3: simulated-branch page layout, full SIMULADO surface)
-**Status:** v2.0 milestone complete
+**Active phase:** Not started (defining requirements)
+**Active plan:** —
+**Status:** Defining requirements
+**Last activity:** 2026-06-08 — Milestone v3.0 (Judge-Runnable Live BuildBear Demo) started
 
-**Progress:**
-[██████████] 96%
-[██████████] 100% (8/8 plans complete for Phase 1)
-[██████████] Phase 1: Foundation and Scaffold — COMPLETE
-[██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
-[██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
-[██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
-[██████████] Phase 5: Read-First Wallet and DeFi Surface — COMPLETE (4/4 plans)
-[██████    ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 3/5 plans (05.1-00, 05.1-01, 05.1-02 complete; 05.1-03 next)
+**Milestone v3.0 focus:** Un-defer the cornerstone live-tx integration as a judge-runnable, one-click pre-funded, real on-chain BuildBear fork mint (decoupled from the outaged Somnia leg), with a shared-fork reset guard and the backend `--no-mint`/fresh-executor provisioning variant.
 
-Overall: 4/5 phases complete (Phase 5.1 in progress)
+> v2.0 shipped: 12 phases, 57 plans (96% — live on-chain RUN ⊘ deferred). See MILESTONES.md.
 
 ---
 
