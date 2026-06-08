@@ -41,7 +41,7 @@ requirements-completed: []  # NONE — LIVEDEP-02/03/04/05 all blocked by extern
 # Metrics
 duration: ~35min
 completed: 2026-06-08
-attempts: 2  # attempt-1 + a 2026-06-08 keeper-restored/fresh-datum re-attempt — both BLOCKED by validator callback no-show
+attempts: 3  # attempt-1 + 2026-06-08 keeper-restored re-attempt + 2026-06-08T17:55Z "validators-recovered" re-attempt — ALL THREE BLOCKED by validator callback no-show
 ---
 
 # Phase 18 Plan 01: On-chain decision-moves proof + publish — DOCUMENTED BLOCK
@@ -97,6 +97,21 @@ attempts: 2  # attempt-1 + a 2026-06-08 keeper-restored/fresh-datum re-attempt �
 ## Issues Encountered — THE BLOCK (LIVEDEP-02/03/04/05)
 
 **Somnia testnet validator inference callbacks are not landing.**
+
+### Re-attempt 3 (2026-06-08T17:55Z, "validators-recovered" directive) — STILL BLOCKED
+
+Ran again on the v2.1 directive that a fresh school-leg probe had reportedly gotten a 30s callback (`decisionState=(true,false,0,"SHILLER_MACRO_RISK")`). The full runner re-fired the school leg against the reused CONSUMER. Outcome: **same silent validator no-show — NO callback landed for the actual request this runner sent.**
+
+- Pre-flight ALL PASS: chain-id 50312 ✓; balance 95.879 STT ✓ vs NEED_TOTAL 1.8 STT; FREE surface gate (platform code, v1 reachable, immutables read back) ✓; oracle datum fresh (`deliveredAt=1780927644`, `scaledValue=584`) → json-fetch refresh correctly SKIPPED; tx-hash self-test ✓.
+- School-leg request fired and MINED on-chain, `status 1 (success)`, block `403972162`:
+  - `schoolTx = 0x63d0bd6791e6782b515ddb7e3acc8c2b8b5f7e4fab7ba02d6ffa328feed1ba24`
+  - deterministic `decisionId = 0x000000000000000000000000000000000000000000000000b24ac1afbcefc708` — **IDENTICAL to attempts 1 & 2** (same request bytes → same hash; the request side is byte-stable, confirming the bottleneck is purely the off-chain validator inference layer, and likely that the platform deduplicates this already-stalled request id rather than re-queueing it).
+  - The platform `RequestCreated` event (`0xb623…6889`, topics requestId `0x566afb` + decisionId `0xb24a…c708`) IS present in the receipt — the request reached the platform; only the validator callback never returned.
+- Bounded poll ~480s total (180s in-runner + a ~300s extended poll): `decisionState(decisionId)` = `(false, false, 0, "")` throughout 12 extra checks; NO `DecisionFailed` (0 logs bound to the decisionId), NO `StrategistDecided` — a silent validator no-show, identical to attempts 1 & 2.
+- **STT spent this re-attempt:** wallet 95.879 → 95.627 = **~0.252 STT** (one school-leg deposit 0.24 + gas; within the ~1.6 STT reserve, no runaway). Irreversible.
+- No `.run1-state.env` / `.runs-state.env` persisted (the school leg never completed) — no half-open decision stranded; a future recovery re-run is clean.
+- **No notional leg sent, no `StrategistDecided` landed → LIVEDEP-02/03/04/05 remain BLOCKED.** Per guardrails: NO JSON artifact written, handoff NOT reversed, nothing fabricated.
+- **NOTE for the next attempt:** because the request id is deterministic and has now stalled 3×, a recovery run should FORCE A DISTINCT decisionId (vary `USER_INTENT` or `CONSENSUS`) so the platform cannot dedupe it against the dead `0xb24a…c708` request — re-firing the byte-identical request may be the reason no callback ever returns even when validators are nominally live.
 
 ### Re-attempt 2 (2026-06-08, keeper-restored / fresh-datum retry) — STILL BLOCKED
 
