@@ -1,35 +1,39 @@
 #!/usr/bin/env bash
-# MacroHedgeStrategist Somnia-testnet end-to-end integration runner (AGENT-03 live half).
+# MacroHedgeStrategist Somnia-testnet PHASE-17 live deploy + school-leg liveness probe runner.
 #
-#   keeper sequences, ONE infer per tx, across DIFFERENT blocks:
-#     MacroOracle.requestMacro (json-fetch)  --> await MacroReceived  (datum populated)
-#     Strategist.requestActionDecision       --> await action callback (actionSet, decisionId emitted)
-#     Strategist.requestSizeDecision(id)      --> await HedgeDecisionMade (both legs joined)
+#   FREE surface gate (chain-id 50312 + platform code + v1 reachable) BEFORE any STT spend, then:
+#     MacroOracle.requestMacro (json-fetch, conditional)  --> await MacroReceived (datum populated)
+#     oracle-freshness gate (deliveredAt != 0)
+#     forge create MacroHedgeStrategist (platform, oracle)  --> guard mined + read back 3 immutables
+#     Strategist.requestSchoolDecision (the ONE cheap LLM liveness probe)  --> await schoolSet==true
 #
-# Live-testnet integration test (NOT a forge unit test): every callback is async, executed
+# Phase 18 adapts this further: requestNotionalDecision + StrategistDecided join + artifact publish.
+#
+# Live-testnet integration runner (NOT a forge unit test): every callback is async, executed
 # off-chain by validators after consensus. We invoke, then poll on-chain logs with a hard
 # timeout and an explicit FAIL branch.
 #
 # PRICE CLASSES (CLAUDE.md, the budget source of truth — NEVER floor-only, that is the
 # TimedOut regression). subSize = 3:
-#   - oracle refresh        : json-fetch     0.03 SOMI -> JSON_DEPOSIT = FLOOR + 0.09 STT
-#   - each of the two legs  : llm-inference  0.07 SOMI -> LLM_DEPOSIT  = FLOOR + 0.21 STT
+#   - oracle refresh   : json-fetch     0.03 SOMI -> JSON_DEPOSIT = FLOOR + 0.09 STT (conditional)
+#   - school-leg infer : llm-inference  0.07 SOMI -> LLM_DEPOSIT  = FLOOR + 0.21 STT (the probe)
 #
-# decisionId is read EXCLUSIVELY from the action leg's HedgeDecisionRequested log topic — the
+# decisionId is read EXCLUSIVELY from the school leg's HedgeDecisionRequested log topic — the
 # single source of truth, authoritative regardless of how the contract derives the id. We do
-# NOT reconstruct it as bytes32(actionRequestId).
+# NOT reconstruct it as bytes32(requestId).
 #
 # Prereqs (the script verifies what it can before spending):
 #   - contracts/.env has SOMNIA_TESTNET_PK + SOMNIA_TESTNET_ADDRESS                  [DONE]
 #   - keeper-proxy public (Vercel Deployment Protection OFF) for the json-fetch leg  [gate via MacroReceived]
-#   - the dedicated wallet funded with STT (>= 2 * NEED_PER_RUN for the 2-run demo)  [<-- gating step, faucet]
+#   - the dedicated wallet funded with STT (>= NEED_PER_RUN for the single probe)    [<-- gating step, faucet]
 #
 # Usage:
 #   MACRO_ORACLE=<addr> CONSENSUS=500 bash script/macro-hedge-strategist-e2e.sh
-#   (run twice with different CONSENSUS to prove decision-moves-with-consensus)
+#   (single deploy + ONE school-leg probe; idempotent re-run: pass CONSUMER + MACRO_ORACLE to re-fire
+#    the probe only — no double-deploy, no second oracle refresh)
 #
 # Env knobs (all optional except the wallet creds in .env):
-#   MACRO_ORACLE  reuse a deployed oracle (else the script deploys one)
+#   MACRO_ORACLE  reuse a deployed oracle (defaults to the live 0xAcA751…983f — never redeployed)
 #   CONSUMER      reuse a deployed strategist (else the script deploys one)
 #   DATA_KEY      catalog key (default keccak256("co/inflation-rate"))
 #   CONSENSUS     consensus expectation, scaled int (default 500)
@@ -42,6 +46,11 @@ PLATFORM="0x037Bb9C718F3f7fe5eCBDB0b600D607b52706776"
 LLM_AGENT_ID=12847293847561029384
 PROXY_BASE="${PROXY_BASE:-https://keeper-eta-pied.vercel.app/}"   # MUST end in "/" (MacroOracle BadProxyBase guard)
 SUBSIZE=3
+
+# REUSE the live MacroOracle (do NOT redeploy it) — overridable for the idempotent re-run path.
+MACRO_ORACLE="${MACRO_ORACLE:-0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f}"
+# v1 strategist — the §4 keep-reachable guardrail target (must STILL hold bytecode; never decommission).
+V1_STRATEGIST="0xfA428171E1F5B56f92C67C002De1d8e90B053EE1"
 
 # Per-class price TERMS (p_i * subSize). NOT one conflated PRICE_TERM_WEI.
 JSON_TERM_WEI="${JSON_TERM_WEI:-90000000000000000}"    # 0.03 SOMI * 3 = 0.09 STT (oracle refresh ONLY)
@@ -71,26 +80,43 @@ esac
 FLOOR=$(cast call "$PLATFORM" "getRequestDeposit()(uint256)" --rpc-url "$RPC")
 FLOOR=${FLOOR%% *}                         # strip any trailing unit annotation (e.g. "[3e16]")
 JSON_DEPOSIT=$(( FLOOR + JSON_TERM_WEI ))   # the oracle refresh leg
-LLM_DEPOSIT=$(( FLOOR + LLM_TERM_WEI ))     # each infer leg
-NEED_PER_RUN=$(( JSON_DEPOSIT + 2 * LLM_DEPOSIT ))
-NEED_DEMO=$(( 2 * NEED_PER_RUN ))           # >= 2 runs for the consensus-moves-decision proof
+LLM_DEPOSIT=$(( FLOOR + LLM_TERM_WEI ))     # the ONE school-leg infer probe
+# Phase-17 single-probe footprint: ONE json refresh + ONE school-leg infer (NOT the v1 2-run demo).
+# CONSERVATIVE OVER-RESERVE (spend-honesty): JSON_DEPOSIT covers the cold/first run where the oracle
+# datum is stale and Step 2 fires a json-fetch refresh. On the idempotent fresh-retry path
+# (MACRO_ORACLE reused + datum already fresh, deliveredAt != 0) NO json-fetch fires, so the actual
+# probe spends LESS than NEED_PER_RUN — the over-reserve only leaves headroom, never strands funds;
+# the conditional refresh is honestly the only json spend.
+NEED_PER_RUN=$(( JSON_DEPOSIT + LLM_DEPOSIT ))
 
 echo "  floor=$FLOOR"
-echo "  json_deposit=$JSON_DEPOSIT (refresh, json-fetch 0.09)"
-echo "  llm_deposit=$LLM_DEPOSIT  (each infer leg, llm-inference 0.21)"
-echo "  need_per_run=$NEED_PER_RUN  need_demo(2 runs)=$NEED_DEMO"
+echo "  json_deposit=$JSON_DEPOSIT (refresh, json-fetch 0.09 — conditional, cold run only)"
+echo "  llm_deposit=$LLM_DEPOSIT  (the ONE school-leg infer probe, llm-inference 0.21)"
+echo "  need_per_run=$NEED_PER_RUN  (single probe: json refresh + one school-leg infer)"
 
-echo "== Step 0b: deployer balance vs demo budget =="
+echo "== Step 0b: deployer balance vs single-probe budget =="
 BAL=$(cast balance "$ADDR" --rpc-url "$RPC")
 BAL=${BAL%% *}
 echo "  balance=$BAL wei  (wallet $ADDR)"
 # Big-int-safe comparison: wei balances exceed bash's signed 64-bit range (a 20-digit wei value
 # overflows `[ -lt ]`). Compare by digit-count, then lexically for equal lengths (no leading zeros).
-if [ "${#BAL}" -lt "${#NEED_DEMO}" ] || { [ "${#BAL}" -eq "${#NEED_DEMO}" ] && [[ "$BAL" < "$NEED_DEMO" ]]; }; then
-  echo "FAIL: insufficient STT for the 2-run demo. Fund $ADDR at https://testnet.somnia.network/"
-  echo "      (faucet is browser-only; need >= $NEED_DEMO wei, have $BAL)."
+if [ "${#BAL}" -lt "${#NEED_PER_RUN}" ] || { [ "${#BAL}" -eq "${#NEED_PER_RUN}" ] && [[ "$BAL" < "$NEED_PER_RUN" ]]; }; then
+  echo "FAIL: insufficient STT for the single probe. Fund $ADDR at https://testnet.somnia.network/"
+  echo "      (faucet is browser-only; need >= $NEED_PER_RUN wei, have $BAL)."
   exit 1
 fi
+
+echo "== Step 0c: FREE pre-spend surface gate (read-only — MUST pass before the FIRST STT spend) =="
+# §4 ordering guarantee: this gate runs before requestMacro / cast send / forge create. All free reads.
+[ "$(cast chain-id --rpc-url "$RPC")" = "50312" ] || { echo "FAIL: deploy-network chain-id != 50312 (Somnia testnet) — wrong RPC"; exit 1; }
+PLATFORM_CODE=$(cast code "$PLATFORM" --rpc-url "$RPC")
+[ "${#PLATFORM_CODE}" -gt 2 ] || { echo "FAIL: platform $PLATFORM has no code — volatile platform constant is wrong"; exit 1; }
+V1_CODE=$(cast code "$V1_STRATEGIST" --rpc-url "$RPC")
+[ "${#V1_CODE}" -gt 2 ] || { echo "FAIL: v1 $V1_STRATEGIST unreachable (must stay reachable — §4 guardrail)"; exit 1; }
+echo "  REMINDER: LLM_AGENT_ID $LLM_AGENT_ID liveness is NOT free-provable — it is proven BY the cheap"
+echo "  school-leg probe at Step 4 (which spends STT by design). A wrong id surfaces there as"
+echo "  DecisionFailed/no-callback (deposit at risk; rebate unconfirmed on Somnia)."
+echo "== surface gate PASS (chain-id 50312 + platform code + v1 reachable) — proceeding to spend =="
 
 # Generic log-poll helper: poll a signature on an address from a block until present, or a
 # failure-signature appears, or TIMEOUT_S elapses. Echoes the matching log line on success.
@@ -139,7 +165,16 @@ if ! poll_log "$MACRO_ORACLE" "MacroReceived(bytes32,int256)" "MacroFailed(uint2
 fi
 echo "  oracle refresh OK — latest($DATA_KEY) is populated."
 
-echo "== Step 3: deploy MacroHedgeStrategist (reads MACRO_ORACLE) =="
+echo "== Step 2b: oracle-freshness gate (read-only — before any LLM-deposit spend) =="
+# The MacroDatum struct is 4 members: (bytes32 dataKey, int256 scaledValue, uint64 observedAt,
+# uint64 deliveredAt). deliveredAt is the 4TH member (index 3): != 0 ⇔ the datum has been delivered.
+# A stale datum would burn the LLM deposit via UnknownKey at requestSchoolDecision.
+FRESH=$(cast call "$MACRO_ORACLE" "latest(bytes32)((bytes32,int256,uint64,uint64))" "$DATA_KEY" --rpc-url "$RPC")
+DELIVERED_AT=$(printf '%s' "$FRESH" | tr -d '()' | awk -F',' '{gsub(/ /,"",$4); print $4}'); DELIVERED_AT=${DELIVERED_AT%% *}
+[ -n "$DELIVERED_AT" ] && [ "$DELIVERED_AT" != "0" ] || { echo "FAIL: oracle datum stale (deliveredAt==0) for $DATA_KEY — refusing to spend the LLM deposit"; exit 1; }
+echo "== oracle-freshness gate PASS (deliveredAt != 0) =="
+
+echo "== Step 3: deploy MacroHedgeStrategist (constructor-args ORDER: platform THEN oracle) =="
 if [ -z "${CONSUMER:-}" ]; then
   CREATE_S=$(forge create src/instrument/MacroHedgeStrategist.sol:MacroHedgeStrategist --rpc-url "$RPC" \
                --private-key "$PK" --broadcast --constructor-args "$PLATFORM" "$MACRO_ORACLE" 2>&1)
@@ -148,75 +183,59 @@ if [ -z "${CONSUMER:-}" ]; then
 fi
 echo "  CONSUMER=$CONSUMER"
 
-echo "== Step 4: ACTION leg + standalone ID-disambiguation probe =="
-echo "  NOTE: this action leg DOUBLES as the LLM_AGENT_ID probe."
-echo "        If the ACTION leg TimedOut here (no HedgeDecisionRequested action callback /"
-echo "        a DecisionFailed), LLM_AGENT_ID $LLM_AGENT_ID is WRONG — flip the constant in"
-echo "        src/instrument/MacroHedgeStrategist.sol and redeploy (benign — deposits rebate)."
-echo "        A TimedOut at THIS step is the WRONG-ID signal — NOT the cross-leg join failure"
-echo "        (the join failure mode instead shows actionSet WITHOUT a later HedgeDecisionMade)."
+# Guard the deploy actually mined before any read-back.
+CONSUMER_CODE=$(cast code "$CONSUMER" --rpc-url "$RPC")
+[ "${#CONSUMER_CODE}" -gt 2 ] || { echo "FAIL: deploy not mined — $CONSUMER has no code"; exit 1; }
+
+# Immutable read-backs (SC-1): the constructor-wired surface must read the live platform/oracle/agent.
+lc() { printf '%s' "$1" | tr 'A-Z' 'a-z'; }
+RB_PLATFORM=$(cast call "$CONSUMER" "PLATFORM()(address)" --rpc-url "$RPC"); RB_PLATFORM=${RB_PLATFORM%% *}
+[ "$(lc "$RB_PLATFORM")" = "$(lc "$PLATFORM")" ] || { echo "FAIL: PLATFORM() read-back $RB_PLATFORM != $PLATFORM"; exit 1; }
+RB_ORACLE=$(cast call "$CONSUMER" "ORACLE()(address)" --rpc-url "$RPC"); RB_ORACLE=${RB_ORACLE%% *}
+[ "$(lc "$RB_ORACLE")" = "$(lc "$MACRO_ORACLE")" ] || { echo "FAIL: ORACLE() read-back $RB_ORACLE != $MACRO_ORACLE"; exit 1; }
+RB_AGENT=$(cast call "$CONSUMER" "LLM_AGENT_ID()(uint256)" --rpc-url "$RPC"); RB_AGENT=${RB_AGENT%% *}
+[ "$RB_AGENT" = "$LLM_AGENT_ID" ] || { echo "FAIL: LLM_AGENT_ID() read-back $RB_AGENT != $LLM_AGENT_ID"; exit 1; }
+[ "$(lc "$CONSUMER")" != "0xfa428171e1f5b56f92c67c002de1d8e90b053ee1" ] || { echo "FAIL: deployed at the v1 address — expected a NEW address"; exit 1; }
+echo "  immutables OK: PLATFORM=$RB_PLATFORM ORACLE=$RB_ORACLE LLM_AGENT_ID=$RB_AGENT (NEW address, != v1)"
+
+echo "== Step 4: SCHOOL leg — the cheap LLM_AGENT_ID liveness probe (Phase 18 does notional + join) =="
+USER_INTENT="${USER_INTENT:-Hedge COP depreciation from a rate-hike surprise}"
 FROMBLK_A=$(cast block-number --rpc-url "$RPC")
-cast send "$CONSUMER" "requestActionDecision(bytes32,int256)" "$DATA_KEY" "$CONSENSUS" \
+cast send "$CONSUMER" "requestSchoolDecision(string,bytes32,int256)" "$USER_INTENT" "$DATA_KEY" "$CONSENSUS" \
   --value "$LLM_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" >/dev/null
-echo "  requestActionDecision sent (consensus=$CONSENSUS, --value $LLM_DEPOSIT); awaiting HedgeDecisionRequested (action leg)..."
-# decisionId is the SECOND indexed topic of HedgeDecisionRequested(uint256,bytes32,uint8).
-# This is emitted synchronously in requestActionDecision — it confirms the action leg was
-# accepted and is the AUTHORITATIVE decisionId (single source of truth).
-REQ_LOG=$(poll_log "$CONSUMER" "HedgeDecisionRequested(uint256,bytes32,uint8)" "" "$FROMBLK_A" "action request") || {
-  echo "FAIL: HedgeDecisionRequested (action leg) never observed — action send likely reverted."; exit 1; }
-# decisionId is topics[2] (topics[0]=event sig, topics[1]=requestId, topics[2]=decisionId).
-# Parse the 3rd 64-hex value AFTER the "topics:" marker — NOT the 3rd in the whole log text
-# (blockHash/data precede topics in cast's output, so a global match grabs topics[0]=the event sig).
+echo "  requestSchoolDecision sent (intent='$USER_INTENT', consensus=$CONSENSUS, --value $LLM_DEPOSIT);"
+echo "  awaiting HedgeDecisionRequested (school leg, emitted synchronously)..."
+# decisionId is topics[2] of HedgeDecisionRequested(uint256,bytes32,uint8): topics[0]=sig,
+# topics[1]=requestId, topics[2]=decisionId. Parse the 3rd 64-hex value AFTER the "topics:" marker.
+REQ_LOG=$(poll_log "$CONSUMER" "HedgeDecisionRequested(uint256,bytes32,uint8)" "" "$FROMBLK_A" "school request") || {
+  echo "FAIL: HedgeDecisionRequested (school leg) never observed — school send likely reverted."; exit 1; }
 DECISION_ID=$(printf '%s' "$REQ_LOG" | awk '/topics:/{t=1} t && match($0,/0x[0-9a-fA-F]{64}/){ if(++n==3){ print substr($0,RSTART,RLENGTH); exit } }')
 [ -n "$DECISION_ID" ] || { echo "FAIL: could not parse decisionId topic from HedgeDecisionRequested log:"; printf '%s\n' "$REQ_LOG"; exit 1; }
-echo "  decisionId (from the action leg's HedgeDecisionRequested topic) = $DECISION_ID"
+echo "  decisionId (from the school leg's HedgeDecisionRequested topic) = $DECISION_ID"
 
-echo "  awaiting the ACTION callback to land (actionSet) before firing the size leg..."
-# The action callback sets actionSet; it does NOT itself emit HedgeDecisionMade (that needs both
-# legs). We confirm actionSet via the typed getter rather than guessing on the async timing.
-START_A=$(date +%s); DEADLINE_A=$(( START_A + TIMEOUT_S )); ACTION_OK=0
+echo "  awaiting the SCHOOL callback to land (schoolSet) — the affirmative liveness proof..."
+# decisionState(bytes32) returns (bool schoolSet, bool notionalSet, uint64 decidedAt, string schoolLabel).
+# POSITION-EXPLICIT: decode the FIRST member only (schoolSet) — a positional-blind grep would also
+# match notionalSet (also a bool). This school-only probe leaves notionalSet false, but the read is
+# pinned to member 1 regardless.
+START_A=$(date +%s); DEADLINE_A=$(( START_A + TIMEOUT_S )); SCHOOL_SET="false"
 while :; do
   if cast logs --rpc-url "$RPC" --address "$CONSUMER" "DecisionFailed(uint256,uint8)" --from-block "$FROMBLK_A" 2>/dev/null | grep -q .; then
-    echo "  FAIL: DecisionFailed emitted on the action leg (decode/no-match or validator Failed/TimedOut)."; exit 1
+    echo "  DecisionFailed — agent ANSWERED but the school label is UNMAPPED in MacroThesisRegistry"
+    echo "  (agent LIVE; re-run with an adjusted USER_INTENT). NOT a wrong-constant signal."
+    exit 1
   fi
-  ASET=$(cast call "$CONSUMER" "getDecision(bytes32)((uint8,uint256,int256,int256,uint64,bool,bool))" "$DECISION_ID" --rpc-url "$RPC" 2>/dev/null || true)
-  # The 6th tuple member is actionSet (bool). A true reads as the literal 'true'.
-  if printf '%s' "$ASET" | grep -qiE '\btrue\b'; then ACTION_OK=1; break; fi
+  SCHOOL_SET=$(cast call "$CONSUMER" "decisionState(bytes32)((bool,bool,uint64,string))" "$DECISION_ID" --rpc-url "$RPC" 2>/dev/null | tr -d '()' | awk -F',' 'NR==1{gsub(/ /,"",$1); print $1}')
+  [ "$SCHOOL_SET" = "true" ] && break
   [ "$(date +%s)" -ge "$DEADLINE_A" ] && break
   sleep "$POLL_S"
 done
-[ "$ACTION_OK" -eq 1 ] || { echo "  FAIL: action callback did not land within ${TIMEOUT_S}s (actionSet stayed false) — wrong LLM_AGENT_ID is the prime suspect."; exit 1; }
-echo "  ACTION callback landed (actionSet=true)."
-
-echo "== Step 5: SIZE leg — fired with the SAME decisionId, ONLY after the action callback landed =="
-FROMBLK_S=$(cast block-number --rpc-url "$RPC")
-cast send "$CONSUMER" "requestSizeDecision(bytes32)" "$DECISION_ID" \
-  --value "$LLM_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" >/dev/null
-echo "  requestSizeDecision sent (decisionId=$DECISION_ID, --value $LLM_DEPOSIT); awaiting HedgeDecisionMade..."
-MADE_LOG=$(poll_log "$CONSUMER" "HedgeDecisionMade(uint256,uint8,uint256,int256,int256)" "DecisionFailed(uint256,uint8)" "$FROMBLK_S" "size leg / join") || {
-  echo "FAIL: HedgeDecisionMade never observed. If actionSet was true but no HedgeDecisionMade,"
-  echo "      that is the cross-leg JOIN failure mode (a more serious bug than a wrong ID)."; exit 1; }
-echo "  HedgeDecisionMade observed:"
-printf '%s\n' "$MADE_LOG"
-
-echo "== Step 6: assert invariants from the stored decision (in-enum action, in-range size) =="
-DEC=$(cast call "$CONSUMER" "getDecision(bytes32)((uint8,uint256,int256,int256,uint64,bool,bool))" "$DECISION_ID" --rpc-url "$RPC")
-echo "  decision tuple (action,sizeBps,macroValue,consensus,decidedAt,actionSet,sizeSet):"
-echo "    $DEC"
-# Parse the first two tuple members: action (uint8 enum) and sizeBps (uint256).
-ACTION=$(printf '%s' "$DEC" | tr -d '()' | cut -d',' -f1 | tr -d ' ')
-SIZEBPS=$(printf '%s' "$DEC" | tr -d '()' | cut -d',' -f2 | tr -d ' '); SIZEBPS=${SIZEBPS%% *}
-echo "  decoded -> action=$ACTION  sizeBps=$SIZEBPS"
-case "$ACTION" in
-  0|1|2|3) echo "  ASSERT PASS: action in-enum {0,1,2,3}" ;;
-  *) echo "  ASSERT FAIL: action $ACTION not in {0,1,2,3}"; exit 1 ;;
-esac
-if [ "$SIZEBPS" -le 10000 ]; then
-  echo "  ASSERT PASS: sizeBps $SIZEBPS <= 10000 (in-range)"
-else
-  echo "  ASSERT FAIL: sizeBps $SIZEBPS > 10000 (out of range)"; exit 1
+if [ "$SCHOOL_SET" != "true" ]; then
+  echo "  FAIL: no callback / timeout ${TIMEOUT_S}s — LLM_AGENT_ID $LLM_AGENT_ID / platform likely DEAD or WRONG (§4)."
+  echo "        (deposit at risk; rebate unconfirmed on Somnia.)"
+  exit 1
 fi
+echo "== probe PASS: requestSchoolDecision callback landed (schoolSet=true) — volatile surface LIVE =="
 
-echo "== done: CONSUMER=$CONSUMER decisionId=$DECISION_ID consensus=$CONSENSUS action=$ACTION sizeBps=$SIZEBPS =="
-echo "   (run again with a DIFFERENT CONSENSUS and confirm (action,sizeBps) DIFFERS — the consensus-moves-decision proof;"
-echo "    capture both HedgeDecisionMade tx hashes for the Agentathon demo video.)"
+echo "== Phase-17 done: CONSUMER=$CONSUMER decisionId=$DECISION_ID schoolSet=true =="
+# Phase 18 adapts THIS runner further: add requestNotionalDecision + StrategistDecided join + the somnia-strategist-deployment.json publish.
