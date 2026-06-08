@@ -1,0 +1,201 @@
+name: CI
+
+# Single monorepo workflow, two lanes:
+#   backend  — Foundry. Plain checkout (NO submodules: lib/* deps are VENDORED as
+#              committed plain files). foundryup -> forge fmt --check (non-blocking,
+#              source predates strict fmt) + forge build + forge test. Fork suites
+#              are keyless-gated (skip-not-fail without the RPC secret).
+#   frontend — pnpm. biome + tsc + vitest + impeccable + playwright e2e/a11y on a
+#              LOCAL prod build using the COMMITTED generated ABIs (no Foundry).
+#
+# All jobs run from the appropriate package via `working-directory`. There are no
+# submodules anywhere in this repo, so `actions/checkout@v4` (default, no recurse)
+# is the correct and sufficient fetch.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  # ----------------------------- BACKEND (Foundry) -----------------------------
+  backend-build-test:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/backend/contracts
+    steps:
+      - uses: actions/checkout@v4 # NO submodules — libs are vendored plain files
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: forge fmt --check (non-blocking — vendored source predates strict fmt)
+        continue-on-error: true
+        run: forge fmt --check
+      - name: forge build (vendored libs — no submodule init, no forge install)
+        run: forge build
+      - name: forge test (fork-excluded, SECRET-FREE — exits 0 with no RPC secret)
+        run: forge test --no-match-path 'test/**/*fork*'
+
+  backend-fork:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/backend/contracts
+    env:
+      BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Cache Foundry RPC fork state
+        uses: actions/cache@v4
+        with:
+          path: ~/.foundry/cache/rpc
+          key: foundry-rpc-base-46700000-v1
+          restore-keys: |
+            foundry-rpc-base-
+      - name: forge test (Base fork — keyless-gated; skips without BASE_RPC_URL)
+        run: |
+          if [ -z "${BASE_RPC_URL:-}" ]; then
+            echo "::warning::BASE_RPC_URL not set — skipping Base-fork tests (not a failure)."
+            exit 0
+          fi
+          n=0; until forge test --match-path 'test/**/*fork*' -vvv; do
+            n=$((n+1)); [ "$n" -ge 3 ] && { echo "::error::Base-fork tests failed after $n attempts"; exit 1; }
+            echo "::warning::Base-fork attempt $n failed (likely RPC 429) — retrying in 5s"; sleep 5
+          done
+
+  # ----------------------------- FRONTEND (pnpm) -------------------------------
+  frontend-lint:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: packages/frontend/.nvmrc
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm biome check .
+
+  frontend-typecheck:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: packages/frontend/.nvmrc
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm velite build
+      - run: pnpm tsc --noEmit
+
+  frontend-test-unit:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: packages/frontend/.nvmrc
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm velite build
+      - run: pnpm vitest run
+
+  frontend-impeccable:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: packages/frontend/.nvmrc
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: npx --yes impeccable detect app/
+
+  frontend-e2e:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/frontend
+    env:
+      NEXT_PUBLIC_RPC_CELO_PRIMARY: https://forno.celo.org
+      NEXT_PUBLIC_RPC_ETH_PRIMARY: https://ethereum.publicnode.com
+      NEXT_PUBLIC_RPC_BASE_PRIMARY: https://mainnet.base.org
+      NEXT_PUBLIC_RPC_ARB_PRIMARY: https://arb1.arbitrum.io/rpc
+      NEXT_PUBLIC_RPC_OP_PRIMARY: https://mainnet.optimism.io
+      NEXT_PUBLIC_WALLETCONNECT_ID: placeholder_walletconnect_id_for_ci
+      NEXT_PUBLIC_APP_URL: http://localhost:3040
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: packages/frontend/.nvmrc
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm playwright install --with-deps chromium
+      - run: pnpm playwright test --project=chromium
+
+  frontend-a11y:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/frontend
+    env:
+      NEXT_PUBLIC_RPC_CELO_PRIMARY: https://forno.celo.org
+      NEXT_PUBLIC_RPC_ETH_PRIMARY: https://ethereum.publicnode.com
+      NEXT_PUBLIC_RPC_BASE_PRIMARY: https://mainnet.base.org
+      NEXT_PUBLIC_RPC_ARB_PRIMARY: https://arb1.arbitrum.io/rpc
+      NEXT_PUBLIC_RPC_OP_PRIMARY: https://mainnet.optimism.io
+      NEXT_PUBLIC_WALLETCONNECT_ID: placeholder_walletconnect_id_for_ci
+      NEXT_PUBLIC_APP_URL: http://localhost:3040
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: packages/frontend/.nvmrc
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm playwright install --with-deps chromium
+      - run: pnpm playwright test tests/a11y/
+
+  # ----------------------------- LIGHTHOUSE (preview) --------------------------
+  lighthouse:
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: packages/frontend/.nvmrc
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dlx @lhci/cli@^0.15 autorun
+        env:
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+          LHCI_COLLECT__URL: ${{ github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
