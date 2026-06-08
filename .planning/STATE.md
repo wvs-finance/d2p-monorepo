@@ -1,9 +1,9 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: milestone
-status: completed
-stopped_at: Phase 16 context gathered (Shiller-differentiated representativeness)
+milestone: v2.1
+milestone_name: Live Agent Integration
+status: defining_requirements
+stopped_at: v2.1 started — defining requirements (Somnia two-leg strategist live deploy)
 last_updated: "2026-06-07T10:46:25.797Z"
 last_activity: "2026-06-07 — completed 14-03-PLAN.md (cornerstone Wave 3: `resolveFromMandate` FORK-PROVEN — a `HedgeMandate` flows through the deterministic regime-conditional geometry → the Fix-C sink → a real wCOP/USDC Panoptic position at the EXACT structural K_hi tick 360360 + `numberOfLegs(exec)>0`; the 8-param `ExecutorDecided` honesty flag (`nonErgodicDisclosed==true`) + TEMPLATE caveat decoded from the live mint; behavioral LLM-independence via `MockRevertingPlatform`; the direct-path size>127 guard. UNBLOCKED by a gate-passed `volToWidth` even-width invariant — odd widths snap to even so symmetric Panoptic leg bounds stay tickSpacing-aligned — landed as a real RED→GREEN evm-TDD split (`f92b0f7` test → `e686d4d` fix, per-file ancestry verified). demo fork 6/6, fork EXEC 7/7, Representativeness 17/17, onResult 4/4, fork-free 114/114, build exit 0)"
 progress:
@@ -14,7 +14,17 @@ progress:
   percent: 100
 ---
 
-# Project State: abrigo-somnia v2.0 — Convex Instrument
+# Project State: abrigo-somnia v2.1 — Live Agent Integration
+
+> **v2.1 (current), 2026-06-07.** Backend deploy serving the frontend live-Agent-1 path: deploy the
+> two-leg `MacroHedgeStrategist` (`StrategistDecided` API) live on Somnia 50312, prove on-chain, publish
+> the artifact. Phases continue at **17**. Source: `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md`.
+> **v2.0 (Convex Instrument) remains OPEN** (parallel track — cornerstone E2E-01 video pending, phases 9–10
+> deferred); the v2.0 state below is preserved verbatim and is NOT closed by v2.1.
+
+---
+
+# (preserved) Project State: abrigo-somnia v2.0 — Convex Instrument
 
 > **Parallel-track note.** The M1 donor-transfer *econometrics* milestone is **PARKED mid-Phase-3**
 > and preserved verbatim at `.planning/{STATE,ROADMAP,REQUIREMENTS}-M1-donor-transfer-2026-06-01.md`

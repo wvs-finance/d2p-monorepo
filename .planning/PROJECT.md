@@ -16,7 +16,36 @@ Scope notes:
 - **Validator-side rows (#8, #9, #10) are out of scope** — not caller-observable.
 - **Row #3 (`subcommitteeSize ≤ operator_configured_max`) is excluded from per-row binding analysis** — `operator_configured_max` lives in impl storage with no exposed getter in the e15d4e9 NatSpec. #3 is validated structurally by the *absence* of `SubcommitteeSizeExceedsMax` reverts in the indexed window; per-row `pct_binding` is N/A. A future plan-phase decision (see STORAGE-01 in Known Plan-Phase Decisions) may recover the cap via storage probe if the slot can be identified — but M1 does not block on it.
 
-## Current Milestone: v2.0 — Convex Instrument (cCOP/USD long-gamma)
+## Current Milestone: v2.1 — Live Agent Integration (Somnia two-leg strategist deploy)
+
+**Goal:** Deploy the re-semantic'd two-leg `MacroHedgeStrategist` (`StrategistDecided` API:
+`requestSchoolDecision` → `requestNotionalDecision` → `StrategistDecided(decisionId, school, mandate)`)
+**live on Somnia testnet 50312** to a new address, wire it to the live platform / LLM agent /
+`MacroOracle`, **prove it on-chain** (real prompt → well-formed `HedgeMandate`, and different prompt →
+different mandate — real tx hashes, spends STT), and **publish** the new address + ABI +
+`contracts/script/out/somnia-strategist-deployment.json` + handoff update. This is the **backend half**
+of the frontend live-Agent-1 path; the frontend half is tracked in the `d2p-frontend` repo's GSD.
+
+**Why:** The two-leg API is written and **offline-proven** (Phase 12, 19/19 vs MockPlatform) but the
+contract **deployed** on Somnia 50312 (`0xfA428171…`) is still the **v1** shape (`HedgeDecisionMade`/
+`getDecision`). The frontend cannot decode a `HedgeMandate` from v1 logs, and the live-Agent-1 path is
+blocked until the two-leg version is live. Source of truth:
+`docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2 deliverable, §3 acceptance, §4 constraints).
+
+**Target features:**
+- Live two-leg strategist deploy on Somnia 50312 (new address; not upgradeable → redeploy).
+- On-chain proof: well-formed mandate + decision-moves (different prompt → different mandate).
+- Published deployment artifact + committed ABI + handoff doc update.
+
+**Constraints (from §4):** re-confirm volatile `LLM_AGENT_ID`/platform before spending STT; keep the
+v1 contract reachable (backs the frontend replay fallback); do NOT alter the join's hardcoded
+`chainId = 137` (the 137→31337 override is a documented frontend accommodation). Phases continue at **17**.
+
+> **Parallel tracks.** v2.0 (Convex Instrument) remains **OPEN** — cornerstone E2E-01 demo video pending,
+> phases 9–10 deferred. v2.1 runs alongside as a focused backend deploy serving the frontend integration;
+> it does not close or supersede v2.0.
+
+## Prior Milestone (open): v2.0 — Convex Instrument (cCOP/USD long-gamma)
 
 > **2026-06-01 — new ENGINEERING milestone (parallel track).** The M1 donor-transfer
 > econometrics (Core Value above) is **PARKED mid-Phase-3** and preserved verbatim at
