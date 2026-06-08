@@ -39,35 +39,27 @@
 export const runtime = 'nodejs'
 
 import {
-  type Log,
-  createWalletClient,
-  http,
-  parseEther,
-  publicActions,
-} from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { macroHedgeStrategistAbi, macroOracleAbi } from '@/lib/contracts/generated'
-import { somniaTestnet } from '@/lib/apps/abrigo/somnia/chain'
-import { AGENT1_INPUTS } from '@/lib/apps/abrigo/somnia/agent1-inputs'
-import {
-  LEG_TIMEOUT_MS,
   type AgentDecisionResult,
+  LEG_TIMEOUT_MS,
   correlateDecisionFailed,
   evaluateLegOutcome,
   parseStrategistDecided,
   readDecisionRequested,
   serializeMandate,
 } from '@/lib/apps/abrigo/cornerstone/agent1-route-logic'
+import { AGENT1_INPUTS } from '@/lib/apps/abrigo/somnia/agent1-inputs'
+import { somniaTestnet } from '@/lib/apps/abrigo/somnia/chain'
+import { macroHedgeStrategistAbi, macroOracleAbi } from '@/lib/contracts/generated'
 import { env } from '@/lib/env'
+import { http, type Log, createWalletClient, parseEther, publicActions } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 
 // ---------------------------------------------------------------------------
 // Contract addresses (live Somnia 50312)
 // ---------------------------------------------------------------------------
 
-const STRATEGIST_ADDRESS =
-  '0xf0570CcB1271FFaFf4caCA628F3632257f177b1D' as const
-const MACRO_ORACLE_ADDRESS =
-  '0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f' as const
+const STRATEGIST_ADDRESS = '0xf0570CcB1271FFaFf4caCA628F3632257f177b1D' as const
+const MACRO_ORACLE_ADDRESS = '0xAcA75144f644220f1dEAD5F989C350D8e0Cc983f' as const
 
 // ---------------------------------------------------------------------------
 // Rate limit: simple in-memory token-bucket (min-interval between requests)
@@ -100,10 +92,7 @@ type MinLog = Pick<Log, 'topics' | 'data'>
 export async function POST(req: Request): Promise<Response> {
   // ---- Guard: non-operator-deploy → 503 ----
   if (!env.SOMNIA_OPERATOR_PK || !env.AGENT1_ROUTE_SECRET) {
-    return Response.json(
-      { ok: false, reason: 'route not configured' },
-      { status: 503 },
-    )
+    return Response.json({ ok: false, reason: 'route not configured' }, { status: 503 })
   }
 
   // ---- Guard: shared-secret header → 401 ----
@@ -125,9 +114,7 @@ export async function POST(req: Request): Promise<Response> {
 
   try {
     // ---- Build operator wallet client ----
-    const account = privateKeyToAccount(
-      env.SOMNIA_OPERATOR_PK as `0x${string}`,
-    )
+    const account = privateKeyToAccount(env.SOMNIA_OPERATOR_PK as `0x${string}`)
     const client = createWalletClient({
       account,
       chain: somniaTestnet,
@@ -157,11 +144,7 @@ export async function POST(req: Request): Promise<Response> {
       address: STRATEGIST_ADDRESS,
       abi: macroHedgeStrategistAbi,
       functionName: 'requestSchoolDecision',
-      args: [
-        AGENT1_INPUTS.userIntent,
-        AGENT1_INPUTS.dataKey,
-        AGENT1_INPUTS.consensus,
-      ],
+      args: [AGENT1_INPUTS.userIntent, AGENT1_INPUTS.dataKey, AGENT1_INPUTS.consensus],
       value: parseEther('0.5'), // STT deposit to cover inference cost
     })
     const schoolReceipt = await client.waitForTransactionReceipt({
@@ -185,17 +168,13 @@ export async function POST(req: Request): Promise<Response> {
 
     let schoolSet = false
     // Poll loop: breaks on terminal outcome
-    outerSchool: for (;;) {
+    for (;;) {
       const elapsed = Date.now() - schoolPollStart
 
       // Fetch latest receipt logs for DecisionFailed correlation
       // (We re-read decisionState each tick; DecisionFailed would be in school receipt
       //  or in a subsequent receipt — use school receipt logs for the correlation check)
-      const failCorrelation = correlateDecisionFailed(
-        schoolLogs,
-        schoolRequestId,
-        'school',
-      )
+      const failCorrelation = correlateDecisionFailed(schoolLogs, schoolRequestId, 'school')
       const failedLeg = failCorrelation.failed ? failCorrelation.leg : null
 
       // Read current decision state
@@ -228,12 +207,10 @@ export async function POST(req: Request): Promise<Response> {
         return Response.json(result)
       }
 
-      if (schoolSet) break outerSchool
+      if (schoolSet) break
 
       // Still polling — wait before next tick
-      await new Promise<void>((resolve) =>
-        setTimeout(resolve, POLL_INTERVAL_MS),
-      )
+      await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
     }
 
     // ---- (d) requestNotionalDecision ----
@@ -271,11 +248,7 @@ export async function POST(req: Request): Promise<Response> {
       // Refresh cumulative logs — in practice DecisionFailed can land in any tx
       // triggered by the validator callback. We only have receipts already fetched,
       // so correlation is bounded to those. Sufficient for the bounded-timeout terminal.
-      const failCorrelation = correlateDecisionFailed(
-        allLogs,
-        notionalRequestId,
-        'notional',
-      )
+      const failCorrelation = correlateDecisionFailed(allLogs, notionalRequestId, 'notional')
       const failedLeg = failCorrelation.failed ? failCorrelation.leg : null
 
       const state = await client.readContract({
@@ -319,13 +292,10 @@ export async function POST(req: Request): Promise<Response> {
         // notionalSet but no StrategistDecided log yet — keep polling briefly
       }
 
-      await new Promise<void>((resolve) =>
-        setTimeout(resolve, POLL_INTERVAL_MS),
-      )
+      await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
     }
   } catch (err) {
-    const reason =
-      err instanceof Error ? err.message : 'unexpected error in agent1 route'
+    const reason = err instanceof Error ? err.message : 'unexpected error in agent1 route'
     const result: AgentDecisionResult = { ok: false, reason }
     return Response.json(result, { status: 500 })
   }

@@ -26,8 +26,7 @@ export const AGENT1_INPUTS = {
    * Colombia CPI inflation-rate. The sole wired catalog key on the Somnia MacroOracle.
    * Source: snapshot.json macro.latest.dataKey + macro-hedge-strategist-e2e.sh L71
    */
-  dataKey:
-    '0xb73053d3303a516ffee4ecf3fdcd9195da7e3192557a59fdecb0d83545c44841' as const,
+  dataKey: '0xb73053d3303a516ffee4ecf3fdcd9195da7e3192557a59fdecb0d83545c44841' as const,
 
   /**
    * int256 consensus = 500 (scaled, 2 decimals → 5.00% consensus threshold)
