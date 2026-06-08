@@ -1,6 +1,6 @@
 # d2p Monorepo Consolidation — design (Phase 10)
 
-**Status:** REVISED v2 — 2-way review complete (Reality Checker + Git Workflow Master, both NEEDS WORK on v1); all BLOCKERs/MAJORs resolved here per user decisions (2026-06-08). Pending user approval.
+**Status:** REVISED v3 — READY. Two-way review ran twice: v1 (both NEEDS WORK) → v2 (Git WM APPROVE-w/-minor, empirically reproduced the subtree+submodule recipe; Reality Checker NB1+M-A) → v3 resolves NB1 (backend base justified — `master` is 141 commits behind/stale; the feature branch is the de-facto trunk), M-A (env enumeration before Vercel), and MINOR-1 (artifact filename). No open blockers.
 **Date:** 2026-06-08
 **Sub-project 1 of 2.** Sub-project 2 = "Full-live cornerstone integration" (Phase 11) — specced separately once the monorepo paths are real (preview in §9).
 
@@ -37,7 +37,9 @@ d2p/                              # new repo (wvs-finance/d2p)
     frontend/                     # = current frontend repo (subtree, full history, DAG-reachable)
       app/ lib/ components/ wagmi.config.ts (→ ../backend/contracts/out) ...
       lib/contracts/generated.ts  # committed (frontend builds without Foundry)
-      lib/apps/abrigo/cornerstone/*-deployments.json  # committed mirror (build input)
+      lib/apps/abrigo/cornerstone/buildbear-deployments.json  # the ONLY committed frontend mirror today (build input)
+      # NOTE: somnia-strategist-deployment.json is NOT committed in frontend — it lives on the backend
+      # branch at contracts/script/out/ → post-migration packages/backend/contracts/script/out/ (Phase 11 mirrors it)
     backend/                      # = whole abrigo-somnia (subtree, full history, DAG-reachable)
       contracts/                  # Foundry: foundry.toml src/ script/ test/ lib/(submodules) out/(gitignored)
       keeper/ indexing/ subgraphs/ openspec/ adapters/ probes/ schemas/ research/
@@ -48,7 +50,9 @@ d2p/                              # new repo (wvs-finance/d2p)
 
 ## §2 Migration method (subtree, history-preserving, no rewrite)
 
-**Source branches (verified):** frontend — **merge PR #8 into `main` first**, then migrate from `main` (clean linear base). backend — migrate from **`feat/somnia-strategist-live-deploy`** (abrigo's active branch carrying the live-deploy artifacts; abrigo has NO `main`).
+**Source branches (verified against the live repos):**
+- **frontend** — **merge PR #8 → `main` first** (PR #8 confirmed OPEN/MERGEABLE, base `main`, head `feat/phase-09-cornerstone-live-tx`), then migrate from `main` (clean linear base). Frontend remote = `wvs-finance/d2p-frontend`; the new monorepo is a NEW repo `wvs-finance/d2p` (§11.1).
+- **backend** — migrate from **`feat/somnia-strategist-live-deploy`** (HEAD `6810c47`). **Justification (NB1):** abrigo HAS a `master`, but it is **stale — 141 commits behind** this branch and 0 ahead; ALL of abrigo Phases 11–18 (the live two-leg strategist deploy + the published `somnia-strategist-deployment.json` + the Panoptic/executor work) exist ONLY on `feat/somnia-strategist-live-deploy`, never merged to `master`. Migrating from `master` would LOSE the entire backend. So the feature-branch tip IS the de-facto trunk and is the correct base; it becomes the backend baseline in the monorepo. (Optionally fast-forward/merge it → abrigo `master` first for tidiness, but since `master` is 141 behind that's a cosmetic rename, not a gate.)
 
 1. `git init` fresh local `d2p`; first commit = root scaffold (`package.json`, `pnpm-workspace.yaml`, `.gitignore` §4, `README.md`).
 2. Subtree-merge each source into a subdir (preserves commits in the DAG; `subtree add` ≡ `read-tree --prefix` + `merge -s ours --allow-unrelated-histories`):
@@ -81,7 +85,7 @@ After the `packages/backend` subtree (which brings the 6 `160000` gitlinks under
 ## §4 Codegen seam + artifacts + .gitignore union
 
 - `packages/frontend/wagmi.config.ts`: change the absolute `/home/.../abrigo-somnia/contracts` project path → relative **`../backend/contracts`** (resolves to `packages/backend/contracts`; output `lib/contracts/generated.ts` shape unchanged, stays committed).
-- **Deployment artifacts:** the committed mirror under `packages/frontend/lib/apps/abrigo/cornerstone/{somnia-strategist-deployment,buildbear-deployments}.json` is the BUILD INPUT (already committed; the frontend never depends on the backend's gitignored `out/`). A root `scripts/sync-artifacts.sh` refreshes that mirror from `packages/backend/contracts/script/out/*.json` after a backend provision/deploy — replacing the old cross-repo mirror.
+- **Deployment artifacts (MINOR-1 corrected):** the ONLY committed frontend mirror today is `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` (the build input; `artifact-loader.ts` statically imports just this). **`somnia-strategist-deployment.json` is NOT a committed frontend mirror** — it lives on the backend branch at `contracts/script/out/` and arrives via the backend subtree at `packages/backend/contracts/script/out/somnia-strategist-deployment.json`. A root `scripts/sync-artifacts.sh` refreshes the frontend mirror(s) from `packages/backend/contracts/script/out/*.json` after a backend provision/deploy. **Phase 11** decides whether the live-Somnia wiring reads `somnia-strategist-deployment.json` directly from the backend tree or introduces a committed frontend mirror (the route currently has those inputs pinned in `agent1-inputs.ts`, so a committed mirror is optional). The frontend never depends on the backend's gitignored `out/`.
 - **Root `.gitignore` union (per-package-anchored — M3):** keep Foundry hygiene ignores scoped under the backend package — `packages/backend/contracts/out/`, `/cache/`, `/broadcast/` — using anchored paths, NOT a bare `out/` (a bare `out/` would wrongly sweep any `out/` under `packages/frontend/`). Keep the frontend's anchored ignores as-is. The committed deployment JSONs live outside any `out/` → not affected.
 
 ## §5 CI (single workflow, two lanes)
@@ -112,7 +116,7 @@ After the `packages/backend` subtree (which brings the 6 `160000` gitlinks under
    - `forge test --root packages/backend/contracts` (Foundry + submodules, non-fork lanes) → green.
    - `pnpm --filter frontend test` (vitest) + playwright e2e → green.
    - One read-only GSD command from root resolves `.planning` (§6).
-4. Push `d2p`; set up CI; create + GREEN the new Vercel project (preview build green = the §7 gate).
+4. **Enumerate required env from code (M-A):** `grep -rEn "process\.env|env\." packages/frontend/{app,lib} | grep -oE "(NEXT_PUBLIC_[A-Z0-9_]+|[A-Z][A-Z0-9_]{3,})"` (+ check `lib/env.ts` t3 schema) → the authoritative server+public var set; confirm EVERY one is set in the new Vercel project (server-only NEVER `NEXT_PUBLIC_`). A missing server-only var (e.g. `AGENT1_ROUTE_SECRET`) yields a GREEN build but a runtime-broken `/api/abrigo/agent1` — the typecheck-green/runtime-broken class. Then push `d2p`; set up CI; create + GREEN the new Vercel project (preview build green = the §7 gate).
 5. **Archive** the two old repos read-only (GitHub Archive + README pointer to `d2p`). Do NOT delete.
 6. Update local working dirs + memory to the new path.
 
