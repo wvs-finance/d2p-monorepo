@@ -327,9 +327,12 @@ run_two_leg() {
   # ---- Full-mandate assertion (MINOR-4, positional awk) ----------------------------------------
   # getMandate returns (address economicTheory, bytes32 underlyingMarket, uint256 targetNotional,
   # uint32 chainId, bool isLong): economicTheory = field $1, targetNotional = field $3.
+  # NOTE: cast appends a human-readable annotation to large ints, e.g. "58400000 [5.84e7]". The awk
+  # field split on ',' keeps that bracketed suffix; strip it (everything from the first '[') AFTER the
+  # space-strip so the numeric check sees a clean integer (Rule-1 fix: this was a false targetNotional BLOCK).
   mandate=$(cast call "$CONSUMER" "getMandate(bytes32)((address,bytes32,uint256,uint32,bool))" "$decision_id" --rpc-url "$RPC" 2>/dev/null)
-  econ_theory=$(printf '%s' "$mandate" | tr -d '()' | awk -F',' '{gsub(/ /,"",$1); print $1}'); econ_theory=${econ_theory%% *}
-  target_notional=$(printf '%s' "$mandate" | tr -d '()' | awk -F',' '{gsub(/ /,"",$3); print $3}'); target_notional=${target_notional%% *}
+  econ_theory=$(printf '%s' "$mandate" | tr -d '()' | awk -F',' '{gsub(/ /,"",$1); print $1}'); econ_theory=${econ_theory%% *}; econ_theory=${econ_theory%%\[*}
+  target_notional=$(printf '%s' "$mandate" | tr -d '()' | awk -F',' '{gsub(/ /,"",$3); print $3}'); target_notional=${target_notional%% *}; target_notional=${target_notional%%\[*}
   [ -n "$econ_theory" ] && [ "$econ_theory" != "0x0000000000000000000000000000000000000000" ] || { echo "  BLOCK: getMandate economicTheory is 0x0 for decisionId=$decision_id" >&2; return 1; }
   case "$target_notional" in ''|*[!0-9]*) echo "  BLOCK: getMandate targetNotional non-numeric ('$target_notional') for decisionId=$decision_id" >&2; return 1;; esac
   { [ "$target_notional" -ge 1000 ] && [ "$target_notional" -le 100000000 ]; } || { echo "  BLOCK: targetNotional $target_notional out of [1000,100000000] for decisionId=$decision_id" >&2; return 1; }
