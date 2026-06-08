@@ -131,7 +131,11 @@
       "fieldTickSpacing": "Tick spacing",
       "fieldAsset": "Asset",
       "fieldMargin": "Margin delta",
-      "fieldTokenId": "Position token id"
+      "fieldTokenId": "Position token id",
+      "nonErgodicDisclosedLabel": "Non-ergodic disclosed",
+      "templateMarker": "(TEMPLATE)",
+      "booleanYesLabel": "yes",
+      "booleanNoLabel": "no"
     }
   }
 }

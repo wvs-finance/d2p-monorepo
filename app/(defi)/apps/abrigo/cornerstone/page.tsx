@@ -95,6 +95,11 @@ export default async function CornerstonePage() {
     mockUnit: t('cornerstone.mockUnit'),
     confirmGateCaption: t('cornerstone.confirmGateCaption'),
     confirmCta: t('cornerstone.confirmCta'),
+    // D1 Davidson honesty split (09-03)
+    nonErgodicDisclosedLabel: t('cornerstone.nonErgodicDisclosedLabel'),
+    templateMarker: t('cornerstone.templateMarker'),
+    booleanYesLabel: t('cornerstone.booleanYesLabel'),
+    booleanNoLabel: t('cornerstone.booleanNoLabel'),
   }
 
   // MintCardStrings

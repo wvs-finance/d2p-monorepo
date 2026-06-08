@@ -67,6 +67,11 @@ const STRINGS = {
   // Confirm foot
   confirmGateCaption: 'Acción simulada — no se ejecuta en ninguna cadena.',
   confirmCta: 'Confirmar (simulado)',
+  // D1 Davidson honesty split (09-03)
+  nonErgodicDisclosedLabel: 'Divulgación no ergódica',
+  templateMarker: '(TEMPLATE)',
+  booleanYesLabel: 'sí',
+  booleanNoLabel: 'no',
 }
 
 describe('HedgeDecisionCardV2 — honesty + visual contract', () => {

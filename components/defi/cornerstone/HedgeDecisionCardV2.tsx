@@ -15,7 +15,7 @@
 
 import { ProvenancePill } from '@/components/defi/ProvenanceBadge'
 import type { HedgeLegParamsView } from '@/lib/apps/abrigo/cornerstone/events'
-import { FlaskConical } from 'lucide-react'
+import { CheckCircle2, Circle, FlaskConical } from 'lucide-react'
 import { type Ref, useRef } from 'react'
 
 // ---------------------------------------------------------------------------
@@ -43,6 +43,11 @@ export interface CardV2Strings {
   mockUnit: string
   confirmGateCaption: string
   confirmCta: string
+  // D1 Davidson honesty split (09-03) — nonErgodicDisclosed pill + TEMPLATE rationale
+  nonErgodicDisclosedLabel: string
+  templateMarker: string // "(TEMPLATE)" marker prefix for the rationale
+  booleanYesLabel: string // "sí" / "yes"
+  booleanNoLabel: string // "no"
 }
 
 interface HedgeDecisionCardV2Props {
@@ -50,6 +55,38 @@ interface HedgeDecisionCardV2Props {
   strings: CardV2Strings
   onConfirm: () => void
   confirmRef?: Ref<HTMLButtonElement>
+}
+
+// ---------------------------------------------------------------------------
+// BooleanPill — D1 Davidson honesty flag pill (CROSS-09 color+icon+text, never color-only).
+// true → status-pass background + CheckCircle2 icon; false → surface + Circle icon.
+// Used for nonErgodicDisclosed.
+// NO <details>. Full visual weight. LAB-05. CROSS-09.
+// ---------------------------------------------------------------------------
+
+function BooleanPill({
+  value,
+  trueLabel,
+  falseLabel,
+}: {
+  value: boolean
+  trueLabel: string
+  falseLabel: string
+}) {
+  if (value) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-normal ring-1 ring-inset text-status-pass ring-status-pass bg-status-pass/10">
+        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        <span>{trueLabel}</span>
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-normal ring-1 ring-inset text-text-muted ring-border-default bg-bg-surface">
+      <Circle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+      <span>{falseLabel}</span>
+    </span>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -166,17 +203,34 @@ export function HedgeDecisionCardV2({
           value={String(view.marginDelta.token0)}
           sibling={strings.mockUnit}
         />
+
+        {/* ---------------------------------------------------------------- */}
+        {/* D1 Davidson honesty split — nonErgodicDisclosed pill              */}
+        {/* FULL WEIGHT — color+icon+text (CROSS-09). NO <details>. LAB-05. */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="flex items-center justify-between gap-4 py-2">
+          <dt className="text-text-muted text-sm">{strings.nonErgodicDisclosedLabel}</dt>
+          <dd>
+            <BooleanPill
+              value={view.nonErgodicDisclosed}
+              trueLabel={strings.booleanYesLabel}
+              falseLabel={strings.booleanNoLabel}
+            />
+          </dd>
+        </div>
       </dl>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Free-text rationale under the explicit human-authored label.        */}
+      {/* Free-text rationale with (TEMPLATE) marker — D1 Davidson split.    */}
       {/* BLOCKER RC-B2: NEVER presented as live agent/LLM reasoning.        */}
+      {/* The "(TEMPLATE)" marker is MANDATORY — sourced from the event str. */}
       {/* No <details>. Full visual weight. LAB-05.                           */}
       {/* ------------------------------------------------------------------ */}
       <section aria-labelledby="human-authored-label">
         <p id="human-authored-label" className="text-text-muted text-sm font-normal mb-1">
           {strings.humanAuthoredLabel}
         </p>
+        <p className="text-text-muted text-xs font-mono mb-1">{strings.templateMarker}</p>
         <p className="text-text-primary text-sm">{view.rationale}</p>
       </section>
 
