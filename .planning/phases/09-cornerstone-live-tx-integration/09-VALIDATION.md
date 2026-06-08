@@ -2,7 +2,7 @@
 phase: 9
 slug: cornerstone-live-tx-integration
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-06-07
 ---
@@ -45,16 +45,23 @@ created: 2026-06-07
 | `BalanceDelta` decoder (amount0 sar + amount1 sign-extend low word) | 0 | MOD5-ABI | unit | `pnpm vitest run lib/apps/abrigo/cornerstone` | ❌ W0 | ⬜ pending |
 | signed `int24` strike/width decode (negative tick) | 0 | MOD5-ABI | unit | `pnpm vitest run` | ❌ W0 | ⬜ pending |
 | `extractStrike(positionId) === 360360` (TokenId.strike(0) bit offset) | 0 | MOD5-ABI | unit | `pnpm vitest run` | ❌ W0 | ⬜ pending |
-| `fromChainLog` decoder (ExecutorDecided/PositionMinted, `strict:false`, requestId=0 not surfaced) | 0 | MOD5-ABI | unit | `pnpm vitest run` | ❌ W0 | ⬜ pending |
+| `fromChainEvent` reshape (8-field ExecutorDecided/PositionMinted.positionId, `strict:false`, recordedDecisionId once, requestId=0 not surfaced) | 1 | MOD5-ABI | unit | `pnpm vitest run tests/unit/cornerstone/from-chain-event.test.ts` | ❌ W0 | ⬜ pending |
 | artifact loader + `isExpired(capturedAt+3d)` | 0 | MOD5-CHAIN | unit | `pnpm vitest run` | ❌ W0 | ⬜ pending |
-| isolated `buildbear.ts` chain NOT in `wagmiConfig`/`SupportedChainId` | 0 | MOD5-CHAIN | unit/grep | `pnpm vitest run` + grep guard | ❌ W0 | ⬜ pending |
+| fork registered as 6th wagmi chain (D2; rpcUrl from artifact, no hardcoded endpoint) | 0 | MOD5-CHAIN | grep | `grep -qE '31337\|BuildBearChainId' lib/wagmi/config.ts` | ❌ W0 | ⬜ pending |
+| T0 replay smoke (snapshot renders end-to-end) — the CI gate | 0 | MOD5-MODES | e2e | `pnpm exec playwright test tests/e2e/cornerstone-replay-smoke.spec.ts` | ❌ W0 | ⬜ pending |
+| mode parse: DEFAULT_MODE==='replay'; garbage/null → replay | 0 | MOD5-MODES | unit | `pnpm vitest run tests/unit/cornerstone/mode.test.ts` | ❌ W0 | ⬜ pending |
 | freshness gate: `numberOfLegs(executor)==0` → live; `>0` → fallback | 1 | MOD5-LIVE | unit (pure logic) | `pnpm vitest run` | ❌ W0 | ⬜ pending |
 | `runWorkflowLive` producer selection vs `runWorkflow` mock through same workflow-store seam | 1 | MOD5-LIVE/FALLBACK | unit (store reducer) | `pnpm vitest run` | ❌ W0 | ⬜ pending |
+| Agent-1 two-leg orchestration: parseStrategistDecided + serializeMandate (strings, no raw bigint/bytes32) + correlateDecisionFailed per leg | 1 | MOD5-AGENT1LIVE | unit | `pnpm vitest run tests/unit/cornerstone/agent1-route-logic.test.ts` | ❌ W1 | ⬜ pending |
+| /api/abrigo/agent1 server-only (runtime nodejs, shared-secret 401, 503 unconfigured); SOMNIA_OPERATOR_PK not NEXT_PUBLIC_ | 1 | MOD5-AGENT1LIVE | integration/grep | `curl`/`browser_network_request` + `grep` guard | ❌ W1 | ⬜ pending |
+| D4 mandate.chainId→31337 override before resolveFromMandate; args [mandate,0n,1_000_000n] | 1 | MOD5-LIVE | unit | `pnpm vitest run tests/unit/cornerstone/mandate-override.test.ts` | ❌ W1 | ⬜ pending |
+| producer emit ordering + reverted path (no quoteMargin, no minted claim) | 1 | MOD5-LIVE | unit | `pnpm vitest run tests/unit/cornerstone/producer-ordering.test.ts` | ❌ W1 | ⬜ pending |
 | Route-Handler JSON-RPC proxy forwards `eth_chainId`/reads | 1 | MOD5-CHAIN/LIVE | integration | `browser_network_request` / vitest route test | ❌ W0 | ⬜ pending |
-| live-vs-fallback branch + mode banner always visible | 2 | MOD5-FALLBACK | e2e | `pnpm exec playwright test cornerstone` | ✅ extend | ⬜ pending |
+| live|replay|mock mode switch + banner always visible (replay not broken) | 2 | MOD5-MODES/FALLBACK | e2e | `pnpm exec playwright test tests/e2e/cornerstone-modes.spec.ts tests/e2e/cornerstone-replay-smoke.spec.ts` | ❌ W2 | ⬜ pending |
+| live mode shows BOTH explorer txs (Somnia Agent-1 + BuildBear Agent-2); narrative no prompt-varying geometry | 2 | MOD5-SURFACE | e2e (mocked) | `pnpm exec playwright test tests/e2e/cornerstone-modes.spec.ts` | ❌ W2 | ⬜ pending |
 | honesty greps (no executed/realized, no `$` PnL, no raw 0x000…0, fork-verified never green, no `<details>` on decision card, mock fallback shows NO tx hash) | 2 | MOD5-SURFACE/FALLBACK | e2e | `pnpm exec playwright test cornerstone` | ✅ extend | ⬜ pending |
 | verbatim no-bridge disclosure (es-CO+en) present in banner | 2 | MOD5-SURFACE | e2e | `pnpm exec playwright test` | ✅ extend | ⬜ pending |
-| live mint end-to-end (real tx hash + ExecutorDecided + PositionMinted + quoteMargin) | 2 | MOD5-LIVE/SURFACE | live (manual/EC) | Evidence Collector vs freshly provisioned sandbox | n/a | ⬜ pending |
+| live two-chain end-to-end (real Somnia Agent-1 tx + BuildBear Agent-2 tx + ExecutorDecided + PositionMinted + quoteMargin) | 2 | MOD5-LIVE/AGENT1LIVE/SURFACE | live (manual/EC) | Evidence Collector — DEFERRED to the two-leg strategist deploy; replay is the gate until then | n/a | ⬜ deferred |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

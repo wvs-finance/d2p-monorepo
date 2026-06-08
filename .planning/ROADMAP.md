@@ -368,12 +368,14 @@ Plans:
 
 **Open item carried to planning/research:** CORS/browser-origin JSON-RPC to the BuildBear RPC — decide via an `eth_chainId` browser probe whether a Next.js Route-Handler proxy is mandatory (spec §7.2).
 
-**Plans:** 3 plans
+**Plans:** 5 plans (REPLANNED to Option B — both agents live; T0–T8)
 
 Plans:
-- [ ] 09-01-PLAN.md — Wave 0 data layer (TDD): wagmi-codegen ABIs from contracts/out/ + mirrored buildbear artifact + isExpired loader + isolated buildbear chain + BalanceDelta sign-extend decoder + Panoptic extractStrike(===360360) (MOD5-ABI, MOD5-CHAIN) [wave 0]
-- [ ] 09-02-PLAN.md — Wave 1 live producer (TDD): reconcile events.ts to 8-field ExecutorDecided + fromChainLog (strict:false) + register fork as 6th wagmi chain (D2) + freshness-gate logic + RPC proxy + runWorkflowLive with the D4 mandate.chainId=31337 override + post-mint quoteMargin (MOD5-ABI, MOD5-CHAIN, MOD5-LIVE, MOD5-FALLBACK) [wave 1]
-- [ ] 09-03-PLAN.md — Wave 2 surfaces + wire: 6 surfaces (mode banner + verbatim no-bridge disclosure, live-tx rows, on-chain evidence, expandable rationale, static cost placeholder, freshness gate) + D1 Davidson split on HedgeDecisionCardV2 + es-CO/en copy + freshness-probe page wire + e2e honesty greps + Evidence Collector live-verify (MOD5-SURFACE, MOD5-FALLBACK, MOD5-LIVE) [wave 2]
+- [ ] 09-01-PLAN.md — Wave 0: T0 FREEZE replay first (git tag cornerstone-replay-safe + replay smoke = CI gate) + live|replay|mock mode type + T1 wagmi-codegen ABIs (Strategist/Executor/IPanopticData) + register fork as 6th wagmi chain (D2) + mirrored artifact/isExpired + BalanceDelta sign-extend decoder + Panoptic extractStrike(===360360) (MOD5-MODES, MOD5-ABI, MOD5-CHAIN) [wave 0]
+- [ ] 09-02-PLAN.md — Wave 1: T2 hardened Somnia server route /api/abrigo/agent1 (runtime nodejs, server-only SOMNIA_OPERATOR_PK, shared-secret; requestSchoolDecision→poll decisionState→requestNotionalDecision→StrategistDecided; terminal DecisionFailed per leg via per-leg requestId; serialized mandate) + T3 oracle freshness (deliveredAt!=0; pinned dataKey/consensus/userIntent O-1) (MOD5-AGENT1LIVE, MOD5-LIVE) [wave 1]
+- [ ] 09-03-PLAN.md — Wave 1: T4 browser fork mint (re-hydrate mandate, D4 chainId→31337 override, resolveFromMandate(mandate,0n,1e6), quoteMargin post-mint) + T5 fromChainEvent reshape (8-field ExecutorDecided, recordedDecisionId once, PositionMinted.positionId, strict:false) + runWorkflowLive + T5b D1 Davidson split on HedgeDecisionCardV2 (nonErgodicDisclosed + TEMPLATE rationale full weight) (MOD5-ABI, MOD5-LIVE, MOD5-FALLBACK) [wave 1]
+- [ ] 09-04-PLAN.md — Wave 2: T6 live|replay|mock mode switch + 6 UI-SPEC surfaces (mode banner w/ dual Somnia+BuildBear explorer links + verbatim no-bridge disclosure, live-tx rows, on-chain evidence, expandable geometry panel, static cost placeholder, freshness gate) + es-CO/en copy + page wire + T8 mode/honesty e2e (MOD5-MODES, MOD5-SURFACE, MOD5-FALLBACK) [wave 2]
+- [ ] 09-05-PLAN.md — Wave 2: T7 operator runbook + env (.env.example SOMNIA_OPERATOR_PK/AGENT1_ROUTE_SECRET/BuildBear RPC+addrs/dataKey/consensus; two-explorer expectation) + Evidence Collector live-DOM gate (replay/mock verified now; live two-leg DEFERRED to the cross-repo strategist deploy) (MOD5-AGENT1LIVE, MOD5-LIVE) [wave 2]
 
 ---
 *Roadmap created: 2026-05-11*
