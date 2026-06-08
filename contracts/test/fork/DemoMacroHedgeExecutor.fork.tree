@@ -1,0 +1,7 @@
+DemoMacroHedgeExecutorForkTest
+├── when a SHILLER mandate with a positive surprise resolves
+│   └── it should mint a strike different from the PKE anchor through the shared sink
+├── when both schools resolve the same scenario
+│   └── it should surface distinct per-school honesty on ExecutorDecided
+└── when a SHILLER mandate with a negative surprise resolves
+    └── it should mint the downside strike or fall to the minimal stance

@@ -1,0 +1,10 @@
+LongGammaWrapperOpen
+├── when a user deposits upfront collateral and the wrapper opens a long
+│   ├── it deposits collateral to the trackers as the wrapper so the wrapper owns the shares
+│   ├── it leaves the user holding zero collateral shares
+│   ├── it mints a long gamma position with isLong one against the seeded seller short
+│   ├── it reports numberOfLegs greater than zero for the wrapper
+│   ├── it reads back a single position balance with positionSize greater than zero
+│   └── it transitions state from Uninitialized to Open and stores the user and tokenId
+└── when deposit is called a second time after the position is open
+    └── it reverts WrongState because the wrapper is one shot

@@ -1,0 +1,6 @@
+LongGammaWrapperForceExercise
+└── when an exercisor force exercises the out of range long via dispatchFrom with a shorter final list
+    ├── it burns the long leg and drives numberOfLegs of the wrapper to zero
+    ├── it transitions the wrapper to Closed so claimResidual can run
+    ├── it pays a residual equal to max of surviving minus cost and zero
+    └── it emits ResidualEroded for the involuntary debit and never pays more than holdings

@@ -1,0 +1,9 @@
+LongGammaWrapperClose
+├── when the stored user calls close on an open position
+│   ├── it voluntarily burns the long via dispatch with size zero and false and zero builder code
+│   ├── it drives numberOfLegs of the wrapper to zero
+│   └── it transitions state from Open to Closed
+├── when a non user address calls close
+│   └── it reverts NotUser
+└── when close is called while not Open
+    └── it reverts WrongState

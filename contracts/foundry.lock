@@ -5,6 +5,12 @@
   "lib/openzeppelin-contracts": {
     "rev": "0a25c1940ca220686588c4af3ec526f725fe2582"
   },
+  "lib/panoptic-helper": {
+    "rev": "5750a9c0dd00dca54c3de6a14a352293c22ee195"
+  },
+  "lib/panoptic-sdk": {
+    "rev": "4618b6564481491f227188b11455a1ff095030af"
+  },
   "lib/solady": {
     "rev": "adfad66656a6ef8c65b2a412d849bbf7f7a59842"
   },
@@ -19,5 +25,8 @@
   },
   "lib/v4-core": {
     "rev": "e50237c43811bd9b526eff40f26772152a42daba"
+  },
+  "lib/v4-hooks-public": {
+    "rev": "0ec65960e213d0bc38be91004c66d550a085c0dc"
   }
 }

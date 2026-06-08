@@ -1,0 +1,14 @@
+ShillerRepresentativenessTest::shillerCore
+├── when a standardized cpi surprise is derived
+│   └── it equals actual minus consensus over sigma in wad with the sign preserved
+├── when a surprise magnitude is mapped to a convex option ratio
+│   └── it is convex monotone in the absolute surprise clamped between one and one hundred twenty seven
+├── when a strike tick is derived from a signed surprise
+│   └── it is sign driven and tickspacing aligned around the pke anchor
+├── when a chunk width is derived from a surprise magnitude
+│   └── it is even snapped and non decreasing with at least one strict widening step
+└── when the surprise oracle is stale or unset
+    ├── given observedAt is zero
+    │   └── it maps to the zero surprise minimal stance
+    └── given observedAt is beyond the max staleness window
+        └── it maps to the zero surprise minimal stance

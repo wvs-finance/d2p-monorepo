@@ -1,0 +1,20 @@
+RepresentativenessTest::representativenessCore
+├── when a structural strike tick is derived for a human rate
+│   └── it equals the decimal-gap-correct snapped tick exactly at the K_hi strike
+├── when the regime-conditional width is derived
+│   └── it differs from the stationary GBM baseline width when the regime is stress
+├── when the regime-conditional vol is derived
+│   └── it strictly exceeds the stationary baseline vol when the regime is stress
+├── when beta one is applied across regimes
+│   └── it makes the stress inflation adjustment strictly exceed the tranquil one
+├── when the regime oracle is stale or unset
+│   ├── given observedAt is zero
+│   │   └── it resolves the effective regime to stress
+│   └── given observedAt is beyond the max staleness window
+│       └── it resolves the effective regime to stress
+├── when a whole-usd notional is mapped to a feasible option ratio
+│   └── it is a monotone non-decreasing map clamped between one and one hundred twenty seven
+├── when the full geometry is resolved from a mandate-like input
+│   └── it derives the expected hedge-leg fields field by field
+└── when the geometry derivation is mutated to collapse stress beta one onto tranquil
+    └── it makes the gbm divergence and asymmetry assertions vacuous

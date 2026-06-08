@@ -2,7 +2,7 @@
 
 **Created:** 2026-06-01
 **Milestone:** v2.0 — convex-instrument (NEW parallel-track engineering milestone)
-**Granularity:** standard (4 lean phases for the v1 demo loop)
+**Granularity:** standard — original v1 demo loop (4 lean phases 7–10) + the Agentathon cornerstone (phases 11–15, appended 2026-06-02)
 **Parallelization:** enabled (Phase 7 fork-stack and Phase 10's `MacroOracle` modify are independent; first true join is `PositionBuilder`)
 **Mode:** interactive
 **Source of truth:** `.planning/PROJECT.md` (§ Current Milestone: v2.0) + `.planning/REQUIREMENTS.md` (v1 reqs) + `.planning/research/v2-convex-instrument/{SUMMARY,STACK,ARCHITECTURE,PITFALLS}.md`
@@ -38,7 +38,7 @@
 - Mapped to active phases: 12 (100%)
 - Orphans: 0
 - Deferred (clearly out of active phases): PAY-01, XCHAIN-01, HEDGE-01
-- Active phases: 4 (Phase 7–10)
+- Active phases: original instrument 7–10 (7–8 ✅ done; 9–10 deferred behind the cornerstone) + the **Agentathon cornerstone 11–15** (11 ✅, 12 ✅, 13 ✅, 14 ✅ done; MVP remaining = **15 E2E**). See the "Cornerstone milestone" section.
 - Total success criteria: 16 (observable, testable)
 
 ## Process Gates (every phase — from PITFALLS)
@@ -55,7 +55,7 @@
 ## Phases
 
 - [x] **Phase 7: Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool** — Foundry Base-fork (UniV4 PoolManager), borrowed Panoptic-V2-lite behind `IPanopticData`, our own cCOP/USDC UniV4 demo pool, BUSL NOTICE + bulloak. (completed 2026-06-02)
-- [ ] **Phase 8: LongGammaWrapper cash-flow** — Wrapper owns the position; deposit upfront collateral → mint long-gamma → streamia accrues (read from the contract) → burn closes → residual from surviving collateral, with all involuntary-close branches.
+- [x] **Phase 8: LongGammaWrapper cash-flow** — Wrapper owns the position; deposit upfront collateral → mint long-gamma → streamia accrues (read from the contract) → burn closes → residual from surviving collateral, with all involuntary-close branches. (completed 2026-06-02)
 - [ ] **Phase 9: Premium split + data-cost reimbursement** — `PremiumSplitter` (π_panoptic + μ_LP + φ_data); `CapitalRemunerationVault` (ERC-4626) receives mutualized φ_data ($199 fixed) under a no-double-count conservation invariant; data-cost-weighted user residual.
 - [ ] **Phase 10: Oracle surprise route + position sizing** — `MacroOracle` exposes a CPI surprise (consensus + σ → `s_t`); `PositionBuilder` sizes notional/strike from `s_t` + the cCOP/USD mark, linkage flagged `linkage_validated:false`.
 
@@ -91,7 +91,14 @@
   4. The wrapper handles every involuntary-close branch — `forceExercise`, `settleLongPremium`, and liquidation — each with a committed `.tree` branch and a fork test; in each, `residual = max(survivingCollateral − realizedCosts, 0)`, the wrapper never pays more than it holds, and a `ResidualEroded` event fires on involuntary debit. *(WRAP-03)*
   5. A voluntary `burn` closes the position and `claimResidual()` computes the residual from **surviving collateral at actual close** — never a figure derived from the upfront deposit. *(WRAP-04)*
 **Notes (PITFALLS):** P1 — streamia read-from-contract, never a `SPREAD_MULTIPLIER`/`streamiaPerBlock` constant. P2 — wrapper-owns-position custody is the foundational invariant; the user's claim is internal accounting, not a 4626 share/Panoptic position. P3 — the no-upfront-premium reframe; the deposit is an over-funded cap, residual is post-settlement. P8 — `.tree` for open/close/claim/health committed before `.sol`.
-**Plans**: TBD
+**Plans**: 7 plans (7 waves — interface-first skeleton → test substrate → behavioral units dep-chained by the evm-tdd Iron Law, invariants last)
+- [x] 08-01-PLAN.md — Interface-first surface: `ICostMeter`, `IPanopticData.getOracleTicks` (+L221→L431 fix), `LongGammaWrapper` skeleton (state machine + events + stubs), `invariants.tree` *(WRAP-01..04 surface)*
+- [x] 08-02-PLAN.md — Test substrate: `V4SwapHelper` (deterministic fee gen) + `LongGammaWrapperBase` (M-3 isolation + seeded closeable seller short) *(WRAP-02/03 prerequisites)*
+- [x] 08-03-PLAN.md — `open` tree+impl+test: deposit upfront collateral → wrapper-owns custody → mint `isLong=1` *(WRAP-01, WRAP-02)* — 5/5 green on Base fork
+- [x] 08-04-PLAN.md — `streamia` tree+impl+test: READ `longPremium` (read-fidelity + non-zero + directional/monotonic + pre-Open WrongState) *(WRAP-03 — fork-proven 6/6; req stays pending until the 08-06 involuntary branches)*
+- [x] 08-05-PLAN.md — `close` + `claimResidual` trees+impl+tests: user-gated voluntary burn (SC-5) + CEI cap-aware surviving-collateral residual *(WRAP-04)* — close 6/6 + claimResidual 7/7 green on Base fork
+- [x] 08-06-PLAN.md — `settleLong` + `forceExercise` + `liquidation` trees+tests: the three `dispatchFrom` involuntary branches (settle stays Open; the other two close) *(WRAP-03 — fork-proven 2/2 each; WRAP-03 now complete)*
+- [ ] 08-07-PLAN.md — `invariants` impl: `invariant_residualNeverExceedsHoldings` + `invariant_userClaimsBackedByCollateral` at the CI fuzz floor *(WRAP-03/04)*
 
 ### Phase 9: Premium split + data-cost reimbursement
 **Goal**: A premium is decomposed into its three economic slices, the mutualized data cost is recouped through an ERC-4626 vault, and the user's reimbursement is data-cost-weighted — all under a conservation invariant that no data cost is double-counted.
@@ -103,7 +110,12 @@
   3. A named conservation invariant test (`invariant_dataCostConserved`) asserts `Σ φ_data (vault, mutualized) + Σ hedgeMeteredCost (per-position, incremental) == totalDataSpend` — the fixed $199 is charged once to the vault, never N times to N positions; every cost line carries a units/FX column. *(FEE-02 / FEE-03)*
   4. User reimbursement = **surviving collateral − streamia − commission − metered hedge-data cost** (the per-position *incremental* metered cost only, in the v1 stubbed-hedge metering); a fork test asserts the full residual formula with `Σ hedge cost` wired into the wrapper from Phase 8. *(FEE-03)*
 **Notes (PITFALLS):** P5 — the two data costs are disjoint ledger line items: mutualized φ_data (fixed $199 → vault, decreasing per-position as volume grows) vs per-position incremental hedge metering. The `199` constant never appears in a per-position deduction; the conservation test is the phase exit criterion. v1 meters a **stubbed** hedge (live delta-hedge is HEDGE-01, deferred) — the metering interface is built so the live keeper drops in later.
-**Plans**: TBD
+**Plans**: 5 plans (3 waves — units/FX lock + splitter (W1) → {vault, meter} parallel (W2) → {conservation invariant, fork residual} parallel (W3))
+- [ ] 09-01-PLAN.md — Units/FX lock (Option B per-token + Option A USD narrative) + `PremiumSplitter` (`Σ slices == premium`, remainder sink) *(FEE-01)*
+- [ ] 09-02-PLAN.md — `CapitalRemunerationVault is ERC4626` (mutualized $199 once/epoch, donation-inflow recoupment, 4626 share fuzz invariants) *(FEE-02)*
+- [ ] 09-03-PLAN.md — `IHedgeMeter is ICostMeter` (+`recordHedgeFill` HEDGE-01 drop-in) + `HedgeDataMeter` (per-position incremental, P5 `199`==0) *(FEE-03)*
+- [ ] 09-04-PLAN.md — `invariant_dataCostConserved` (hand-named, per-token, non-vacuous mutation-proven; Handler drives both ledgers) *(FEE-02/FEE-03)*
+- [ ] 09-05-PLAN.md — `LongGammaWrapper.meteredResidual` fork test: fresh wrapper + `setCostMeter` → residual nets the metered hedge cost (metered term BIT); wrapper unedited *(FEE-03)*
 
 ### Phase 10: Oracle surprise route + position sizing
 **Goal**: The CPI surprise `s_t` is computable from the already-live `MacroOracle`, and `PositionBuilder` sizes the long-gamma notional/strike from `s_t` + the cCOP/USD mark — with the CPI→FX linkage honestly flagged unvalidated.
@@ -116,6 +128,67 @@
   3. The CPI→FX coefficient (`β_{s→FX}`) is a **config/oracle-supplied parameter, never a hard-coded constant**, and the instrument metadata carries `linkage_validated: false`; the success criteria and demo narrative state the sizing is *illustrative assuming the linkage*, not a validated CPI hedge. *(SIZE-02)*
 **Notes (PITFALLS):** P7 — the CPI→FX linkage is an unvalidated assumption; the coefficient stays config-backed for later M1/M2 recalibration; `linkage_validated:false` is a hard requirement and the milestone must not claim production-readiness while false. v1 may inject `s_t` directly (the MacroOracle→instrument cross-chain scalar bridge is XCHAIN-01, deferred).
 **Plans**: TBD
+
+## Cornerstone milestone — Scenario 1 (UI → contracts), the Agentathon deliverable
+
+> **The deliverable is ONE end-to-end test** (`CHECKPOINT.md`): user prompt on the UI → **Agent 1** picks the instrument → **Agent 2** sizes it to the pool and mints → a **monitoring agent** reports live performance — for **Scenario 1** ("rate-hike → COP/USD convexity → long cCOP/USD call"). Phases 11–15 are the **test-ribbon (evm-TDD per component)** decomposition; they take priority over Phases 9–10 (premium-split, oracle-surprise) for the ~**June 11, 2026** deadline. Delta-hedge management over the position's lifetime is a **later iteration** (deferred — `HEDGE-01`).
+>
+> **CHAIN PIVOT (confirmed 2026-06-02):** the cornerstone runs on a **Polygon fork** against the **real `wCOP/USDC` UniV4 pool** (PoolManager `0x6736…`, USDC 6dp `0x3c49…`, wCOP 18dp `0x8a1D…`, fee 3000 / tickSpacing 60), with Panoptic V2 stood up via the production `DeployProtocol.s.sol` + real periphery (`StrategyBuilder`, `PanopticQuery`). Phases 7–8 (Base fork / mock-cCOP) were the V2-mechanics proving ground; the Polygon demo realizes the mint with real tokens. **Agent 2's execution core is ALREADY BUILT + committed** in `contracts/test/fork/DemoMacroHedgeExecutor.fork.t.sol` (`HedgeLegParams`/`PayoffTerms` → `resolvePositionFromHedgeParams` vol→width→strike→`TokenId` → short-then-long `dispatch` mint; `RiskManagement.quoteCollateralRequirements`; two green ribbons). Phases 11–15 build the agents + monitoring + UI **around** that core; nothing there is planned over.
+
+### Phase 11: `MacroHedgeStrategist` v1 (lean decision agent) — DONE ✅
+**Goal**: A Somnia-testnet `MacroHedgeStrategist is SomniaAgentConsumer` turns a macro view into a **consensus-verified, authenticated** decision via the LLM-Inference agent. **Built + verified + run LIVE on Somnia testnet** — this is the v1; Phase 12 upgrades its OUTPUT shape (`HedgeDecision{action,sizeBps}` → the `HedgeLegParams` instrument-spec the Executor consumes).
+**Requirements**: AGENT-01, AGENT-02, AGENT-03, AGENT-04 — **all Complete**.
+**Plans (complete):**
+- [x] 11-01-PLAN.md — Add `ILLMAgent` (inferString/inferNumber) to vendored `ISomniaAgents.sol` *(AGENT-01)* — `faffaec`, forge build green
+- [x] 11-02-PLAN.md — `.tree` + `MacroHedgeStrategist.sol` (is SomniaAgentConsumer) + unit suite (encode/decode→enum/clamp/auth/replay/DecisionFailed) *(AGENT-02 + AGENT-03 unit)* — tree `71d3bec`, contract `0853bfc`, suite `f778012`; bulloak clean, 17/17 green
+- [x] 11-03-PLAN.md — Somnia-testnet e2e runner; live in-enum/in-range + decision-moves-with-consensus *(AGENT-03)* — **APPROVED on Somnia testnet (50312)**: CONSUMER `0xfA428171E1F5B56f92C67C002De1d8e90B053EE1`; consensus=500→ADD_LONG_GAMMA/6800, consensus=900→REDUCE/568
+- [x] 11-04-PLAN.md — `contracts-ci.yml` (forge build + parseable-tree bulloak + sharded/cached/secret fork; Somnia e2e on `workflow_dispatch`) *(AGENT-04)* — `0dc1587`, `c291305`
+**Deferred out of the cornerstone MVP:** the `te-factor-modules` multi-factor data layer (DATA-01/02 — the live `MacroOracle` factors suffice for Scenario 1; `openspec/changes/te-factor-modules/` ships post-deadline) and the monitoring *agent* (MON-01 — Phase 15 uses a basic read instead).
+
+### Phase 12: `MacroHedgeStrategist` (Agent 1) — prompt → hedge mandate — DONE ✅
+**Goal**: **Upgrade the Phase-11 v1 Strategist's OUTPUT** from `HedgeDecision{action,sizeBps}` to a **`HedgeMandate`** — the hedging *intent* the Phase-14 representativeness brain consumes: the **economic school Agent 1 INFERS from the prompt** (via a concrete `IMacroThesis` named-thesis registry — Shiller macro-risk / post-Keynesian), the **direction** (Scenario 1: long cCOP/USD call → `isLong`), and a **target notional** (the cash-flow risk to hedge), reading the **live `MacroOracle` factors**. Agent 1 expresses WHAT to hedge under WHICH school; it does **NOT** finalize the instrument geometry (moneyness/strike/width/size are Phase-14's representativeness outputs). `underlyingMarket` anchored to the committed **`POLYGON_WCOP_USDC_POOL_ID`** constant (Agent 1 can't produce a runtime PoolId).
+**Depends on**: Phase 11 (the v1 Strategist — DONE) + the live `MacroOracle`; the committed `docs/superpowers/specs/2026-06-02-macro-hedge-strategist-design.md` (its `inferString`/`inferNumber` calling convention) + `IMacroThesis` + `PolygonPools`. **Independent of the Phase-14 representativeness math** — the mandate is its *input*, so Phase 12 can build in parallel.
+**Requirements**: STRAT-01, STRAT-02 — **all Complete** (2026-06-06; 12-VERIFICATION `status: passed`, 7/7 must-haves; strategist 19/19 + regression 97/0; live "different prompt → different mandate" run deferred to a Manual-Only `workflow_dispatch`)
+**Success Criteria**: 1. `IMacroThesis` is given a concrete **named-thesis registry** shape, and `MacroHedgeStrategist is SomniaAgentConsumer` emits a **`HedgeMandate`** via the two-leg flow (Leg 1 `inferString` → the economic school inferred from the prompt; Leg 2 `inferNumber` → the target notional; `llm-inference` ID `12847293847561029384`, authenticated callback); a Somnia-testnet run proves a real prompt → well-formed mandate, rejects non-`PLATFORM`/replayed responses, and a different prompt yields a different mandate (reasoning, not a constant). *(STRAT-01)* 2. The emitted `HedgeMandate` is well-formed + **consumable by Agent 2's representativeness derivation** — `underlyingMarket` anchored to `POLYGON_WCOP_USDC_POOL_ID`, the school address resolvable, the target notional in-range — so Phase 14's `resolveFromMandate` can derive a `HedgeLegParams` from it (the geometry/`TokenId` round-trip moves to Phase 14). *(STRAT-02)*
+**Notes**: autonomy = decision freedom, NOT unauthenticated. The geometry (moneyness/strike/width/size) is explicitly Phase-14's representativeness output — Agent 1 emits intent only. Stretch: `inferToolsChat` (the LLM pulls factors itself).
+**Plans**: 2 plans (2 waves — Wave-0 type+registry substrate, then the Iron-Law TDD re-semantic of the live contract)
+- [x] 12-01-PLAN.md — `HedgeMandate` value type (intent-only, no geometry) + promote `IMacroThesis` to a concrete handle-resolving `MacroThesisRegistry` (schoolLabels/thesisOf/promptBias) *(STRAT-01, STRAT-02)* ✅ 2026-06-06 (commits 59dcc0d/1d4387f; five intent-only fields, four types mirror HedgeLegParams byte-for-byte, no-geometry grep==0, handle-resolving Fork-B with non-deployable 0x5/0x6 sentinels; `forge build` exit 0; the STRAT-01/02 substrate half — the strategist re-semantic + Somnia-testnet run land in 12-02)
+- [x] 12-02-PLAN.md — Iron-Law re-semantic of `MacroHedgeStrategist` (RED tree+test -> GREEN impl): Leg 1 inferString -> school, Leg 2 inferNumber -> target notional, assemble+emit `StrategistDecided(decisionId, school, HedgeMandate)` + `getMandate`; spine kept verbatim; reconcile the UI-handoff event schema *(STRAT-01, STRAT-02)* ✅ 2026-06-06 (commits 6fe4c32 RED → 7101acb GREEN → 68e34d0 docs; school/notional two-leg flow, block-independent cross-block join, B1 single-struct `getMandate`/`decisionState`, M2 below-MIN floor-UP, spine verbatim + old action/sizeBps API removed; **19/19** strategist + **97/97** fork-free suite, no sibling regressions; UI-handoff reconciled to the HedgeMandate shape; the live Somnia "different prompt → different mandate" run DEFERRED Manual-Only per M4)
+
+### Phase 13: `MacroHedgeExecutor` (Agent 2) — pool-representativeness, sizing, mint — DONE ✅
+**Goal**: Promote the committed `DemoMacroHedgeExecutor` resolver harness into the real **`MacroHedgeExecutor is SomniaAgentConsumer`**: it takes Agent 1's `HedgeLegParams`, does the **pool-state / representativeness analysis** (how representative the Polygon `wCOP/USDC` pool is of the FX risk — the "inflation adjustment", a `llm-inference` step whose decision is surfaced for the UI), sizes the position, and **mints it** via the short-then-long `dispatch` flow; with `RiskManagement.quoteCollateralRequirements` and `OperationalCostManagement` (cumulative agent+data cost) completed.
+**Depends on**: Phase 12 (the `HedgeLegParams` hand-off); the **committed Polygon demo** (`resolvePositionFromHedgeParams`, `RiskManagement`, `PayoffTerms`/`VolToWidth`/`PriceGrids`, `StrategyBuilder`/`PanopticQuery`). Mints on the real Polygon wCOP/USDC V2 pool.
+**Requirements**: EXEC-01, EXEC-02, EXEC-03 — **all Complete** (2026-06-06; 13-VERIFICATION `status: passed`, 24/24 tests green)
+**Success Criteria**: 1. `MacroHedgeExecutor` (deployable) mints via `resolveAndMint` — the Polygon fork test (the `test__takeDemoPosition__Succeeds` lineage) is green through the real executor, not just the harness; a `RepresentativenessAssessed` event fires (live `llm-inference` representativeness round-trip = STRETCH; MVP stubs the source). *(EXEC-01)* 2. Collateral gating = the **protocol-native atomic `AccountInsolvent` revert** at `_validateSolvency` (under-funded executor → mint reverts, no position persists), proven by an under-funded negative fork test — NOT a pre-mint quote (which reverts `PositionNotOwned`, `PanopticPool.sol:559`); a POST-mint `quoteCollateralRequirements` `BalanceDelta` read is informational. *(EXEC-02)* 3. `OperationalCostManagement` accrues the cumulative agent-call + data cost (budgeted SOMI — realized executionCost is structurally unavailable on Somnia), with a mutation-proven no-double-count conservation invariant. *(EXEC-03)*
+**Notes**: the heaviest ribbon, but the resolver/mint/risk-quote core is already committed + green — this wires it behind the agent + completes risk/cost. EXEC-02 is reframed HONESTLY (per 13-RESEARCH §2): a pre-mint solvency quote on the unminted position REVERTS `PositionNotOwned` (`PanopticPool.sol:559`), so the gate is the protocol-native atomic `AccountInsolvent` inside `dispatch` (post-mint margin read = informational); the live representativeness `llm-inference` is STRETCH (MVP ships the `RepresentativenessAssessed` event with a stubbed source) → the **REAL** representativeness model (the "inflation adjustment") is now the dedicated **Phase 14** (`resolveFromMandate`), which un-stubs this event's source.
+**Plans**: 3 plans (2 waves — {PoolId-anchor, cost-ledger} parallel in W1 -> the executor mint in W2)
+- [x] 13-01-PLAN.md — `POLYGON_WCOP_USDC_POOL_ID` constant (STRAT-02 anchor) + `IMacroThesis` compile-stub + polygon(137) fork-cache *(EXEC-01)* ✅ 2026-06-06 (commits 3de3c5e/a91a708/ebea287; EXEC-01 the anchor half — the deployable-mint half landed in 13-02, EXEC-01 now COMPLETE)
+- [x] 13-02-PLAN.md — promote `MacroHedgeExecutor is SomniaAgentConsumer`: `resolveAndMint` (the `test__takeDemoPosition__Succeeds` lineage, contract-owned) + fixed `_onResult` decode + events + EXEC-02 post-mint read & `AccountInsolvent` atomic gate *(EXEC-01, EXEC-02)* ✅ 2026-06-06 (commits 322cab4/e85c2fc/de22865; 7/7 fork + 4/4 onResult unit green; numberOfLegs(executor)>0, PositionMinted+RepresentativenessAssessed(0) emitted; EXEC-02 under-funded AccountInsolvent gate via expectPartialRevert; EXEC-01+EXEC-02 done; live _onResult→mint join = Phase-14 STRETCH)
+- [x] 13-03-PLAN.md — `OperationalCostManagement` `cummCost` ledger: per-`decisionId` agent+data accrual, per-leg idempotency, mutation-proven `invariant_costConserved` *(EXEC-03)* ✅ 2026-06-06 (commits e3b9dc4/ceb5057; 10/10 green, invariant 16 runs/0 reverts; BOTH non-vacuity mutations recorded — conservation 882…3505≠0, idempotency 14≠7; EXEC-03 done)
+
+### Phase 14: Representativeness derivation (Agent 2 brain) — pool-mirrors-risk → geometry
+**Goal**: The dedicated **mathematical** representativeness model that turns Agent-1's `HedgeMandate` into the actual option **geometry** (moneyness/strike/width/feasible-size = a `HedgeLegParams`). An agent **tool-calls** (RPC-node queries / on-chain + subgraph queries) over the **underlying wCOP/USDC pool's activity/behavior** and runs a **parameterized model of how representative** the pool is of the COP-inflation/depreciation risk the user wants to hedge (*can this pool hedge that risk, and with what basis risk?*) — the "inflation adjustment". The derived `HedgeLegParams` is minted via an **additive `resolveFromMandate`** front-end on the shipped `MacroHedgeExecutor` (the committed `resolveAndMint(HedgeLegParams)` mint core is REUSED, not rebuilt); the representativeness decision is surfaced for the UI (`ExecutorDecided`).
+**Depends on**: Phase 12 (the `HedgeMandate`) + Phase 13 ✅ (the deployable mint core). Reuses `PanopticQuery` for on-chain pool state.
+**Requirements**: REPR-01, REPR-02
+**Success Criteria**: 1. A representativeness analysis reads the live wCOP/USDC pool activity (on-chain liquidity/TVL via `PanopticQuery`; volume/depth via the agent's tool-calls) and computes a **parameterized representativeness/basis-risk measure** of how well the pool mirrors the target COP-inflation risk; the measure + its parameters are surfaced (the "inflation adjustment" the UI shows). *(REPR-01)* 2. `resolveFromMandate(HedgeMandate)` derives a well-formed `HedgeLegParams` (moneyness/strike/width/feasible-size; size in the `optionRatio ≤127` bound) from the mandate + the representativeness measure and mints via the shipped core — the Polygon-fork mint is green through this path; the live `inferToolsChat` tool-calling round-trip = STRETCH (MVP may stage the on-chain-readable signal first). *(REPR-02)*
+**Notes**: the **critical-path build** — it un-stubs the Phase-13 `RepresentativenessAssessed` source. Riskiest unknown = pool-activity data sourcing (volume/depth likely off-chain). The math model (correlation / cointegration / basis risk / liquidity-adjusted tracking error) is this phase's research core (ties to the econometrics / `abrigo-analytics` side). Likely `inferToolsChat` (the Phase-11 deferred stretch).
+**Plans**: 3 plans (3 waves — the evm-TDD Iron Law dep-chains the build: pure-library substrate → executor wiring → fork mint)
+- [x] 14-01-PLAN.md — `IRegimeOracle` + pure `RepresentativenessLib` (β₁(REGIME)×devaluation core + GBM-baseline comparator + decimal-gap strike anchoring + staleness→STRESS fail-safe) + `MockRegimeOracle`; Iron-Law tree+RED→GREEN unit suite (GBM-divergence, β₁ asymmetry, staleness→STRESS, the Pitfall-1 strike canary), mutation-proven non-vacuous *(REPR-01, REPR-02)*
+- [x] 14-02-PLAN.md — additive `resolveFromMandate(HedgeMandate)` front-end + `ExecutorDecided` event on the shipped `MacroHedgeExecutor` (reads Z_t with the fail-safe, regime-conditional width + Fix-C decimal-gap-correct strike 360360, targetNotional→optionRatio≤127, honesty flag + TEMPLATE caveat); the mint body lifted verbatim into the Fix-C sink split `_resolveAndMintAtStrike(int24 strike)` (demo/direct path byte-unchanged), the onResult DecodeProbe + 3 fork ctor sites migrated in one compiling commit — `forge build` exit 0, onResult 4/4, fork EXEC 7/7 *(REPR-01, REPR-02)*
+- [x] 14-03-PLAN.md — extend `DemoMacroHedgeExecutor.fork.t.sol` (reuse `_init_world`): mandate→geometry→mint on the Polygon fork (`numberOfLegs(executor)>0`), the EXACT structural K_hi strike `360360` (Fix-C, not a loose band), `ExecutorDecided` honesty-flag emit, the size=128 `optionRatio overflow` revert, behavioral LLM-independence via `MockRevertingPlatform` *(REPR-02, REPR-01)* ✅ 2026-06-07 — FORK-PROVEN on the live Polygon fork: `resolveFromMandate` mints a real wCOP/USDC position at strike `360360` EXACT + `numberOfLegs>0`, the 8-param `ExecutorDecided` decoded with `nonErgodicDisclosed==true` + TEMPLATE caveat, `MockRevertingPlatform` mints identical geometry. UNBLOCKED by a gate-passed `volToWidth` even-width invariant (odd→even snap so symmetric Panoptic leg bounds stay tickSpacing-aligned — the STRESS-width `21→22` `InvalidTickBound()` fix) landed as a real RED→GREEN evm-TDD split (`f92b0f7` test → `e686d4d` fix, per-file ancestry verified). demo fork 6/6, fork EXEC 7/7, Representativeness 17/17, onResult 4/4, fork-free 114/114, build exit 0 — **Phase 14 COMPLETE (3/3)**
+
+### Phase 15: Cornerstone E2E (UI → contracts) + CI — the deliverable
+**Goal**: The single **Scenario-1 cornerstone test** threading **frontend → Agent 1 (`HedgeMandate`) → Agent 2 (representativeness derivation + geometry, shown on the UI) → the Polygon wCOP/USDC mint → a basic live-performance read on the UI** — plus a `contracts-ci.yml` gate so the build/tests are confirmed for delivery.
+**Depends on**: Phase 12 (mandate) + Phase 14 (representativeness geometry); Phase 13 ✅ (mint core); the frontend repo (`/home/jmsbpp/apps/d2p/frontend`, ~98%) consuming `docs/UI-AGENT-HANDOFF.md`.
+**Requirements**: E2E-01, E2E-02
+**Success Criteria**: 1. One end-to-end run reproduces Scenario 1 from the UI prompt to a minted position + a **basic** live-performance read (mark/margin via `PanopticQuery`/`RiskManagement` — NOT a separate monitoring agent), with Agent 2's decision surfaced to the user mid-flow — the artifact presented to the judges (demo + public repo + video). *(E2E-01)* 2. `contracts-ci.yml` gates the repo: `forge build` + per-file `bulloak check` + the fork tests (a **`polygon`** fork endpoint via an Actions secret + Foundry RPC cache keyed on the pinned block, sharded to dodge the 429); the Somnia-testnet + Polygon-mint live e2e stays a manual `workflow_dispatch`. *(E2E-02)*
+**Notes**: the integrating ribbon — the deliverable. The monitoring **agent** (MON-01) and the delta-hedge agent (`HEDGE-01`) are DEFERRED; the demo shows a basic position read, not active management. **The contract mint leg is ALREADY shipped + fork-proven (Phases 13–14): `resolveFromMandate` mints at strike 360360.** Phase 15 is integration + packaging — NO new contracts. The frontend real-mint wiring is a clearly-labeled sibling-repo STRETCH (its own git at `/home/jmsbpp/apps/d2p/frontend`); the MVP deliverable is achievable entirely from the abrigo-somnia demo-node + the recorded video.
+**Plans**: 3 plans (1 wave — disjoint files, all parallel; the green contract leg is the regression anchor)
+- [ ] 15-01-PLAN.md — Contract-leg packaging: the explicit `quoteMargin` BASIC-read assertion + `serve-polygon-fork-demo.sh` (anvil fork+redeploy chain-137 demo node) + the human-verify video checkpoint *(E2E-01)*
+- [x] 15-02-PLAN.md — `contracts-ci.yml` `polygon` fork job (gated on `ALCHEMY_API_KEY`, RPC-cached `foundry-rpc-polygon-86900000-v1`, retried; keyless job + `somnia-e2e` unchanged) *(E2E-02)*
+- [x] 15-03-PLAN.md — `docs/UI-AGENT-HANDOFF.md` refresh (drop the stale 34-line-STUB claim; the 8-param `ExecutorDecided` + 3-field `PositionMinted`; flip §6 to the Phase-15 swap-to-real for the Agent-2 leg; the no-bridge honesty + the sibling-repo stretch boundary) *(E2E-01)*
+
+> **MVP critical path:** Phase 11 ✅ → **Phase 12** (Agent 1 → `HedgeMandate`) → **Phase 14** (representativeness → geometry, reusing Phase 13 ✅ mint core) → **Phase 15** (UI E2E + CI). Each goes through the standard GSD loop — plan-phase → 2-way planning-review gate → execute → verify. **Deferred behind the cornerstone:** Phases 9–10 (premium-split, oracle-surprise), the `te-factor-modules` data polish (DATA-01/02), the monitoring agent (MON-01), delta-hedge (`HEDGE-01`).
 
 ## Deferred / Future (NOT active phases this milestone)
 
@@ -136,8 +209,8 @@ are LAST; delta-hedge is an external keeper add-on, not a Panoptic primitive).
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Base-fork harness + borrowed Panoptic V2 + pool | 2/5 | Complete    | 2026-06-02 |
-| 8. LongGammaWrapper cash-flow | 0/0 | Not started | - |
-| 9. Premium split + data-cost reimbursement | 0/0 | Not started | - |
+| 8. LongGammaWrapper cash-flow | 7/7 | Complete   | 2026-06-02 |
+| 9. Premium split + data-cost reimbursement | 0/5 | Planned | - |
 | 10. Oracle surprise route + position sizing | 0/0 | Not started | - |
 
 ## Traceability (v1 requirements → phases)
@@ -147,10 +220,10 @@ are LAST; delta-hedge is an external keeper add-on, not a Panoptic primitive).
 | FORK-01 | Phase 7 | Pending |
 | FORK-02 | Phase 7 | Pending |
 | FORK-03 | Phase 7 | Pending |
-| WRAP-01 | Phase 8 | Pending |
-| WRAP-02 | Phase 8 | Pending |
-| WRAP-03 | Phase 8 | Pending |
-| WRAP-04 | Phase 8 | Pending |
+| WRAP-01 | Phase 8 | Complete (08-03: wrapper-owns custody fork-proven) |
+| WRAP-02 | Phase 8 | Complete (08-03: isLong=1 mint fork-proven) |
+| WRAP-03 | Phase 8 | Complete (08-04: streamia READ fork-proven 6/6; 08-06: three involuntary dispatchFrom branches fork-proven — settleLong/forceExercise/liquidation 2/2 each) |
+| WRAP-04 | Phase 8 | Complete (08-05: close() SC-5 + claimResidual() surviving-collateral residual fork-proven — close 6/6 + claimResidual 7/7) |
 | FEE-01 | Phase 9 | Pending |
 | FEE-02 | Phase 9 | Pending |
 | FEE-03 | Phase 9 | Pending |
@@ -159,6 +232,19 @@ are LAST; delta-hedge is an external keeper add-on, not a Panoptic primitive).
 | PAY-01 | Deferred | Future |
 | XCHAIN-01 | Deferred | Future |
 | HEDGE-01 | Deferred | Future |
+
+### Phase 16: Shiller-differentiated representativeness (Agent-2 brain branches on economic school) — POST-MVP
+
+**Goal:** Extend the Phase-14 representativeness brain so `resolveFromMandate`/`Representativeness` BRANCH on the mandate's economic school: `SHILLER_MACRO_RISK` gets a genuine narrative-driven-mispricing / tail-macro-risk geometry DISTINCT from the POST_KEYNESIAN regime/β₁ model (today the geometry is school-agnostic — regime-driven/TEMPLATE; the school is a label only). Grounded in the local `research/macro-markets-colombia/` (Shiller's Macro Markets framework for Colombia), analogous to how Phase 14 used `~/learning/post-keynesian/`. Then a whole-workflow integration test suite — prompt → Agent-1 selects school → `HedgeMandate` → Agent-2 school-specific geometry → mint — across multiple Colombian macro-risk scenarios under BOTH frameworks, at the agent-interaction layer just below the UI.
+**Requirements**: SHILLER-01, SHILLER-02
+**Depends on:** Phase 14 (the representativeness brain it extends) + Phase 13 (mint core); grounding in `research/macro-markets-colombia/`.
+**Notes:** POST-cornerstone-MVP depth — does NOT gate the June-11 submission (the proven mint + the Phase-15 demo video are the deliverable). Surfaced by `/gsd:verify-work 15`: SHILLER is selected by Agent-1 but Agent-2's geometry is regime-driven/PKE/TEMPLATE (school-agnostic). All PLANs must pass the three-step planning-review gate before execution.
+**Plans:** 3/3 plans complete
+
+Plans:
+- [x] 16-01-PLAN.md — ISurpriseOracle/MockSurpriseOracle + SHILLER lib fns (convex size, sign strike, |s|-width) + TEMPLATE constants (35-day staleness) + atomic 10-arg ctor migration; pure-lib RED->GREEN unit suite *(SHILLER-01)* ✅ 2026-06-07 (Shiller 10/10, PKE 17/17 un-regressed)
+- [x] 16-02-PLAN.md — branch resolveFromMandate on economic school (SHILLER arm + verbatim PKE else); fork-prove SHILLER!=PKE 360360 + per-school honesty + downside K_lo resolution; PKE regression anchor *(SHILLER-01)* ✅ 2026-06-07 (SHILLER +2σ mints 361200 ≠ PKE 360360; demo fork 13/13, Representativeness 17/17, onResult 4/4; open-Q3 → depreciation-only-v1)
+- [x] 16-03-PLAN.md — MacroWorkflow whole-workflow suite (Agent-1 in-VM -> HedgeMandate -> Agent-2 fork mint), 4 Colombian scenarios x 2 schools, same-input-different-geometry *(SHILLER-02)* ✅ 2026-06-07 (6/6 green on the Polygon fork; anti-tautology proven: intra-school SIZE 62<90 + flip-only-the-sentinel 0x5↔0x6 with identical oracles; PKE 360360 anchor + Representativeness 17/17 + ShillerRepresentativeness 10/10 + onResult 4/4 + demo fork 13/13 un-regressed)
 
 ---
 *Roadmap created: 2026-06-01 — v2.0 convex-instrument; REPLACES the M1 roadmap (snapshotted at `.planning/ROADMAP-M1-donor-transfer-2026-06-01.md`). Phase numbering starts at 7. Build order from ARCHITECTURE/SUMMARY: (7) Base-fork harness + borrowed Panoptic V2 + cCOP/USDC pool → (8) LongGammaWrapper cash-flow → (9) PremiumSplitter + ERC-4626 vault + data-cost residual → (10) MacroOracle surprise route + PositionBuilder sizing. All phase PLANs must pass the three-step planning-review gate before execution.*

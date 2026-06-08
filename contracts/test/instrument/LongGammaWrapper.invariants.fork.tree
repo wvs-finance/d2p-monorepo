@@ -1,0 +1,5 @@
+LongGammaWrapperInvariants
+├── when invariant_residualNeverExceedsHoldings
+│   └── it never pays out more than convertToAssets of the wrapper share balance
+└── when invariant_userClaimsBackedByCollateral
+    └── it keeps the single user claim at or below wrapper surviving collateral

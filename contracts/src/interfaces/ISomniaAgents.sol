@@ -65,3 +65,24 @@ interface IJsonApiAgent {
     function fetchInt(string calldata url, string calldata selector, uint8 decimals) external returns (int256);
     function fetchBool(string calldata url, string calldata selector) external returns (bool);
 }
+
+/// @notice LLM Inference agent ABI — encode the payload for createRequest.
+/// @dev On-chain Qwen3-30B (deterministic, temperature=0) -> consensus-verified output.
+///      inferString constrains to `allowedValues`; inferNumber clamps to [minValue,maxValue].
+///      LLM-Inference agent id on Somnia testnet: 12847293847561029384.
+interface ILLMAgent {
+    function inferString(
+        string calldata prompt,
+        string calldata system,
+        bool chainOfThought,
+        string[] calldata allowedValues
+    ) external returns (string memory);
+
+    function inferNumber(
+        string calldata prompt,
+        string calldata system,
+        int256 minValue,
+        int256 maxValue,
+        bool chainOfThought
+    ) external returns (int256);
+}

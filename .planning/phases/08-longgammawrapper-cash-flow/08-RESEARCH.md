@@ -285,10 +285,10 @@ uint128 streamiaToken1 = longPremium.leftSlot();
 ```solidity
 // Source: PanopticPool.sol L572/L633; SFPM L965-988; TokenId @types builder (07-05 arg order)
 // 1) seller short at chunk X:
-TokenId shortId = TokenId.wrap(0).addPoolId(poolId).addLeg(0,1,0,/*tokenType*/0,/*isLong*/0,0,strike,2);
+TokenId shortId = TokenId.wrap(0).addPoolId(poolId).addLeg(0,1,0,/*isLong*/0,/*tokenType*/0,0,strike,2);
 vm.prank(seller); pp.dispatch(_one(shortId), _one(shortId), _size(sellerSize), limits, false, 0);
 // 2) wrapper long at the SAME chunk X (isLong=1):
-TokenId longId  = TokenId.wrap(0).addPoolId(poolId).addLeg(0,1,0,/*tokenType*/0,/*isLong*/1,0,strike,2);
+TokenId longId  = TokenId.wrap(0).addPoolId(poolId).addLeg(0,1,0,/*isLong*/1,/*tokenType*/0,0,strike,2);
 pp.dispatch(_one(longId), _one(longId), _size(longSize), limits, false, 0);  // longSize <= sellerSize
 ```
 
@@ -351,7 +351,7 @@ uint256 residual  = surviving > wrapperSideCosts ? surviving - wrapperSideCosts 
 |-----|----------|-----------|-------------------|-------------------------------|--------------|
 | WRAP-01 | Wrapper-owns custody | fork unit | `forge test --match-test test_open_wrapperOwnsCollateralAndPosition --fork-url "$BASE_RPC_URL"` | `ct0.balanceOf(wrapper)>0` && `ct0.balanceOf(user)==0` && `numberOfLegs(wrapper)>0` && `getAccumulatedFeesAndPositionsData(wrapper,…).balances.length==1` with `positionSize>0` | ❌ Wave 0 |
 | WRAP-02 | Long (`isLong=1`) mint via IPanopticData | fork unit | `forge test --match-test test_open_mintsLongGamma --fork-url "$BASE_RPC_URL"` | after a same-chunk seller seed, `dispatch` long succeeds; the stored `TokenId.isLong(0)==1`; pool reached only via `IPanopticData` (grep guard) | ❌ Wave 0 |
-| WRAP-03 | Streamia READ == pool debit (wei) | fork unit | `forge test --match-test test_streamia_recordedEqualsPoolDebit --fork-url "$BASE_RPC_URL"` | swap-seed fees → `longPremium` read (=wrapperRecorded) → burn → `assertEq(wrapperRecorded, OptionBurnt.premiaByLeg longSlot)` (wei-exact); proves "never re-derived" because no constant/multiplier appears (grep: no `SPREAD_MULTIPLIER`/`perBlock`) | ❌ Wave 0 |
+| WRAP-03 | Streamia READ (read-fidelity + non-zero + directional) | fork unit | `forge test --match-test test_streamia --fork-url "$BASE_RPC_URL"` | **Read-fidelity (wei-exact, same call/tick):** wrapper stores EXACTLY `getAccumulatedFeesAndPositionsData(wrapper,true,list).longPremium.rightSlot()/leftSlot()`; **non-zero floor:** after swap-seed fees `recorded0>0 \|\| recorded1>0`; **directional:** more fees ⇒ recorded strictly increases. Proves "never re-derived" (grep: no `SPREAD_MULTIPLIER`/`perBlock`/`VEGOID`). NOTE: the cross-tick `assertEq(recorded, OptionBurnt.premiaByLeg)` is NOT a valid gate — `recordStreamia` reads at `currentTick` (PanopticPool L437) but `premiaByLeg` is emitted atTick=0 under `COMMIT_LONG_SETTLED` (L1159-1161); the available-premium cap is short-branch only (L1186-1235), so it is not the cause. Any `premiaByLeg` comparison is non-gating only. | ❌ Wave 0 |
 | WRAP-03 | forceExercise branch | fork unit | `forge test --match-test test_forceExercise_residualFromSurviving --fork-url "$BASE_RPC_URL"` | `dispatchFrom` (final one shorter) debits wrapper; `residual==max(convertToAssets(balanceOf(wrapper))-costs,0)`; `ResidualEroded` emitted; wrapper share-burn never exceeds holdings (no `NotEnoughTokens` swallowed) | ❌ Wave 0 |
 | WRAP-03 | settleLongPremium branch | fork unit | `forge test --match-test test_settleLong_residualFromSurviving --fork-url "$BASE_RPC_URL"` | `dispatchFrom` (toLen==finalLen) settles long premium; surviving recomputed; `ResidualEroded` emitted | ❌ Wave 0 |
 | WRAP-03 | liquidation branch | fork unit | `forge test --match-test test_liquidation_residualFloorZero --fork-url "$BASE_RPC_URL"` | wrapper insolvent → `dispatchFrom` (finalLen==0) → `_liquidate`; `residual==max(surviving-costs,0)` (can floor at 0); `AccountLiquidated` + `ResidualEroded`; wrapper never pays more than holdings | ❌ Wave 0 |

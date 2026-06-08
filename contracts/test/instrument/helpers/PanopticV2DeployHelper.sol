@@ -10,11 +10,13 @@ import {PoolKey} from "v4-core/types/PoolKey.sol";
 
 // borrowed Panoptic V2 core (CWIA factory choreography — §A/§B). This IS the deploy seam, so
 // importing the concretes here is correct/intended; the SEAM TEST never imports this file (M-3).
-import {SemiFungiblePositionManager} from "@contracts/SemiFungiblePositionManagerV4.sol";
-import {PanopticPool} from "@contracts/PanopticPool.sol";
-import {CollateralTracker} from "@contracts/CollateralTracker.sol";
+// d20b0aed (post-audit main) renamed these contracts; alias back to the local names so
+// the helper body is unchanged (migration probe — see .planning/changes/panoptic-v2-forge-install).
+import {SemiFungiblePositionManagerV4 as SemiFungiblePositionManager} from "@contracts/SemiFungiblePositionManagerV4.sol";
+import {PanopticPoolV2 as PanopticPool} from "@contracts/PanopticPool.sol";
+import {CollateralTrackerV2 as CollateralTracker} from "@contracts/CollateralTracker.sol";
 import {RiskEngine} from "@contracts/RiskEngine.sol";
-import {PanopticFactory} from "@contracts/PanopticFactoryV4.sol";
+import {PanopticFactoryV4 as PanopticFactory} from "@contracts/PanopticFactoryV4.sol";
 import {ISemiFungiblePositionManager} from "@contracts/interfaces/ISemiFungiblePositionManager.sol";
 import {IRiskEngine} from "@contracts/interfaces/IRiskEngine.sol";
 import {Pointer} from "@types/Pointer.sol";
@@ -42,7 +44,6 @@ contract PanopticV2DeployHelper is Test {
     uint256 internal constant SFPM_MIN_TICKFILL = 10**13;
     uint256 internal constant SFPM_NATIVE_TICKFILL = 10**13;
     uint256 internal constant SFPM_SUPPLY_MULT = 0;
-    uint256 internal constant CT_COMMISSION_FEE = 10;
     uint256 internal constant RE_CROSS_BUFFER0 = 10_000_000;
     uint256 internal constant RE_CROSS_BUFFER1 = 10_000_000;
 
@@ -62,14 +63,18 @@ contract PanopticV2DeployHelper is Test {
         int24 tickSpacing;
     }
 
-    /// @dev Deploy the one-time infra (master copies + factory + RiskEngine) — split out to cap stack depth.
-    function _deployInfra() internal returns (PanopticFactory factory, RiskEngine re) {
-        IPoolManager manager = IPoolManager(BASE_POOL_MANAGER);
+    /// @dev Deploy the one-time infra (master copies + factory + RiskEngine) against any v4 PoolManager.
+    /// Callers supply the PoolManager address so this helper is reusable across chains/forks.
+    function deployInfra(address poolManagerAddr) external returns (PanopticFactory factory, RiskEngine re) {
+        IPoolManager manager = IPoolManager(poolManagerAddr);
         SemiFungiblePositionManager sfpm =
             new SemiFungiblePositionManager(manager, SFPM_MIN_TICKFILL, SFPM_NATIVE_TICKFILL, SFPM_SUPPLY_MULT);
         // master-copy implementations the factory clones (the ONLY `new PanopticPool`/`new CollateralTracker`):
         address poolReference = address(new PanopticPool(ISemiFungiblePositionManager(address(sfpm))));
-        address collateralReference = address(new CollateralTracker(CT_COMMISSION_FEE));
+        // d20b0aed: CollateralTrackerV2() now takes 0 args. The flat commission fee
+        // (vendored CT_COMMISSION_FEE) was replaced by a RiskParameters-driven notional/premium
+        // fee model resolved through the RiskEngine — no constructor/factory wiring needed.
+        address collateralReference = address(new CollateralTracker());
         factory = new PanopticFactory(
             sfpm, manager, poolReference, collateralReference, new bytes32[](0), new uint256[][](0), new Pointer[][](0)
         );
@@ -79,7 +84,7 @@ contract PanopticV2DeployHelper is Test {
     /// @notice Run the §B+§D factory choreography and return seam-safe handles.
     function deployPanopticV2() external returns (Deployed memory d) {
         IPoolManager manager = IPoolManager(BASE_POOL_MANAGER);
-        (PanopticFactory factory, RiskEngine re) = _deployInfra();
+        (PanopticFactory factory, RiskEngine re) = this.deployInfra(BASE_POOL_MANAGER);
 
         // ---- PER-POOL: helper builds its OWN pool (mn-C) ----
         MockCcop ccop = new MockCcop();

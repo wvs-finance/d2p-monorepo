@@ -1,0 +1,8 @@
+PolygonPoolsTest::poolIdAnchor
+├── when the canonical key is built
+│   ├── it should order currency0 as USDC and currency1 as wCOP with USDC address strictly less than wCOP address
+│   └── it should set fee three thousand tickSpacing sixty and the zero hooks address
+├── when POLYGON_WCOP_USDC_POOL_ID is read
+│   └── it should equal the demo wcopUsdcKey toId computed inline from the same fields
+└── when the panoptic pool id is mapped
+    └── it should equal PoolIdMappersLib panopticPoolIdFromUniV4PoolId of the constant with a sample vegoid and tickSpacing sixty

@@ -1,0 +1,9 @@
+LongGammaWrapperStreamia
+├── when swaps generate pool fees and the long premium is read
+│   ├── it reads longPremium from the accumulated fees getter and never from a per block constant
+│   ├── it returns exactly the getter slots from the same call at the same tick proving read fidelity
+│   └── it records a non zero streamia for at least one token after swaps cross the chunk
+├── when additional swaps generate more fees
+│   └── it asserts the recorded streamia is monotonic non decreasing and strictly increases after a material swap
+└── when recordStreamia is called outside the Open state
+    └── it reverts WrongState both before the position is opened and after it is claimed

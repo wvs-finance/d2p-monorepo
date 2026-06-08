@@ -34,3 +34,8 @@ __pycache__/
 dist/
 build/
 *.log
+
+# Hackathon war-room — internal strategy/research/plans. NEVER commit:
+# the submission repos are PUBLIC and judges read them. Local-only docs for
+# planning + implementation agents.
+.hackathon/

@@ -15,7 +15,7 @@ pragma solidity ^0.8.24;
   keep a secret AND cannot make the outbound HTTPS call, so the key is held + used
   ONLY by the off-chain keeper. Fhenix/FHE does not help: FHE performs no network I/O,
   and its decryption happens off-chain — the key would still be used in plaintext
-  off-chain. FHE is the wrong tool for this problem.
+   off-chain. FHE is the wrong tool for this problem.
 
   ── How the off-chain key bridges to on-chain (two honest forms) ─────────────
     (NOW, trusted)  The consumer embeds a KEYLESS proxy URL in the json-fetch
@@ -31,6 +31,7 @@ pragma solidity ^0.8.24;
     AGENT_ID = 13174292974160097713
   (CLAUDE.md's mainnet IAgentRequester 0x5E5205CF… is a DIFFERENT deployment.)
 //////////////////////////////////////////////////////////////////////////////*/
+
 
 import {SomniaAgentConsumer} from "./SomniaAgentConsumer.sol";
 import {IJsonApiAgent, Response, ResponseStatus} from "./interfaces/ISomniaAgents.sol";

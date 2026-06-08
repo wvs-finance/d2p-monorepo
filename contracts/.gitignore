@@ -1,7 +1,13 @@
-# Foundry build artifacts
-out/
-cache/
-broadcast/
+# Foundry build artifacts (anchored to the contracts root so metadata/out/ is NOT swept up)
+/out/
+/cache/
+/broadcast/
+
+# NFT metadata package — a deterministic build artifact required by DeployProtocol's deploy path
+# on a fresh checkout (the fork-state snapshot is local-only). Re-include it despite the root
+# `out/` ignore so the fork test is reproducible in CI.
+!metadata/out/
+!metadata/out/MetadataPackage.json
 
 # Vendored deps — restore with `forge install foundry-rs/forge-std`
 lib/
@@ -9,3 +15,6 @@ lib/
 # Secrets — never commit real values (.env.example documents key names only)
 .env
 !.env.example
+
+# Fork-state snapshots (vm.dumpState) — deterministic, regenerable; no secrets
+fork-state/

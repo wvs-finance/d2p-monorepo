@@ -13,7 +13,7 @@ import {PanopticDataSeamBase} from "./PanopticDataSeamBase.sol";
 ///         and collateral is deposited ONLY through `IERC4626` ct0/ct1 — this file imports NEITHER
 ///         a `panoptic-borrowed` concrete NOR the `PanopticV2DeployHelper` (both deploy details live
 ///         behind `PanopticDataSeamBase`). Mints ONE position via `dispatch` (PositionBalance==0 ⇒
-///         mint), reads `PositionBalance[]` length 1 via `getAccumulatedFeesAndPositionsData`, then
+///         mint), reads `PositionBalance[]` length 1 via `getFullPositionsData`, then
 ///         dispatches size 0 (≠ stored ⇒ burn) — all through the interface.
 contract PanopticDataSeammintBurnThroughInterface is PanopticDataSeamBase {
     /// @dev bulloak branch fn (un-renamed, mn-B) — delegates to the single FORK-03 proof so the BTT
@@ -92,7 +92,7 @@ contract PanopticDataSeammintBurnThroughInterface is PanopticDataSeamBase {
         pano.dispatch(mintList, finalIds, sizes, limits, false, 0); // PositionBalance==0 ⇒ mint
 
         // --- §D step 4: READ PREMIUM (never derive) — assert one position via PositionBalance[] len 1 ---
-        (,, PositionBalance[] memory bals) = pano.getAccumulatedFeesAndPositionsData(actor, true, finalIds);
+        (,, PositionBalance[] memory bals,,) = pano.getFullPositionsData(actor, true, finalIds);
         assertEq(bals.length, 1, "exactly one position minted through IPanopticData");
 
         // --- §D step 5: BURN (size 0 != stored ⇒ burn). FIX array literal: new uint128[](1), NOT [0] ---
@@ -102,8 +102,8 @@ contract PanopticDataSeammintBurnThroughInterface is PanopticDataSeamBase {
         pano.dispatch(mintList, emptyFinal, burnSizes, limits, false, 0);
 
         // post-burn read: the empty final portfolio holds no positions (the burn closed it)
-        (,, PositionBalance[] memory afterBals) =
-            pano.getAccumulatedFeesAndPositionsData(actor, true, emptyFinal);
+        (,, PositionBalance[] memory afterBals,,) =
+            pano.getFullPositionsData(actor, true, emptyFinal);
         assertEq(afterBals.length, 0, "position closed after burn (empty final portfolio)");
 
         vm.stopPrank();
