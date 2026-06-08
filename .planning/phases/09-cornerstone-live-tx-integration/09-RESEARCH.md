@@ -287,14 +287,16 @@ const legs = await publicClient.readContract({
 // legs === 0n → fresh; legs > 0n → used sandbox → fallback
 ```
 
-### Pattern 6: fromChainLog — Real-ABI Sibling of fromMockEvent
+### Pattern 6: fromChainEvent — Real-ABI Sibling of fromMockEvent
 
-**What:** `fromChainLog(log) → WorkflowEventView` decodes a real receipt log and produces the same view model types as `fromMockEvent`. Downstream components are unchanged.
+> ⟳ **UPDATED for v4/v5.** Renamed `fromChainLog` → **`fromChainEvent`** (the name the plans use). The "StrategistDecided is NEVER decoded from chain" bullet is **STRUCK** — see below.
+
+**What:** `fromChainEvent(log) → WorkflowEventView` decodes a real receipt log and produces the same view model types as `fromMockEvent`. Downstream components are unchanged.
 
 **Key differences from fromMockEvent:**
 - `ExecutorDecidedView` gains: `regimeZt`, `inflationAdjustment`, `strikeTick`, `regimeWidth`, `parametricHedged`, `nonErgodicDisclosed`, `rationale`
 - `PositionMintedView` gains: margins come from a SEPARATE `quoteMargin` call (NOT from the PositionMinted event itself)
-- `StrategistDecided` is NEVER decoded from chain — synthesized in-app
+- ⟳ **REVERSED (v4/v5):** `StrategistDecided` **IS** decoded from chain — server-side in the `/api/abrigo/agent1` route against the LIVE two-leg strategist `0xf0570CcB1271FFaFf4caCA628F3632257f177b1D` (Somnia 50312). `fromChainEvent` sets `StrategistDecidedView.recordedDecisionId = decisionId.toString()` ONCE inside the adapter. In `replay` it comes from captured receipts; in `mock` from `fromMockEvent`. (Live decode currently no-ops only due to the external Somnia validator-callback outage, not deployment.)
 - WAD → percent at the edge: `inflationAdjustmentWad` (uint256, 1e18 scale) → `(Number(wad) / 1e16).toFixed(2) + '%'`
 - int24 fields (`strikeTick`, `regimeWidth`) from ABI are decoded as `number` by viem (already sign-correct); use as-is
 
