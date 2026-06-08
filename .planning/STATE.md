@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Live Agent Integration
-status: planning
-stopped_at: Phase 16 context gathered (Shiller-differentiated representativeness)
-last_updated: "2026-06-08T13:19:25.105Z"
+status: blocked
+stopped_at: 18-01 DOCUMENTED BLOCK — Somnia validator LLM-inference callbacks not landing; runner built+committed, no mandate landed, nothing fabricated/published
+last_updated: "2026-06-08T14:08:04Z"
 last_activity: "2026-06-07 — completed 14-03-PLAN.md (cornerstone Wave 3: `resolveFromMandate` FORK-PROVEN — a `HedgeMandate` flows through the deterministic regime-conditional geometry → the Fix-C sink → a real wCOP/USDC Panoptic position at the EXACT structural K_hi tick 360360 + `numberOfLegs(exec)>0`; the 8-param `ExecutorDecided` honesty flag (`nonErgodicDisclosed==true`) + TEMPLATE caveat decoded from the live mint; behavioral LLM-independence via `MockRevertingPlatform`; the direct-path size>127 guard. UNBLOCKED by a gate-passed `volToWidth` even-width invariant — odd widths snap to even so symmetric Panoptic leg bounds stay tickSpacing-aligned — landed as a real RED→GREEN evm-TDD split (`f92b0f7` test → `e686d4d` fix, per-file ancestry verified). demo fork 6/6, fork EXEC 7/7, Representativeness 17/17, onResult 4/4, fork-free 114/114, build exit 0)"
 progress:
   total_phases: 12
@@ -25,10 +25,10 @@ progress:
 ## Current Position (v2.1 — Live Agent Integration)
 
 - **Milestone:** v2.1 — Live Agent Integration (Somnia two-leg strategist live deploy)
-- **Phase:** 17 — Live deploy + pre-flight surface verification (COMPLETE — 1/1 plan, LIVEDEP-01 ✅)
-- **Plan:** 17-01 complete (2026-06-08) — adapted the runner to the two-leg `StrategistDecided` API (FREE pre-spend surface gate + scripted oracle-freshness gate), deployed LIVE to Somnia 50312 at NEW `0xf0570CcB1271FFaFf4caCA628F3632257f177b1D` (≠ v1, code len 19439), read back all three immutables (PLATFORM `0x037Bb9…6776` / ORACLE `0xAcA751…983f` / LLM_AGENT_ID `12847293847561029384`), and the cheap `requestSchoolDecision` liveness probe returned a real validator callback → `schoolSet==true`, mapped label `SHILLER_MACRO_RISK` (economicTheory 0x5). v1 `0xfA428171…` still reachable. Real tx hashes: deploy `0x6e19500c…875032f`, school-leg `0xdbc1e636…1d165b`, oracle-refresh `0x5180a842…dbf9530d`. SUCCESS (no retry/PARTIAL needed). Spent ~0.30 STT (json refresh + school infer). 0 deviations.
-- **Status:** Ready to plan
-- **Next phase:** 18 — On-chain decision-moves proof + publish (depends on 17; reuses the deployed address + adapted runner)
+- **Phase:** 18 — On-chain decision-moves proof + publish (**BLOCKED** — 0/1 plan landed; LIVEDEP-02/03/04/05 unverified)
+- **Plan:** 18-01 **DOCUMENTED BLOCK (2026-06-08)** — runner FULLY built + committed (`8190564` Task 1/2 two-leg `run_two_leg` + divergent run-2 + idempotent persist; `187e347` Rule-3 conditional oracle refresh) and `bash -n` clean, ABI extracted (local-only, has `StrategistDecided`). BUT the live proof is BLOCKED: **Somnia testnet validator LLM-inference callbacks are not landing.** Against the reused live CONSUMER `0xf0570CcB1271FFaFf4caCA628F3632257f177b1D`, all FREE surface gates + freshness gate PASS, the school-leg request fired TWICE (real on-chain txs `0x2a8230cc…` 180s + `0xb1ff1d17…` 300s, both `status 0x1`, deterministic decisionId `0x…b24ac1afbcefc708`) but `decisionState` stayed `(false,false,0,"")` and `getMandate` all-zero — no `StrategistDecided`/`DecisionFailed`, a silent validator no-show. Earlier the json-fetch oracle refresh also `MacroFailed` (keeper-proxy 404). NO full mandate ⇒ **did NOT** publish `somnia-strategist-deployment.json` (would need 3 real tx hashes) nor reverse the §6 prohibition (would be a false "✅ LIVE — proven on-chain" claim) — an unverifiable claim is explicitly unacceptable. ~0.63 STT spent (bounded, within reserve). NOT fabricated. chainId=137 untouched, CONSUMER reused (no `forge create`), no secret committed. (NB: Phase-17 saw a live school callback earlier today — infra is INTERMITTENT; re-run when it recovers.)
+- **Status:** BLOCKED — re-run `CONSUMER=0xf0570CcB…7b1D MACRO_ORACLE=0xAcA751…983f bash script/macro-hedge-strategist-e2e.sh` once the Somnia validator inference layer + keeper-proxy recover (pre-flight a cheap liveness probe first). Frontend live-Agent-1 path stays blocked until then.
+- **Next phase:** 18-02 (or re-run 18-01) — execute the bounded proof + publish when validator infra is live; consumes the already-built runner.
 - **Source of truth:** `docs/FRONTEND-REQUEST-2026-06-07-strategist-live-deploy.md` (§2/§3/§4)
 - **Spend-gate reason for the split:** §4 mandates re-confirming the volatile `LLM_AGENT_ID`/platform BEFORE spending STT — Phase 17 (deploy + cheap school-leg liveness probe) gates Phase 18 (the full STT-spending decision-moves prove + publish).
 - **Guardrails:** keep v1 `0xfA428171…` reachable; do NOT alter the join's `chainId = 137`; funded STT key in `contracts/.env`; real tx hashes mandatory.
