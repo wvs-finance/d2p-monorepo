@@ -1,6 +1,9 @@
 # d2p Monorepo Consolidation — design (Phase 10)
 
-**Status:** REVISED v3 — READY. Two-way review ran twice: v1 (both NEEDS WORK) → v2 (Git WM APPROVE-w/-minor, empirically reproduced the subtree+submodule recipe; Reality Checker NB1+M-A) → v3 resolves NB1 (backend base justified — `master` is 141 commits behind/stale; the feature branch is the de-facto trunk), M-A (env enumeration before Vercel), and MINOR-1 (artifact filename). No open blockers.
+**Status:** REVISED v4 — READY (recipe empirically proven by a reversible local build). Two-way review: v1 (NEEDS WORK) → v2 (Git WM APPROVE-w/-minor + Reality Checker NB1+M-A) → v3 (NB1/M-A/MINOR resolved). **v4 = the local-build proof finding:** vendor ALL 14 Foundry lib deps as committed files (SUPERSEDES the v2 submodule re-registration), because abrigo's `contracts/.gitignore` blanket-ignores `lib/` and only 6 of 14 deps are tracked submodules — the other 8 are gitignored local `forge install` checkouts in NO git history, so neither the source nor a submodule-only monorepo can `forge build` from a clean clone. Vendoring → plain `git clone && forge build` works. Also: frontend package is `d2p-frontend` (root scripts use `--filter d2p-frontend`).
+
+## v3 → v4 (from the reversible local-build proof, 2026-06-08)
+A throwaway local build (`/home/jmsbpp/apps/d2p-monorepo`) executed §2–§6 and verified both pipelines. PROVEN: subtree lands Foundry at `packages/backend/contracts/`; frontend builds with no Foundry (committed `generated.ts`); codegen resolves `../backend/contracts` (byte-identical); `.planning` at root resolves for GSD; histories DAG-reachable. The build surfaced ONE real gap text-review missed → the vendoring decision below. **Decision (user 2026-06-08): VENDOR all 14 lib deps as committed plain files; remove `.gitmodules` entirely; un-ignore `lib/` under the backend contracts package.** This replaces §3a's submodule re-registration. CI/runbook simplify (no `submodules: recursive`, plain `git clone`).
 **Date:** 2026-06-08
 **Sub-project 1 of 2.** Sub-project 2 = "Full-live cornerstone integration" (Phase 11) — specced separately once the monorepo paths are real (preview in §9).
 
@@ -65,19 +68,20 @@ d2p/                              # new repo (wvs-finance/d2p)
 ## §3 Workspace & tooling
 
 - **`pnpm-workspace.yaml`:** `packages: ['packages/frontend']`. `packages/backend` is NOT a pnpm member (no consumable JS package) — it's present for `forge`/codegen/CI, referenced by relative path.
-- **Root `package.json` scripts** (one command from root):
+- **Root `package.json` scripts** (one command from root; the frontend package is named **`d2p-frontend`** — use `--filter d2p-frontend`, NOT `--filter frontend` which silently no-ops):
   - `"contracts:build": "forge build --root packages/backend/contracts"`
   - `"contracts:test": "forge test --root packages/backend/contracts"`
-  - `"contracts:gen": "pnpm run contracts:build && pnpm --filter frontend run contracts:gen"`
-  - `"build|dev|test": "pnpm --filter frontend <x>"`
+  - `"contracts:gen": "pnpm run contracts:build && pnpm --filter d2p-frontend run contracts:gen"`
+  - `"build|dev|test": "pnpm --filter d2p-frontend <x>"`
 - **Versions:** carry frontend's `packageManager`/`.nvmrc`; Foundry via `foundryup` (README + CI).
 
-### §3a Submodule re-registration (the B2 recipe)
-After the `packages/backend` subtree (which brings the 6 `160000` gitlinks under `packages/backend/contracts/lib/*` but NOT a working `.gitmodules`):
-1. Author a **root `.gitmodules`** with the 6 stanzas, each `path = packages/backend/contracts/lib/<name>` and the original `url` (copy URLs from `abrigo-somnia/.gitmodules`).
-2. `git submodule init` + `git submodule update --recursive` (gitlink SHAs already match the upstream commits subtree imported) — verify each `lib/<name>` populates.
-3. Verify `forge build --root packages/backend/contracts` resolves `solady`/`v4-periphery`/etc.
-4. **CI** (`actions/checkout` with `submodules: recursive`) + the README runbook (`git clone --recurse-submodules`, or `git submodule update --init --recursive` post-clone) — §5/§8.
+### §3a Vendor all Foundry lib deps (the v4 recipe — supersedes submodule re-registration)
+The backend `forge build` needs **14** `lib/*` deps; only 6 are tracked submodules, the other 8 (`forge-std, v4-core, panoptic-v2-core, solmate, v3-core, v3-periphery, openzeppelin-contracts, clones-with-immutable-args`) are gitignored local checkouts in no git history. To make `git clone d2p && forge build` work with no submodule/forge-install step:
+1. In `packages/backend/contracts/`: **`git rm --cached` the 6 submodule gitlinks** and **delete the inherited `.gitmodules`** (no submodules anywhere in the monorepo).
+2. **Un-ignore `lib/`** — edit `packages/backend/contracts/.gitignore` to remove the blanket `lib/` ignore (keep `out/ cache/ broadcast/` anchored-ignored per §4).
+3. **Commit all 14 `lib/<name>` dirs as plain files** (sourced from the backend working tree, which has them populated; strip any nested `.git`/`.gitmodules` inside the vendored deps so they are plain trees, not nested repos).
+4. Verify `forge build --root packages/backend/contracts` passes, then verify from a **fresh plain `git clone`** (NO `--recurse-submodules`) that `forge build` still passes (the real reproducibility gate).
+- Trade-off (accepted): bigger repo, deps frozen at current SHAs (update via re-vendor). This is the delivery-robust choice (clone-and-build).
 
 ### §3b Foundry-required codegen (M2)
 `contracts/out/` is gitignored/untracked (Foundry build dir) — a clean clone has no ABIs until `forge build`. So `pnpm contracts:gen` REQUIRES Foundry + initialized submodules. The frontend-only `pnpm build` does NOT require Foundry — it uses the committed `packages/frontend/lib/contracts/generated.ts` (this is why Vercel works). Two distinct pipelines, never conflated (§10).
@@ -91,7 +95,7 @@ After the `packages/backend` subtree (which brings the 6 `160000` gitlinks under
 ## §5 CI (single workflow, two lanes)
 
 - `.github/workflows/ci.yml`, two jobs:
-  - **backend:** `actions/checkout` **`submodules: recursive`** → install Foundry → `forge fmt --check` + `forge build` + `forge test` (`--root packages/backend/contracts`; fork suites stay keyless-gated as today).
+  - **backend:** plain `actions/checkout` (NO submodules — libs are vendored as committed files, §3a) → install Foundry → `forge fmt --check` + `forge build` + `forge test` (`--root packages/backend/contracts`; fork suites stay keyless-gated as today).
   - **frontend:** pnpm install → biome + tsc + vitest + playwright (e2e/a11y) on a local prod build, using the COMMITTED generated ABIs (no Foundry, no submodules in this lane).
   - Path filters so docs-only changes skip forge (optional).
 - **Lighthouse** on the Vercel preview (unchanged).
@@ -111,9 +115,9 @@ After the `packages/backend` subtree (which brings the 6 `160000` gitlinks under
 
 1. **Merge PR #8** → `frontend/main` (clean linear base).
 2. Build `d2p` locally: scaffold → subtree both → §3a submodules → §3/§4 paths/tooling/.gitignore → §6 `.planning` move.
-3. **Verify (two pipelines, clean clone):**
-   - `git clone --recurse-submodules d2p && pnpm install && pnpm build` (frontend, committed ABIs, NO Foundry) → green.
-   - `forge test --root packages/backend/contracts` (Foundry + submodules, non-fork lanes) → green.
+3. **Verify (two pipelines, fresh PLAIN clone — no submodules):**
+   - `git clone d2p && pnpm install && pnpm build` (frontend, committed ABIs, NO Foundry) → green.
+   - `forge build && forge test --root packages/backend/contracts` (Foundry; libs vendored, no submodule init, non-fork lanes) → green.
    - `pnpm --filter frontend test` (vitest) + playwright e2e → green.
    - One read-only GSD command from root resolves `.planning` (§6).
 4. **Enumerate required env from code (M-A):** `grep -rEn "process\.env|env\." packages/frontend/{app,lib} | grep -oE "(NEXT_PUBLIC_[A-Z0-9_]+|[A-Z][A-Z0-9_]{3,})"` (+ check `lib/env.ts` t3 schema) → the authoritative server+public var set; confirm EVERY one is set in the new Vercel project (server-only NEVER `NEXT_PUBLIC_`). A missing server-only var (e.g. `AGENT1_ROUTE_SECRET`) yields a GREEN build but a runtime-broken `/api/abrigo/agent1` — the typecheck-green/runtime-broken class. Then push `d2p`; set up CI; create + GREEN the new Vercel project (preview build green = the §7 gate).
@@ -129,8 +133,8 @@ Full-live cornerstone integration in the monorepo: `DEFAULT_MODE='live'` (Agent-
 ## §10 Acceptance (what must be TRUE — Phase 10)
 
 - `d2p` exists with `packages/frontend` + `packages/backend`; **both histories DAG-reachable** (`git log --all` shows the originals; the subtree-merge commit's second parent reaches each source history). NOTE: path-scoped `git log -- packages/...` / blame begins at the subtree merge — per-file follow across the prefix is NOT guaranteed (subtree, no rewrite).
-- **Frontend pipeline (no Foundry):** `git clone --recurse-submodules && pnpm install && pnpm build` green using committed `generated.ts`.
-- **Backend pipeline (Foundry + submodules):** `forge test --root packages/backend/contracts` (non-fork) green; the 6 submodules populate via the rewritten root `.gitmodules`.
+- **Frontend pipeline (no Foundry):** plain `git clone && pnpm install && pnpm build` green using committed `generated.ts`.
+- **Backend pipeline (Foundry, vendored libs):** plain `git clone && forge build && forge test --root packages/backend/contracts` (non-fork) green — all 14 `lib/*` deps present as committed files; NO `.gitmodules`, NO submodule init.
 - `pnpm --filter frontend test` (vitest) + playwright e2e green; `wagmi.config.ts` points at `../backend/contracts` (no absolute `/home/...`).
 - Single CI workflow runs both lanes (backend lane `submodules: recursive`); Vercel new project preview GREEN with env set.
 - Root `.planning/` is the canonical GSD home (resolves from root); `packages/backend/.planning/` preserved; MILESTONES carried.
