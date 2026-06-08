@@ -1,2 +1,19 @@
 packages:
   - 'packages/frontend'
+
+# Hoisted from packages/frontend/package.json — in a pnpm workspace these must live
+# at the workspace root (pnpm 10 ignores per-package pnpm.* fields).
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - '@parcel/watcher'
+  - '@swc/core'
+  - bufferutil
+  - esbuild
+  - keccak
+  - lefthook
+  - msw
+  - utf-8-validate
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver

@@ -83,19 +83,5 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^5.8",
     "vitest": "^4.1.6"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "@parcel/watcher",
-      "@swc/core",
-      "bufferutil",
-      "esbuild",
-      "keccak",
-      "lefthook",
-      "msw",
-      "utf-8-validate"
-    ],
-    "ignoredBuiltDependencies": ["sharp", "unrs-resolver"]
   }
 }
