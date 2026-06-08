@@ -22,6 +22,8 @@ const MOCK_VIEW: HedgeLegParamsView = {
   isLong: true,
   schoolLabel: 'Shiller macro-risk / post-Keynesian',
   rationale: 'La representatividad del pool es adecuada para la cobertura macro propuesta.',
+  nonErgodicDisclosed: true,
+  parametricHedged: false,
   payoff: {
     volToWidth: '5%',
     horizonBlocks: 100,
