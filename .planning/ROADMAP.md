@@ -324,7 +324,7 @@ decomposition.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 17. Live deploy + pre-flight surface verification | 1/1 | Complete   | 2026-06-08 |
+| 17. Live deploy + pre-flight surface verification | 1/1 | Complete    | 2026-06-08 |
 | 18. On-chain decision-moves proof + publish | 0/0 | Not started | - |
 
 ## v2.1 Traceability (LIVEDEP requirements → phases)
