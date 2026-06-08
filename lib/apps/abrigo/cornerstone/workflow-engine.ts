@@ -104,7 +104,7 @@ export async function runWorkflow(
       'wCOP/USDC pool (UniV4, Polygon) is deeply liquid at this strike. ' +
       'Representativeness score: 0.91 (above threshold). ' +
       'Inflation adjustment confirmed: co/inflation-rate=5.68% ∈ [CPI band]. ' +
-      'Proceeding with long cCOP/USD call at strike 4.100.',
+      'Proceeding with long cCOP/USD call at strike 360360 (tick 360360).',
     positionId: 999n,
     strike: 4100, // SIGNED int24 — positive for the ADD_LONG_GAMMA case
     width: 60,
