@@ -10,13 +10,14 @@
 ## User Constraints (from Canonical Spec v2 — 2026-06-07-module5-cornerstone-live-tx-design.md)
 
 ### Locked Decisions
-- Integration depth: live tx submission via re-provision-per-run (re-provision-per-run model, §4a)
-- Demo constants pinned: `legIndex=0`, `positionSize=1_000_000n`, `economicTheory=0x…06` (POST_KEYNESIAN sentinel)
+> **⚑ SUPERSEDED by spec v4/v5 (2026-06-08).** This research was written against spec v2 (recorded Agent-1 + isolated chain). Two decisions below are REVERSED — read the spec's v4→v5 reframe block as authoritative. Updated bullets are marked ⟳.
+- Integration depth: BOTH agents LIVE (Option B); but the live RUN is gated ⊘ on the Somnia validator-callback outage. In-phase: `replay` (captured receipts) is the GUARANTEED artifact; the live path is BUILT+wired against the live address and auto-works on Somnia recovery. ⟳
+- Demo constants pinned: `legIndex=0`, `positionSize=1_000_000n`; **`economicTheory=0x…06` (PKE) is pinned on the MINT side** (a live SHILLER 0x5 mandate breaks the 360360 anchor / can revert) — the live `school` LABEL still renders from the event string. ⟳
 - Cost ledger: STATIC placeholder ONLY — no `totalCost` call, no `OperationalCostManagement` address, no fabricated numbers
-- `StrategistDecided` is NEVER decoded from a live Somnia log — synthesized in-app from recorded v1 trace
+- ⟳ **REVERSED:** `StrategistDecided` IS decoded from a live Somnia log — server-side in the `/api/abrigo/agent1` route, against the LIVE two-leg strategist `0xf0570CcB1271FFaFf4caCA628F3632257f177b1D` (Somnia 50312). In `replay` it is sourced from captured receipts; in `mock` from `fromMockEvent`. (Live decode currently no-ops only due to the external validator-callback outage, not deployment.)
 - Provenance: `fork-verified` is NEUTRAL — never green
-- Fallback path must ALWAYS be labelled "modo demostración (sin cadena)" / "demo mode (no chain)" — never a silent substitution
-- `buildbear.ts` chain is ISOLATED — NOT added to 5-chain `wagmiConfig`, NOT added to `SupportedChainId`
+- Fallback path must ALWAYS be labelled "modo demostración (sin cadena)" / "demo mode (no chain)" — never a silent substitution; the live→replay degradation must be announced (aria-live), never silent
+- ⟳ **REVERSED (D2, user 2026-06-07):** the BuildBear fork (31337) IS registered in `lib/wagmi/config.ts` as a 6th chain; the write path uses wagmi `useSwitchChain` + `useWriteContract({chainId:31337})`. `SupportedChainId` widened (accepted for the demo). Reads may use a dedicated viem public client built from the artifact RPC. (The "isolated / raw EIP-1193" patterns elsewhere in this doc are the SUPERSEDED alternative.)
 - Fork addresses/RPC ONLY from the mirrored `buildbear-deployments.json` artifact (no hardcoding)
 - `isExpired(nowMs)` honored (capturedAt + 3 days TTL)
 - No `executed/realized/ejecutad/realizad` in rendered DOM; no `$` PnL; decision card never `<details>`
@@ -32,6 +33,7 @@
 ### Deferred Ideas (OUT OF SCOPE)
 - MOD4-MONITOR (MonitorPanel) and MOD4-HISTORY (idb run history) — deferred from Phase 8
 - School-branch UI (SHILLER vs PKE selector)
+- ⟳ Live Somnia `StrategistDecided` decode is NO LONGER deferred — it is in scope (server-side), gated only by the external validator-callback outage (the live on-chain RUN verdict is ⊘ DEFERRED, the build is not)
 - Live Somnia `StrategistDecided` decode
 - Cross-chain bridge
 - Monitoring agent
