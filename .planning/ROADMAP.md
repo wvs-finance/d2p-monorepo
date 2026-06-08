@@ -350,6 +350,25 @@ Plans:
 - [ ] 08-02-PLAN.md — Wave 2 wire: /apps/abrigo/cornerstone RSC shell (pre-renders DecisionPipelineTrace as children) + PromptBox + RunTranscript (useSyncExternalStore, aria-live, motion mounted-gate, focus-to-Confirm) + motion dep + e2e honesty greps + Evidence Collector live-verify (MOD4-FLOW, MOD4-A1, MOD4-A2, MOD4-MINT) [wave 2]
 - [ ] 08-03-PLAN.md — Wave 3 IF-TIME (NOT required for phase completion): MonitorPanel (basic mock read) + RunHistory (idb, lazy openDB, client-only) — adds idb ONLY here, off the critical path (MOD4-MONITOR, MOD4-HISTORY) [wave 3]
 
+### Phase 9: Cornerstone live-tx integration — Module 5
+
+**Goal:** Swap the cornerstone's MOCK producer for a REAL on-chain producer behind the existing `workflow-store`/`WorkflowEvent` seam, so a judge at `/apps/abrigo/cornerstone` can — against a FRESHLY provisioned BuildBear Polygon fork — click Confirm and submit a real `resolveFromMandate(mandate, 0, 1e6)` (economicTheory=`0x…06`) that mints a real position, with the UI rendering the REAL resulting tx hash + decoded `ExecutorDecided` + `PositionMinted` + `quoteMargin(positionId, strike(0))`. Agent-1 stays the REAL recorded Somnia trace (the new `StrategistDecided` shape is NOT deployed → synthesized in-app, never decoded from a live log). A mount-time **freshness gate** (`pool.numberOfLegs(executor)==0`) decides live-vs-fallback; when the sandbox is used/expired/unreachable or no wallet, the existing `fromMockEvent` path runs under an explicit "modo demostración (sin cadena)" label (no fake tx hash). Frontend-only; no Solidity changes; the live mint targets a Polygon FORK (BuildBear), never mainnet, never a bridge.
+
+**Requirements** (MOD5-* introduced at planning): MOD5-ABI (reconcile `events.ts` to the final ABIs — `StrategistDecided`/`HedgeMandate`, 8-field `ExecutorDecided`, `PositionMinted`; `BalanceDelta` sign-extending decoder; `fromChainLog` real-ABI sibling of `fromMockEvent`), MOD5-CHAIN (isolated `buildbear.ts` chain @ 31337 like `somnia/chain.ts` — NOT in the 5-chain `wagmiConfig`/`SupportedChainId`; typed artifact loader + `isExpired`), MOD5-LIVE (freshness gate + `runWorkflowLive` producer + Confirm→submit→receipt→decode→`quoteMargin`; honest tx/revert/error states), MOD5-FALLBACK (honest mock degradation, mode always visible), MOD5-SURFACE (real mint tx hash+strike+TokenId; `ExecutorDecided` rationale fields expandable; STATIC "agent cost not deployed for this demo" placeholder). Reuses CROSS-01/09/10, the `fork-verified` tier, RunTranscript/workflow-store/`useSyncExternalStore`, es-CO-first copy.
+
+**Depends on:** Phase 8 (cornerstone route, `workflow-store`, `WorkflowEvent`/`fromMockEvent`, RunTranscript, HedgeDecisionCardV2, MintCard), Phase 6 (recorded Somnia trace + reader), Phase 7 (`fork-verified` tier, DecisionPipelineTrace). **Cross-repo dependency (non-blocking):** backend must provide a fresh-executor/`--no-mint` provisioning variant so the freshness gate passes for a live in-demo mint (else the live path honestly degrades to mock — the FE phase ships the gate + fallback regardless). See spec §4b runbook.
+
+**Canonical spec:** `docs/superpowers/specs/2026-06-07-module5-cornerstone-live-tx-design.md` (v2; **2-way review complete** — Reality Checker + Solidity Smart Contract Engineer; both NEEDS WORK on v1, all BLOCKERs/MAJORs resolved in v2; §0 = binding honesty contract, validated unchanged by both reviewers).
+
+**Honesty invariants (spec §0):** Agent-1 recorded-only (new shape not deployed to Somnia; synthesized in-app, no live decode); Agent-2 mint on a Polygon FORK not mainnet, `fork-verified` never green; mandatory verbatim on-screen no-bridge disclosure (es-CO+en); the app RELAYS the mandate (not bridged); `_onResult` live callback unexecuted (FE submits `resolveFromMandate` directly); no `executed/realized/ejecutad/realizad`, no `$` PnL, no raw `0x000…0`; decision card never `<details>`; status pills color+icon+text; demo constants pinned `legIndex=0`/`positionSize=1e6`/`economicTheory=0x…06`; cost ledger STATIC placeholder (not deployed/addressable); fork addrs ONLY from mirrored artifact (no hardcoding), `isExpired` honored; mock fallback never shows a fake tx hash/link; es-CO-first + native sign-off in `docs/copy-review.md`; `pnpm run test:impeccable` + token tests + e2e green LOCALLY before commit; Evidence Collector live-verify gate per task; no `--no-verify`.
+
+**Open item carried to planning/research:** CORS/browser-origin JSON-RPC to the BuildBear RPC — decide via an `eth_chainId` browser probe whether a Next.js Route-Handler proxy is mandatory (spec §7.2).
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 9 to break down — likely Wave 0 ABI/chain data layer → Wave 1 live producer + freshness gate → Wave 2 surfaces + route wire + e2e + live-verify)
+
 ---
 *Roadmap created: 2026-05-11*
 *Last updated: 2026-06-02 — Phase 7 (agent reasoning + position-execution surface, Module 3) planned: 4 plans (07-00 data layer → 07-01/02 trace+position parallel → 07-03 detail-route wire + live-verify); MOD3-HONKER deferred to 7.x*
