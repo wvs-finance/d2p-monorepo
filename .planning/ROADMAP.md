@@ -368,7 +368,7 @@ Plans:
 
 **Open item carried to planning/research:** CORS/browser-origin JSON-RPC to the BuildBear RPC — decide via an `eth_chainId` browser probe whether a Next.js Route-Handler proxy is mandatory (spec §7.2).
 
-**Plans:** 2/5 plans executed
+**Plans:** 3/5 plans executed
 
 Plans:
 - [ ] 09-01-PLAN.md — Wave 0: T0 FREEZE replay first (git tag cornerstone-replay-safe + replay smoke = CI gate) + live|replay|mock mode type + T1 wagmi-codegen ABIs (Strategist/Executor/IPanopticData) + register fork as 6th wagmi chain (D2) + mirrored artifact/isExpired + BalanceDelta sign-extend decoder + Panoptic extractStrike(===360360) (MOD5-MODES, MOD5-ABI, MOD5-CHAIN) [wave 0]
