@@ -304,7 +304,8 @@ decomposition.
   3. `cast code 0xfA428171E1F5B56f92C67C002De1d8e90B053EE1 --rpc-url <somnia-50312>` STILL returns the v1 bytecode — the v1 contract remains reachable (it backs the frontend replay fallback; not decommissioned). *(§4 constraint guardrail)*
 **Constraint guardrails (from §4):** re-confirm volatile `LLM_AGENT_ID 12847293847561029384` + platform `0x037Bb9…6776` against the Agent Explorer FIRST (the school-leg probe doubles as the agent-ID liveness probe); keep v1 `0xfA428171…` reachable; do NOT alter the join's hardcoded `chainId = 137` (the 137→31337 override is a documented frontend accommodation, NOT a backend change); funded STT (>50 STT) key is in `contracts/.env` — a recorded run is acceptable, an unverifiable claim is not.
 **Notes**: NO new contract development — the two-leg API is source-complete + offline-proven (Phase 12, 19/19). This phase REDEPLOYS the existing source (non-upgradeable → new address). The runner `contracts/script/macro-hedge-strategist-e2e.sh` (v1) is ADAPTED here: re-point `requestActionDecision`/`requestSizeDecision`/`getDecision` → `requestSchoolDecision`/`requestNotionalDecision`/`getMandate`+`decisionState`, and the polled log sig `HedgeDecisionMade(...)` → `StrategistDecided(bytes32,string,(address,bytes32,uint256,uint32,bool))`.
-**Plans**: TBD
+**Plans**: 1 plan (1 wave — deploy + cheap school-leg liveness probe are a strict spend-gated chain in ONE autonomous plan; the surface re-confirm gates the STT spend intra-plan per §4)
+- [ ] 17-01-PLAN.md — Adapt the v1 e2e runner to the two-leg `StrategistDecided` API + a pre-spend surface re-confirm gate, then deploy live to Somnia 50312 (NEW address), verify the three immutables, run ONE `requestSchoolDecision` liveness probe (`schoolSet==true`, NOT `DecisionFailed`), and re-confirm v1 `0xfA428171…` reachable *(LIVEDEP-01)*
 
 ### Phase 18: On-chain decision-moves proof + publish
 **Goal**: The live deploy is PROVEN on-chain — a real prompt yields a well-formed `HedgeMandate` (with `schoolSet && notionalSet`), a different consensus yields a DIFFERENT mandate (decision-moves), all captured as real tx hashes — and the address + ABI + exact call inputs are PUBLISHED so the frontend can mirror them.
@@ -323,7 +324,7 @@ decomposition.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 17. Live deploy + pre-flight surface verification | 0/0 | Not started | - |
+| 17. Live deploy + pre-flight surface verification | 0/1 | Planned | - |
 | 18. On-chain decision-moves proof + publish | 0/0 | Not started | - |
 
 ## v2.1 Traceability (LIVEDEP requirements → phases)
