@@ -16,9 +16,9 @@ beforeAll(() => {
 })
 
 describe('lib/wagmi/config', () => {
-  it('exports chains array with exactly 5 elements', async () => {
+  it('exports chains array with exactly 6 elements (5 mainnet + BuildBear fork 31337)', async () => {
     const { chains } = await import('@/lib/wagmi/config')
-    expect(chains).toHaveLength(5)
+    expect(chains).toHaveLength(6)
   })
 
   it('chain IDs match expected networks', async () => {
@@ -29,6 +29,7 @@ describe('lib/wagmi/config', () => {
     expect(ids).toContain(8453) // base
     expect(ids).toContain(42161) // arbitrum
     expect(ids).toContain(10) // optimism
+    expect(ids).toContain(31337) // BuildBear Polygon fork (09-03 D2: 6th chain for live mint)
   })
 
   it('wagmiConfig.chains[0] is celo (primary chain)', async () => {
@@ -36,7 +37,7 @@ describe('lib/wagmi/config', () => {
     expect(wagmiConfig.chains[0].id).toBe(42220)
   })
 
-  it('wagmiConfig has fallback transports for all 5 chains', async () => {
+  it('wagmiConfig has fallback transports for all 6 chains', async () => {
     const { wagmiConfig, chains } = await import('@/lib/wagmi/config')
     // Each chain must have a transport configured in the transports map.
     for (const chain of chains) {

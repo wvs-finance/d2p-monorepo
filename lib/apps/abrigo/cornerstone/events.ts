@@ -1,4 +1,10 @@
-// PROVISIONAL — backend Phases 12–15 reshape expected; isolated behind fromMockEvent.
+// PROVISIONAL → LIVE: extended in 09-03 with fromChainEvent + formatWadToPercent.
+// viem decodeEventLog used for real-ABI decoding (strict:false tolerates extra logs).
+
+import { macroHedgeExecutorAbi, macroHedgeStrategistAbi } from '@/lib/contracts/generated'
+import { decodeEventLog } from 'viem'
+// fromMockEvent retained for mock/replay fallback (unchanged).
+// fromChainEvent: the real-ABI adapter using viem decodeEventLog (strict:false).
 // NOT zero-rework. REAL contract (UI-AGENT-HANDOFF §5):
 //   - margins/mark/premiumAccrued/pnl are SIGNED int256 (may be NEGATIVE)
 //   - strike/width are SIGNED int24 (may be negative ticks)
@@ -80,8 +86,10 @@ export type WorkflowEvent =
 
 /**
  * HedgeLegParamsView — the display-ready, serializable view of Agent 2's decision.
- * All raw bigint fields are formatted at the fromMockEvent boundary (burn class prevention).
+ * All raw bigint fields are formatted at the fromMockEvent/fromChainEvent boundary (burn class prevention).
  * No raw bigint reaches JSX.
+ *
+ * D1 additions (09-03): nonErgodicDisclosed + parametricHedged (Davidson honesty split).
  */
 export type HedgeLegParamsView = {
   marketLabel: string // e.g. "wCOP/USDC (UniV4, Polygon)"
@@ -90,6 +98,9 @@ export type HedgeLegParamsView = {
   isLong: boolean
   schoolLabel: string // human-readable from economicTheory address(0) — NEVER raw 0x000…0
   rationale: string // verbatim free-text poolRepresentativenessRationale
+  // D1 — Davidson honesty split fields (09-03)
+  nonErgodicDisclosed: boolean // honesty flag from ExecutorDecided event
+  parametricHedged: boolean // from ExecutorDecided event
   payoff: {
     volToWidth: string // formatted: vol → "5%" width string
     horizonBlocks: number
@@ -124,6 +135,14 @@ export type StrategistDecidedView = {
 export type ExecutorDecidedView = {
   kind: 'ExecutorDecided'
   hedgeLegParams: HedgeLegParamsView
+  // 09-03: 8-field ExecutorDecided live fields (sourced directly from the event)
+  regimeZt: number // uint8 — regime state
+  inflationAdjustment: string // WAD → percent string (e.g. "5.68%")
+  strikeTick: number // int24 SIGNED — may be negative
+  regimeWidth: number // int24 SIGNED
+  parametricHedged: boolean
+  nonErgodicDisclosed: boolean
+  rationale: string // verbatim (TEMPLATE) string from the event
 }
 
 export type PositionMintedView = {
@@ -189,13 +208,38 @@ function formatAsset(asset: number): string {
 }
 
 /**
- * schoolLabelFromAddress: address(0) (economicTheory) → human-readable school label.
- * NEVER renders raw 0x000…0 in the UI.
+ * schoolLabelFromAddress: economicTheory address → human-readable school label.
+ * NEVER renders raw hex in the UI.
+ * 0x6 → POST_KEYNESIAN, 0x5 → SHILLER_MACRO_RISK, address(0)/unknown → em-dash.
+ *
+ * NOTE: the school LABEL shown on the card comes from the StrategistDecided event STRING
+ * (not from this address mapping). This function is used only for address-to-label lookup
+ * when the event string is unavailable (mock path).
  */
-function schoolLabelFromAddress(_addr: string): string {
-  // address(0) = demo placeholder for IMacroThesis (empty interface, no instance)
-  // Render human label. Phase 15: real address lookup.
-  return 'Shiller macro-risk / post-Keynesian'
+export function schoolLabelFromAddress(addr: string): string {
+  const lower = addr.toLowerCase()
+  // 0x…06 = POST_KEYNESIAN (IMacroThesis.sol:36)
+  if (lower === '0x0000000000000000000000000000000000000006') return 'POST_KEYNESIAN'
+  // 0x…05 = SHILLER_MACRO_RISK (IMacroThesis.sol:35)
+  if (lower === '0x0000000000000000000000000000000000000005') return 'SHILLER_MACRO_RISK'
+  // address(0) or unknown → em-dash (never raw hex)
+  return '—'
+}
+
+// ---------------------------------------------------------------------------
+// formatWadToPercent — WAD (1e18 scale) → percent string (09-03)
+// ---------------------------------------------------------------------------
+
+/**
+ * formatWadToPercent(wad) — converts a WAD-scaled inflation adjustment to a percent string.
+ *
+ * Formula: wad / 1e16 → hundredths of a percent → toFixed(2) + '%'
+ * Example: 56800000000000000n (5.68% × 1e18) → "5.68%"
+ */
+export function formatWadToPercent(wad: bigint): string {
+  // Divide wad by 1e14 → value in hundredths of a percent (e.g. 568 for 5.68%)
+  const hundredths = Number(wad / 10n ** 14n)
+  return `${(hundredths / 100).toFixed(2)}%`
 }
 
 // ---------------------------------------------------------------------------
@@ -214,6 +258,166 @@ function schoolLabelFromAddress(_addr: string): string {
  *
  * Phase 15: swap this adapter for the real ABI decoder. Everything downstream is stable.
  */
+// ---------------------------------------------------------------------------
+// fromChainEvent — real-ABI adapter for live/replay receipt logs (09-03)
+// ---------------------------------------------------------------------------
+
+/**
+ * fromChainEvent(log) → WorkflowEventView | null
+ *
+ * Decodes a raw receipt log into a WorkflowEventView using the real ABIs.
+ * Uses viem decodeEventLog with strict:false to tolerate extra logs
+ * (e.g. RepresentativenessAssessed) without erroring.
+ *
+ * KEY DIFFERENCES from fromMockEvent:
+ *   - recordedDecisionId is set ONCE here for StrategistDecided (no outside enrich)
+ *   - ExecutorDecided: all 8 fields decoded (regimeZt, inflationAdjustment, strikeTick,
+ *     regimeWidth, parametricHedged, nonErgodicDisclosed, rationale)
+ *   - PositionMinted.positionId comes from the indexed topic (bigint → string)
+ *   - requestId sentinel 0 NOT surfaced
+ *   - Unknown/unrecognized topics → returns null (no throw)
+ *
+ * @param log - a raw log object { topics: `0x${string}`[], data: `0x${string}` }
+ * @returns WorkflowEventView | null
+ */
+export function fromChainEvent(log: {
+  topics: readonly `0x${string}`[]
+  data: `0x${string}`
+}): WorkflowEventView | null {
+  // Try MacroHedgeExecutor ABI first (ExecutorDecided, PositionMinted, RepresentativenessAssessed)
+  try {
+    const decoded = decodeEventLog({
+      abi: macroHedgeExecutorAbi,
+      topics: [...log.topics] as [`0x${string}`, ...`0x${string}`[]],
+      data: log.data,
+      strict: false,
+    })
+
+    if (decoded.eventName === 'ExecutorDecided') {
+      const {
+        regimeZt,
+        inflationAdjustmentWad,
+        strikeTick,
+        regimeWidth,
+        parametricHedged,
+        nonErgodicDisclosed,
+        rationale,
+      } = decoded.args as {
+        requestId: bigint
+        regimeZt: number
+        inflationAdjustmentWad: bigint
+        strikeTick: number
+        regimeWidth: number
+        parametricHedged: boolean
+        nonErgodicDisclosed: boolean
+        rationale: string
+      }
+
+      const inflationAdjustment = formatWadToPercent(inflationAdjustmentWad)
+
+      const view: ExecutorDecidedView = {
+        kind: 'ExecutorDecided',
+        regimeZt,
+        inflationAdjustment,
+        strikeTick,
+        regimeWidth,
+        parametricHedged,
+        nonErgodicDisclosed,
+        rationale,
+        hedgeLegParams: {
+          marketLabel: 'wCOP/USDC (UniV4, Polygon)',
+          strikeWAD: String(strikeTick), // formatted from the event strikeTick
+          size: 1_000_000n, // demo constant
+          isLong: true, // sourced from mandate context
+          schoolLabel: '—', // filled from StrategistDecided school string downstream
+          rationale,
+          nonErgodicDisclosed,
+          parametricHedged,
+          payoff: {
+            volToWidth: '5%', // demo constant
+            horizonBlocks: 100,
+            tickSpacing: 60,
+            asset: 'token0',
+          },
+          maxLoss: '= prima',
+          upside: 'ilimitado',
+          marginDelta: {
+            token0: 0n, // filled by quoteMargin after PositionMinted
+            token1: 0n,
+          },
+        },
+      }
+      return view
+    }
+
+    if (decoded.eventName === 'PositionMinted') {
+      const args = decoded.args as {
+        owner: `0x${string}`
+        positionId: bigint
+        positionSize: bigint
+      }
+      const view: PositionMintedView = {
+        kind: 'PositionMinted',
+        positionId: args.positionId.toString(),
+        // margins filled by quoteMargin in the producer — 0n placeholders
+        marginToken0: 0n,
+        marginToken1: 0n,
+      }
+      return view
+    }
+
+    // Other executor events (RepresentativenessAssessed, AgentRequested, Swept) → null
+    return null
+  } catch {
+    // Not an executor ABI event — try strategist ABI
+  }
+
+  // Try MacroHedgeStrategist ABI (StrategistDecided)
+  try {
+    const decoded = decodeEventLog({
+      abi: macroHedgeStrategistAbi,
+      topics: [...log.topics] as [`0x${string}`, ...`0x${string}`[]],
+      data: log.data,
+      strict: false,
+    })
+
+    if (decoded.eventName === 'StrategistDecided') {
+      const args = decoded.args as {
+        decisionId: `0x${string}`
+        school: string
+        mandate: {
+          economicTheory: `0x${string}`
+          underlyingMarket: `0x${string}`
+          targetNotional: bigint
+          chainId: number
+          isLong: boolean
+        }
+      }
+
+      const view: StrategistDecidedView = {
+        kind: 'StrategistDecided',
+        // recordedDecisionId set ONCE here — not enriched outside in the live path
+        recordedDecisionId: args.decisionId.toString(),
+        thesis: '', // live path: thesis not in the event; filled downstream if available
+        spec: {
+          marketLabel: 'wCOP/USDC (UniV4, Polygon)',
+          strikeWAD: '—', // not in StrategistDecided event
+          size: args.mandate.targetNotional,
+          isLong: args.mandate.isLong,
+          // school LABEL comes from the event STRING (spec v5 D5 — decouple from economicTheory address)
+          schoolLabel: args.school || schoolLabelFromAddress(args.mandate.economicTheory),
+        },
+      }
+      return view
+    }
+
+    return null
+  } catch {
+    // Unrecognized topic → null (no throw)
+    return null
+  }
+}
+
 export function fromMockEvent(e: WorkflowEvent): WorkflowEventView {
   switch (e.kind) {
     case 'StrategistDecided': {
@@ -235,6 +439,14 @@ export function fromMockEvent(e: WorkflowEvent): WorkflowEventView {
     case 'ExecutorDecided': {
       return {
         kind: 'ExecutorDecided',
+        // D1 fields for mock path — defaults matching demo expectations
+        regimeZt: 0,
+        inflationAdjustment: '5.68%',
+        strikeTick: e.strike,
+        regimeWidth: e.width,
+        parametricHedged: false,
+        nonErgodicDisclosed: true,
+        rationale: e.poolRepresentativenessRationale,
         hedgeLegParams: {
           marketLabel: 'wCOP/USDC (UniV4, Polygon)',
           // CRITICAL: sign preserved — negative int24 → negative display string
@@ -243,6 +455,9 @@ export function fromMockEvent(e: WorkflowEvent): WorkflowEventView {
           isLong: e.isLong,
           schoolLabel: 'Shiller macro-risk / post-Keynesian',
           rationale: e.poolRepresentativenessRationale, // verbatim — no truncation
+          // D1 defaults for mock path
+          nonErgodicDisclosed: true,
+          parametricHedged: false,
           payoff: {
             volToWidth: formatVol(0n), // vol not in ExecutorDecided; use demo default
             horizonBlocks: 100,

@@ -1,8 +1,11 @@
 // /apps/abrigo/cornerstone — Scenario-1 Cornerstone RSC shell.
 //
-// Pre-renders DecisionPipelineTrace for both PRESETS (null-guarded → errorState).
-// Passes pre-rendered trace nodes as a map to RunTranscript.
-// Mounts PromptBox + RunTranscript client islands.
+// Phase 9 (09-04): live | replay | mock mode switch wired.
+//   - Mode resolved via URL param ?mode= → parseMode (DEFAULT_MODE = 'replay').
+//   - ModeBanner (Surface 1) rendered above PromptBox by CornerstoneClientShell.
+//   - FreshnessGate (Surface 6) logic in CornerstoneClientShell (mount-time probe).
+//   - runWorkflowLive wired: useSwitchChain(31337) BEFORE useWriteContract({chainId:31337}) (v5 fix-4).
+//   - ok:false from /api/abrigo/agent1 → degrade to replay (aria-live, never silent).
 //
 // HEADING OUTLINE (FD-M4): h1 (pageTitle) → h2 per agent entry (inside RunTranscript).
 // NULL-GUARD (RC-M5): null trace → cornerstone.errorState (no 500/throw).
@@ -11,10 +14,11 @@
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+import { CornerstoneClientShell } from '@/components/defi/cornerstone/CornerstoneClientShell'
+import type { CornerstoneClientShellStrings } from '@/components/defi/cornerstone/CornerstoneClientShell'
 import type { CardV2Strings } from '@/components/defi/cornerstone/HedgeDecisionCardV2'
 import type { MintCardStrings } from '@/components/defi/cornerstone/MintCard'
 import type { PromptBoxStrings } from '@/components/defi/cornerstone/PromptBox'
-import { RunTranscript } from '@/components/defi/cornerstone/RunTranscript'
 import { DecisionPipelineTrace } from '@/components/defi/somnia/DecisionPipelineTrace'
 import type { TraceStrings } from '@/components/defi/somnia/DecisionPipelineTrace'
 import { PRESETS } from '@/lib/apps/abrigo/cornerstone/presets'
@@ -33,6 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function CornerstonePage() {
   const locale = await getLocale()
   const t = await getTranslations('somnia')
+  const tLive = await getTranslations('somnia.cornerstone.live')
 
   // TraceStrings — threaded from RSC exactly like the [id] route.
   // MAJOR-9: consensusCaveat reused from feed.consensusCaveat.
@@ -95,6 +100,11 @@ export default async function CornerstonePage() {
     mockUnit: t('cornerstone.mockUnit'),
     confirmGateCaption: t('cornerstone.confirmGateCaption'),
     confirmCta: t('cornerstone.confirmCta'),
+    // D1 Davidson honesty split (09-03)
+    nonErgodicDisclosedLabel: t('cornerstone.nonErgodicDisclosedLabel'),
+    templateMarker: t('cornerstone.templateMarker'),
+    booleanYesLabel: t('cornerstone.booleanYesLabel'),
+    booleanNoLabel: t('cornerstone.booleanNoLabel'),
   }
 
   // MintCardStrings
@@ -130,6 +140,48 @@ export default async function CornerstonePage() {
     errorState: t('cornerstone.errorState'),
   }
 
+  // ModeBanner strings (Surface 1)
+  const modeBannerStrings = {
+    liveModeLabel: tLive('modeLiveLabel'),
+    replayModeLabel: tLive('modeReplayLabel'),
+    mockModeLabel: tLive('modeMockLabel'),
+    disclosureEs: tLive('disclosureEs'),
+    disclosureEn: tLive('disclosureEn'),
+    forkVerifiedLabel: tLive('forkVerifiedLabel'),
+    explorerAgent1Label: tLive('explorerAgent1Label'),
+    explorerAgent2Label: tLive('explorerAgent2Label'),
+  }
+
+  // AgentCostPlaceholder strings (Surface 5)
+  const costPlaceholderStrings = {
+    heading: tLive('costPanelHeading'),
+    bodyEs: tLive('costPanelBodyEs'),
+    bodyEn: tLive('costPanelBodyEn'),
+    contractName: tLive('costPanelContractName'),
+    ariaLabel: tLive('costPanelAriaLabel'),
+  }
+
+  // LiveTxStateRow strings (Surface 2)
+  const liveTxRowStrings = {
+    submitting: tLive('txStateSubmitting'),
+    pending: tLive('txStatePending'),
+    confirmed: tLive('txStateConfirmed'),
+    confirmBlock: tLive('txStateConfirmed'),
+    reverted: tLive('txStateReverted'),
+    error: tLive('txStateError'),
+    copyHashAriaLabel: tLive('copyHashAriaLabel'),
+  }
+
+  const shellStrings: CornerstoneClientShellStrings = {
+    modeBanner: modeBannerStrings,
+    costPlaceholder: costPlaceholderStrings,
+    liveTxRow: liveTxRowStrings,
+    transcript: transcriptStrings,
+    card: cardStrings,
+    mint: mintStrings,
+    prompt: promptStrings,
+  }
+
   return (
     <main className="bg-canvas min-h-screen py-12">
       <div className="max-w-[720px] mx-auto px-4">
@@ -138,14 +190,12 @@ export default async function CornerstonePage() {
           {t('cornerstone.pageTitle')}
         </h1>
 
-        {/* RunTranscript — client island owning PromptBox + workflow stream + aria-live */}
-        <RunTranscript
-          traceNodes={traceNodes}
-          cardStrings={cardStrings}
-          mintStrings={mintStrings}
-          strings={transcriptStrings}
-          promptStrings={promptStrings}
-        />
+        {/* CornerstoneClientShell — client island owning mode switch, ModeBanner,
+            RunTranscript, FreshnessGate, AgentCostPlaceholder.
+            Resolves mode via parseMode (URL param ?mode=), DEFAULT_MODE = 'replay'.
+            Mount-time eth_chainId probe decides direct-vs-/api/cornerstone/rpc proxy.
+            Live path: useSwitchChain(31337) BEFORE useWriteContract({chainId:31337}). */}
+        <CornerstoneClientShell traceNodes={traceNodes} strings={shellStrings} />
       </div>
     </main>
   )

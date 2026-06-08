@@ -18,6 +18,15 @@ export const env = createEnv({
     // not-deployed empty state. Re-derive adaptWrapper from the final ABI before flipping
     // (ABI is mid-dev/moving). Phase 7 default: false.
     WRAPPER_DEPLOYED: z.coerce.boolean().optional(),
+    // Phase 9 Agent-1 Somnia operator key.
+    // NEVER NEXT_PUBLIC_ — this is a funded testnet key that auto-spends STT per call.
+    // The route 503s at runtime when absent (non-operator-deploy guard).
+    // Required: funded Somnia testnet account with >50 STT.
+    SOMNIA_OPERATOR_PK: z.string().min(1).optional(),
+    // Shared-secret header for POST /api/abrigo/agent1.
+    // The route returns 401 when x-agent1-secret does not match this value.
+    // The route 503s when this env var is absent (non-operator-deploy guard).
+    AGENT1_ROUTE_SECRET: z.string().min(1).optional(),
   },
   client: {
     // client-safe (NEXT_PUBLIC_*): public RPCs, WalletConnect ID, app URL
@@ -35,6 +44,8 @@ export const env = createEnv({
     VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
     SOMNIA_LIVE: process.env.SOMNIA_LIVE,
     WRAPPER_DEPLOYED: process.env.WRAPPER_DEPLOYED,
+    SOMNIA_OPERATOR_PK: process.env.SOMNIA_OPERATOR_PK,
+    AGENT1_ROUTE_SECRET: process.env.AGENT1_ROUTE_SECRET,
     NEXT_PUBLIC_RPC_CELO_PRIMARY: process.env.NEXT_PUBLIC_RPC_CELO_PRIMARY,
     NEXT_PUBLIC_RPC_ETH_PRIMARY: process.env.NEXT_PUBLIC_RPC_ETH_PRIMARY,
     NEXT_PUBLIC_RPC_BASE_PRIMARY: process.env.NEXT_PUBLIC_RPC_BASE_PRIMARY,

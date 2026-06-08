@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 08-02-PLAN.md (bfa26f9 + 2a2c295); 08-03 optional/if-time; phase 08 verification run next
-last_updated: "2026-06-06T21:13:51.225Z"
+stopped_at: Completed 09-05-PLAN.md — Phase 9 all 5 plans done
+last_updated: "2026-06-08T17:38:09.961Z"
 progress:
-  total_phases: 11
-  completed_phases: 9
-  total_plans: 52
-  completed_plans: 50
+  total_phases: 12
+  completed_phases: 10
+  total_plans: 57
+  completed_plans: 55
   percent: 96
 ---
 
@@ -17,7 +17,7 @@ progress:
 
 **Last updated:** 2026-06-06
 **Session type:** Plan execution (08-02 complete — cornerstone RSC shell + PromptBox + RunTranscript + e2e + post-checkpoint live-verify fix)
-**Stopped at:** Completed 08-02-PLAN.md (bfa26f9 + 2a2c295); 08-03 optional/if-time; phase 08 verification run next
+**Stopped at:** Completed 09-05-PLAN.md — Phase 9 all 5 plans done
 
 ---
 
@@ -35,7 +35,7 @@ progress:
 
 **Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
 **Active plan:** 05.1-03 (Wave 3: simulated-branch page layout, full SIMULADO surface)
-**Status:** Milestone complete
+**Status:** v2.0 milestone complete
 
 **Progress:**
 [██████████] 96%
@@ -103,12 +103,18 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 | Phase 07-agent-reasoning-position-surface P03 | 13 | 3 tasks | 9 files |
 | Phase 08 P00 | 10 | 2 tasks | 9 files |
 | Phase 08-scenario1-agent-cornerstone P01 | 8 | 2 tasks | 8 files |
+| Phase 09-cornerstone-live-tx-integration P01 | 16 | 4 tasks | 14 files |
+| Phase 09-cornerstone-live-tx-integration P02 | 25 | 2 tasks | 7 files |
+| Phase 09 P03 | 25 | 3 tasks | 8 files |
+| Phase 09 P04 | 45 | 2 tasks | 9 files |
+| Phase 09 P05 | 15 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 - Phase 03.1 (Research Reading Surface) inserted after Phase 3, before Phase 4 (2026-05-29). Depth pass on `/research` (LAB-03): paper-grade math reading surface, build-time KaTeX, track filter, arXiv/PDF paper-bridge. Canonical spec: `docs/superpowers/specs/2026-05-29-research-reading-surface-design.md`. Citations deferred to v2.
 - Phase 05.1 (abrigo-somnia convex instrument frontend surface — cCOP/USD long-gamma, read-first simulated) inserted after Phase 5 (2026-06-02, URGENT). Module 1 extending the Phase-5 (defi) instrument-detail route: schematic convex payoff + backend-correct cash-flow waterfall + Panoptic fork-fixture params, three-tier provenance (fork-fixture / spec / schematic), SIMULADO badge, read-only wallet, no transact. Backend (abrigo-somnia) is fork-only/locked. Canonical spec: `docs/superpowers/specs/2026-06-02-ccop-usd-long-gamma-instrument-frontend-design.md` (passed two-step review).
+- Phase 9 (Cornerstone live-tx integration — Module 5) added 2026-06-07. Backend advanced since Jun 6 (Phases 14/15/16 done; `MacroHedgeExecutor` now real + BuildBear-fork-deployed). Swaps the Phase-8 cornerstone MOCK producer for a REAL on-chain producer behind the existing `workflow-store`/`WorkflowEvent` seam: live `resolveFromMandate(mandate,0,1e6)` (economicTheory=`0x…06`) on the BuildBear Polygon fork (chainId 31337), gated by a freshness check (`pool.numberOfLegs(executor)==0`), with the existing `fromMockEvent` path as honest fallback. User decisions (2026-06-07): integration depth = live tx submission via re-provision-per-run; surfaces = real mint tx hash+strike + ExecutorDecided rationale fields + STATIC cost placeholder (cost ledger not deployed). Canonical spec: `docs/superpowers/specs/2026-06-07-module5-cornerstone-live-tx-design.md` (v2; 2-way review complete — Reality Checker + Solidity Smart Contract Engineer both NEEDS WORK on v1 → all BLOCKERs/MAJORs resolved in v2: B1 collateral single-shot revert → freshness gate + re-provision runbook §4b; B2 signer/auth red herring corrected; B3 cost ledger → static placeholder; pinned demo constants; BalanceDelta sign-extend decoder). Cross-repo non-blocking dep: backend `--no-mint`/fresh-executor provisioning variant.
 
 ### Key Decisions Made
 
