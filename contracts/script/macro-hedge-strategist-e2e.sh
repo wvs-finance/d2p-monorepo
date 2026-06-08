@@ -265,10 +265,21 @@ run_two_leg() {
   [ -n "$school_tx" ] || { echo "  BLOCK: requestSchoolDecision returned no tx hash (intent='$intent')" >&2; return 1; }
   # decisionId is topics[2] of THIS send's HedgeDecisionRequested log (binds the id to the run's send,
   # NOT address-only). topics[0]=sig, topics[1]=requestId, topics[2]=decisionId.
+  #
+  # BUGFIX (Phase 18 v2.1): the strategist tx emits TWO logs with >=3 topics on $CONSUMER:
+  #   log#1  sig 0x9bb846491a984154…  topics[2] = LLM_AGENT_ID (0x…b24ac1afbcefc708) — NOT the decisionId
+  #   log#2  HedgeDecisionRequested   topics[2] = the REAL decisionId (e.g. 0x…566afb)
+  # The old pipeline (address + topics>=3 only, then head -n1) grabbed log#1 (the agent id), so the
+  # poller read decisionState(agentId)=(false,false) → FALSE BLOCK while the real decision had landed.
+  # FIX: filter topics[0] to the HedgeDecisionRequested signature BEFORE taking topics[2].
+  local HDR_SIG="0x4a46430989d2486872dcb9df82504d48879adc86f33d1cd7c58c214b4526e96d"
+  local AGENT_ID_TOPIC="0x000000000000000000000000000000000000000000000000b24ac1afbcefc708"
   req_log=$(cast receipt "$school_tx" --rpc-url "$RPC" --json 2>/dev/null)
-  decision_id=$(printf '%s' "$req_log" | jq -r --arg a "$(printf '%s' "$CONSUMER" | tr 'A-Z' 'a-z')" \
-    '.logs[] | select((.address|ascii_downcase)==$a) | select(.topics|length>=3) | .topics[2]' 2>/dev/null | head -n1)
-  [ -n "$decision_id" ] && [ "$decision_id" != "null" ] || { echo "  BLOCK: could not bind decisionId from school tx $school_tx receipt" >&2; return 1; }
+  decision_id=$(printf '%s' "$req_log" | jq -r --arg a "$(printf '%s' "$CONSUMER" | tr 'A-Z' 'a-z')" --arg s "$HDR_SIG" \
+    '.logs[] | select((.address|ascii_downcase)==$a) | select(.topics|length>=3) | select((.topics[0]|ascii_downcase)==$s) | .topics[2]' 2>/dev/null | head -n1)
+  [ -n "$decision_id" ] && [ "$decision_id" != "null" ] || { echo "  BLOCK: could not bind decisionId from school tx $school_tx receipt (HedgeDecisionRequested sig $HDR_SIG)" >&2; return 1; }
+  # ACCEPTANCE: the parsed decisionId MUST NOT be the agent-id constant — that was the v2.0 parse bug.
+  [ "$(printf '%s' "$decision_id" | tr 'A-Z' 'a-z')" != "$AGENT_ID_TOPIC" ] || { echo "  BLOCK: parsed decisionId == LLM_AGENT_ID constant ($AGENT_ID_TOPIC) — the decisionId-parse bug regressed (wrong log selected)" >&2; return 1; }
   echo "  [run] school_tx=$school_tx decisionId=$decision_id (intent='$intent', consensus=$consensus)" >&2
 
   # Poll schoolSet==true (decisionState member-1), with a DecisionFailed poll BOUND to this decisionId
@@ -294,8 +305,8 @@ run_two_leg() {
     --value "$LLM_DEPOSIT" --private-key "$PK" --rpc-url "$RPC" --json | extract_txhash)
   [ -n "$notional_tx" ] || { echo "  BLOCK: requestNotionalDecision returned no tx hash for decisionId=$decision_id" >&2; return 1; }
   # The notional leg's requestId = topics[1] of the HedgeDecisionRequested log whose topics[2]==decision_id.
-  notional_req_id=$(cast receipt "$notional_tx" --rpc-url "$RPC" --json 2>/dev/null | jq -r --arg a "$(printf '%s' "$CONSUMER" | tr 'A-Z' 'a-z')" --arg d "$decision_id" \
-    '.logs[] | select((.address|ascii_downcase)==$a) | select(.topics|length>=3) | select(.topics[2]==$d) | .topics[1]' 2>/dev/null | head -n1)
+  notional_req_id=$(cast receipt "$notional_tx" --rpc-url "$RPC" --json 2>/dev/null | jq -r --arg a "$(printf '%s' "$CONSUMER" | tr 'A-Z' 'a-z')" --arg d "$(printf '%s' "$decision_id" | tr 'A-Z' 'a-z')" --arg s "$HDR_SIG" \
+    '.logs[] | select((.address|ascii_downcase)==$a) | select(.topics|length>=3) | select((.topics[0]|ascii_downcase)==$s) | select((.topics[2]|ascii_downcase)==$d) | .topics[1]' 2>/dev/null | head -n1)
   echo "  [run] notional_tx=$notional_tx notional_req_id=${notional_req_id:-<unresolved>}" >&2
 
   local start_n deadline_n
