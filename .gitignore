@@ -1,0 +1,29 @@
+# d2p monorepo — root .gitignore
+# Per-package-anchored union. Each package also carries its OWN .gitignore
+# (subtree-imported), so this root file only adds monorepo-level + cross-cutting
+# anchored ignores. NEVER use a bare `out/` here — it would wrongly sweep any
+# `out/` under packages/frontend/. All Foundry ignores are package-anchored.
+
+# --- Node / pnpm (monorepo root) ---
+node_modules/
+.pnpm-debug.log*
+*.tsbuildinfo
+
+# --- OS / editor cruft ---
+.DS_Store
+*.pem
+
+# --- env files (keep .env.example everywhere; ignore real values) ---
+.env
+.env.local
+.env*.local
+
+# --- Foundry build artifacts (backend package, anchored — NOT bare) ---
+packages/backend/contracts/out/
+packages/backend/contracts/cache/
+packages/backend/contracts/broadcast/
+packages/backend/contracts/fork-state/
+
+# Re-include the deterministic NFT metadata package required by the deploy/fork path
+!packages/backend/contracts/metadata/out/
+!packages/backend/contracts/metadata/out/MetadataPackage.json

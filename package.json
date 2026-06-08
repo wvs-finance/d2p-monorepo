@@ -1,0 +1,20 @@
+{
+  "name": "d2p-monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --filter d2p-frontend run build",
+    "dev": "pnpm --filter d2p-frontend run dev",
+    "start": "pnpm --filter d2p-frontend run start",
+    "test": "pnpm --filter d2p-frontend run test:unit",
+    "lint": "pnpm --filter d2p-frontend run lint",
+    "typecheck": "pnpm --filter d2p-frontend run typecheck",
+    "contracts:build": "forge build --root packages/backend/contracts",
+    "contracts:test": "forge test --root packages/backend/contracts",
+    "contracts:fmt": "forge fmt --check --root packages/backend/contracts",
+    "contracts:gen": "pnpm run contracts:build && pnpm --filter d2p-frontend run contracts:gen"
+  }
+}
