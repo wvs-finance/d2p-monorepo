@@ -41,6 +41,7 @@ requirements-completed: []  # NONE — LIVEDEP-02/03/04/05 all blocked by extern
 # Metrics
 duration: ~35min
 completed: 2026-06-08
+attempts: 2  # attempt-1 + a 2026-06-08 keeper-restored/fresh-datum re-attempt — both BLOCKED by validator callback no-show
 ---
 
 # Phase 18 Plan 01: On-chain decision-moves proof + publish — DOCUMENTED BLOCK
@@ -96,6 +97,21 @@ completed: 2026-06-08
 ## Issues Encountered — THE BLOCK (LIVEDEP-02/03/04/05)
 
 **Somnia testnet validator inference callbacks are not landing.**
+
+### Re-attempt 2 (2026-06-08, keeper-restored / fresh-datum retry) — STILL BLOCKED
+
+Re-ran the proof per the v2.1 retry directive (keeper-proxy reportedly restored, MacroOracle datum fresh). Outcome: **same silent validator no-show — the LLM-inference callback layer has NOT recovered.**
+
+- Pre-flight: chain-id 50312 ✓; oracle datum fresh (`deliveredAt=1780927644`, `scaledValue=584`) → json-fetch refresh correctly SKIPPED (conditional guard); keeper-proxy root still HTTP 404 (irrelevant — refresh skipped). All FREE surface gates + tx-hash self-test PASS.
+- School-leg request fired and MINED on-chain, `status 1 (success)`:
+  - `schoolTx = 0x4df212740763d16cbce225117a4cb3834008107c94310cb273e657a13c2fc4b0`
+  - deterministic `decisionId = 0x000000000000000000000000000000000000000000000000b24ac1afbcefc708` (same as attempt-1 — confirms the request side is byte-identical and the bottleneck is purely the off-chain validator inference layer).
+- Bounded poll ~480s total (180s in-runner + a 300s extended poll on the mined request): `decisionState(decisionId)` = `(false, false, 0, "")` throughout; NO `DecisionFailed`, NO `StrategistDecided` — a silent validator no-show, identical to attempt-1.
+- **STT spent this re-attempt:** wallet 96.634 → 96.382 = **~0.252 STT** (one school-leg deposit 0.24 + gas; within the ~1.6 STT reserve, no runaway). Irreversible.
+- No `.run1-state.env` / `.runs-state.env` persisted (the school leg never completed) — no half-open decision stranded; a future recovery re-run is clean.
+- **No notional leg was ever sent, no `StrategistDecided` ever landed → LIVEDEP-02/03/04/05 remain BLOCKED.** Per guardrails: NO JSON artifact written, handoff NOT reversed, nothing fabricated.
+
+### Attempt 1 evidence (retained)
 
 Evidence (all real, on-chain, this run, against reused CONSUMER `0xf0570CcB1271FFaFf4caCA628F3632257f177b1D`, Somnia 50312):
 - All FREE surface gates PASS: chain-id 50312, platform code present, v1 reachable, immutables read back (`PLATFORM 0x037Bb9…6776`, `ORACLE 0xAcA751…983f`, `LLM_AGENT_ID 12847293847561029384`), tx-hash extractor self-test PASS.
