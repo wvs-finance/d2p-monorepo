@@ -40,7 +40,6 @@
     "tests/unit/structured-data.test.tsx",
     "tests/unit/cornerstone/mandate-override.test.ts",
     "tests/unit/cornerstone/producer-ordering.test.ts",
-    "tests/api/buildbear-sign.test.ts",
     "tests/api/buildbear-reset.test.ts",
     "tests/unit/workflow-engine-buildbear.test.ts"
   ]
