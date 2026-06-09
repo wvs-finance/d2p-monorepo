@@ -27,6 +27,8 @@ export const env = createEnv({
     // The route returns 401 when x-agent1-secret does not match this value.
     // The route 503s when this env var is absent (non-operator-deploy guard).
     AGENT1_ROUTE_SECRET: z.string().min(1).optional(),
+    // Phase 11: BuildBear demo signer. NEVER NEXT_PUBLIC_ — server only. Route returns 'not-configured' when absent.
+    DEMO_SIGNER_PK: z.string().min(1).optional(),
   },
   client: {
     // client-safe (NEXT_PUBLIC_*): public RPCs, WalletConnect ID, app URL
@@ -46,6 +48,7 @@ export const env = createEnv({
     WRAPPER_DEPLOYED: process.env.WRAPPER_DEPLOYED,
     SOMNIA_OPERATOR_PK: process.env.SOMNIA_OPERATOR_PK,
     AGENT1_ROUTE_SECRET: process.env.AGENT1_ROUTE_SECRET,
+    DEMO_SIGNER_PK: process.env.DEMO_SIGNER_PK,
     NEXT_PUBLIC_RPC_CELO_PRIMARY: process.env.NEXT_PUBLIC_RPC_CELO_PRIMARY,
     NEXT_PUBLIC_RPC_ETH_PRIMARY: process.env.NEXT_PUBLIC_RPC_ETH_PRIMARY,
     NEXT_PUBLIC_RPC_BASE_PRIMARY: process.env.NEXT_PUBLIC_RPC_BASE_PRIMARY,

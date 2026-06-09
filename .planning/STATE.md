@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases — Judge-Runnable Live BuildBear Demo
 status: planning
-stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-06-09T12:49:15.596Z"
-last_activity: "2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271)."
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-06-09T15:12:17.882Z"
+last_activity: "2026-06-09 — Plan 11-03 executed: Somnia decoupling cut (MINT-02) + MINT-03 mandate-source swap GREEN. handleLiveConfirm hard-branches on resolvedMode==='buildbear' first → /api/cornerstone/buildbear-sign, returns BEFORE any /api/abrigo/agent1; zero replay flips on the buildbear path (HONEST-01); 3 live-path + mount-probe flips preserved; mount-probe guard extended to 'buildbear'. buildUpstreamFromReplayArtifact builds UpstreamResult from getPresetById+fromMockEvent (Somnia-free), runWorkflowLive untouched. Line-order + no-fallthrough arch test + workflow-engine-buildbear un-excluded — 8/8 GREEN; tsc+biome clean; full suite 641 passed (lone failure = unrelated impeccable timeout flake, passes in isolation, deferred). Verified-not-rewritten on prior-session WIP. 2 task commits (c4b2217, 61c8446)."
 progress:
   total_phases: 16
-  completed_phases: 11
-  total_plans: 60
-  completed_plans: 58
+  completed_phases: 12
+  total_plans: 63
+  completed_plans: 61
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-08
 **Session type:** Roadmap creation (v3.0 phases 10–13 derived and written)
-**Stopped at:** Completed 10-02-PLAN.md
+**Stopped at:** Completed 11-03-PLAN.md
 
 ---
 
@@ -33,10 +33,28 @@ progress:
 
 ## Current Position
 
-**Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — in progress (2/3 plans)
-**Active plan:** 10-03 (next) — operator-manual live `--no-mint` run + fill `10-SPIKE-EVIDENCE.md` §(a)-(d) (live BuildBear fork, secret-gated)
+**Active phase:** Phase 11 (Frontend Server Routes — MINT-01/02/03) — all 3 plans executed; awaiting phase verifier to finalize MINT requirements
+**Active plan:** 11-03 (done) — `buildUpstreamFromReplayArtifact` (MINT-03) in workflow-engine.ts + Somnia decoupling cut (MINT-02) in CornerstoneClientShell.tsx; both tests un-excluded + GREEN. Next: `/gsd:verify-work` for Phase 11, then Phase 12 (live path integration).
 **Status:** Ready to plan
-**Last activity:** 2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271).
+**Last activity:** 2026-06-09 — Plan 11-03 executed: Somnia decoupling cut (MINT-02) + MINT-03 mandate-source swap GREEN. handleLiveConfirm hard-branches on resolvedMode==='buildbear' first → /api/cornerstone/buildbear-sign, returns BEFORE any /api/abrigo/agent1; zero replay flips on the buildbear path (HONEST-01); 3 live-path + mount-probe flips preserved; mount-probe guard extended to 'buildbear'. buildUpstreamFromReplayArtifact builds UpstreamResult from getPresetById+fromMockEvent (Somnia-free), runWorkflowLive untouched. Line-order + no-fallthrough arch test + workflow-engine-buildbear un-excluded — 8/8 GREEN; tsc+biome clean; full suite 641 passed (lone failure = unrelated impeccable timeout flake, passes in isolation, deferred). Verified-not-rewritten on prior-session WIP. 2 task commits (c4b2217, 61c8446).
+
+**Decisions (Plan 11-03):**
+- **MINT-02 Somnia decoupling cut.** `CornerstoneClientShell.handleLiveConfirm` hard-branches on `resolvedMode === 'buildbear'` as the FIRST statement: it `fetch`es `/api/cornerstone/buildbear-sign` (typed via the imported `BuildBearSignResponse`) and UNCONDITIONALLY `return`s BEFORE the `/api/abrigo/agent1` `try` block, so control can never fall through to Somnia. ZERO `setResolvedMode('replay')` calls inside the branch (HONEST-01 — Phase 12 owns the fork-used advisory). The three live-path flips + mount-probe useEffect flips are intact; mount-probe guard extended to `resolvedMode !== 'live' && resolvedMode !== 'buildbear'`. Guarded in CI by `tests/architecture/buildbear-decoupling.test.ts` (line-order + no-fallthrough: the branch's own `return` index sits between the buildbear opener and the agent1 fetch).
+- **MINT-03 mandate-source swap is caller-side only.** `buildUpstreamFromReplayArtifact(presetId)` builds `UpstreamResult` from `getPresetById` + `fromMockEvent` (`strategistRaw` lifted verbatim from the `runWorkflow` mock, only `requestId = BigInt(preset.recordedDecisionId)` rebound; `strikeWAD: 4100n` preserved). Somnia-free/synchronous, zero network calls. Honest `.kind` narrowing (no cast); no dead `recordedDecisionId` re-spread (`fromMockEvent` already stamps it). `runWorkflowLive` signature/body and `buildLiveMandate` PKE pin untouched. `tests/unit/workflow-engine-buildbear.test.ts` un-excluded from tsconfig.
+- **`grep -c \"setResolvedMode('replay')\"` == 7, not the plan's literal 3.** The real file always carried 7 (3 mount-probe useEffect flips + 3 live-path flips + 1 JSX comment); `HEAD == working-tree == 7` proves the buildbear branch added ZERO flips. The load-bearing guard is the arch test (scopes to the post-agent1 live path, asserts exactly 3) — GREEN. Documented tension between an idealized grep and the real file; not a behavioral deviation.
+- **Verified-not-rewritten on prior-session WIP.** Both tasks pre-existed (Task 1 committed `c4b2217`; Task 2 uncommitted working-tree). Validated against every acceptance grep + both test suites — all GREEN — and Task 2 committed atomically (`61c8446`). Mirrors the 11-02 interrupted-session pattern.
+
+**Decisions (Plan 11-02):**
+- buildbear-sign route lifted verbatim from 11-RESEARCH §Pattern 1+2 (ABI tuple + classifyViemError + findInCauseChain + redact); `not-configured` guard precedes any client construction; `getBalance()===0n` pre-flight precedes `simulateContract`; `simulateContract` precedes `writeContract` so reverts pre-classify into reason codes; every `detail` routed through `redact()` (RPC URL = bearer credential). `BuildBearSignResponse` exported for 11-03 + Phase 12.
+- buildbear-reset is OPEN: `POST(_req)` never reads body/headers, reads only `deployment.snapshotId`; fixed `evm_revert`→`evm_snapshot` method set; B1 catch classifies thrown fetch errors (`instanceof TypeError` / `cause.code` ECONNREFUSED/ENOTFOUND/ECONNRESET) as `rpc-unreachable`, reserving `revert-failed` for a genuine non-true `evm_revert`; m6 validates `newSnapshotId.startsWith('0x')`. Shared-sandbox griefable limitation + rejected-auth documented in the header (no auth added).
+- **Wave-0 reset test fetch mock corrected: `vi.spyOn(globalThis,'fetch')` → `vi.stubGlobal('fetch', fn)`.** `tests/setup.ts` runs an MSW server (`onUnhandledRequest:'error'`) whose global fetch interceptor defeats `vi.spyOn` — the route's fetch calls reported as 0 and the MSW unhandled-request throw mis-classified as `revert-failed`. `vi.stubGlobal` replaces the binding MSW reads. Route unchanged; only the test's mock mechanism. This is now the required raw-fetch mock pattern for node-env route tests in this repo.
+
+**Decisions (Plan 11-01):**
+- `'buildbear'` added to `CornerstoneMode` union + `parseMode` (after the `'mock'` check); `DEFAULT_MODE`/`parseMode(null)` stays `'replay'` — zero-secret default preserved.
+- `DEMO_SIGNER_PK` mirrors `SOMNIA_OPERATOR_PK` in `lib/env.ts` (server schema + runtimeEnv, `z.string().min(1).optional()`); never `NEXT_PUBLIC_`.
+- Architecture key-leak test matches REAL code reads (`env.DEMO_SIGNER_PK` / `process.env.DEMO_SIGNER_PK` / `privateKeyToAccount(`) and excludes itself from its own scan — so `mode.ts`'s documentation comment about the key doesn't false-positive; proven non-vacuous via a temporary injected leak.
+- `tsconfig.json` Wave-0 stub excludes kept comment-free (strict-JSON tsc gate); the per-line note lives in 11-01-SUMMARY instead.
+- The well-known Hardhat #0 test key is defined ONCE in `tests/fixtures/test-signer.ts` with a single `gitleaks:allow`; tests import it, never re-inline.
 
 **Decisions (Plan 10-02):**
 - EXEC-01 guard at `MacroHedgeExecutor.sol:370` (after the chainId require :365, before the first `pool.dispatch` ~:405, above the dispatch gate) — string revert `"fork used"`; the mutation check (remove -> RED `next call did not revert as expected` -> restore -> GREEN) proves the GREEN is non-vacuous.
@@ -117,6 +135,9 @@ progress:
 | Phase 10 P01 | 4 | 3 tasks | 3 files |
 | Phase 10 P02 | 9 | 4 tasks | 5 files |
 | Phase 10 P02 | 9 | 4 tasks | 5 files |
+| Phase 11 P01 | 8 | 3 tasks | 9 files |
+| Phase 11 P02 | 10 | 2 tasks | 4 files |
+| Phase 11 P03 | 12 | 2 tasks | 4 files |
 
 ## Accumulated Context
 

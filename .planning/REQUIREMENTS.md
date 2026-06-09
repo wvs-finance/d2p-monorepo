@@ -32,9 +32,9 @@
 
 ### Live Mint Path (MINT)
 
-- [ ] **MINT-01**: A server-only API route (`/api/cornerstone/buildbear-sign`) signs and broadcasts `resolveFromMandate` using a pre-funded demo signer key (`DEMO_SIGNER_PK`) that is never `NEXT_PUBLIC_`, never sent to the client, never committed
-- [ ] **MINT-02**: The judge live path is BuildBear-only — it never calls the Somnia `/api/abrigo/agent1` route (decoupling cut made in `handleLiveConfirm` before that fetch)
-- [ ] **MINT-03**: `runWorkflowLive` sources its mandate from the recorded replay artifact, not a live Somnia Agent-1 response
+- [x] **MINT-01**: A server-only API route (`/api/cornerstone/buildbear-sign`) signs and broadcasts `resolveFromMandate` using a pre-funded demo signer key (`DEMO_SIGNER_PK`) that is never `NEXT_PUBLIC_`, never sent to the client, never committed
+- [x] **MINT-02**: The judge live path is BuildBear-only — it never calls the Somnia `/api/abrigo/agent1` route (decoupling cut made in `handleLiveConfirm` before that fetch)
+- [x] **MINT-03**: `runWorkflowLive` sources its mandate from the recorded replay artifact, not a live Somnia Agent-1 response
 - [ ] **MINT-04**: The `void writeContractAsync` stub is removed and the confirm action triggers a real on-chain mint via the server route
 - [ ] **MINT-05**: A judge can trigger the live mint with a single click — no wallet connect, no funding, no secret required
 
@@ -103,9 +103,9 @@ Explicitly excluded for v3.0, with reasoning.
 | PROV-02 | Phase 10 | Pending |
 | PROV-03 | Phase 10 | Pending |
 | PROV-04 | Phase 10 | Complete |
-| MINT-01 | Phase 11 | Pending |
-| MINT-02 | Phase 11 | Pending |
-| MINT-03 | Phase 11 | Pending |
+| MINT-01 | Phase 11 | In Progress (11-01 scaffold; route in 11-02) |
+| MINT-02 | Phase 11 | In Progress (decoupling cut in 11-03) |
+| MINT-03 | Phase 11 | In Progress (helper in 11-03) |
 | MINT-04 | Phase 12 | Pending |
 | MINT-05 | Phase 12 | Pending |
 | HONEST-01 | Phase 12 | Pending |

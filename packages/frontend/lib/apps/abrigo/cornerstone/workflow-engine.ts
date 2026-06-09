@@ -146,6 +146,69 @@ type UpstreamResult =
   | { ok: true; strategistView: StrategistDecidedView }
   | { ok: false; reason: string; strategistView: null }
 
+// ---------------------------------------------------------------------------
+// buildUpstreamFromReplayArtifact — MINT-03 mandate source swap
+// ---------------------------------------------------------------------------
+
+/**
+ * buildUpstreamFromReplayArtifact(presetId) — builds the live-path UpstreamResult
+ * from the RECORDED replay preset (getPresetById), NOT from a live Somnia upstream
+ * response. MINT-03: the BuildBear demo's mandate is pinned to the committed replay
+ * snapshot so the demo works while Somnia is outaged.
+ *
+ * Somnia-free by construction — ZERO network calls, purely synchronous over
+ * getPresetById + fromMockEvent.
+ *
+ * The strategistRaw literal is LIFTED VERBATIM from the runWorkflow mock producer
+ * below (the type-correct StrategistDecidedEvent), rebinding only requestId =
+ * BigInt(preset.recordedDecisionId). fromMockEvent already stamps
+ * recordedDecisionId = requestId.toString() (= preset.recordedDecisionId), so the
+ * view is returned directly with no dead re-spread.
+ *
+ * buildLiveMandate re-hydration (PKE pin) stays untouched in runWorkflowLive — only
+ * the upstream SOURCE changes here.
+ */
+export function buildUpstreamFromReplayArtifact(presetId: string): UpstreamResult {
+  const preset = getPresetById(presetId)
+  if (!preset) {
+    return { ok: false, reason: `unknown preset: ${presetId}`, strategistView: null }
+  }
+
+  const strategistRaw: StrategistDecidedEvent = {
+    kind: 'StrategistDecided',
+    // recordedDecisionId = the real snapshot decisionId join key
+    requestId: BigInt(preset.recordedDecisionId),
+    thesis:
+      'Hawkish monetary-policy surprise → COP appreciation. ' +
+      'Inflation print exceeded consensus by 68bps; central bank bias shifts hawkish. ' +
+      'Long cCOP/USD call provides convex protection if vol transmits.',
+    spec: {
+      underlyingMarket: '0xwcopusdc', // opaque bytes32 — pass-through
+      strikeWAD: 4100n, // 4.100 (demo tick value passed to fromMockEvent formatter)
+      size: 100n,
+      economicTheory: 'address(0)', // IMacroThesis placeholder → fromMockEvent → human label
+      chainId: 137,
+      isLong: true,
+      payoffTerms: { vol: 14400n, horizonBlocks: 100, tickSpacing: 60, asset: 0, riskPartner: 0 },
+    },
+  }
+
+  const view = fromMockEvent(strategistRaw)
+  // fromMockEvent returns the wide WorkflowEventView union; a 'StrategistDecided'
+  // input always yields a StrategistDecidedView. Narrow honestly via the kind tag
+  // (no cast) so the UpstreamResult.strategistView contract is type-safe.
+  if (view.kind !== 'StrategistDecided') {
+    return {
+      ok: false,
+      reason: `expected StrategistDecided view for ${presetId}`,
+      strategistView: null,
+    }
+  }
+  // recordedDecisionId already stamped = requestId.toString() (= preset.recordedDecisionId)
+  // — return the narrowed view directly, no dead re-spread.
+  return { ok: true, strategistView: view }
+}
+
 type RunWorkflowLiveOptions = {
   emit: (event: unknown) => void
   writeContract: (params: {
