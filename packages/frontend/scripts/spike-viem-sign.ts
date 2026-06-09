@@ -13,19 +13,10 @@
 // deployed executor. simulateContract PREPARES/validates the call WITHOUT broadcasting — the
 // operator confirms it does not revert. Only the signer ADDRESS + a DRY_RUN_OK line are printed.
 
-import {
-  http,
-  createPublicClient,
-  createWalletClient,
-  zeroAddress,
-  zeroHash,
-} from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import {
-  type BuildBearDeployment,
-  deployment,
-} from '@/lib/apps/abrigo/cornerstone/artifact-loader'
+import { type BuildBearDeployment, deployment } from '@/lib/apps/abrigo/cornerstone/artifact-loader'
 import { createBuildBearChain } from '@/lib/apps/abrigo/cornerstone/buildbear'
+import { http, createPublicClient, createWalletClient, zeroAddress, zeroHash } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 
 // ---------------------------------------------------------------------------
 // resolveFromMandate(HedgeMandate, uint256, uint128) — ABI fragment.
@@ -112,8 +103,8 @@ async function main(): Promise<void> {
   })
 
   // Print ONLY the signer address + a dry-run marker — never the key, never broadcast.
-  console.log(`DEMO_SIGNER_EOA=${account.address}`)
-  console.log(`DRY_RUN_OK executor=${request.address ?? artifact.executor}`)
+  console.info(`DEMO_SIGNER_EOA=${account.address}`)
+  console.info(`DRY_RUN_OK executor=${request.address ?? artifact.executor}`)
   // Silence unused-var lint for the placeholder import path while keeping the type bound.
   void zeroAddress
 }
