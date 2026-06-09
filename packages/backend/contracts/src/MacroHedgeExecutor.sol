@@ -363,6 +363,11 @@ contract MacroHedgeExecutor is SomniaAgentConsumer {
     ) internal virtual returns (TokenId positionId) {
         require(legParams.size <= 127, "optionRatio overflow");
         require(uint256(legParams.chainId) == block.chainid, "No crosschain allowed yet");
+        // EXEC-01: single-use guard. Reverts on ANY resolve attempt once this executor already
+        // holds legs (numberOfLegs != 0) — it is NOT a "before mint" check; it fires on every
+        // entry to the shared sink. Must precede pool.dispatch (the numberOfLegs view reverts
+        // Reentrancy() if called while the pool's reentrancy guard is active during dispatch).
+        require(pool.numberOfLegs(address(this)) == 0, "fork used");
 
         int24 tickSpacing_ = legParams.payoffTerms.tickSpacing;
         int24 width = PayoffTermsLib.deriveWidthFromVol(legParams.payoffTerms);

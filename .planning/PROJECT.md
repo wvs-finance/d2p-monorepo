@@ -52,6 +52,7 @@ If everything else fails, this must work: an agent or a human can land on the la
 - **Shared-fork reset guard** — handle the `numberOfLegs == 0` freshness gate so repeated/concurrent judge runs don't brick the demo.
 - **Backend BuildBear provisioning variant** (`--no-mint` / fresh-executor) in `packages/backend` so the in-demo mint works end-to-end (closes the v2.0 cross-repo gap).
 - Carry forward the **zero-secret judge runbook**: green `clone → build`, corrected `.env.example` + README test lane.
+- **Local demo mode (`pnpm demo`)** — a judge clones → one command → `localhost` → runs the **full interactive live one-click sim** in the browser on their own machine (via a throwaway fork-only burner key); plain `pnpm dev` stays zero-secret replay; the hosted Vercel URL also runs it live. *(OPS-07, Phase 13.)*
 
 ## Requirements
 

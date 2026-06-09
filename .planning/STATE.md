@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases — Judge-Runnable Live BuildBear Demo
 status: planning
-stopped_at: Phase 10 context gathered
-last_updated: "2026-06-09T01:12:08.328Z"
-last_activity: "2026-06-08 — Milestone v3.0 roadmap created + REVISED to v2 (26/26 requirements mapped, 4 phases). Passed the mandatory two-reviewer pass: Reality Checker (READY) + Solidity Smart Contract Engineer (READY after 3 final MAJORs folded — guard in shared `_resolveAndMintAtStrike` sink, spike on fresh stack, poisoned-artifact retirement)."
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-06-09T12:49:15.596Z"
+last_activity: "2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271)."
 progress:
   total_phases: 16
-  completed_phases: 10
-  total_plans: 57
-  completed_plans: 55
+  completed_phases: 11
+  total_plans: 60
+  completed_plans: 58
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-08
 **Session type:** Roadmap creation (v3.0 phases 10–13 derived and written)
-**Stopped at:** Phase 10 context gathered
+**Stopped at:** Completed 10-02-PLAN.md
 
 ---
 
@@ -33,10 +33,19 @@ progress:
 
 ## Current Position
 
-**Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — not started
-**Active plan:** —
-**Status:** Roadmap complete (v2, two-reviewer-cleared), ready to plan Phase 10
-**Last activity:** 2026-06-08 — Milestone v3.0 roadmap created + REVISED to v2 (26/26 requirements mapped, 4 phases). Passed the mandatory two-reviewer pass: Reality Checker (READY) + Solidity Smart Contract Engineer (READY after 3 final MAJORs folded — guard in shared `_resolveAndMintAtStrike` sink, spike on fresh stack, poisoned-artifact retirement).
+**Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — in progress (2/3 plans)
+**Active plan:** 10-03 (next) — operator-manual live `--no-mint` run + fill `10-SPIKE-EVIDENCE.md` §(a)-(d) (live BuildBear fork, secret-gated)
+**Status:** Ready to plan
+**Last activity:** 2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271).
+
+**Decisions (Plan 10-02):**
+- EXEC-01 guard at `MacroHedgeExecutor.sol:370` (after the chainId require :365, before the first `pool.dispatch` ~:405, above the dispatch gate) — string revert `"fork used"`; the mutation check (remove -> RED `next call did not revert as expected` -> restore -> GREEN) proves the GREEN is non-vacuous.
+- Mint extracted from `_provision()` into `_mint(ProvisionResult memory r)` gated by `vm.envOr("SKIP_MINT", false)` in `run()`; `MacroHedgeExecutor(payable(...))` cast required for the payable-fallback executor.
+- `--no-mint` shell: fund `DEMO_SIGNER_PK` before `evm_snapshot` (revert restores gas), gate receipt-parse behind `!NO_MINT`, runtime-assert `MONO_ROOT`, write artifact directly to frontend path with `jq --argjson mintTxHash null` + `snapshotId`; null-fixture round-trips the exported `validateDeployment` via vitest (tsx not installed).
+
+**Decisions (Plan 10-01):**
+- Placeholder pool literal must be EIP-55 checksummed (`0x...c0Fe`) — Solidity 0.8.24 rejects non-checksummed address literals at compile time.
+- `vm.mockCall` on a placeholder pool address is the sole mock strategy for the non-virtual concrete `PanopticPoolV2.numberOfLegs` view (a mock subclass cannot compile or cast to the immutable ctor param).
 
 **v3.0 phase structure:**
 - Phase 10: Backend Provisioning Variant (PROV-01–04) — critical-path blocker; parallel with Phase 11
@@ -105,6 +114,9 @@ progress:
 | Phase 09 P03 | 25 | 3 tasks | 8 files |
 | Phase 09 P04 | 45 | 2 tasks | 9 files |
 | Phase 09 P05 | 15 | 1 tasks | 2 files |
+| Phase 10 P01 | 4 | 3 tasks | 3 files |
+| Phase 10 P02 | 9 | 4 tasks | 5 files |
+| Phase 10 P02 | 9 | 4 tasks | 5 files |
 
 ## Accumulated Context
 

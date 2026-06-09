@@ -23,20 +23,21 @@ export type BuildBearDeployment = {
   pool: string
   riskManagement: string
   rpcUrl: string
-  mintTxHash: string
-  mintedStrike: number
+  mintTxHash: string | null // null on --no-mint artifact (Phase 10)
+  mintedStrike: number | null // null on --no-mint artifact (Phase 10)
   capturedAt: string
   source: string
   // Optional fields that may appear in later artifact versions
   factory?: string
   riskEngine?: string
+  snapshotId?: string // NEW (Phase 10) — evm_snapshot id, hex e.g. "0x1"; absent on legacy artifacts
 }
 
 // ---------------------------------------------------------------------------
 // Validate required fields at module load (fail fast)
 // ---------------------------------------------------------------------------
 
-function validateDeployment(raw: unknown): BuildBearDeployment {
+export function validateDeployment(raw: unknown): BuildBearDeployment {
   const d = raw as Record<string, unknown>
   const required: (keyof BuildBearDeployment)[] = [
     'chainId',

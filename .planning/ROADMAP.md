@@ -30,10 +30,15 @@
 **Granularity:** Coarse (4 phases derived from two parallel tracks converging at integration)
 **Coverage:** 26/26 v3.0 requirements mapped (v2 — two-reviewer revision)
 
-- [ ] **Phase 10: Backend On-Chain Single-Use Guard + `--no-mint` Provisioning** — adds `require(numberOfLegs==0, "fork used")` to `MacroHedgeExecutor` (EXEC-01) + a `--no-mint` variant that redeploys a clean stack/executor, funds a dedicated signer inside an `evm_snapshot`, and writes the artifact (`snapshotId`, `mintTxHash:null`) directly to the frontend path. Gated by a live-fork empirical spike; not CI-verifiable.
+- [x] **Phase 10: Backend On-Chain Single-Use Guard + `--no-mint` Provisioning** — adds `require(numberOfLegs==0, "fork used")` to `MacroHedgeExecutor` (EXEC-01) + a `--no-mint` variant that redeploys a clean stack/executor, funds a dedicated signer inside an `evm_snapshot`, and writes the artifact (`snapshotId`, `mintTxHash:null`) directly to the frontend path. Gated by a live-fork empirical spike; not CI-verifiable. (completed 2026-06-09)
+
+  **Plans:** 3 plans
+  - [ ] 10-01-PLAN.md — Wave 0: artifact-loader nullable-type migration + EXEC-01 guard test (RED) + 10-SPIKE-EVIDENCE scaffold (EXEC-01, PROV-04) [wave 0]
+  - [ ] 10-02-PLAN.md — Wave 1: EXEC-01 guard insertion (GREEN) + SKIP_MINT gate + --no-mint shell variant (signer-in-snapshot, direct frontend artifact write) (EXEC-01, PROV-01, PROV-04) [wave 1]
+  - [ ] 10-03-PLAN.md — Wave 2 (operator-manual, not CI): live --no-mint spike + provision producing 10-SPIKE-EVIDENCE.md (EXEC-01, PROV-01, PROV-02, PROV-03, PROV-04) [wave 2]
 - [ ] **Phase 11: Frontend Server Routes** — New `buildbear-sign` and `buildbear-reset` API routes with server-side viem signing and Somnia mode decoupling; the `'buildbear'` mode variant in `mode.ts`; runs in parallel with Phase 10
 - [ ] **Phase 12: Live Path Integration** — Converges Phase 10 artifact and Phase 11 routes in `CornerstoneClientShell`: Somnia decoupling cut FIRST, then `handleBuildBearConfirm()`, un-void `writeContractAsync`, reset-guard mount flow, `RunState: 'failed'` terminal state, and `RunState: 'fork-used'` advisory
-- [ ] **Phase 13: Evidence Polish and Judge Runbook** — Real on-chain evidence surfaces (tx hash, explorer link, block number, positionId, margin delta), anti-fishing disclosures, `ForkVerifiedPill` relabeling, and the zero-secret judge runbook with corrected `.env.example` and operator reset procedure
+- [ ] **Phase 13: Evidence Polish and Judge Runbook** — Real on-chain evidence surfaces (tx hash, explorer link, block number, positionId, margin delta), anti-fishing disclosures, `ForkVerifiedPill` relabeling, the zero-secret judge runbook with corrected `.env.example` and operator reset procedure, **and the `pnpm demo` local-demo-mode command (OPS-07: throwaway fork-burner key → full live one-click sim on the judge's own localhost; replay by default)**
 
 ---
 
@@ -204,7 +209,7 @@ Plans:
 | 4. Agent Surface (MCP) | 0/? | Not started | - |
 | 5. Read-First Wallet and DeFi Surface | 3/4 | In Progress|  |
 | **v3.0 — Judge-Runnable Live BuildBear Demo** | | | |
-| 10. Backend Single-Use Guard + `--no-mint` Provisioning | 0/5 | Not started | - |
+| 10. Backend Single-Use Guard + `--no-mint` Provisioning | 2/3 | Complete    | 2026-06-09 |
 | 11. Frontend Server Routes | 0/3 | Not started | - |
 | 12. Live Path Integration | 0/3 | Not started | - |
 | 13. Evidence Polish and Judge Runbook | 0/2 | Not started | - |
@@ -285,7 +290,7 @@ Phase 13: Evidence Polish and Judge Runbook
 | Anti-Fishing (integration-time) | HONEST-01, HONEST-02, HONEST-03 (3 reqs) | Phase 12 |
 | On-Chain Evidence | EVID-01, EVID-02, EVID-03, EVID-04, EVID-05, EVID-06 (6 reqs) | Phase 13 |
 | Anti-Fishing (polish) | HONEST-04, HONEST-05 (2 reqs) | Phase 13 |
-| Judge Runbook and Reset Ops | OPS-01, OPS-02, OPS-03, OPS-04, OPS-05 (5 reqs) | Phase 13 |
+| Judge Runbook and Reset Ops | OPS-01, OPS-02, OPS-03, OPS-04, OPS-05, OPS-07 (6 reqs; OPS-07 = `pnpm demo` local mode) | Phase 13 |
 
 **Total mapped: 26/26 v3.0 requirements. No orphans.** *(v2 — two-reviewer revision: added EXEC-01, EVID-06, OPS-05.)*
 

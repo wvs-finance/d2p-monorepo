@@ -123,11 +123,20 @@ contract ProvisionBuildBearDemo is Script {
     ///      B1 funding = the runner's buildbear_ERC20Faucet on the EOA BEFORE the broadcast; B2 = this
     ///      inlined read-back deploy (no nested broadcast, no --load-state). NO forge-test cheat / multi-broadcast.
     function run() external {
+        // PROV-01: the --no-mint shell variant exports SKIP_MINT=true; this gates the final mint
+        // (and its require) so the run deploys a FRESH executor with numberOfLegs == 0. The default
+        // (mint) path is unchanged: SKIP_MINT defaults to false.
+        bool skipMint = vm.envOr("SKIP_MINT", false);
+
         vm.startBroadcast();
         ProvisionResult memory r = _provision();
+        if (!skipMint) {
+            _mint(r);
+        }
         vm.stopBroadcast();
 
         // the read-back locals + result — the runner greps these `*=` lines into the artifact.
+        // On the --no-mint path MINTED_STRIKE / NUMBER_OF_LEGS log 0 (no strike, no legs yet).
         console2.log("FACTORY_ADDRESS=", r.factory);
         console2.log("RISK_ENGINE_ADDRESS=", r.riskEngine);
         console2.log("POOL_ADDRESS=", r.pool);
@@ -135,7 +144,9 @@ contract ProvisionBuildBearDemo is Script {
         console2.log("EXECUTOR_ADDRESS=", r.executor);
         console2.log("MINTED_STRIKE=", int256(r.strike));
         console2.log("NUMBER_OF_LEGS=", r.legs);
-        require(r.legs > 0, "mint failed: executor owns no leg");
+        if (!skipMint) {
+            require(r.legs > 0, "mint failed: executor owns no leg");
+        }
     }
 
     /// @dev The full provisioning body — runs INSIDE run()'s single broadcast. Returns a packed
@@ -170,7 +181,34 @@ contract ProvisionBuildBearDemo is Script {
             ct1.deposit(DEFAULT_FUND_COP, address(exec));
         }
 
-        // (5) mint via the proven mandate path (strike 360360, Fix C).
+        // (5) deploy + deposit complete. The mint step is now a SEPARATE _mint() call gated by
+        //     SKIP_MINT in run() (PROV-01) — on the --no-mint path it is skipped and the executor
+        //     stays fresh (numberOfLegs == 0, strike 0).
+        r = ProvisionResult({
+            factory: address(factory),
+            riskEngine: address(riskEngine),
+            pool: address(pool),
+            riskManagement: address(riskManagement),
+            executor: address(exec),
+            strike: 0,
+            legs: 0
+        });
+    }
+
+    /// @dev The mint step — extracted from _provision() so run() can gate it behind SKIP_MINT.
+    ///      Mutates the packed ProvisionResult in place (memory struct → passed by reference) to
+    ///      set the minted strike and the resulting leg count. Mints via the proven mandate path
+    ///      (strike 360360, Fix C).
+    function _mint(ProvisionResult memory r) internal {
+        MacroHedgeExecutor exec = MacroHedgeExecutor(payable(r.executor));
+        PanopticPoolV2 pool = PanopticPoolV2(r.pool);
+        PoolKey memory wcopUsdcKey = PoolKey({
+            currency0: Currency.wrap(POLYGON_USDC),
+            currency1: Currency.wrap(POLYGON_WCOP),
+            fee: 3000,
+            tickSpacing: 60,
+            hooks: IHooks(address(0))
+        });
         HedgeMandate memory mandate = HedgeMandate({
             economicTheory: IMacroThesis(address(uint160(0x6))), // POST_KEYNESIAN sentinel
             underlyingMarket: wcopUsdcKey.toId(),
@@ -183,15 +221,8 @@ contract ProvisionBuildBearDemo is Script {
         BalanceDelta marginDelta = exec.quoteMargin(positionId, strike);
         marginDelta; // basic read — no magnitude assertion (honesty: read-back only)
 
-        r = ProvisionResult({
-            factory: address(factory),
-            riskEngine: address(riskEngine),
-            pool: address(pool),
-            riskManagement: address(riskManagement),
-            executor: address(exec),
-            strike: strike,
-            legs: pool.numberOfLegs(address(exec))
-        });
+        r.strike = strike;
+        r.legs = pool.numberOfLegs(address(exec));
     }
 
     /// @dev The 9-arg executor ctor (mirrors _deployExecutorWith) — STRESS regime, TEMPLATE betas,
