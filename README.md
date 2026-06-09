@@ -38,7 +38,10 @@ pnpm build                                                   # = pnpm --filter d
 # install Foundry once if needed:
 curl -L https://foundry.paradigm.xyz | bash && foundryup
 forge build --root packages/backend/contracts
-forge test  --root packages/backend/contracts               # fork suites are keyless-gated
+# Unit suite (keyless — what a fresh clone can run with no RPC env vars):
+forge test  --root packages/backend/contracts --no-match-path '*fork*'
+# Fork suites need RPC env vars (BASE_RPC_URL, etc.) + a fork-state/ dir; CI runs
+# them on a separate lane. Plain `forge test` (no filter) will fail those 14 here.
 ```
 
 ### Codegen (regenerate ABIs from contracts)
