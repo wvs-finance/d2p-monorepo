@@ -40,7 +40,7 @@
 
 | ID | Description | Research Support |
 |----|-------------|-----------------|
-| EXEC-01 | `MacroHedgeExecutor` reverts `"fork used"` when `pool.numberOfLegs(address(this)) != 0`. Guard in `_resolveAndMintAtStrike` before any `pool.dispatch`. Verified by Foundry test + on-fork `cast` transcript. | Edit site pinned to `MacroHedgeExecutor.sol:357-363` (before existing `require` statements). Test pattern is a MockPool subclass (no live fork). |
+| EXEC-01 | `MacroHedgeExecutor` reverts `"fork used"` when `pool.numberOfLegs(address(this)) != 0`. Guard in `_resolveAndMintAtStrike` before any `pool.dispatch`. Verified by Foundry test + on-fork `cast` transcript. | Edit site pinned to `MacroHedgeExecutor.sol:357-363` (before existing `require` statements). Test pattern is `vm.mockCall` on `numberOfLegs` (no live fork, no PanopticPoolV2 subclass — Open Q2 resolved). |
 | PROV-01 | Operator can run `--no-mint` / `SKIP_MINT=true` variant deploying fresh executor with `numberOfLegs == 0`. | `ProvisionBuildBearDemo.s.sol:125-138` `run()` + `_provision()`. `SKIP_MINT` gate added via `vm.envOr`. The final mint step (`_provision()` lines 173-184) is the only section gated. |
 | PROV-02 | Dedicated `DEMO_SIGNER_PK` address funded with native gas via `hardhat_setBalance` INSIDE the captured snapshot. Collateral for executor deposited as part of deploy. | `provision-buildbear-demo.sh:65` already uses `hardhat_setBalance` for the deployer EOA — same RPC method, new target address. Collateral deposit is at `_provision()` lines 164-171. |
 | PROV-03 | Provisioning captures `evm_snapshot` id AFTER deploy + collateral + signer funding but BEFORE any mint. Verified by round-trip: `evm_revert` → fresh `resolveFromMandate` succeeds. | `evm_snapshot` is a no-params JSON-RPC call returning a hex string. Must be called from shell (not Foundry VM cheat) against the hosted BuildBear node. `cast rpc evm_snapshot --rpc-url "$RPC"` is the correct invocation. |
@@ -92,10 +92,11 @@ packages/backend/contracts/
 │   └── MacroHedgeExecutor.sol         MODIFIED — add 3-line guard in _resolveAndMintAtStrike
 ├── script/
 │   ├── ProvisionBuildBearDemo.s.sol   MODIFIED — vm.envOr("SKIP_MINT") gate + evm_snapshot console log
-│   └── provision-buildbear-demo.sh    MODIFIED — --no-mint flag + DEMO_SIGNER_PK funding + direct frontend artifact write
+│   ├── provision-buildbear-demo.sh    MODIFIED — --no-mint flag + DEMO_SIGNER_PK funding + direct frontend artifact write
+│   └── spike-viem-sign.ts             NEW — type-checked viem server-sign dry-run for §(c) reproducibility
 └── test/
     └── unit/
-        └── MacroHedgeExecutor.guard.t.sol  NEW — keyless Foundry unit test for EXEC-01
+        └── MacroHedgeExecutor.guard.t.sol  NEW — keyless Foundry unit test for EXEC-01 (vm.mockCall)
 
 packages/frontend/lib/apps/abrigo/cornerstone/
 ├── artifact-loader.ts                 MODIFIED — snapshotId?: string; mintTxHash?: string | null
@@ -121,27 +122,26 @@ require(pool.numberOfLegs(address(this)) == 0, "fork used");
 
 **Why BEFORE dispatch:** `PanopticPoolV2.numberOfLegs` is a view function. Calling it while inside `pool.dispatch` triggers the pool's reentrancy guard and reverts with `Reentrancy()`. The guard must be placed before line 401 (first `pool.dispatch` call).
 
-**Coverage:** Because all three public entrypoints (`resolveFromMandate` line 279, `resolveAndMint` line 168, `_onResult` line 195) call `_resolveAndMintAtStrike` as their ONLY mint path, placing the guard here makes single-use unbypassable.
+**Coverage:** Because all three public entrypoints (`resolveFromMandate` line 209, `resolveAndMint` line 156, `_onResult` line 180) call `_resolveAndMintAtStrike` as their ONLY mint path, placing the guard here makes single-use unbypassable. NOTE: the guard at line 366 is ABOVE the `if (legParams.isLong && positionSize > 0)` dispatch gate (line 386), so `pool.numberOfLegs(address(this))` is dereferenced UNCONDITIONALLY on every sink call.
 
 **What `numberOfLegs` returns:** The count of positions (legs) the executor holds in the pool. On a freshly-provisioned `--no-mint` stack, `pool.numberOfLegs(address(this)) == 0`. After one successful mint via `resolveFromMandate`, `numberOfLegs == 1` (the long leg) or `2` (short + long). Either `> 0` triggers the guard.
 
 **String revert "fork used":** This is a cross-layer contract. The frontend `HONEST-01` path (Phase 12) string-matches on `"fork used"`. Do NOT change this string. Do NOT use a custom error. ABI-decode of custom errors across chains/abis is fragile; string matching is trivially reliable.
 
-### Pattern 2: Foundry Unit Test — Keyless, Non-Fork, CI-Safe
+### Pattern 2: Foundry Unit Test — Keyless, Non-Fork, CI-Safe (vm.mockCall)
 
-**File name convention:** The CI lane filters `test/**/*[Ff]ork*`. Name the test file so it does NOT match: `MacroHedgeExecutor.guard.t.sol` (no "fork" substring). Place in `test/unit/` or `test/instrument/`.
+**File name convention:** The CI lane filters `test/**/*[Ff]ork*`. Name the test file so it does NOT match: `MacroHedgeExecutor.guard.t.sol` (no "fork" substring). Place in `test/unit/`.
 
-**Test strategy:** Deploy a `MockPool` that increments a `legs` counter when `dispatch` is called. Deploy `MacroHedgeExecutor` pointing at this mock pool. Call `resolveAndMint` once (succeeds). Call again (reverts `"fork used"`). Also call `resolveFromMandate` on the second attempt to verify coverage via that entrypoint.
+**Test strategy (Open Q2 RESOLVED — vm.mockCall is the SOLE approach):** Construct `MacroHedgeExecutor` with a non-zero PLACEHOLDER pool address `PanopticPoolV2(address(0x000000000000000000000000000000000000C0FE))` and REAL `MockRegimeOracle`/`MockSurpriseOracle`. Use `resolveAndMint` (which does NOT read the regime oracle) with `positionSize == 0` (so the dispatch block is skipped). `vm.mockCall` the `numberOfLegs(executor)` selector to return `0` for call 1 (passes the future guard) and `1` for call 2 (must revert `"fork used"`). The `MockPoolForGuard is PanopticPoolV2` subclass option is REJECTED — see Open Questions §2.
 
-**Pattern from existing test:** `MacroHedgeExecutor.onResult.t.sol` demonstrates the `MacroHedgeExecutorDecodeProbe` subclass pattern: override `_resolveAndMintAtStrike` to isolate behavior. For the guard test, the override is NOT needed — the guard fires BEFORE the mint logic, so the real `_resolveAndMintAtStrike` executes up to the `require` and reverts. The mock pool just needs to answer `numberOfLegs(address)` correctly.
+**Pattern from existing test:** `MacroHedgeExecutor.onResult.t.sol` demonstrates the ctor wiring (full 9-arg ctor at lines 156-170) and `_demoLegParams()` (lines 50-62). BUT the onResult probe OVERRIDES `_resolveAndMintAtStrike` to SKIP dispatch — the guard test must NOT do this; it must hit the REAL sink so the guard `require` executes.
 
-**Exact test name shape (bulloak-compatible):**
+**Exact test name shape:**
 ```solidity
 // test/unit/MacroHedgeExecutor.guard.t.sol
 contract MacroHedgeExecutorGuardTest is Test {
-    function test_WhenNumberOfLegsIsZeroFirstMintSucceeds() external { ... }
-    function test_WhenNumberOfLegsIsNonZeroSecondMintRevertsForkedUsed() external { ... }
-    function test_WhenCalledViaResolveAndMintSecondCallRevertsForkedUsed() external { ... }
+    function test_WhenNumberOfLegsIsZeroFirstResolveAndMintDoesNotRevertForkUsed() external { ... }
+    function test_WhenNumberOfLegsIsNonZeroSecondResolveAndMintRevertsForkUsed() external { ... }
 }
 ```
 
@@ -226,6 +226,8 @@ FRONTEND_ART="$MONO_ROOT/packages/frontend/lib/apps/abrigo/cornerstone/buildbear
 mkdir -p "$(dirname "$FRONTEND_ART")"
 ```
 
+NOTE: the four `../` segments anchor `script/` → `contracts/` → `backend/` → `packages/` → monorepo root. This MUST be asserted at runtime against the actual monorepo root (echo + `test "$MONO_ROOT" = "<expected>"`) — see Plan 10-02 Task 3 acceptance.
+
 **`jq` `mintTxHash: null` serialization:**
 
 The existing script at line 125 uses `--arg mintTxHash "$MINT_TX_HASH"` (a string value). For `--no-mint`, use `--argjson` to produce a JSON `null`:
@@ -289,6 +291,7 @@ export type BuildBearDeployment = {
 
 ### Anti-Patterns to Avoid
 
+- **`MockPoolForGuard is PanopticPoolV2` subclass:** REJECTED — `numberOfLegs` and `dispatch` are non-virtual on the concrete `PanopticPoolV2`; cannot override; not castable to the immutable. Use `vm.mockCall` (Open Q2).
 - **`vm.snapshot` / `vm.rpc("evm_snapshot", ...)` inside a Foundry script targeting a hosted node:** These call the in-process Anvil node, not the BuildBear sandbox RPC. Use `cast rpc evm_snapshot --rpc-url "$RPC"` from the shell instead.
 - **`anvil_setBalance` on BuildBear:** LIVE-VERIFIED rejection in `provision-buildbear-demo.sh:65` (`|| true` guard present). Always use `hardhat_setBalance`.
 - **`--arg mintTxHash ""` for the null case:** `jq --arg` always produces a JSON string. Use `--argjson mintTxHash null` to produce JSON `null`.
@@ -306,7 +309,7 @@ export type BuildBearDeployment = {
 | Native-gas funding on BuildBear | ETH transfer from a whale account | `hardhat_setBalance` via `cast rpc` | LIVE-VERIFIED; `anvil_setBalance` is rejected on BuildBear |
 | Conditional Solidity script step | A second `.s.sol` script | `vm.envOr("SKIP_MINT", false)` | Idiomatic Foundry pattern; avoids maintaining two scripts that differ by one `if` |
 | JSON null field in shell | `echo '{"mintTxHash":null}'` | `jq --argjson mintTxHash null` | `jq` handles JSON type safety; manual echo risks quoting errors |
-| EXEC-01 test without a live fork | Custom in-VM fork setup requiring `BASE_RPC_URL` | MockPool + `MacroHedgeExecutorGuardTest` — no fork | Matches `MacroHedgeExecutor.onResult.t.sol` pattern; runs in the secret-free CI lane |
+| EXEC-01 test without a live fork | PanopticPoolV2 mock subclass / custom in-VM fork setup | `vm.mockCall` on `numberOfLegs` + real executor | non-virtual methods can't be subclassed; `vm.mockCall` runs in the secret-free CI lane |
 
 ---
 
@@ -377,11 +380,12 @@ function _resolveAndMintAtStrike(
     // ... rest of existing body unchanged ...
 ```
 
-### Foundry Guard Test Skeleton
+### Foundry Guard Test Skeleton (vm.mockCall — Open Q2 resolved)
 
 ```solidity
 // Source: new file test/unit/MacroHedgeExecutor.guard.t.sol
-// NOT named *fork* — runs in the secret-free CI lane
+// NOT named *fork* — runs in the secret-free CI lane.
+// NO PanopticPoolV2 subclass — numberOfLegs/dispatch are non-virtual on the concrete pool.
 pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
@@ -390,39 +394,28 @@ import {PanopticPoolV2} from "@contracts/PanopticPool.sol";
 import {RiskManagement} from "../../src/RiskManagement.sol";
 import {IRegimeOracle} from "../../src/interfaces/IRegimeOracle.sol";
 import {ISurpriseOracle} from "../../src/interfaces/ISurpriseOracle.sol";
-import {HedgeMandate} from "../../src/types/HedgeMandate.sol";
-import {IMacroThesis} from "../../src/interfaces/IMacroThesis.sol";
 import {MockPlatform} from "../mocks/MockPlatform.sol";
 import {MockRegimeOracle} from "../mocks/MockRegimeOracle.sol";
 import {MockSurpriseOracle} from "../mocks/MockSurpriseOracle.sol";
-import {PoolKey} from "v4-core/types/PoolKey.sol";
-import {PoolIdLibrary} from "v4-core/types/PoolId.sol";
-import {IHooks} from "v4-core/interfaces/IHooks.sol";
-import {Currency} from "v4-core/types/Currency.sol";
-
-/// @dev MockPool that tracks numberOfLegs per address for EXEC-01 guard testing.
-/// Increments legs on dispatch (simulating a successful mint). No real pool logic.
-contract MockPoolForGuard {
-    mapping(address => uint256) public _legs;
-
-    function numberOfLegs(address owner) external view returns (uint256) {
-        return _legs[owner];
-    }
-
-    function dispatch(...) external {
-        _legs[msg.sender]++;
-    }
-
-    // stub other methods PanopticPoolV2 interface requires...
-    function collateralToken0() external view returns (address) { return address(0); }
-    function collateralToken1() external view returns (address) { return address(0); }
-}
 
 contract MacroHedgeExecutorGuardTest is Test {
-    // ...setUp deploys executor with MockPoolForGuard...
-    // first resolveFromMandate succeeds (legs==0 → passes guard, mock increments legs)
-    // second resolveFromMandate reverts "fork used" (legs==1 → fails guard)
-    // resolveAndMint second call also reverts "fork used"
+    address constant POOL = address(0x000000000000000000000000000000000000C0FE); // any non-zero placeholder
+    MacroHedgeExecutor executor;
+
+    function setUp() public {
+        MockPlatform platform = new MockPlatform(0.01 ether);
+        MockRegimeOracle regime = new MockRegimeOracle();
+        MockSurpriseOracle surprise = new MockSurpriseOracle();
+        regime.set(IRegimeOracle.Regime.Tranquil);
+        executor = new MacroHedgeExecutor(
+            address(platform), PanopticPoolV2(POOL), RiskManagement(address(0)),
+            0, 0.10e18, 0.35e18, 0.15e18, 14_400,
+            IRegimeOracle(address(regime)), ISurpriseOracle(address(surprise))
+        );
+        vm.deal(address(this), 1000 ether);
+    }
+    // call 1: vm.mockCall numberOfLegs → 0; resolveAndMint(legParams, 0, 0) does NOT revert "fork used"
+    // call 2: vm.mockCall numberOfLegs → 1; vm.expectRevert(bytes("fork used")); resolveAndMint(...)
 }
 ```
 
@@ -484,10 +477,9 @@ jq -n \
    - What's unclear: If the BuildBear infra restarts its Anvil node between provisions and the judge run, the stored snapshot ID may be stale.
    - Recommendation: In the `buildbear-reset` route (Phase 11), implement probe-before-use: attempt `evm_revert(snapshotId)` and check the return value; if it returns `false`, surface `{ ok: false, reason: 'snapshot-stale' }`. Confirm empirically on first `--no-mint` run.
 
-2. **`MockPoolForGuard` interface completeness for unit tests**
-   - What we know: `PanopticPoolV2` is a complex contract. The guard test only needs `numberOfLegs` to return a counter and `dispatch` to increment it. The executor constructor takes a `PanopticPoolV2` typed parameter — casting a mock address requires a conforming interface or a `vm.etch` approach.
-   - What's unclear: Whether the existing `MockPlatform` pattern (simple contract with the needed methods) is sufficient, or if a fuller mock is needed for the constructor to compile.
-   - Recommendation: Follow the `MacroHedgeExecutor.onResult.t.sol` pattern (line 39-43): pass `PanopticPoolV2(address(0))` as the pool ctor param in the DecodeProbe subclass. For the guard test, either subclass the executor with an overridden `pool` immutable (not possible — immutables can't be overridden in Solidity) or use a thin mock contract castable to `PanopticPoolV2` via a `MockPoolForGuard is PanopticPoolV2` subclass or an interface-based approach. The cleanest solution is a `MockPool` that inherits from `PanopticPoolV2` and overrides `numberOfLegs` + `dispatch`.
+2. **`MockPoolForGuard` interface completeness for unit tests — RESOLVED (2026-06-08, backend 3-step review pass) in favor of `vm.mockCall`.**
+   - RESOLUTION: The `MockPoolForGuard is PanopticPoolV2` subclass option is REJECTED — it cannot compile. Both `numberOfLegs` (PanopticPool.sol:2155) and `dispatch` (PanopticPool.sol:666) are NON-virtual on the CONCRETE `PanopticPoolV2` (`contract PanopticPoolV2 is Clone, Multicall, TransientReentrancyGuard`, line 29), so a subclass cannot override them; and a standalone mock is not castable to the `PanopticPoolV2`-typed immutable ctor param. The SOLE strategy is `vm.mockCall`: construct the executor with a non-zero placeholder pool `PanopticPoolV2(address(0x000000000000000000000000000000000000C0FE))`, then `vm.mockCall(POOL, abi.encodeWithSelector(PanopticPoolV2.numberOfLegs.selector, address(executor)), abi.encode(uint256(0)))` for call 1 and `abi.encode(uint256(1))` for call 2. Drive the RED via `resolveAndMint` (no oracle read) with `positionSize == 0` so `pool.dispatch` is never reached; if a non-zero positionSize is used, also `vm.mockCall` the `dispatch` selector. See Plan 10-01 Task 2 for the exact lines.
+   - What we know (original): `PanopticPoolV2` is a complex contract. The guard test only needs `numberOfLegs` to answer 0 then non-zero at the guard site.
 
 3. **`_provision()` refactor scope**
    - What we know: The `SKIP_MINT` gate can be added to `run()` (extracting mint from `_provision()`) or inline in `_provision()`. Either compiles.
@@ -513,14 +505,14 @@ jq -n \
 
 | Req ID | Behavior | Test Type | Signal | CI-Checkable? |
 |--------|----------|-----------|--------|---------------|
-| EXEC-01 | `_resolveAndMintAtStrike` reverts `"fork used"` on 2nd call | Foundry unit test (no fork) | `forge test --no-match-path 'test/**/*[Ff]ork*'` green; test names `test_WhenNumberOfLegsIsNonZero*` pass | YES — secret-free CI lane |
+| EXEC-01 | `_resolveAndMintAtStrike` reverts `"fork used"` on 2nd call | Foundry unit test (vm.mockCall, no fork) | `forge test --no-match-path 'test/**/*[Ff]ork*'` green; test names `test_WhenNumberOfLegsIsNonZero*` pass | YES — secret-free CI lane |
 | EXEC-01 | On-fork executor redeployed with guard reverts 2nd `cast send resolveFromMandate` | Live-fork transcript | `10-SPIKE-EVIDENCE.md` section (d): `cast send` shows `"fork used"` revert | NO — operator-manual only |
 | PROV-01 | `--no-mint` provision deploys executor with `pool.numberOfLegs(executor) == 0` | Live-fork transcript | `10-SPIKE-EVIDENCE.md` section (a): `cast call pool numberOfLegs(executor)` returns `0` after provision | NO — operator-manual only |
 | PROV-02 | Signer funded inside snapshot; `evm_revert` restores signer gas balance | Live-fork transcript | `10-SPIKE-EVIDENCE.md` section (b): `cast balance $SIGNER_EOA` after revert equals funded amount | NO — operator-manual only |
 | PROV-03 | `evm_snapshot`→`evm_revert` round-trip: `resolveFromMandate` succeeds after revert | Live-fork transcript | `10-SPIKE-EVIDENCE.md` section (b): fresh `cast send resolveFromMandate` succeeds after `evm_revert` | NO — operator-manual only |
 | PROV-04 | Artifact written directly to frontend path with `mintTxHash: null` | File grep | `jq '.mintTxHash' packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` returns `null` (not `""`) | YES (file check, not forge) |
 | PROV-04 | `snapshotId` field present in artifact | File grep | `jq '.snapshotId' .../buildbear-deployments.json` returns a hex string like `"0x1"` | YES (file check) |
-| PROV-04 | `artifact-loader.ts` type migration accepts null `mintTxHash` | TypeScript type check | `pnpm --filter frontend tsc --noEmit` passes with `mintTxHash: null` in the JSON | YES — tsc via pre-commit hook |
+| PROV-04 | `artifact-loader.ts` type migration accepts null `mintTxHash` | TypeScript type check | `pnpm --filter d2p-frontend tsc --noEmit` passes with `mintTxHash: null` in the JSON | YES — tsc via pre-commit hook |
 | Wave-0 type migration | `BuildBearDeployment.snapshotId?: string` | TypeScript type check | `tsc --noEmit` green; `artifact-loader.ts` type diff reviewable in PR | YES |
 
 ### Sampling Rate
@@ -531,7 +523,7 @@ jq -n \
 
 ### Wave 0 Gaps (must exist before implementation waves)
 
-- [ ] `test/unit/MacroHedgeExecutor.guard.t.sol` — covers EXEC-01 (first call succeeds, second reverts `"fork used"` via `resolveAndMint` and `resolveFromMandate`)
+- [ ] `test/unit/MacroHedgeExecutor.guard.t.sol` — covers EXEC-01 (first `resolveAndMint` does not revert "fork used", second reverts "fork used" via `vm.mockCall` numberOfLegs 0→1)
 - [ ] `10-SPIKE-EVIDENCE.md` — operator-recorded; sections (a) pre-guard 2nd-mint baseline, (b) `evm_snapshot`→`evm_revert` round-trip, (c) viem server-sign dry-run, (d) on-fork post-guard `"fork used"` transcript
 - [ ] `artifact-loader.ts` TS type migration (`mintTxHash?: string | null`, `snapshotId?: string`) — must land BEFORE the `--no-mint` artifact is written (unblocks Phase 11 `buildbear-reset` route's `snapshotId` read)
 
@@ -543,12 +535,14 @@ jq -n \
 
 ### Primary (HIGH confidence)
 
-- `packages/backend/contracts/src/MacroHedgeExecutor.sol` — full source; `_resolveAndMintAtStrike` body (lines 357-422), all three entrypoints (lines 156-169, 209-279, 180-196), `pool` immutable (line 59)
+- `packages/backend/contracts/src/MacroHedgeExecutor.sol` — full source; `_resolveAndMintAtStrike` body (lines 357-422), all three entrypoints (`resolveAndMint` 156, `_onResult` 180, `resolveFromMandate` 209), `pool` immutable ctor (lines 127-148)
+- `packages/backend/contracts/lib/panoptic-v2-core/contracts/PanopticPool.sol` — `PanopticPoolV2` concrete contract (line 29); `dispatch` (line 666) and `numberOfLegs` (line 2155) both NON-virtual
 - `packages/backend/contracts/script/ProvisionBuildBearDemo.s.sol` — `run()` structure (lines 125-138), `_provision()` body (lines 143-195), `_deployCore()` + `_deployExecutor()` helpers
 - `packages/backend/contracts/script/provision-buildbear-demo.sh` — all 144 lines; `hardhat_setBalance` pattern (line 65), `buildbear_ERC20Faucet` pattern (lines 77-83), `jq` artifact emit (lines 117-131), artifact output path (lines 114-115)
 - `packages/frontend/lib/apps/abrigo/cornerstone/artifact-loader.ts` — `BuildBearDeployment` type (lines 20-33), `validateDeployment` required fields list (lines 41-47)
 - `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` — committed (poisoned) artifact with `executor: "0xa95Ffdf..."`, `mintTxHash: "0xfce415a6..."`, `capturedAt: "2026-06-08T00:15:09.000Z"`
-- `packages/backend/contracts/test/instrument/MacroHedgeExecutor.onResult.t.sol` — existing unit test pattern: `MacroHedgeExecutorDecodeProbe` subclass, `MockPlatform`, no fork, CI-safe
+- `packages/backend/contracts/test/instrument/MacroHedgeExecutor.onResult.t.sol` — existing unit test pattern: full 9-arg ctor wiring (lines 156-170), `_demoLegParams()` (lines 50-62), no fork, CI-safe — BUT the probe OVERRIDES the sink to skip dispatch (the guard test must NOT)
+- `packages/backend/contracts/test/mocks/MockRegimeOracle.sol` / `MockSurpriseOracle.sol` — real oracle mocks (`set(...)` + latest reader)
 - `.github/workflows/ci.yml` lines 49-50 — `forge test --no-match-path 'test/**/*[Ff]ork*'` CI lane definition; case-insensitive `[Ff]ork` glob
 - `.planning/research/STACK.md` — BuildBear RPC method reference (all LIVE-VERIFIED methods); `vm.envOr` pattern; `evm_snapshot`/`evm_revert` one-use behavior
 - `.planning/research/ARCHITECTURE.md` — artifact contract table, build order, reset guard placement
@@ -566,10 +560,10 @@ jq -n \
 
 **Confidence breakdown:**
 - EXEC-01 edit site: HIGH — exact line numbers confirmed from source read
-- Foundry test pattern: HIGH — existing test in `MacroHedgeExecutor.onResult.t.sol` provides exact template
+- Foundry test pattern: HIGH — `vm.mockCall` approach confirmed; PanopticPoolV2 non-virtual methods verified at PanopticPool.sol:666/2155
 - Shell `--no-mint` pattern: HIGH — `jq --argjson`, `cast rpc`, `hardhat_setBalance` all LIVE-VERIFIED in existing script
 - `evm_snapshot` from shell (not Solidity): HIGH — confirmed by analysis of VM vs hosted-node distinction; `cast rpc` is the correct invocation path
-- MockPool for unit test: MEDIUM — `PanopticPoolV2` interface depth unknown; may require a fuller mock than a simple counter contract
+- MockPool for unit test: RESOLVED — `vm.mockCall` (Open Q2); subclass approach proven non-compilable
 - `evm_snapshot` persistence across sandbox restarts: LOW — not documented by BuildBear; probe-before-use mitigation recommended
 
 **Research date:** 2026-06-08

@@ -1,8 +1,8 @@
 ---
 phase: 10
 slug: backend-on-chain-single-use-guard-no-mint-provisioning-variant
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-06-08
 ---
@@ -83,4 +83,4 @@ created: 2026-06-08
 - [ ] No watch-mode flags
 - [ ] `nyquist_compliant: true` set after planner wires the per-task `<automated>` fields
 
-**Approval:** pending
+**Approval:** approved 2026-06-08 (GSD plan-checker PASS + backend 3-step pipeline cleared)
