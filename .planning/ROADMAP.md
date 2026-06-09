@@ -30,7 +30,7 @@
 **Granularity:** Coarse (4 phases derived from two parallel tracks converging at integration)
 **Coverage:** 26/26 v3.0 requirements mapped (v2 — two-reviewer revision)
 
-- [ ] **Phase 10: Backend On-Chain Single-Use Guard + `--no-mint` Provisioning** — adds `require(numberOfLegs==0, "fork used")` to `MacroHedgeExecutor` (EXEC-01) + a `--no-mint` variant that redeploys a clean stack/executor, funds a dedicated signer inside an `evm_snapshot`, and writes the artifact (`snapshotId`, `mintTxHash:null`) directly to the frontend path. Gated by a live-fork empirical spike; not CI-verifiable.
+- [x] **Phase 10: Backend On-Chain Single-Use Guard + `--no-mint` Provisioning** — adds `require(numberOfLegs==0, "fork used")` to `MacroHedgeExecutor` (EXEC-01) + a `--no-mint` variant that redeploys a clean stack/executor, funds a dedicated signer inside an `evm_snapshot`, and writes the artifact (`snapshotId`, `mintTxHash:null`) directly to the frontend path. Gated by a live-fork empirical spike; not CI-verifiable. (completed 2026-06-09)
 
   **Plans:** 3 plans
   - [ ] 10-01-PLAN.md — Wave 0: artifact-loader nullable-type migration + EXEC-01 guard test (RED) + 10-SPIKE-EVIDENCE scaffold (EXEC-01, PROV-04) [wave 0]
@@ -209,7 +209,7 @@ Plans:
 | 4. Agent Surface (MCP) | 0/? | Not started | - |
 | 5. Read-First Wallet and DeFi Surface | 3/4 | In Progress|  |
 | **v3.0 — Judge-Runnable Live BuildBear Demo** | | | |
-| 10. Backend Single-Use Guard + `--no-mint` Provisioning | 2/3 | In Progress|  |
+| 10. Backend Single-Use Guard + `--no-mint` Provisioning | 2/3 | Complete    | 2026-06-09 |
 | 11. Frontend Server Routes | 0/3 | Not started | - |
 | 12. Live Path Integration | 0/3 | Not started | - |
 | 13. Evidence Polish and Judge Runbook | 0/2 | Not started | - |

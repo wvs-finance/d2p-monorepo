@@ -4,13 +4,13 @@ milestone: v3.0
 milestone_name: Phases — Judge-Runnable Live BuildBear Demo
 status: planning
 stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-06-08T23:05:00.000Z"
-last_activity: "2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97) + SKIP_MINT gate + --no-mint shell variant + null-fixture vitest round-trip + type-checked viem simulate-only spike. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271)."
+last_updated: "2026-06-09T12:49:15.596Z"
+last_activity: "2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271)."
 progress:
   total_phases: 16
-  completed_phases: 10
+  completed_phases: 11
   total_plans: 60
-  completed_plans: 57
+  completed_plans: 58
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
@@ -35,7 +35,7 @@ progress:
 
 **Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — in progress (2/3 plans)
 **Active plan:** 10-03 (next) — operator-manual live `--no-mint` run + fill `10-SPIKE-EVIDENCE.md` §(a)-(d) (live BuildBear fork, secret-gated)
-**Status:** Plans 10-01 + 10-02 complete on branch `phase-10-backend-single-use-guard`
+**Status:** Ready to plan
 **Last activity:** 2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271).
 
 **Decisions (Plan 10-02):**
