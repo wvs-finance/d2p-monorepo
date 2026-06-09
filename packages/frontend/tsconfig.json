@@ -39,7 +39,6 @@
     ".next",
     "tests/unit/structured-data.test.tsx",
     "tests/unit/cornerstone/mandate-override.test.ts",
-    "tests/unit/cornerstone/producer-ordering.test.ts",
-    "tests/unit/workflow-engine-buildbear.test.ts"
+    "tests/unit/cornerstone/producer-ordering.test.ts"
   ]
 }
