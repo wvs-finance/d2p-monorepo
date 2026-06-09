@@ -36,7 +36,7 @@
   - [ ] 10-01-PLAN.md — Wave 0: artifact-loader nullable-type migration + EXEC-01 guard test (RED) + 10-SPIKE-EVIDENCE scaffold (EXEC-01, PROV-04) [wave 0]
   - [ ] 10-02-PLAN.md — Wave 1: EXEC-01 guard insertion (GREEN) + SKIP_MINT gate + --no-mint shell variant (signer-in-snapshot, direct frontend artifact write) (EXEC-01, PROV-01, PROV-04) [wave 1]
   - [ ] 10-03-PLAN.md — Wave 2 (operator-manual, not CI): live --no-mint spike + provision producing 10-SPIKE-EVIDENCE.md (EXEC-01, PROV-01, PROV-02, PROV-03, PROV-04) [wave 2]
-- [ ] **Phase 11: Frontend Server Routes** — New `buildbear-sign` and `buildbear-reset` API routes with server-side viem signing and Somnia mode decoupling; the `'buildbear'` mode variant in `mode.ts`; runs in parallel with Phase 10
+- [x] **Phase 11: Frontend Server Routes** — New `buildbear-sign` and `buildbear-reset` API routes with server-side viem signing and Somnia mode decoupling; the `'buildbear'` mode variant in `mode.ts`; runs in parallel with Phase 10 (completed 2026-06-09)
 
   **Plans:** 3 plans
   - [ ] 11-01-PLAN.md — Wave 0: RED test scaffolds (sign reason-codes + reset + upstream) + `mode.ts` 'buildbear' + `lib/env.ts` DEMO_SIGNER_PK + key-leak arch test (MINT-01, MINT-02, MINT-03) [wave 0]
@@ -215,7 +215,7 @@ Plans:
 | 5. Read-First Wallet and DeFi Surface | 3/4 | In Progress|  |
 | **v3.0 — Judge-Runnable Live BuildBear Demo** | | | |
 | 10. Backend Single-Use Guard + `--no-mint` Provisioning | 2/3 | Complete    | 2026-06-09 |
-| 11. Frontend Server Routes | 2/3 | In Progress|  |
+| 11. Frontend Server Routes | 3/3 | Complete   | 2026-06-09 |
 | 12. Live Path Integration | 0/3 | Not started | - |
 | 13. Evidence Polish and Judge Runbook | 0/2 | Not started | - |
 
