@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases — Judge-Runnable Live BuildBear Demo
-status: executing
+status: planning
 stopped_at: Completed 11-03-PLAN.md
-last_updated: "2026-06-09T14:57:33.872Z"
-last_activity: "2026-06-09 — Plan 11-03 executed: Somnia decoupling cut (MINT-02) + MINT-03 mandate-source swap GREEN. handleLiveConfirm hard-branches on resolvedMode==='buildbear' as the FIRST statement → /api/cornerstone/buildbear-sign, unconditionally returns BEFORE any /api/abrigo/agent1 reference; zero replay flips on the buildbear path (HONEST-01); 3 live-path flips + mount-probe flips preserved; mount-probe guard extended to 'buildbear'. buildUpstreamFromReplayArtifact(presetId) builds UpstreamResult from getPresetById+fromMockEvent (Somnia-free, synchronous), runWorkflowLive untouched. New line-order + no-fallthrough arch test (buildbear-decoupling.test.ts, un-excluded) + workflow-engine-buildbear un-excluded — 8/8 GREEN. tsc+biome clean; full suite 641 passed (lone failure = pre-existing unrelated impeccable anti-patterns timeout flake, passes 9/9 in isolation — deferred). Both tasks pre-existed as prior-session WIP (Task 1 committed c4b2217; Task 2 committed this session 61c8446); verified-not-rewritten. MINT requirement finalization deferred to the phase verifier per plan. 2 task commits (c4b2217, 61c8446)."
+last_updated: "2026-06-09T15:12:17.882Z"
+last_activity: "2026-06-09 — Plan 11-03 executed: Somnia decoupling cut (MINT-02) + MINT-03 mandate-source swap GREEN. handleLiveConfirm hard-branches on resolvedMode==='buildbear' first → /api/cornerstone/buildbear-sign, returns BEFORE any /api/abrigo/agent1; zero replay flips on the buildbear path (HONEST-01); 3 live-path + mount-probe flips preserved; mount-probe guard extended to 'buildbear'. buildUpstreamFromReplayArtifact builds UpstreamResult from getPresetById+fromMockEvent (Somnia-free), runWorkflowLive untouched. Line-order + no-fallthrough arch test + workflow-engine-buildbear un-excluded — 8/8 GREEN; tsc+biome clean; full suite 641 passed (lone failure = unrelated impeccable timeout flake, passes in isolation, deferred). Verified-not-rewritten on prior-session WIP. 2 task commits (c4b2217, 61c8446)."
 progress:
   total_phases: 16
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 63
   completed_plans: 61
 ---
@@ -35,7 +35,7 @@ progress:
 
 **Active phase:** Phase 11 (Frontend Server Routes — MINT-01/02/03) — all 3 plans executed; awaiting phase verifier to finalize MINT requirements
 **Active plan:** 11-03 (done) — `buildUpstreamFromReplayArtifact` (MINT-03) in workflow-engine.ts + Somnia decoupling cut (MINT-02) in CornerstoneClientShell.tsx; both tests un-excluded + GREEN. Next: `/gsd:verify-work` for Phase 11, then Phase 12 (live path integration).
-**Status:** Phase 11 plans complete (3/3); ready for the Phase 11 verifier
+**Status:** Ready to plan
 **Last activity:** 2026-06-09 — Plan 11-03 executed: Somnia decoupling cut (MINT-02) + MINT-03 mandate-source swap GREEN. handleLiveConfirm hard-branches on resolvedMode==='buildbear' first → /api/cornerstone/buildbear-sign, returns BEFORE any /api/abrigo/agent1; zero replay flips on the buildbear path (HONEST-01); 3 live-path + mount-probe flips preserved; mount-probe guard extended to 'buildbear'. buildUpstreamFromReplayArtifact builds UpstreamResult from getPresetById+fromMockEvent (Somnia-free), runWorkflowLive untouched. Line-order + no-fallthrough arch test + workflow-engine-buildbear un-excluded — 8/8 GREEN; tsc+biome clean; full suite 641 passed (lone failure = unrelated impeccable timeout flake, passes in isolation, deferred). Verified-not-rewritten on prior-session WIP. 2 task commits (c4b2217, 61c8446).
 
 **Decisions (Plan 11-03):**
