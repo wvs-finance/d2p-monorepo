@@ -9,7 +9,7 @@
 //   + B1 (real undici fetch-failed shape → rpc-unreachable, NOT revert-failed)
 //   + M1 (no RPC-URL leak in detail).
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mutable artifact holder so snapshotId presence can be toggled per-test.
 const artifactHolder: { rpcUrl: string; snapshotId: string | undefined } = {
@@ -34,7 +34,13 @@ vi.mock('@/lib/apps/abrigo/cornerstone/artifact-loader', () => ({
   isExpired: vi.fn().mockReturnValue(false),
 }))
 
-const fetchSpy = vi.spyOn(globalThis, 'fetch')
+// NOTE: tests/setup.ts starts an MSW server with onUnhandledRequest:'error', which
+// installs a global fetch interceptor. `vi.spyOn(globalThis, 'fetch')` loses to that
+// interceptor (MSW wraps fetch beneath the spy), so the route's calls would be reported
+// as 0 and any thrown MSW "unhandled request" error would mis-classify as revert-failed.
+// `vi.stubGlobal('fetch', …)` replaces the binding MSW reads, so the route's fetch is
+// the mock. Re-stubbed every test (beforeEach) and torn down via vi.unstubAllGlobals.
+const fetchSpy = vi.fn<typeof fetch>()
 
 // Build a JSON-RPC Response envelope.
 function rpcResponse(result: unknown): Response {
@@ -59,7 +65,12 @@ async function callPost() {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.stubGlobal('fetch', fetchSpy)
   artifactHolder.snapshotId = '0x1'
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
 describe('POST /api/cornerstone/buildbear-reset — scoped reason set', () => {
