@@ -38,6 +38,21 @@ d2-π (the labs umbrella — this site)
 
 If everything else fails, this must work: an agent or a human can land on the lab site, navigate via top-nav `Apps → Abrigo`, see the current state of every Abrigo (Y, M, X) iteration, and either interact with a deployed Abrigo instrument or read the structural evidence that justifies it. The same affordance generalizes to any future app the lab incubates.
 
+## Current Milestone: v3.0 — Judge-Runnable Live BuildBear Demo
+
+**Goal:** Turn Phase 9's deferred cornerstone live-tx integration into a real, judge-runnable demo — a one-click, pre-funded, genuine on-chain mint against a shared BuildBear sandbox fork that the frontend reflects live, decoupled from the outaged/operator-only Somnia Agent-1 leg, with a reset guard for repeated/concurrent runs and the backend provisioning variant that makes the in-demo mint work end-to-end.
+
+**Why now:** v2.0 shipped the cornerstone live path BUILT-and-wired but with the live on-chain RUN ⊘ DEFERRED (external Somnia validator-callback outage) and the actual fork write stubbed (`runWorkflowLive` = mocked viem; `void writeContractAsync`). For the hackathon deliverable, judges clone, run locally, and must *see real on-chain interaction* — not a replay-only snapshot.
+
+**Target features:**
+- Decouple the judge-interactive path so it runs the **BuildBear fork-mint leg only** (Somnia stays an operator-only "full two-chain" mode, immune to the Somnia outage).
+- Un-defer the live run: replace mocked viem / `void writeContractAsync` with a **real `resolveFromMandate` write** against the fork.
+- **One-click, pre-funded** execution — a funded demo signer (or BuildBear auto-fund) signs; no judge secrets, no wallet funding friction.
+- Frontend reflects the **real on-chain result** (tx hash, OnChainEvidencePanel, LiveTxStateRow, position state) from the fork.
+- **Shared-fork reset guard** — handle the `numberOfLegs == 0` freshness gate so repeated/concurrent judge runs don't brick the demo.
+- **Backend BuildBear provisioning variant** (`--no-mint` / fresh-executor) in `packages/backend` so the in-demo mint works end-to-end (closes the v2.0 cross-repo gap).
+- Carry forward the **zero-secret judge runbook**: green `clone → build`, corrected `.env.example` + README test lane.
+
 ## Requirements
 
 ### Validated
@@ -119,6 +134,7 @@ The user explicitly questions whether traditional web UI is the right primary su
 - **Design discipline**: Apply `impeccable` anti-pattern rules — no Inter-for-everything, no purple-to-blue gradients, no card-nested-in-card, no gray-on-color text
 - **Epistemic honesty**: Failures (FAIL / PARKED iterations) must render with the same visual weight as passes; no marketing-style success-selection
 - **Deadline awareness**: From user memory — Proof of Ship MVP ~May 2 (already past), Uniswap Hook Incubator Cohort 9 Hookathon ~June 2 (~3 weeks out) — first milestone must align with hackathon demo readiness
+- **CI/PR governance (NON-NEGOTIABLE, user directive 2026-06-08)**: Every command that is *claimed to work / be on-rhythm* MUST be a step in the GitHub Actions CI workflow (`.github/workflows/ci.yml`). All code reaches the repo **only via Pull Requests**, and every PR must run that CI workflow (merge gated on green). Corollary (anti-fishing): any command that genuinely CANNOT run in CI — e.g. the live BuildBear-fork spike/provisioning (secret-gated, 3-day TTL) — must NOT be claimed as on-rhythm; it is explicitly operator-manual with recorded transcripts. CI/`ci.yml` changes themselves land via PR and take the DevOps Automator as Reviewer 2 in the two-step review.
 
 ## Key Decisions
 
@@ -136,6 +152,10 @@ The user explicitly questions whether traditional web UI is the right primary su
 | Apps dropdown shows external link affordance to @d2pfinabrigo Twitter for Abrigo until that app has its own destination | The Abrigo app has no design yet beyond Twitter; the umbrella must still offer a working outbound link as a placeholder, NOT a dead anchor. | — Pending |
 | Render passes and failures with equal weight | Mirrors the lab's anti-fishing discipline — selecting only passes would betray the science | — Pending |
 | Spanish + English at launch, mobile-first, WCAG 2.2 AA | Frontier-market wage earners are the lab's stated beneficiaries; designing English-desktop-first would exclude them | — Pending |
+| **v3.0:** Judge-interactive on-chain path is **BuildBear-only**; Somnia Agent-1 stays operator-only | Decoupling makes the demo immune to the external Somnia validator-callback outage that ⊘-deferred the v2.0 live run; the demo must not be hostage to infra you don't control | — Pending |
+| **v3.0:** The judge's on-chain action is **one-click pre-funded**, not bring-your-own-funded-wallet | A funded demo signer / BuildBear auto-fund removes wallet-funding friction and keeps the demo zero-secret and seamless for judges | — Pending |
+| **v3.0:** **Shared** BuildBear fork with a **reset guard**, not per-judge provisioning | Hackathon scale; one fork provisioned fresh before judging + a tolerant/reset freshness gate is simpler than per-judge orchestration and survives repeated/concurrent runs | — Pending |
+| **v3.0:** Backend BuildBear provisioning variant (`--no-mint`/fresh-executor) is **in scope** | The in-demo Agent-2 mint can't work end-to-end without it; a self-contained deliverable owns the backend piece rather than depending on an external artifact | — Pending |
 
 ---
-*Last updated: 2026-05-11 after initialization*
+*Last updated: 2026-06-08 after starting milestone v3.0 (Judge-Runnable Live BuildBear Demo)*

@@ -1,23 +1,23 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: milestone
-status: completed
-stopped_at: Completed 09-05-PLAN.md — Phase 9 all 5 plans done
-last_updated: "2026-06-08T17:38:09.961Z"
+milestone: v3.0
+milestone_name: Phases — Judge-Runnable Live BuildBear Demo
+status: planning
+stopped_at: Phase 10 context gathered
+last_updated: "2026-06-09T01:12:08.328Z"
+last_activity: "2026-06-08 — Milestone v3.0 roadmap created + REVISED to v2 (26/26 requirements mapped, 4 phases). Passed the mandatory two-reviewer pass: Reality Checker (READY) + Solidity Smart Contract Engineer (READY after 3 final MAJORs folded — guard in shared `_resolveAndMintAtStrike` sink, spike on fresh stack, poisoned-artifact retirement)."
 progress:
-  total_phases: 12
+  total_phases: 16
   completed_phases: 10
   total_plans: 57
   completed_plans: 55
-  percent: 96
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
-**Last updated:** 2026-06-06
-**Session type:** Plan execution (08-02 complete — cornerstone RSC shell + PromptBox + RunTranscript + e2e + post-checkpoint live-verify fix)
-**Stopped at:** Completed 09-05-PLAN.md — Phase 9 all 5 plans done
+**Last updated:** 2026-06-08
+**Session type:** Roadmap creation (v3.0 phases 10–13 derived and written)
+**Stopped at:** Phase 10 context gathered
 
 ---
 
@@ -25,29 +25,26 @@ progress:
 
 **Core value:** Make the lab's research outputs and live hedging instruments accessible — to humans browsing, to participants transacting, and to AI agents consuming — through a single coherent surface that treats agent-first interaction as a primary design constraint.
 
-**Milestone:** v1 — Uniswap Hook Incubator Cohort 9 Hookathon demo (~June 2, 2026)
+**Milestone:** v3.0 — Judge-Runnable Live BuildBear Demo
 
-**Hard deadline:** ~June 2, 2026 (~3 weeks from initialization). Hackathon demo critical path must ship by end of Phase 2.
+**Goal:** Turn Phase 9's deferred cornerstone live-tx integration into a real, judge-runnable demo — a one-click, pre-funded, genuine on-chain mint against a shared BuildBear sandbox fork that the frontend reflects live, decoupled from the outaged/operator-only Somnia Agent-1 leg, with a reset guard for repeated/concurrent runs and the backend provisioning variant that makes the in-demo mint work end-to-end.
 
 ---
 
 ## Current Position
 
-**Active phase:** 05.1 — abrigo-somnia convex instrument frontend surface (cCOP/USD long-gamma, read-first simulated)
-**Active plan:** 05.1-03 (Wave 3: simulated-branch page layout, full SIMULADO surface)
-**Status:** v2.0 milestone complete
+**Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — not started
+**Active plan:** —
+**Status:** Roadmap complete (v2, two-reviewer-cleared), ready to plan Phase 10
+**Last activity:** 2026-06-08 — Milestone v3.0 roadmap created + REVISED to v2 (26/26 requirements mapped, 4 phases). Passed the mandatory two-reviewer pass: Reality Checker (READY) + Solidity Smart Contract Engineer (READY after 3 final MAJORs folded — guard in shared `_resolveAndMintAtStrike` sink, spike on fresh stack, poisoned-artifact retirement).
 
-**Progress:**
-[██████████] 96%
-[██████████] 100% (8/8 plans complete for Phase 1)
-[██████████] Phase 1: Foundation and Scaffold — COMPLETE
-[██████████] Phase 2: Research Lab Presence and Iteration Catalog — plans 8/8 complete
-[██████████] Phase 3: Data Layer and On-Chain Dashboard — COMPLETE
-[██████████] Phase 4: Agent Surface (MCP) — COMPLETE (04-06 verified)
-[██████████] Phase 5: Read-First Wallet and DeFi Surface — COMPLETE (4/4 plans)
-[██████    ] Phase 5.1: Abrigo Somnia Convex Instrument Surface — 3/5 plans (05.1-00, 05.1-01, 05.1-02 complete; 05.1-03 next)
+**v3.0 phase structure:**
+- Phase 10: Backend Provisioning Variant (PROV-01–04) — critical-path blocker; parallel with Phase 11
+- Phase 11: Frontend Server Routes (MINT-01–03) — parallel with Phase 10; converges at Phase 12
+- Phase 12: Live Path Integration (MINT-04, MINT-05, HONEST-01–03) — converges Phase 10 + 11
+- Phase 13: Evidence Polish and Judge Runbook (EVID-01–05, HONEST-04–05, OPS-01–04)
 
-Overall: 4/5 phases complete (Phase 5.1 in progress)
+> v2.0 shipped: 12 phases, 57 plans (live on-chain RUN ⊘ deferred). See MILESTONES.md.
 
 ---
 
@@ -115,8 +112,21 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 - Phase 03.1 (Research Reading Surface) inserted after Phase 3, before Phase 4 (2026-05-29). Depth pass on `/research` (LAB-03): paper-grade math reading surface, build-time KaTeX, track filter, arXiv/PDF paper-bridge. Canonical spec: `docs/superpowers/specs/2026-05-29-research-reading-surface-design.md`. Citations deferred to v2.
 - Phase 05.1 (abrigo-somnia convex instrument frontend surface — cCOP/USD long-gamma, read-first simulated) inserted after Phase 5 (2026-06-02, URGENT). Module 1 extending the Phase-5 (defi) instrument-detail route: schematic convex payoff + backend-correct cash-flow waterfall + Panoptic fork-fixture params, three-tier provenance (fork-fixture / spec / schematic), SIMULADO badge, read-only wallet, no transact. Backend (abrigo-somnia) is fork-only/locked. Canonical spec: `docs/superpowers/specs/2026-06-02-ccop-usd-long-gamma-instrument-frontend-design.md` (passed two-step review).
 - Phase 9 (Cornerstone live-tx integration — Module 5) added 2026-06-07. Backend advanced since Jun 6 (Phases 14/15/16 done; `MacroHedgeExecutor` now real + BuildBear-fork-deployed). Swaps the Phase-8 cornerstone MOCK producer for a REAL on-chain producer behind the existing `workflow-store`/`WorkflowEvent` seam: live `resolveFromMandate(mandate,0,1e6)` (economicTheory=`0x…06`) on the BuildBear Polygon fork (chainId 31337), gated by a freshness check (`pool.numberOfLegs(executor)==0`), with the existing `fromMockEvent` path as honest fallback. User decisions (2026-06-07): integration depth = live tx submission via re-provision-per-run; surfaces = real mint tx hash+strike + ExecutorDecided rationale fields + STATIC cost placeholder (cost ledger not deployed). Canonical spec: `docs/superpowers/specs/2026-06-07-module5-cornerstone-live-tx-design.md` (v2; 2-way review complete — Reality Checker + Solidity Smart Contract Engineer both NEEDS WORK on v1 → all BLOCKERs/MAJORs resolved in v2: B1 collateral single-shot revert → freshness gate + re-provision runbook §4b; B2 signer/auth red herring corrected; B3 cost ledger → static placeholder; pinned demo constants; BalanceDelta sign-extend decoder). Cross-repo non-blocking dep: backend `--no-mint`/fresh-executor provisioning variant.
+- **Milestone v3.0 (Judge-Runnable Live BuildBear Demo) started 2026-06-08.** Phases 10–13 derived from 23 requirements (PROV/MINT/EVID/HONEST/OPS). Phases 10+11 run in parallel; Phase 12 is the integration convergence point; Phase 13 is polish + runbook. Research confidence: HIGH across all four areas (stack/features/architecture/pitfalls).
 
-### Key Decisions Made
+### v3.0 Key Architectural Decisions
+
+| Decision | Rationale | Constraint |
+|----------|-----------|------------|
+| Judge path is BuildBear-only; Somnia stays operator-only | External Somnia validator-callback outage; demo must not be hostage to infra we don't control | `handleLiveConfirm()` hard-branches on `resolvedMode` BEFORE any agent1 reference |
+| Server-side signing (`buildbear-sign` route holds `DEMO_SIGNER_PK`) | No wallet friction for judges; mirrors existing `agent1` route pattern with `SOMNIA_OPERATOR_PK`; key never in client bundle | `DEMO_SIGNER_PK` is `process.env` only; zero `NEXT_PUBLIC_` prefix; `runtime = 'nodejs'` |
+| Shared fork with operator reset guard (not per-judge provisioning) | Hackathon scale; one fork provisioned fresh before judging + tolerant freshness gate is simpler than per-judge orchestration | `evm_revert` followed immediately by `evm_snapshot` (snapshot is one-use); `buildbear-reset` route must re-snapshot after every revert |
+| `--no-mint` provisioning variant writes artifact directly to frontend path | Eliminates the manual copy step that causes artifact drift; `git diff` after any provision run must show a change to the frontend artifact | `provision-buildbear-demo.sh --no-mint` outputs directly to `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` |
+| `RunState: 'failed'` is load-bearing, not polish | Silent fallback to replay is an anti-fishing violation per PROJECT.md epistemic discipline; error boundaries must NOT render replay mode as fallback | Add `{ status: 'failed', reason: string }` to `RunState` union in `workflow-store.ts` in the same task that un-voids `writeContractAsync` |
+| Somnia decoupling cut is Phase 12's FIRST task | The v2.0 outage happened because the live path called agent1; un-voiding `writeContractAsync` without first cutting that dependency reproduces the failure | Verify via grep before any store-wiring work in Phase 12 |
+| EVID+HONEST polish and OPS runbook co-located in Phase 13 | All are single-field wires or string updates with no external dependencies beyond Phase 12 being complete; research confirms low-risk co-location | Phase 13 is intentionally the largest phase by requirement count (11) but lowest by implementation risk |
+
+### Key Decisions Made (v1.0/v2.0 — preserved)
 
 | Decision | Rationale | Phase Impact |
 |----------|-----------|--------------|
@@ -201,10 +211,16 @@ Overall: 4/5 phases complete (Phase 5.1 in progress)
 ### Critical Path Summary
 
 ```
-Phase 1 (Foundation) → Phase 2 (Demo path) → [HACKATHON DEMO CUT]
-                                            → Phase 3 (Data Layer)
-                                                → Phase 4 (Agent MCP)  [parallel]
-                                                → Phase 5 (DeFi)       [parallel]
+v3.0 Critical Path:
+
+Phase 10 (backend --no-mint variant)   Phase 11 (frontend server routes)
+         │                                        │
+         └──────────────────┬────────────────────┘
+                            │
+                    Phase 12 (live path integration)
+                    [Somnia decoupling FIRST]
+                            │
+                    Phase 13 (evidence polish + runbook)
 ```
 
 ### Technical Context
@@ -214,36 +230,27 @@ Phase 1 (Foundation) → Phase 2 (Demo path) → [HACKATHON DEMO CUT]
 - **Added (Plan 02-01):** nuqs@2.8.9, IBM Plex Sans + IBM Plex Mono (next/font/google)
 - **Deployment target:** Vercel (preview-per-PR, Vercel KV for caching)
 - **i18n languages:** `es-CO` (primary, Colombian Spanish) and `en` (secondary)
-- **Content source:** Iteration MDX from `../abrigo/scratch/` and `../abrigo/docs/` synced to `frontend/content/iterations/` by CI
-- **BFF caching:** Vercel KV (chain reads 30s TTL, HuggingFace 1h TTL, GitHub meta 6h TTL)
+- **v3.0 new env vars (server-only):** `DEMO_SIGNER_PK` (never `NEXT_PUBLIC_`); `BUILDBEAR_SNAPSHOT_ID` stored in artifact JSON field, not a standalone env var
 
-### Known Constraints to Track
+### v3.0 Constraints to Track
 
-- `impeccable detect --fail-on-error` must run in CI on every PR (FOUND-07)
-- Lighthouse CI LCP < 2.5s on Moto G Power 3G profile (FOUND-08)
-- axe-core WCAG 2.2 AA CI enforcement (FOUND-09)
-- No Inter / Geist / Mona Sans / Plus Jakarta as typefaces — `impeccable` anti-pattern blocklist
-- No purple-to-blue gradients — `impeccable` anti-pattern
-- No card-nested-in-card — `impeccable` anti-pattern
-- `(lab)` route group must never hydrate wallet state
-- Wallet state is client-only — never SSR
-- Chat shell (CHAT-*) is v2 scope — not in this milestone
-- Transact path (TXN-*) is v2 scope — not in this milestone
-
-### User Setup Items (Non-blocking Deferred)
-
-- **Vercel project:** Create Vercel project, link to GitHub repo, run `vercel link` to create `.vercel/project.json`
-- **GitHub repo:** Push scaffold commits to `wvs-finance/frontend` (or chosen repo name)
+- `DEMO_SIGNER_PK` must NEVER appear in `NEXT_PUBLIC_*` or in any committed file
+- `handleLiveConfirm()` Somnia branch must be unreachable from the BuildBear path — verify by grep before Phase 12 `writeContractAsync` work
+- `void writeContractAsync` stub must be absent after Phase 12
+- `evm_revert` consumes the snapshot — `buildbear-reset` must immediately call `evm_snapshot` after every revert
+- `quoteMargin` must only be called after `PositionMinted` log is confirmed (already enforced in `runWorkflowLive` step i — do not reorder)
+- `buildbear-deployments.json` must be the direct output of `--no-mint` provisioning (no manual copy step)
+- `ForkVerifiedPill` must use neutral styling — never green / `status-pass` colors
+- Phase 12 minimum: confirm `pnpm build` and `forge test --no-match-path '*fork*'` are green before merging
 
 ### Blockers
 
-None currently.
+None currently. Phase 10 and Phase 11 can begin immediately in parallel.
 
 ### Open Questions
 
-- What ABI JSON files are currently available in `../abrigo/` Foundry artifacts? (Needed for FOUND-06 in Phase 1 / wagmi CLI codegen)
-- Are `../abrigo/scratch/*.md` and `../abrigo/docs/*.md` files ready to sync? (Needed for LAB-03, LAB-04, ITER-05, ITER-06 in Phase 2)
-- What is the deployed Celo mainnet contract address for the Abrigo instrument? (Needed for DASH-* in Phase 3 and DEFI-* in Phase 5)
+- BuildBear snapshot ID persistence across sandbox restarts: not documented. Implement probe-before-use in `buildbear-reset` route; return `{ ok: false, reason: 'snapshot-stale' }` if probe fails. Confirm empirically on first `--no-mint` provision run.
+- Exact judging window date: determines the "provision no earlier than T-24h" runbook constraint. Add to OPS-04 plan when known.
 
 ---
 
@@ -251,26 +258,34 @@ None currently.
 
 ### How to Resume
 
-1. Read `/home/jmsbpp/apps/d2p/frontend/.planning/ROADMAP.md` — current phase structure and success criteria
+1. Read `/home/jmsbpp/apps/d2p/d2p-monorepo/.planning/ROADMAP.md` — v3.0 phases 10–13 with full success criteria
 2. Read this file — current position and accumulated context
-3. Read `/home/jmsbpp/apps/d2p/frontend/.planning/REQUIREMENTS.md` — traceability table shows which requirements belong to the active phase
-4. Run phase verifier (`gsd-verifier`) — Phase 2 plan execution complete
+3. Read `/home/jmsbpp/apps/d2p/d2p-monorepo/.planning/REQUIREMENTS.md` — traceability table shows Phase 10–13 mappings
+4. Run `/gsd:plan-phase 10` — backend provisioning variant (critical path blocker)
 
-### Phase 2 Planning Order
+### v3.0 Execution Order
 
 ```
-Plan 02-01: Phase 2 foundation (tokens, fonts, Velite research, nuqs, i18n, Wave 0 stubs) — COMPLETE
-Plan 02-02: Homepage content (real mission/explainer copy, Velite-derived counts) — COMPLETE
-Plan 02-03: Iteration catalog page (/apps/abrigo/iterations, nuqs filter) — COMPLETE (via 02-05)
-Plan 02-04: Iteration detail page (evidence chain, JSON-LD) — COMPLETE
-Plan 02-05: Iteration MDX seed files + catalog page (pair-d/v1 PASS, fx-vol/v1 FAIL) — COMPLETE
-Plan 02-06: Team page (/team, lib/team/contributors.ts) — COMPLETE
-Plan 02-07: Publications + Team pages (/research, /team, locale coverage) — COMPLETE
-Plan 02-08: Content sync workflow (LAB-04, repository_dispatch trigger) — COMPLETE
+Phase 10 (packages/backend): --no-mint variant
+  → Plan 10-01: ProvisionBuildBearDemo.s.sol noMint() entrypoint + vm.envOr("SKIP_MINT", false)
+  → Plan 10-02: provision-buildbear-demo.sh --no-mint + evm_snapshot + direct frontend artifact output
+               + artifact-loader.ts mintTxHash optional
 
-All 8 Phase 2 plans complete. Next step: phase verifier (goal-backward audit).
+Phase 11 (packages/frontend): server routes + mode decoupling  [parallel with Phase 10]
+  → Plan 11-01: /api/cornerstone/buildbear-sign + /api/cornerstone/buildbear-reset (Node runtime, server-only key)
+  → Plan 11-02: mode.ts 'buildbear' variant + handleLiveConfirm() decoupling cut in CornerstoneClientShell
+
+Phase 12 (packages/frontend): live path integration  [requires Phase 10 artifact + Phase 11 routes]
+  → Plan 12-01: Somnia grep verification FIRST → handleBuildBearConfirm() → un-void writeContractAsync
+               → runMountProbe reset-guard → RunState: 'failed' + RunState: 'fork-used'
+  → Plan 12-02: e2e integration test (live mint end-to-end + honesty greps) + Evidence Collector gate
+
+Phase 13 (packages/frontend): evidence + runbook  [requires Phase 12]
+  → Plan 13-01: EVID-* evidence surfaces (tx hash copy, explorer link, block number, positionId, margin delta)
+               + HONEST-04/05 disclosures + ForkVerifiedPill relabeling
+  → Plan 13-02: OPS-* judge runbook (.env.example corrections, README test lane, reset procedure docs)
 ```
 
 ---
 *State initialized: 2026-05-11 after roadmap creation*
-*Plan 01-01 completed: 2026-05-11*
+*v3.0 state written: 2026-06-08 after milestone v3.0 roadmap creation (phases 10–13)*

@@ -1,894 +1,162 @@
 # Pitfalls Research
 
-**Domain:** Agent-first DeFi research-lab frontend (d2p Finance / DS2P Labs)
-**Researched:** 2026-05-11
-**Confidence:** HIGH (impeccable rules confirmed against official source; DeFi/wagmi pitfalls confirmed via official docs and known issues; agent/MCP pitfalls confirmed via Block Engineering, MCP spec, and community; frontier-market pitfalls confirmed via Web Vitals data; Colombia network data from Opensignal Jan 2025)
+**Domain:** One-click pre-funded live on-chain demo on a shared, TTL-limited BuildBear fork
+**Milestone:** v3.0 — Judge-Runnable Live BuildBear Demo
+**Researched:** 2026-06-08
+**Confidence:** HIGH (stack-specific; grounded in the actual codebase, not generic advice)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: AI Slop — Inter Everywhere
+### Pitfall 1: Shared Fork State Corruption — `numberOfLegs == 0` Freshness Gate Fails on Repeated/Concurrent Runs
 
 **What goes wrong:**
-The default font stack resolves to Inter (or Roboto/Geist/Plus Jakarta Sans/Space Grotesk) for every typographic role — display, body, UI, and code — producing a site that is visually indistinguishable from every other AI-generated SaaS page built in 2024–2026. The impeccable `overused-font` and `single-font-for-everything` rules fire simultaneously.
+`resolveFromMandate` on `MacroHedgeExecutor` gates execution on the pool having `numberOfLegs == 0` (the freshness invariant — the executor only enters a fresh pool slot). On the shared BuildBear fork, the FIRST judge run mints a position and advances `numberOfLegs` to 1. Every subsequent judge run — whether from a second judge tab, a second machine, or a retry — calls `resolveFromMandate` against a pool that no longer satisfies the gate. The tx reverts on-chain. The UI receives `receipt.status === 'reverted'` and either surfaces a cryptic error or, worse, silently falls back to mock mode (see Pitfall 4). The demo is effectively bricked for all judges after the first.
 
 **Why it happens:**
-Scaffolding tools (create-next-app, v0, bolt) hardcode `font-family: 'Inter', sans-serif` in globals.css. The developer never revisits it.
+The shared-fork model trades per-judge provisioning complexity for a single authoritative fork, but that fork is mutable. The executor's freshness gate is deterministic — it was designed for a fresh fork per run. With a shared fork, state from run N becomes the starting condition for run N+1. Teams often discover this only when a second person runs the demo live during judging.
 
 **How to avoid:**
-In the design system phase, select a distinctive display typeface (not Inter, Fraunces, Recoleta, Geist, Mona Sans, Instrument Sans, or Plus Jakarta Sans — all on the impeccable blocklist) paired with a refined body font. Run `npx impeccable detect` before any design review to enforce mechanically.
-
-Grep signal: `grep -r "Inter\|Geist\|Mona Sans\|Instrument Sans\|Plus Jakarta" src/ --include="*.css" --include="*.tsx"` returning hits in globals.css or layout.tsx is a fail.
+Implement the reset guard as a backend provisioning step, NOT a frontend check. The reset guard must re-provision a fresh executor state before each judge session: either (a) deploy a fresh `MacroHedgeExecutor` pointing at the same pool, storing its address in a refreshed `buildbear-deployments.json` artifact, or (b) call an admin reset function on the existing executor if one exists, or (c) provision a fresh BuildBear fork entirely (re-running `provision-buildbear-demo.sh`) and re-mirror the artifact. Option (c) is the only one that cannot be silently stale. The frontend's `isExpired` check in `artifact-loader.ts` is a readiness signal, not a reset mechanism — do not conflate the two. The reset guard belongs in `packages/backend` as part of the `--no-mint`/fresh-executor provisioning variant.
 
 **Warning signs:**
-`font-family: 'Inter'` in `globals.css`; any scaffold file referencing `next/font/google` with `Inter` as the first import.
+- Second test run produces `receipt.status === 'reverted'` after the first succeeds.
+- The `publicClient.readContract({ functionName: 'numberOfLegs', ... })` returns `1n` (or higher) at the start of a new judge session.
+- The backend provisioning script has no idempotent reset step — a `provision.sh` that only deploys on a fresh fork but does not handle re-runs.
 
 **Phase to address:**
-Design System phase (before any components are built).
+Backend provisioning phase (the `--no-mint`/fresh-executor variant in `packages/backend`). Must be designed and tested before the frontend live-run phase. The frontend should read pool freshness BEFORE emitting `confirm` and gate the one-click button behind a live `numberOfLegs === 0n` check, surfacing a clear "Demo is being reset — please wait" message rather than a revert.
 
 ---
 
-### Pitfall 2: AI Slop — Purple-to-Blue Gradient Everything
+### Pitfall 2: Pre-Funded Private Key Leaking into the Client Bundle or the Git Repository
 
 **What goes wrong:**
-The primary background, hero, button, and text-gradient all use `linear-gradient(135deg, #7c3aed, #2563eb)` or equivalent HSL sweep through violet/indigo/blue. Impeccable rule `ai-color-palette` fires. The research-lab context makes this worse: it signals "generic crypto startup," which directly contradicts the structural-econometrics identity.
+The demo signer key (the pre-funded wallet that pays for `resolveFromMandate` on the fork) ends up in one of three places it must never be: (a) a `NEXT_PUBLIC_` env var — which Vercel/Next.js inlines into the client-side JavaScript bundle, making it trivially extractable from the browser devtools network tab; (b) a `.env.local` or `.env` file that gets committed to the monorepo (`.planning/PROJECT.md` already flags missing `NEXT_PUBLIC_*` env vars as a Vercel blocker — the team is actively touching env config); or (c) hardcoded in `buildbear-deployments.json` or any other mirrored artifact that is committed to the repo.
 
 **Why it happens:**
-LLM code generators default to this palette when asked for a "modern" or "crypto" look. It has been the dominant AI-slop palette since 2023.
+Under deadline pressure, the fastest path to "pre-funded one-click" is to put the demo private key in an env var and call `privateKeyToAccount` in the browser. Teams reason that it is "just a testnet key with no real funds." On a BuildBear fork, the fork's funded accounts are MATIC-clones — no real value — but the pattern itself is toxic: (1) it normalizes client-side key handling in a codebase the lab uses as a reference for real protocol interaction, (2) the key appears in browser memory and is extractable by any browser extension, and (3) if the pattern is copy-pasted to a real-funds context it causes an immediate critical vulnerability.
 
 **How to avoid:**
-In the design-os color step, commit to a palette anchored in a non-violet hue that carries meaning for the lab (earthy Colombian hues, research-neutral warm grays, or a deliberately austere black-and-one-accent scheme). Lock the palette as CSS custom properties in `design-tokens.css` before writing any component. Run `npx impeccable detect` on every PR.
+The demo signer MUST live exclusively in `packages/backend` (the server-side provisioning/execution layer). The frontend calls a backend API endpoint (e.g., `POST /api/cornerstone/run-live`) that constructs the `writeContract` call server-side using a `privateKeyToAccount` wallet created from a `process.env.DEMO_SIGNER_KEY` (non-public env var, never prefixed `NEXT_PUBLIC_`). The backend returns the tx hash and receipt data; the frontend only displays results. The private key never touches the browser. Verify in `packages/frontend`: grep for `privateKeyToAccount`, `NEXT_PUBLIC_.*KEY`, and any import of `viem/accounts` in files under `app/` or `lib/apps/`.
 
 **Warning signs:**
-Any CSS containing `#7c3aed`, `#8b5cf6`, `violet`, `purple`, or a gradient sweeping hue from ~260–280° through ~220°.
+- Any env var containing `KEY`, `PRIVATE`, `SIGNER`, or `MNEMONIC` that is also prefixed `NEXT_PUBLIC_`.
+- `privateKeyToAccount` imported anywhere in the frontend package.
+- `buildbear-deployments.json` gains a `signerKey` or `funderKey` field.
+- The `.env.example` in the frontend package references a signer key (even with a placeholder value).
 
 **Phase to address:**
-Design System phase. Block in CI with `npx impeccable detect --fail-on-error`.
+Backend provisioning phase — the API endpoint design must specify exactly which env vars are server-only. The frontend `RunWorkflowLiveOptions.writeContract` seam (already typed in `workflow-engine.ts`) is the correct injection point: the frontend passes a `writeContract` closure that calls the backend API, never holding the key itself.
 
 ---
 
-### Pitfall 3: AI Slop — Cardocalypse (Nested Cards)
+### Pitfall 3: BuildBear 3-Day TTL Expiring Mid-Judging
 
 **What goes wrong:**
-An iteration detail page renders: outer page card > inner stat card > inner-inner badge card. Impeccable rule `nested-cards` fires. Visual noise makes the structural-evidence data (β estimates, p-values, confidence intervals) harder to read, not easier — the opposite of research-lab credibility.
+The `capturedAt` field in `buildbear-deployments.json` is currently `"2026-06-08T00:15:09.000Z"`. The `isExpired` function in `artifact-loader.ts` computes `capturedAt + 3 days`. If the fork expires during the judging window (e.g., judging starts June 10 and runs through June 11), any RPC call to `rpc.buildbear.io/colossal-groot-e8ea55ce` returns 404 or connection-refused. The frontend's `createBuildBearPublicClient(rpcUrl)` throws; `runWorkflowLive` catches the error and emits `{ kind: 'error' }`. Judges see a broken demo with no explanation.
 
 **Why it happens:**
-Component libraries (shadcn, radix) make `<Card>` trivially easy to reach for. Every sub-section gets wrapped without asking whether the card is doing work.
+Teams provision the fork during development (days before the event) and forget to re-provision within the judging window. BuildBear's 3-day TTL is short. The `isExpired` check exists in `artifact-loader.ts` but is a pure function — it is only useful if something actually calls it and acts on the result before attempting any RPC. If the UI skips the expiry check and goes straight to `runWorkflowLive`, the error surfaces mid-run, not pre-flight.
 
 **How to avoid:**
-Default to space and type hierarchy for grouping. Reach for a card border only when there is a true affordance reason (interactive, copyable, expandable). Establish a written rule in the design system: "A card that contains only text and is not interactive is probably wrong." The impeccable `wrapping-everything-in-cards` rule is the enforcement mechanism.
+(a) Re-provision the BuildBear fork within 24 hours of the judging window opening and update `buildbear-deployments.json`. Add this as an explicit step in the judge runbook. (b) Wire `isExpired(Date.now())` as a pre-flight check in the cornerstone page's `useEffect` or server component: if expired, render a `ForkExpiredBanner` with a clear explanation BEFORE the one-click button is enabled. Do not silently disable the button — label it "Fork expired — contact operator." (c) Set a calendar alert for `capturedAt + 2d 18h` to re-provision with a 6-hour buffer.
 
 **Warning signs:**
-Grep `<Card` inside another `<Card` in JSX. More than 2 levels of `border-radius` nesting in DevTools.
+- `capturedAt` in `buildbear-deployments.json` is more than 2 days before the scheduled judging date.
+- The `isExpired` function is imported nowhere outside its own module (meaning nothing calls it).
+- The judge runbook has no "re-provision fork" step.
 
 **Phase to address:**
-Design System phase (component library definition); re-enforce in Dashboard phase where data density is highest.
+Frontend live-run phase — add the pre-flight expiry check as part of the `live` mode boot sequence. Backend provisioning phase — add re-provisioning as a named step in the runbook with a deadline relative to the judging window.
 
 ---
 
-### Pitfall 4: AI Slop — Side-Tab Accent Border
+### Pitfall 4: Silent Fallback to Replay Masking a Broken Live Path (Anti-Fishing Violation)
 
 **What goes wrong:**
-A `border-left: 4px solid var(--accent)` (or equivalent thick colored side-border) appears on rounded cards throughout the iteration catalog, dashboard panels, or chat message bubbles. Impeccable identifies this as the single most recognizable tell of AI-generated UI.
+`parseMode` in `mode.ts` returns `DEFAULT_MODE` (`'replay'`) for any input that is not exactly `'live'` or `'mock'`. If a RPC failure, revert, or missing env var causes the live path to throw before emitting any store event, and the error boundary or catch block responds by restarting in `replay` mode without surfacing the failure, the judge sees a smooth animation and concludes the demo worked — but they witnessed a replay, not a real on-chain interaction. This is the anti-fishing violation described in `PROJECT.md`: the lab's epistemic discipline requires that failures render at equal weight to successes. A silent substitution is worse than a visible failure.
 
 **Why it happens:**
-It is the default "I want this card to feel important" move generated by every code-gen tool.
+React error boundaries catch thrown errors and render fallback UI. If the fallback UI is the `replay`-mode cornerstone (chosen because "at least the demo doesn't break"), the failure is completely invisible. Teams justify it as "graceful degradation" without realizing it constitutes presenting a mocked demo as a live one. The existing `mode.ts` governance comment says "never a silent substitution" — but that governs the `mock` label, not the error path.
 
 **How to avoid:**
-Never use `border-left` / `border-right` as a standalone accent on a rounded card. If a left-border semantic is needed (code blocks, blockquotes), make it a full-height inset stripe, not a card-level decoration. Enforce with `npx impeccable detect`.
+Any failure in `runWorkflowLive` must terminate the run in an explicit failed terminal state visible to the judge. The `workflow-store.ts` state machine should gain a `{ status: 'failed', reason: string }` terminal state (distinct from `idle`). The UI must render this state with a prominent, honest error message: "Live on-chain run failed: [reason]." The error message must NOT include a "Retry in demo mode" affordance that silently switches to replay. A separate, clearly labeled "Run in replay mode" button is acceptable — but switching modes must require an explicit judge action AND must change the UI's mode indicator. Verify: the `RunState` type in `workflow-store.ts` currently has no `failed` variant — this is a gap that must be filled before the live path is un-deferred.
 
 **Warning signs:**
-`border-left:` or `border-inline-start:` in card component styles.
+- `RunState` in `workflow-store.ts` has no `failed` status variant.
+- The error boundary wrapping the cornerstone page renders `<CornerstoneWorkflow mode="replay" />` as its fallback.
+- `runWorkflowLive` emits `{ kind: 'error' }` but no UI component handles that event shape and renders it visibly.
+- The mode indicator in the UI disappears or changes silently when an error occurs.
 
 **Phase to address:**
-Design System phase.
+Frontend live-run phase — must be addressed in the same task that un-defers `runWorkflowLive`. The `failed` terminal state is load-bearing for honest demo behavior. It is not optional polish.
 
 ---
 
-### Pitfall 5: AI Slop — Icon Tile Stacked Above Heading
+### Pitfall 5: Demo Signer Running Out of Gas/Funds Mid-Judging
 
 **What goes wrong:**
-Every feature section, iteration card, or "capabilities" block opens with a small rounded-square icon container above a heading, followed by a one-line description. Impeccable rule `icon-tile-stacked-above-heading` fires. The research lab looks like a SaaS product landing page, not a scientific institution.
+The pre-funded demo signer account on the BuildBear fork has a finite MATIC balance. Each `resolveFromMandate` call consumes gas. If the executor is reset (re-provisioned) between judge runs and the same signer account is re-used across multiple sessions without re-funding, by judge N the signer balance may be insufficient and the `writeContract` call fails with `insufficient funds for gas * price + value`. The failure looks identical to a smart contract revert from the UI's perspective.
 
 **Why it happens:**
-This is the universal AI feature-card template, reproduced identically by v0, bolt, and LLM code generation.
+BuildBear forks allow arbitrary account funding via the fork's `hardhat_setBalance` (or equivalent) RPC method, but this must be called explicitly. Teams provision once, fund once, and assume the balance lasts. On a shared fork with concurrent/repeated runs, gas consumption is additive across all runs.
 
 **How to avoid:**
-Inline icons with text. Lead with the content, not a visual decoration. Use tabular or list structures for iteration catalogs rather than feature-grid cards.
+(a) The backend provisioning script must include a step that checks the demo signer's balance AFTER deployment and top it up to a known-safe level (e.g., 10 MATIC). (b) The backend API endpoint that executes the live run should pre-flight check the signer balance before submitting the transaction: if `balance < estimated_gas_cost * 2`, call `hardhat_setBalance` on the fork RPC to re-fund before proceeding. BuildBear exposes this via its faucet API or standard Hardhat JSON-RPC methods on the fork. (c) The pre-flight check in the frontend (the `numberOfLegs` check described in Pitfall 1) should be extended to also verify signer balance via the backend health endpoint, not by exposing the signer to the frontend.
 
 **Warning signs:**
-JSX pattern `<div className="icon-container">...<Icon>...</div><h3>...</h3><p>...</p>` repeating in a grid.
+- The provisioning script has no `hardhat_setBalance` or faucet step for the demo signer.
+- The backend API has no pre-flight balance check.
+- After 3+ test runs, the demo starts failing with `writeContract` errors that are not revert-related.
 
 **Phase to address:**
-Design System phase; explicitly reviewed in Iteration Catalog component design.
+Backend provisioning phase — the signer funding step must be part of the `--no-mint`/fresh-executor provisioning variant. Also address in the backend API endpoint that executes the run.
 
 ---
 
-### Pitfall 6: AI Slop — Bounce/Elastic Easing
+### Pitfall 6: Backend Provisioning Artifact Drift — Committed Addresses Stale vs. Fork
 
 **What goes wrong:**
-Navigation transitions, modal entrances, toast notifications, or chart data-load animations use `cubic-bezier` with a rebound overshoot or CSS `spring()` easing. Impeccable rule `bounce-or-elastic-easing` fires. On low-end Android devices this causes jank; on any device it reads as dated.
+`buildbear-deployments.json` is committed to the frontend package at `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json`. This is the artifact-loader's static import (Turbopack-safe by design — `artifact-loader.ts` uses a static relative import to avoid the Phase-2/6 dynamic-require burn). When the backend re-provisions a fresh fork (as required by the reset guard in Pitfall 1), it deploys contracts at NEW addresses. If the backend re-provision script does not also update and commit `buildbear-deployments.json`, the frontend is pointing at addresses from the OLD fork — which may be expired or may be on a different fork entirely. Every `readContract` and `writeContract` call silently targets wrong addresses.
 
 **Why it happens:**
-Spring/bounce easing is the default in Framer Motion examples and AI-generated animation code.
+The backend provisioning script lives in `packages/backend` (or `abrigo-somnia/contracts/script/`); the artifact lives in `packages/frontend`. The sync step is a cross-package operation that is easy to forget under deadline pressure. The v2.0 known gap explicitly calls out this cross-repo dependency: "Backend cross-repo dep: `--no-mint`/fresh-executor BuildBear provisioning variant needed." The word "dep" implies the artifact sync is a manual step, which is exactly the failure mode.
 
 **How to avoid:**
-Restrict all motion to `ease-out` (deceleration) or `ease-in-out` for transitions. Document in the design system's motion section: "No easing with overshoot." Enforce with `npx impeccable detect` and a custom ESLint rule banning `spring` in Framer Motion configs.
+The backend provisioning script must output `buildbear-deployments.json` directly into `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` as its final step — not into a separate `out/` directory that someone must manually copy. Make the artifact path a required parameter of the provision script so the frontend path is the default output location. Add a CI check: `artifact-loader.ts` validates required fields at module load (fail fast is already implemented), but also add a build-time check that `capturedAt` is within the last 72 hours — if stale, the build fails with a clear message. This prevents silently deploying with a stale artifact to Vercel.
 
 **Warning signs:**
-`type: "spring"` in Framer Motion variants; `cubic-bezier` values where the third parameter exceeds 1.0.
+- The provision script writes to `contracts/script/out/buildbear-deployments.json` but a separate manual copy step is required to sync to `packages/frontend`.
+- `capturedAt` in the committed `buildbear-deployments.json` is from a different day than the last provision run.
+- The `executor` address in the artifact does not match the address emitted in the last provision script log.
+- `git diff` after a fresh provision run shows no changes to `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json`.
 
 **Phase to address:**
-Design System phase (motion section); checked again in Dashboard phase.
+Backend provisioning phase — the `--no-mint`/fresh-executor variant must specify the frontend artifact output path as a required output, not an optional copy. Also add the build-time staleness check in the frontend build pipeline phase.
 
 ---
 
-### Pitfall 7: AI Slop — Gray Text on Colored Backgrounds
+### Pitfall 7: Somnia Decoupling Accidentally Re-Coupling
 
 **What goes wrong:**
-Secondary labels (`text-gray-500` or equivalent) are placed on colored card backgrounds — iteration status chips, dashboard panels with a tinted background. Impeccable rule `gray-text-on-colored-background` fires. WCAG contrast also fails. On mobile under bright Colombian sunlight this becomes completely unreadable.
+The v3.0 design decision is explicit: the judge-interactive path is BuildBear-only; Somnia Agent-1 stays operator-only (`PROJECT.md` key decision table). But the existing `runWorkflowLive` in `workflow-engine.ts` calls the Agent-1 Somnia route as its upstream step (the `upstream: UpstreamResult` parameter comes from the `/api/cornerstone/agent1` server route, which calls `MacroHedgeStrategist` at `0xf0570C…7b1D` on Somnia chain 50312). If the frontend un-defers the live run without also creating a BuildBear-only code path that bypasses the Somnia Agent-1 call, the demo is still hostage to the external Somnia validator-callback outage. The deferred live run returns exactly because this call fails; un-deferring without decoupling just reproduces the same failure.
 
 **Why it happens:**
-Tailwind utility classes make it trivial to write `bg-indigo-50 text-gray-500` without checking the actual contrast ratio.
+The live path was built as a two-chain path (Somnia Agent-1 + BuildBear Agent-2 mint) because that is the full production architecture. The decoupling is a scoping decision that must be reflected in code, not just in planning documents. Under deadline pressure, a developer might attempt to "just un-stub the writeContractAsync call" without reading the upstream dependency, hitting the Somnia outage again, and concluding "still broken" without diagnosing that the Somnia call is the actual blocker.
 
 **How to avoid:**
-On colored backgrounds, derive text color from the background hue (darker saturation of the same hue) rather than reaching for gray. Automate with `npx impeccable detect` and an axe-core accessibility scan in CI (`@axe-core/react` in dev, `axe-playwright` in e2e).
+The v3.0 live path must use a RECORDED Agent-1 decision (the same source as the `replay` mode's frozen artifact) as the `upstream` input to `runWorkflowLive`, bypassing the live Somnia call entirely. `buildLiveMandate` already accepts a `SerializedMandate` — the serialized mandate from the recorded/replay artifact is a valid input. The `agent1-route-logic.ts` file and the `/api/cornerstone/agent1` route must remain untouched by v3.0; the new live path creates a separate code branch that loads the recorded mandate from the same artifact source as `replay` mode (or from a new server route that reads the mirrored artifact rather than calling Somnia live). Add an explicit assertion in the v3.0 live path: if the upstream source is the Somnia live route, throw a build-time or runtime error with message "v3.0 live path must not call Somnia Agent-1 directly — use recorded mandate."
 
 **Warning signs:**
-Any `text-gray-*` or `text-slate-*` class co-located with a non-white `bg-*` class on the same element.
+- The `POST /api/cornerstone/agent1` route is called anywhere in the `live` mode code path in v3.0.
+- `workflow-engine.ts` `runWorkflowLive` is called with an `upstream` value that was obtained from a live Somnia RPC call.
+- The v3.0 plan has no explicit task titled "decouple live path from Somnia Agent-1 upstream."
+- Testing the live path in an environment where Somnia is also outaged produces the same failure as v2.0.
 
 **Phase to address:**
-Design System phase; re-verified in Accessibility pass (any phase).
-
----
-
-### Pitfall 8: AI Slop — Pure Black/Untinted Background
-
-**What goes wrong:**
-The dark mode or any dark surface uses `#000000` as background. Impeccable rule `pure-black-background` fires. Looks harsh, unnatural, increases perceived jank from animation, and fails to carry brand identity.
-
-**Why it happens:**
-`bg-black` is a one-keystroke Tailwind default. Dark-mode implementations often start with `background: #000`.
-
-**How to avoid:**
-Tint the dark background toward your brand hue (e.g., `hsl(240, 8%, 6%)` for a cool-neutral lab feel). Enforce with `npx impeccable detect`. Document the dark surface token in design-tokens.
-
-**Warning signs:**
-`background: #000`, `bg-black`, or `background-color: rgb(0,0,0)` in any stylesheet.
-
-**Phase to address:**
-Design System phase.
-
----
-
-### Pitfall 9: AI Slop — Hero Metric Layout
-
-**What goes wrong:**
-The landing page or dashboard hero renders: big number, small label beneath, three supporting stats in a row, gradient accent behind. Impeccable rule `hero-metric-layout` fires. The pattern is visually overused to the point of conveying no trust — the opposite of what a research lab showing real β estimates needs.
-
-**Why it happens:**
-It is the default "data product looks impressive" layout every AI code-gen produces.
-
-**How to avoid:**
-Present econometric outputs in a table or structured evidence block with explicit source citations, not a vanity metric trio. Earn trust through specificity, not visual weight.
-
-**Warning signs:**
-A hero section containing three `<div>` stat blocks side-by-side with large font-size numbers and small supporting labels.
-
-**Phase to address:**
-Landing Page / Research Lab Presence phase.
-
----
-
-### Pitfall 10: AI Slop — Gradient Text on Headings
-
-**What goes wrong:**
-Key headings (lab name, instrument name, section titles) use `-webkit-background-clip: text` gradient fill. Impeccable rule `gradient-text` fires. It is a common AI tell, especially on metrics pages.
-
-**Why it happens:**
-Code-gen defaults to this for visual "pop" on headings.
-
-**How to avoid:**
-Use solid color or white for all headings. If emphasis is needed, achieve it through weight and size, not color tricks.
-
-**Warning signs:**
-`background-clip: text` or `-webkit-background-clip: text` anywhere in the stylesheet.
-
-**Phase to address:**
-Design System phase.
-
----
-
-### Pitfall 11: AI Slop — Identical Card Grids (SaaS Template Structure)
-
-**What goes wrong:**
-The iteration catalog or features section renders as a grid of same-sized cards each containing icon + heading + body text in identical proportion. Impeccable rule `identical-card-grids` fires. This also misrepresents the data: iterations have different statuses (PASS/FAIL/PARKED/IN-PROGRESS) with different amounts of evidence, which a uniform grid erases.
-
-**Why it happens:**
-It is the default homepage layout from every SaaS template. AI code-gen reproduces it for any "show multiple items" request.
-
-**How to avoid:**
-Design the iteration catalog as a data table or structured list where column density reflects iteration maturity. Let PASS iterations show more evidence detail; FAIL iterations show the failure reason. Vary the visual weight to match epistemic weight.
-
-**Warning signs:**
-`grid-template-columns: repeat(3, 1fr)` inside a component that maps over iterations.
-
-**Phase to address:**
-Iteration Catalog phase.
-
----
-
-### Pitfall 12: AI Slop Copy — "Empower Your X with Our Y"
-
-**What goes wrong:**
-Hero copy, section introductions, or meta descriptions use marketing-speak: "Empower your financial future," "Revolutionizing access to DeFi," "Seamlessly connect to yield opportunities." This directly contradicts the lab's structural-econometrics identity and anti-fishing discipline.
-
-**Why it happens:**
-LLMs default to SaaS marketing copy when generating text for web projects.
-
-**How to avoid:**
-Write all public-facing copy from the lab's epistemic register: state what was measured, on what data, with what result. Establish a copy style guide: first person plural ("We measured..."), specific claims with citations, no unqualified superlatives. Grep for "empower", "revolutionize", "seamless", "cutting-edge", "leverage your" as banned words in copy.
-
-**Warning signs:**
-Any copy containing: "empower," "revolutionize," "transform," "seamless," "unlock," "next-gen," "cutting-edge."
-
-**Phase to address:**
-Landing Page phase; copy reviewed before any page ships.
-
----
-
-### Pitfall 13: AI Slop — Oversized Italic Serif Hero
-
-**What goes wrong:**
-The landing page h1 uses a large italic serif (Fraunces, Recoleta, Newsreader, Playfair Display, Cormorant, Tiempos) as the primary hero heading. Impeccable added this as a dedicated detector rule in 2025 precisely because it became the dominant AI-generated "editorial feel" pattern — every AI-scaffolded marketing page for late-2025 and 2026 products now uses it. d2p Finance is not a magazine; it is a research lab. The editorial-serif hero signals the wrong genre.
-
-**Why it happens:**
-Design tools and LLMs reached for oversized italic serifs as a reaction to the Inter/sans-serif monoculture. By late 2025 this reaction had itself become a monoculture. Fraunces is on the impeccable overused-font blocklist specifically for this reason.
-
-**How to avoid:**
-Never use an italic serif at h1 display size as the primary heading. If a serif is chosen for the lab's typographic identity, it must be used at a controlled size with upright weight. The h1 for d2p Finance should communicate precision, not romance. Run `npx impeccable detect` to catch this mechanically.
-
-**Warning signs:**
-`font-family: 'Fraunces', 'Recoleta', 'Playfair Display', 'Cormorant'` on any `h1` element. `font-style: italic` combined with a serif font at `font-size` above 48px.
-
-**Phase to address:**
-Design System phase (typography section is the first design token to commit).
-
----
-
-### Pitfall 14: AI Slop — Hero Eyebrow Chip
-
-**What goes wrong:**
-A small uppercase letter-spaced label (often a pill chip with `border-radius: 9999px`) sits directly above the hero h1. Examples: "RESEARCH · FINANCE", "OPEN SOURCE", "BETA". Impeccable added a dedicated rule for this in 2025 because it became one of the most reliable fingerprints of AI-generated landing pages. For a research lab, it looks like marketing copy pretending to be a category label.
-
-**Why it happens:**
-Every AI page-scaffold template includes this element. It is the default way LLMs "add visual hierarchy" to a hero.
-
-**How to avoid:**
-No eyebrow chip above the hero h1. If a category context is needed above the heading, use typographic weight difference and color rather than a pill container. Run `npx impeccable detect` to catch this.
-
-**Warning signs:**
-Any `<span>` or `<div>` with `border-radius: 9999px` or `rounded-full` class positioned immediately above an `h1`. Letter-spacing set to `0.1em` or above on a small element in the hero section.
-
-**Phase to address:**
-Landing Page phase.
-
----
-
-### Pitfall 15: AI Slop — Dark Glow Halos
-
-**What goes wrong:**
-Dashboard panels, hero sections, or feature cards use large blurred radial gradients or `box-shadow` with high blur radius and bright accent color to simulate a "glow" behind elements. Impeccable detects this as `dark-glow`. It is a consistent AI-generated dark-mode aesthetic that reads as dated and consumes significant paint budget on mobile.
-
-**Why it happens:**
-Code-gen defaults to `box-shadow: 0 0 80px rgba(var(--accent), 0.4)` for "depth" on dark surfaces.
-
-**How to avoid:**
-No radial gradient glows behind elements. Depth on dark surfaces is achieved through subtle background tinting and typography contrast, not light sources. Enforce with `npx impeccable detect`.
-
-**Warning signs:**
-`box-shadow` values with blur radius above `40px` combined with colored (`rgba` with non-zero RGB values) shadow. Any `radial-gradient` with center opacity > 0.3 used purely for decoration.
-
-**Phase to address:**
-Design System phase.
-
----
-
-### Pitfall 16: Epistemic Honesty Failure — Only PASS Iterations Visible
-
-**What goes wrong:**
-The iteration catalog shows Pair D (PASS) prominently and buries or omits FX-vol-on-CPI-surprise (CLOSED FAIL) and Phase-A.0 (CLOSED EXIT_NON_REMITTANCE). Users and agents get a selection-biased view of the research. This is the canonical "cherry picking" pattern the lab's anti-fishing discipline explicitly prohibits.
-
-**Why it happens:**
-Design instinct is to show success; failure feels like weakness. Template-first thinking puts "featured results" as the hero with negative results in a footnote.
-
-**How to avoid:**
-Design the iteration status schema first. Every status (PASS, FAIL, PARKED, IN_PROGRESS) must have a designated visual treatment with equal information density. FAIL iterations must include the failure reason and date. Structure the data model so it is impossible to omit a status — the UI renders whatever the data contains, not a curated subset.
-
-Technical enforcement: The iteration list must be driven from the `abrigo-analytics` data source (HuggingFace dataset or static JSON) with no manual filtering step in the frontend.
-
-**Warning signs:**
-A `.filter(i => i.status === 'PASS')` anywhere in iteration-list data fetching. Any hardcoded iteration list in frontend code rather than derived from the canonical data source.
-
-**Phase to address:**
-Iteration Catalog phase (data model design before UI design).
-
----
-
-### Pitfall 17: Epistemic Honesty Failure — No Replication Path
-
-**What goes wrong:**
-The site presents β = +0.137, p ≈ 1.5×10⁻⁸ for Pair D with no link to the notebook, no hash of the data snapshot, and no path for an independent researcher to verify. The evidence summary is marketing rather than science.
-
-**Why it happens:**
-Linking to notebooks is deferred because "the notebook isn't polished." The data hash system is "phase 2."
-
-**How to avoid:**
-Every iteration detail page must include, at minimum: a link to the source notebook in `abrigo-analytics`, the HuggingFace dataset version or commit SHA used for that iteration, and the date the analysis was run. These are not decorative — they are the replication interface. Design the iteration data schema to include `notebook_url`, `dataset_ref`, `analysis_date` as required fields, not optional.
-
-**Warning signs:**
-Iteration detail page with β estimates but no `notebook_url` field in the data model. Any "coming soon" placeholder in the evidence section.
-
-**Phase to address:**
-Iteration Catalog phase (data schema) and Research Lab Presence phase (about/methods page).
-
----
-
-### Pitfall 18: Multi-Chain — Wrong Chain Context (State from "The Other Chain")
-
-**What goes wrong:**
-A user is connected to Polygon but the dashboard reads pool state from Celo (the configured default). Balances, TVL, and position data are silently wrong. The user makes a transaction decision based on stale data from the wrong chain.
-
-**Why it happens:**
-wagmi's global `chainId` comes from the "current" connector connection, but hooks that read contract state may be hardcoded to a specific chain or may not re-derive their viem client when the connected chain changes. In multi-chain setups, a single misconfigured `useReadContract` call without explicit `chainId` propagation reads from the wrong client.
-
-**How to avoid:**
-Every `useReadContract`, `useBalance`, `useContractRead` call must explicitly pass the `chainId` derived from the active connection or from a chain-selector UI state, not from a module-level constant. Centralize chain context in a single provider that exposes `activeChain` and pass it to all read hooks. Add a CI test that mounts the dashboard against a mock chain config for chain B and asserts no chain-A contract addresses appear in requests.
-
-**Warning signs:**
-Module-level `const CHAIN_ID = 42220` used directly in hook calls. Any `useReadContract` without an explicit `chainId` prop in a multi-chain file.
-
-**Phase to address:**
-Live Protocol Dashboard phase (design before implementation).
-
----
-
-### Pitfall 19: Multi-Chain — Wrong UX Hierarchy for Wallet States
-
-**What goes wrong:**
-The app conflates "wallet not connected," "wallet connected but wrong chain," and "wallet connected to unsupported chain" into a single "Connect Wallet" call-to-action. Users on mobile with Celo mainnet connected but browsing a Polygon-only feature get no clear feedback; they click "transact" and receive an opaque error.
-
-**Why it happens:**
-The three states have different remediation actions (connect vs switch chain vs chain not supported) but developers often render the same UI for all three.
-
-**How to avoid:**
-Define a state machine with explicit states: `DISCONNECTED → CONNECTED_WRONG_CHAIN → CONNECTED_UNSUPPORTED_CHAIN → CONNECTED_READY`. Each state has a distinct UI affordance: "Connect Wallet," "Switch to Celo," "Chain not supported" (no CTA). wagmi's `useAccount().chain` and `useChainId()` provide the signals; the state machine is the mapping.
-
-**Warning signs:**
-A single `!isConnected` conditional gate on a transact button with no check for `chainId === expectedChainId`.
-
-**Phase to address:**
-Wallet + Transact path phase.
-
----
-
-### Pitfall 20: Multi-Chain — ABI Drift
-
-**What goes wrong:**
-A contract is redeployed with a changed function signature (e.g., `settle(uint256, address)` becomes `settle(uint256, address, uint256)`). The frontend ABI is not updated. Calls silently encode with the wrong ABI, producing failed transactions whose errors are opaque to users.
-
-**Why it happens:**
-ABIs are copy-pasted into frontend at deploy time and forgotten. Contract-frontend coupling has no automated check.
-
-**How to avoid:**
-Source ABIs from the contract artifact output directory (`~/apps/d2p/abrigo/`) using a workspace path or a post-deploy script that copies the ABI to a `src/abis/` directory and commits it. Add a CI step: `diff <(jq .abi src/abis/Abrigo.json) <(jq .abi ../../abrigo/artifacts/...)` that fails the build on mismatch. Use wagmi CLI's `generate` command to generate typed hooks from ABIs, making drift a TypeScript compile error rather than a runtime failure.
-
-**Warning signs:**
-ABI JSON files in the frontend that have no automated sync with the contract artifacts repo. No wagmi CLI codegen in the project.
-
-**Phase to address:**
-Scaffold phase (establish the sync pipeline before writing any contract reads).
-
----
-
-### Pitfall 21: Multi-Chain — Stale Balances After Transaction
-
-**What goes wrong:**
-User submits a settlement transaction. The transaction confirms. Balance and position state still show pre-transaction values. User clicks again, submits a duplicate, pays double gas.
-
-**Why it happens:**
-wagmi + TanStack Query caches reads. After a write, the cache is not invalidated unless explicitly instructed. The default `staleTime` may not trigger a refetch within the user's session.
-
-**How to avoid:**
-After any `useWriteContract` or `useSendTransaction` success callback, call `queryClient.invalidateQueries({ queryKey: useBalance.queryKey(...) })` for all affected balance and state queries. For optimistic UX, apply an optimistic update immediately on mutation, then settle on success/error with `invalidateQueries`. Document in the wagmi integration layer: "Every write hook must declare which read queries it invalidates."
-
-**Warning signs:**
-`useWriteContract` calls with no corresponding `queryClient.invalidateQueries` in `onSuccess`. Any "refresh page to see updated balance" instruction in the UI copy.
-
-**Phase to address:**
-Live Protocol Dashboard phase and Wallet + Transact path phase.
-
----
-
-### Pitfall 22: Multi-Chain — Token Decimal / BigInt Formatting Mismatch
-
-**What goes wrong:**
-A token with 6 decimals (e.g., USDC) is formatted with `formatUnits(value, 18)`, displaying a value 10¹² times smaller than reality. Or raw bigint values are stored in state alongside display-formatted strings, and a downstream calculation uses the display string as a number, producing garbage.
-
-**Why it happens:**
-Developers assume 18 decimals (ETH standard). USDC is 6. Some tokens are 0. Decimals must be read from the contract at runtime, not hardcoded.
-
-**How to avoid:**
-Always fetch decimals via `useReadContract` with the ERC-20 `decimals()` function before formatting. Use viem's `formatUnits(bigint, decimals)` exclusively for display; never use JavaScript division on raw bigints. Keep raw bigint and formatted string in separate named state variables: `balanceRaw: bigint` and `balanceDisplay: string`. Add a unit test: given a 6-decimal USDC balance of `1_000_000n`, assert display value is "1.00".
-
-**Warning signs:**
-Any hardcoded `18` passed to `formatUnits` or `parseUnits` without a corresponding `decimals` variable. Division operations (`/`, `/ 1e18`) on values that came from contract reads.
-
-**Phase to address:**
-Scaffold phase (establish formatting utilities before any balance display).
-
----
-
-### Pitfall 23: Multi-Chain — Single RPC Provider, No Fallback
-
-**What goes wrong:**
-The only RPC endpoint is `https://forno.celo.org` (Celo public). During congestion or an incident, all chain reads fail simultaneously. The dashboard shows blank state or errors with no explanation.
-
-**Why it happens:**
-One RPC is the path of least resistance. Fallback logic feels like premature complexity.
-
-**How to avoid:**
-Configure wagmi with a `fallbackTransport` using viem's `fallback([http(rpc1), http(rpc2)])`. For a demo, at minimum configure a primary (Alchemy/QuickNode/Ankr) and the public endpoint as fallback. Document the transport config centrally so it is obvious to change.
-
-**Warning signs:**
-A single `http(process.env.NEXT_PUBLIC_RPC_URL)` transport with no fallback wrapper in the wagmi config.
-
-**Phase to address:**
-Scaffold phase (wagmi config).
-
----
-
-### Pitfall 24: Multi-Chain — Gas Estimation Failures Rendered as Opaque Errors
-
-**What goes wrong:**
-A transact call fails gas estimation (because the user lacks funds, the contract reverts on simulation, or the RPC returns an error). The frontend catches the viem `EstimateGasExecutionError` and surfaces "Transaction failed" or nothing at all. The user cannot distinguish between "insufficient gas funds," "contract will revert," and "RPC is down."
-
-**Why it happens:**
-Error handling is written last, often as a single `catch (e) { setError('Transaction failed') }`. viem throws typed errors with structured causes; most developers don't unpack them.
-
-**How to avoid:**
-Wrap all `estimateGas` and `simulateContract` calls with typed error handling. viem exports `EstimateGasExecutionError`, `ContractFunctionRevertedError`, and `UserRejectedRequestError` — catch each explicitly and surface a distinct, actionable message:
-- Revert: "This transaction would fail — [decoded revert reason]"
-- Insufficient funds: "Insufficient CELO for gas. Current balance: [X]"
-- User rejected: no error toast (this was intentional)
-- RPC error: "Network unavailable — try again"
-
-**Warning signs:**
-A single `catch` block with a generic error string. No import of viem's typed error classes. No `simulateContract` call before `writeContract`.
-
-**Phase to address:**
-Wallet + Transact path phase.
-
----
-
-### Pitfall 25: Multi-Chain — Missing Slippage / MEV Protection on Transact Paths
-
-**What goes wrong:**
-The hedging instrument's settlement or LP interaction involves a token swap or price-sensitive operation with no slippage tolerance check and no deadline parameter. On Celo mainnet under even modest volatility, the transaction is frontrun or sandwiched. The user gets worse execution than expected with no explanation.
-
-**Why it happens:**
-Slippage and MEV protection are treated as "advanced" concerns deferred until after the basic transact flow works.
-
-**How to avoid:**
-For any transaction that touches a CFMM or swap operation: (1) compute `amountOutMin` as `expectedAmount * (1 - slippageBps / 10000)` and include it as a parameter, (2) set a `deadline` of `block.timestamp + 300` seconds, (3) surface a slippage tolerance selector in the UI (default 0.5%, configurable 0.1%–5%). Document this as a required field in the transaction schema review, not optional. This must be part of the threat-model review before transact paths are exposed.
-
-**Warning signs:**
-Any `writeContract` call to a swap/settle function without a `minAmountOut` or `deadline` argument. No slippage tolerance UI element near the transact button.
-
-**Phase to address:**
-Wallet + Transact path phase (part of the threat-model review, not a UX afterthought).
-
----
-
-### Pitfall 26: Agent-First — MCP Server Tool Granularity Extremes
-
-**What goes wrong:**
-Either: (a) a single `get_everything` tool returns the entire protocol state as a nested JSON blob (LLM must parse, context window fills up, errors are silent), or (b) 40+ micro-tools one-per-field force the LLM to make 30 tool calls to answer "what is Pair D's current status and β estimate?" Both extremes waste tokens and degrade agent reliability. Block Engineering's case study: cutting from 30+ to 2 tools improved measurable benchmark scores.
-
-**Why it happens:**
-Tool design is treated as an API design problem (one endpoint per resource) rather than a task design problem (one tool per agent intent).
-
-**How to avoid:**
-Design tools around agent intents, not data schemas: `get_iteration(id)` returns full iteration detail (status, β, p-value, notebook_url, data_ref) in one call. `list_iterations(filter)` returns a summary list. `get_pool_state(chain, pair)` returns current on-chain state for one instrument. Target 8–15 tools total. Write each tool description as if documenting the intent, not the schema.
-
-**Warning signs:**
-Tool count exceeds 20. Any tool named `get_all_*` or `get_*_raw`. Tool descriptions that describe the return schema rather than the use case.
-
-**Phase to address:**
-Agent Surface / MCP phase (design before implementation).
-
----
-
-### Pitfall 27: Agent-First — No `llms.txt`, No OpenAPI, No JSON-LD
-
-**What goes wrong:**
-An agent crawls the site, finds no `llms.txt`, no structured data on iteration pages, and no machine-readable API spec. It falls back to scraping HTML and hallucinating protocol state from its training data. Users asking the conversational interface "what is the current COP/USD hedge ratio?" get confident but fabricated answers.
-
-**Why it happens:**
-`llms.txt`, OpenAPI spec, and JSON-LD are treated as documentation tasks deferred to "later."
-
-**How to avoid:**
-Treat these as scaffold-phase deliverables, not documentation. `llms.txt` at `/llms.txt` describes what each section of the site contains and which URLs are canonical for which data. JSON-LD `Dataset` schema on every iteration detail page. An OpenAPI spec for the BFF/API layer generated from the route types (e.g., with `next-openapi-gen` or `ts-rest`). The conversational interface's system prompt must cite tool results, not LLM priors.
-
-**Warning signs:**
-No `public/llms.txt`. Iteration detail pages with no `<script type="application/ld+json">` block. Conversational interface answering "what is the current TVL?" without a tool call in the trace.
-
-**Phase to address:**
-Scaffold phase (`llms.txt`, structured data scaffolding); finalized in Agent Surface phase.
-
----
-
-### Pitfall 28: Agent-First — Auth Blocking Public Agent Reads
-
-**What goes wrong:**
-The iteration catalog, econometric results, and pool state endpoints require an API key or session cookie. Agents hitting the site without credentials get 401s. The public research outputs become inaccessible to agents and search crawlers.
-
-**Why it happens:**
-Middleware auth is applied globally for simplicity. "We'll figure out public routes later."
-
-**How to avoid:**
-Define the read/public vs write/private boundary at architecture time. All research outputs (iterations, results, instrument terms) are public reads — no auth, no rate limit beyond basic DDoS protection. On-chain reads via the BFF are also public. Auth is required only for wallet-gated transact paths. Enforce with a `middleware.ts` that explicitly lists protected paths rather than defaulting to protect-all.
-
-**Warning signs:**
-`export { auth as middleware }` from NextAuth with a catch-all matcher that includes the API routes serving public research data.
-
-**Phase to address:**
-Scaffold phase (auth boundary definition).
-
----
-
-### Pitfall 29: Agent-First — Conversational Interface Hallucinating Protocol State
-
-**What goes wrong:**
-The chat interface answers "What's the current settlement price for Abrigo Pair D?" using the LLM's training-data prior about Celo or token prices rather than grounding in a tool call to the MCP server. The answer is plausible-sounding and wrong.
-
-**Why it happens:**
-The system prompt for the chat interface doesn't mandate tool calls for protocol-state questions. The LLM happily answers from priors.
-
-**How to avoid:**
-The chat system prompt must include explicit instructions: "For any question about iteration status, instrument state, on-chain positions, or prices, you MUST call the appropriate tool. Never answer these from prior knowledge." In the tool response pipeline, if a tool call fails, the response must say "I couldn't retrieve the current state" — not a cached or guessed value.
-
-**Warning signs:**
-Chat integration where the system prompt has no reference to available tools. Any LLM response about protocol state that doesn't show a tool call in the trace log.
-
-**Phase to address:**
-Conversational Interface phase (system prompt design is the first deliverable, not the last).
-
----
-
-### Pitfall 30: Frontier Market / Mobile — LCP > 2.5s on 3G Android
-
-**What goes wrong:**
-A Colombian wage earner on a mid-range Android (Moto G, Samsung A-series) with a 3G connection opens the site. LCP is 4–6 seconds. 53% of mobile users abandon at >3 seconds. The lab's primary beneficiaries cannot use the product.
-
-Note: Opensignal Jan 2025 data shows Colombia's median download speed at ~19 Mbps on Claro (4G) but Tigo and Movistar trail significantly. A meaningful fraction of users are still on 3G-equivalent speeds, particularly in secondary cities and rural areas where wage-earner financial stress is highest.
-
-**Why it happens:**
-Development happens on a desktop with a fast connection. Performance budget is never formalized. Hero images are unoptimized, blocking fonts, or a heavy JS bundle blocks rendering.
-
-**How to avoid:**
-Formalize the budget in `lighthouserc.js`: `'largest-contentful-paint': ['error', {maxNumericValue: 2500}]`. Use Next.js `<Image>` for all images. Never load fonts without `font-display: swap` and a system-font fallback. Keep initial JS bundle under 100kB gzipped (measure with `@next/bundle-analyzer`). No hero animations on the landing page (also an impeccable anti-pattern). Test on real hardware or BrowserStack with Moto G profile weekly.
-
-**Warning signs:**
-Lighthouse mobile score below 75 in CI. Any `<img>` tag (not `<Image>`). Fonts loaded without `display=swap` in the Google Fonts URL.
-
-**Phase to address:**
-Scaffold phase (performance budget CI); verified at each phase before merge.
-
----
-
-### Pitfall 31: Frontier Market / Mobile — Wallet Connect Assumes Browser Extension
-
-**What goes wrong:**
-The wallet connect flow opens a modal listing MetaMask, Coinbase Wallet, and Brave Wallet as the top options. On Android, none of these are browser extensions — they are mobile apps accessed via deep link. Without proper WalletConnect v2 configuration and deep-link handling, "Connect MetaMask" does nothing or opens an empty Play Store page.
-
-**Why it happens:**
-Development and testing happens in a Chromium browser with MetaMask extension installed. Mobile testing is skipped until demo day.
-
-**How to avoid:**
-Configure RainbowKit with WalletConnect v2 projectId and verify that the default wallet list includes mobile-native options (MetaMask mobile, Trust Wallet, Rainbow). Test the full connect flow on a physical Android device before any demo. Add a "no wallet?" fallback that explains WalletConnect QR code pairing.
-
-**Warning signs:**
-`@walletconnect/ethereum-provider` not in dependencies. No `projectId` in RainbowKit config. Wallet modal tested only in desktop Chromium.
-
-**Phase to address:**
-Wallet + Transact path phase; mandatory real-device test before phase sign-off.
-
----
-
-### Pitfall 32: Frontier Market / Mobile — Heavy Hero Animation on Data-Metered Connection
-
-**What goes wrong:**
-A CSS animation or Framer Motion sequence on the landing hero runs on every page load. On a 3G connection with a data cap, animated backgrounds, gradient sweeps, or particle effects consume data, drain battery, and cause jank on low-end hardware. This also violates `prefers-reduced-motion`.
-
-**Why it happens:**
-Animations look impressive in desktop demos. The mobile data cost is invisible in dev.
-
-**How to avoid:**
-No hero animations on the landing page (this aligns with impeccable anti-patterns and the out-of-scope rule in PROJECT.md: "Heavy 3D / WebGL hero animations — counter to impeccable anti-patterns"). Any animation that is not essential must be gated behind `@media (prefers-reduced-motion: no-preference)` AND a runtime check that the connection type is not `2g` or `slow-2g` via `navigator.connection.effectiveType`.
-
-**Warning signs:**
-Any Framer Motion `animate` or CSS `@keyframes` on the LCP element. `navigator.connection` not referenced in any component.
-
-**Phase to address:**
-Landing Page phase.
-
----
-
-### Pitfall 33: Frontier Market / i18n — Spanish as Afterthought
-
-**What goes wrong:**
-Copy is written in English, shipped, and then a machine translation pass is run on `en.json` to produce `es.json`. The result reads as translated, not authored — stilted register, wrong currency idioms, COP formatting that defaults to USD conventions. Colombian users — the primary beneficiaries — experience a product that was designed for someone else.
-
-**Why it happens:**
-i18n is deferred to "after the content is finalized." Machine translation is faster than authoring.
-
-**How to avoid:**
-Establish i18n infrastructure (next-intl with `messages/en.json` and `messages/es-CO.json`) in the scaffold phase. Write English and Spanish copy simultaneously for all P0 pages. Use `es-CO` locale (not `es`) for number and currency formatting — `new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' })` renders "$ 100.000" not "$100,000". Enable the ESLint rule `react/jsx-no-literals` to catch hardcoded strings before they accumulate.
-
-**Warning signs:**
-Hardcoded English strings in JSX (any `<p>` or `<span>` with literal text content). An `es.json` that is empty or identical structure with no entries. `Intl.NumberFormat` called without `'es-CO'` locale on monetary values.
-
-**Phase to address:**
-Scaffold phase (i18n infrastructure); enforced with lint on every PR.
-
----
-
-### Pitfall 34: Hackathon Deadline — Scope Creep Before Shell Is Shippable
-
-**What goes wrong:**
-Week 1 is spent implementing the econometric charts component and MCP server before a single page renders in production. The demo-day shell (landing + iteration list + one iteration detail) is not done by day 14, leaving only 7 days to rehearse. The demo fails not from technical depth but from lack of a working top-level flow.
-
-**Why it happens:**
-Interesting technical work (MCP, charts, wallet) is more engaging than plumbing (routing, layout, deploy pipeline).
-
-**How to avoid:**
-Define the demo critical path as the first deliverable: `/` (landing) → `/research` (iteration list) → `/research/pair-d` (detail) → deployed on Vercel. This path must be shippable on day 7 — static content, no wallet, no MCP. Every other feature is additive. Use a daily "demo path test": open an incognito browser, complete the critical path end-to-end. If any step is broken, fix it before adding new features.
-
-**Warning signs:**
-MCP server implementation started before the `/research` route renders. Any blocking dependency on a live contract before static pages work.
-
-**Phase to address:**
-Phase 1 (Scaffold) and Phase 2 (Landing + Iteration Catalog) must be completed before Phase 3 begins.
-
----
-
-### Pitfall 35: Hackathon Deadline — Over-Engineering the Data Layer
-
-**What goes wrong:**
-The team builds a custom indexer (subgraph deployment, event-listening service) to power the iteration catalog, instead of reading from a static JSON export of `abrigo-analytics`. The indexer is not ready for the demo. The catalog is empty.
-
-**Why it happens:**
-The "right" architecture for production (an indexer) replaces the right architecture for a 3-week demo (static JSON + on-chain reads).
-
-**How to avoid:**
-For the June 2 hookathon demo: iteration data is a static JSON file exported from `abrigo-analytics`, committed to the repo or hosted on HuggingFace datasets, and fetched at build time with `getStaticProps` or `generateStaticParams`. On-chain pool state is read directly via viem with a fallback RPC. The Subgraph/indexer is a Phase 2 architecture concern. Document this explicitly as a known tech debt item, not a hidden shortcut.
-
-**Warning signs:**
-A `subgraph/` directory created before Phase 1 is complete. Any blocking dependency on an indexer being deployed before the catalog renders.
-
-**Phase to address:**
-Phase 2 (Iteration Catalog). Data source decision must be made before implementation begins.
-
----
-
-### Pitfall 36: Vercel — Function Timeout for Chain Aggregations
-
-**What goes wrong:**
-A Next.js API route aggregates state from multiple RPC calls (e.g., reading pool state across 5 contracts on Celo, then fetching 3 HuggingFace dataset fields, then computing a TVL estimate). The total execution time exceeds Vercel's default 10-second serverless function timeout. The route returns a 504 with no useful error to the user. The dashboard shows blank or stale data at exactly the moment the demo is being recorded.
-
-**Why it happens:**
-Each RPC call is fast in isolation (~100–300ms on Celo via Ankr). Five sequential RPC calls with no batching or parallelism take 1.5–2 seconds. Add HuggingFace fetch (~500ms), error retry logic, JSON parsing, and a cold-start penalty (500ms–1s on Vercel hobby tier), and a plausible aggregation route reaches 5–8 seconds under load.
-
-**How to avoid:**
-(1) Batch all contract reads into a single `multicall` call via viem. (2) Run HuggingFace dataset fetches in parallel with RPC reads using `Promise.all`. (3) Cache the aggregated result with `Cache-Control: s-maxage=30` or Vercel's built-in data cache (`unstable_cache`) — stale-while-revalidate is appropriate for on-chain TVL data. (4) If the route still approaches 10 seconds, set `maxDuration = 30` in `vercel.json` for that route only. (5) Never set `maxDuration = 60` globally — it increases billing costs and masks architectural problems.
-
-**Warning signs:**
-API route that contains sequential `await viem.readContract(...)` calls in a loop. No `Promise.all` around independent async operations. No `Cache-Control` header on any dashboard API response.
-
-**Phase to address:**
-Live Protocol Dashboard phase (route design before implementation).
-
----
-
-### Pitfall 37: Vercel — Edge Runtime Incompatibility with wagmi/viem
-
-**What goes wrong:**
-A Next.js API route or middleware is set to `export const runtime = 'edge'`. It imports a wagmi or viem module. Build fails with `Module not found` or runtime fails with `crypto is not defined` / `Buffer is not defined` — Node.js globals that the edge runtime does not provide.
-
-**Why it happens:**
-Edge runtime is the Vercel default for many new route templates. wagmi and viem use Node.js crypto APIs that are not available in the V8 isolate edge environment.
-
-**How to avoid:**
-Never use `runtime = 'edge'` for any route that imports wagmi, viem, or ethers. Use Node.js serverless functions (`runtime = 'nodejs'`) for any on-chain read route on the server side. Wallet state is client-only by design (stated in PROJECT.md constraints) — keep it that way. Add a build-time check: `grep -r "runtime.*edge" src/app/api/ | grep -v "// allowed"` should return nothing.
-
-**Warning signs:**
-`export const runtime = 'edge'` in any file under `src/app/api/`. Build errors mentioning `crypto` or `Buffer` in server contexts.
-
-**Phase to address:**
-Scaffold phase (Vercel config and route conventions).
-
----
-
-### Pitfall 38: Vercel — Build-Time Env Var Leakage
-
-**What goes wrong:**
-A private RPC API key or server-only secret is prefixed `NEXT_PUBLIC_`, causing it to be bundled into the client JavaScript and exposed in the browser. Any user opening DevTools can read the key. For RPC providers with usage-based billing, this means abuse.
-
-**Why it happens:**
-`NEXT_PUBLIC_` is easy to reach for when debugging why a variable is undefined on the client. The developer forgets to remove it.
-
-**How to avoid:**
-Define the public/private boundary explicitly in a `.env.example` file with comments. Rule: only values that are safe to expose to every user in the world get `NEXT_PUBLIC_`. RPC API keys, signing secrets, and analytics write keys are never `NEXT_PUBLIC_`. All on-chain reads that require API keys go through a Next.js API route (server-side) which reads the server-only env var. Add a CI check: `grep -r "NEXT_PUBLIC_.*KEY\|NEXT_PUBLIC_.*SECRET\|NEXT_PUBLIC_.*TOKEN" .env*` should return nothing.
-
-**Warning signs:**
-`NEXT_PUBLIC_RPC_API_KEY`, `NEXT_PUBLIC_ALCHEMY_KEY`, or similar in any `.env*` file.
-
-**Phase to address:**
-Scaffold phase (env var conventions before any keys are added).
-
----
-
-### Pitfall 39: Vercel — Preview Deployments Without Preview-RPC Config
-
-**What goes wrong:**
-A PR preview deployment at `https://d2p-frontend-git-feature-xyz.vercel.app` uses the production RPC URL and production contract addresses. A developer testing a new dashboard feature on the preview URL sends real read requests (and potentially test writes) against mainnet contracts. Alternatively, the preview uses no RPC URL because the env var is not configured for preview environments, and the dashboard shows blank state on every PR review.
-
-**Why it happens:**
-Vercel environment variables have three scopes: Production, Preview, Development. Developers configure Production carefully and forget Preview. The default behavior is that server-side env vars not set for Preview are `undefined` at runtime.
-
-**How to avoid:**
-In Vercel project settings, configure a separate RPC URL for Preview environments that points to a Celo testnet (Alfajores) or a dedicated Ankr/QuickNode endpoint isolated from production traffic. Set this explicitly in the Vercel dashboard: Environment → Preview → `RPC_URL = https://alfajores-forno.celo-testnet.org`. Add a check in the wagmi config: if `process.env.VERCEL_ENV === 'preview'` and `RPC_URL` is undefined, throw at build time rather than silently failing at runtime.
-
-**Warning signs:**
-`VERCEL_ENV` is not referenced anywhere in the codebase. The `RPC_URL` variable has only a Production value in the Vercel dashboard, with no Preview value set.
-
-**Phase to address:**
-Scaffold phase (Vercel environment configuration before any PR preview is reviewed).
-
----
-
-### Pitfall 40: Vercel — ISR/Cache Invalidation Confusion Across Deploys
-
-**What goes wrong:**
-The iteration catalog is rendered with Incremental Static Regeneration (`revalidate: 3600`). A new deploy ships with an updated iteration data file (Pair D status changes from IN_PROGRESS to PASS). Visitors to the site see the old PASS/FAIL state for up to one hour because Vercel's ISR cache is not automatically purged on deploy. The demo audience sees stale iteration status during the live presentation.
-
-**Why it happens:**
-Developers assume a new deployment invalidates all cached pages. Vercel ISR does not work this way — the cache persists across deploys until `revalidate` time expires or an explicit revalidation is triggered via the On-Demand Revalidation API.
-
-**How to avoid:**
-(1) For the demo: set `revalidate: 60` (1 minute) for iteration pages so stale data windows are short. (2) Add an on-demand revalidation webhook: when `abrigo-analytics` data is updated (e.g., a GitHub Action pushes new iteration data), it calls `fetch('/api/revalidate?path=/research/pair-d&secret=...')` which triggers `revalidatePath`. (3) In the deploy pipeline, add a post-deploy step that calls the revalidation endpoint for all iteration paths. Document the cache invalidation model explicitly — it is not automatic.
-
-**Warning signs:**
-ISR `revalidate` time set above 300 seconds on any page that displays iteration status. No revalidation webhook or post-deploy invalidation step. Developers unaware that ISR cache persists across Vercel deploys.
-
-**Phase to address:**
-Iteration Catalog phase (data fetching strategy must account for revalidation before going live).
-
----
-
-### Pitfall 41: Accessibility — Color-Only Status Indicators
-
-**What goes wrong:**
-Iteration status is indicated by color only: green chip for PASS, red chip for FAIL, yellow for PARKED, blue for IN_PROGRESS. A user with red-green color blindness (affecting ~8% of males) sees PASS and FAIL as the same color. WCAG 2.2 SC 1.4.1 (Use of Color) fails.
-
-**Why it happens:**
-Color is the most intuitive status encoding. Text labels feel redundant when the color is "obvious."
-
-**How to avoid:**
-Every status indicator must use color AND a text label AND a distinct shape/icon. Example: PASS = green circle + checkmark icon + "PASS" text. FAIL = red octagon + X icon + "FAIL" text. Test with the Chrome DevTools "Emulate vision deficiency: Protanopia" option. Add an axe-core scan to CI that fails on color-only non-text contrast violations.
-
-**Warning signs:**
-Status chip components with only a `className` color change and no `aria-label` or visible text distinguishing states.
-
-**Phase to address:**
-Design System phase (status component design); verified in Accessibility pass.
-
----
-
-### Pitfall 42: Accessibility — `outline: none` Without Replacement
-
-**What goes wrong:**
-During "design polish," `outline: none` or `outline: 0` is added to button, link, and input styles to remove the browser's default blue focus ring. Keyboard users and screen reader users lose all focus visibility. WCAG 2.2 SC 2.4.11 (Focus Appearance) fails.
-
-**Why it happens:**
-The default focus ring clashes with the design. The quick fix is `outline: none` with no replacement.
-
-**How to avoid:**
-Never use `outline: none` without a replacement. Use `:focus-visible` with a custom focus ring that uses the brand accent color with sufficient contrast. Add a global CSS lint rule: `grep -rn "outline: none\|outline: 0" src/` should return zero results (excluding known exceptions documented with `/* allowed */`).
-
-**Warning signs:**
-`outline: none` or `outline: 0` in any stylesheet. Any `*:focus { outline: none }` reset.
-
-**Phase to address:**
-Design System phase (global reset / base styles); enforced with stylelint rule.
-
----
-
-### Pitfall 43: Accessibility — Keyboard Traps in Wallet Connect Modal
-
-**What goes wrong:**
-The RainbowKit connect modal opens. A keyboard user navigating via Tab cannot exit the modal with Escape or return focus to the trigger button after closing. Focus is trapped inside or escapes the modal into the background page.
-
-**Why it happens:**
-RainbowKit's modal is typically well-implemented, but custom wrappers, portals, or overlays added on top of it can break the focus management. Testing this is rarely done.
-
-**How to avoid:**
-Test keyboard navigation of the full wallet-connect flow manually on every UI change to the modal area. The Escape key must close the modal. Tab must cycle only within the modal while it is open. On close, focus must return to the trigger button. Use `@testing-library/user-event` for keyboard navigation tests in the component test suite.
-
-**Warning signs:**
-No keyboard navigation test for the connect modal. Custom `<Dialog>` or `<Modal>` wrappers around RainbowKit that manage their own focus trap.
-
-**Phase to address:**
-Wallet + Transact path phase.
-
----
-
-### Pitfall 44: Accessibility — Skipped Heading Levels in Iteration Detail Pages
-
-**What goes wrong:**
-An iteration detail page uses `h1` for the page title, then jumps to `h3` for section headings because the `h3` style matched the design better. Screen readers and assistive technologies rely on heading hierarchy for page navigation. Users who navigate by heading landmark skip the `h2` level and lose structural context.
-
-**Why it happens:**
-Heading levels are chosen for visual styling rather than semantic meaning. Tailwind's `text-2xl` looks right, so the developer reaches for `h3` without checking the hierarchy.
-
-**How to avoid:**
-Heading levels (`h1` → `h2` → `h3`) must follow strict document order with no skips. Visual style is applied independently via CSS or Tailwind. Run `npx impeccable detect` (which checks heading structure) and `axe-core` in CI. A simple verification: `document.querySelectorAll('h1,h2,h3,h4,h5,h6')` in the console should show a continuous hierarchy.
-
-**Warning signs:**
-An `h3` appearing in the DOM with no preceding `h2` on the same page. Any component that sets heading level based on visual size rather than document position.
-
-**Phase to address:**
-Design System phase (heading component must enforce semantic levels, not visual levels); verified in every content phase.
-
----
-
-### Pitfall 45: Accessibility — Charts Without Text Alternatives
-
-**What goes wrong:**
-The econometric results surface shows β estimate confidence bands, p-value distributions, and sensitivity charts as SVG or canvas elements with no accessible description. A screen reader announces nothing meaningful. A user who cannot see the chart has no access to the research evidence the chart encodes.
-
-**Why it happens:**
-Chart accessibility is treated as a visual problem ("it looks like a chart"). The semantic content (the actual β estimates with uncertainty bounds) is in the chart rendering, not in the DOM.
-
-**How to avoid:**
-Every chart must have: (1) a `<figcaption>` or `aria-label` that states the core finding in text ("β = +0.137, 95% CI [0.091, 0.183], p ≈ 1.5×10⁻⁸ — positive relationship confirmed"), (2) a `<table>` with the underlying data, hidden visually with `sr-only` but present in the DOM for screen readers. For Recharts/Recharts-derived charts, use the `accessibilityLayer` prop. Test with NVDA or VoiceOver on a chart page.
-
-**Warning signs:**
-Chart components with no `aria-label` and no associated `<table>` element. Recharts usage without `accessibilityLayer` prop.
-
-**Phase to address:**
-Econometric Results Surface phase; verified in Accessibility pass.
-
----
-
-### Pitfall 46: Research-Lab Credibility — Conflating DeFi/Hedging With Leverage Trading
-
-**What goes wrong:**
-The landing page or hero copy says "DeFi protocol," "yield," or "returns" without the qualifier "hedge." Leverage seekers arrive expecting a yield-maximization product, find a wage-hedge instrument, and bounce with a negative impression. The lab's mission is misrepresented. Twitter/crypto community interprets it as another yield farm.
-
-**Why it happens:**
-"DeFi" is the shortest accurate category label. The distinction between hedging and leverage trading requires two extra sentences.
-
-**How to avoid:**
-All above-the-fold copy must lead with the specific value proposition: "permissionless convex hedge instruments for wage earners in frontier markets." The word "hedge" must appear in the hero. The About/Mission page must include an explicit "What this is not" section: not a leverage product, not a yield optimizer, not a swap router.
-
-**Warning signs:**
-Hero copy that uses "yield," "returns," "APY," or "earn" without the hedge qualifier. Any use of "DeFi" without "hedging" in the same sentence on the landing page.
-
-**Phase to address:**
-Landing Page phase (copy review before any page ships).
+Frontend live-run phase — the first task in the live-run phase must be "decouple upstream: use recorded mandate as `runWorkflowLive` upstream input." This must be verified before any `writeContract` work begins.
 
 ---
 
@@ -896,180 +164,104 @@ Landing Page phase (copy review before any page ships).
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Static JSON for iteration data (not indexed) | Ships in week 1, no indexer needed | Stale data after abrigo-analytics updates; no real-time status | Phase 1 demo; build a sync script before launch |
-| Public Celo RPC (forno.celo.org) as sole transport | No API key to manage | Single point of failure; rate limited under load | Dev/demo; replace before any production load |
-| Hardcoded chain ID for Celo only | Simpler wagmi config | Must rewrite for multi-chain; wrong-chain UX omitted | Phase 1 demo only; multi-chain config in Phase 2 |
-| Copy written only in English | Faster to ship | Retrofitting i18n costs 2x the original copy effort | Never — start bilingual from day 1 |
-| No wagmi CLI codegen (hand-written ABIs) | Faster to start | ABI drift is a runtime error not a compile error | Never — wagmi CLI generates in minutes |
-| BFF API route with no caching | Simpler implementation | Every page load hits the RPC; demo breaks under concurrent users | Phase 1 demo; add cache-control headers before hackathon |
-| `NEXT_PUBLIC_` for RPC URL (no API key) | Works in dev | Habit forms; later someone adds an API key with same pattern | Acceptable only for public RPC endpoints with no auth |
-| ISR revalidate set to 3600s | No revalidation webhook needed | Stale iteration data visible for 1 hour after data update | Never for iteration status; acceptable for static lab content |
+| Hardcode `capturedAt`-based TTL check as a static build-time value | No runtime check needed | Stale artifact ships to Vercel with no warning | Never — the build-time staleness check is cheap to add |
+| Put demo signer key in `NEXT_PUBLIC_DEMO_SIGNER_KEY` | Fastest path to pre-funded one-click | Key in client bundle; normalizes insecure pattern in a finance codebase | Never |
+| Reuse existing mock `runWorkflow` with a flag to make it "live" | Less code to write | Masks the actual live/mock distinction; anti-fishing violation | Never |
+| Per-judge fork provisioning instead of shared fork with reset guard | Eliminates shared-state corruption | Provisioning latency per judge (2-3 min); BuildBear rate limits; much more complex to orchestrate | Only if shared-fork reset guard proves technically infeasible |
+| Skip `failed` terminal state in `RunState`; rely on error boundaries only | Avoids store-layer changes | Error path falls back to replay silently; anti-fishing violation | Never |
+
+---
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| wagmi + Next.js App Router | Importing wagmi hooks in Server Components | Mark all wallet-using components `'use client'`; create a top-level `Providers.tsx` wrapper |
-| RainbowKit on Android | Testing only in desktop Chromium with extension | Configure WalletConnect v2 `projectId`; test on real Android device |
-| viem formatUnits | Hardcoding 18 decimals | Fetch decimals from contract; use runtime value |
-| HuggingFace datasets (iteration data) | Fetching at runtime on every request | Fetch at build time with `generateStaticParams`; cache in Vercel ISR with short revalidate |
-| next-intl with App Router | Initializing without `generateStaticParams` for locales | Follow next-intl App Router setup; define `[locale]` segment in routing |
-| Vercel env vars | Using `NEXT_PUBLIC_` for server secrets | Server-only vars have no prefix; client vars with `NEXT_PUBLIC_` must be safe to expose |
-| Vercel Edge Runtime + viem | `export const runtime = 'edge'` in API routes using viem | Use Node.js runtime for all API routes that import viem/wagmi |
-| TanStack Query + wagmi writes | No query invalidation after transactions | Explicitly invalidate balance and state queries in `onSuccess` |
-| MCP server + Next.js | MCP server depends on same DB as web app causing drift | MCP server reads from canonical data source (same HuggingFace dataset or static JSON); never its own cache |
-| Vercel Preview + RPC | No Preview-scoped RPC env var configured | Set `RPC_URL` explicitly for Preview environment in Vercel dashboard (Alfajores testnet) |
-| viem multicall | N separate `readContract` calls in sequential `await` | Use `multicall` to batch all contract reads into one RPC round-trip |
+| BuildBear fork RPC | Call `hardhat_setBalance` with a value in ETH units (18 decimals), get wrong balance | Pass value as hex wei string, not a decimal ETH float. Verify with `eth_getBalance` after calling. |
+| BuildBear fork RPC | Assume the fork RPC is reachable from the browser for writes | The fork RPC accepts writes from any caller — but the SIGNER (private key) must be server-side. The public client for reads can call the RPC from the browser; `writeContract` must route through the backend. |
+| `waitForTransactionReceipt` on BuildBear | Default polling interval (4s) causes the UI to appear frozen for judge UX | Set `pollingInterval: 500` on the `publicClient` for BuildBear — fork blocks are instant, not waiting for real block times. |
+| `resolveFromMandate` ABI arg order | `args: [mandate, marginA, marginB]` — teams swap `0n` and `1_000_000n` order, causing wrong slippage or revert | The existing `runWorkflowLive` has `args: [mandate, 0n, 1_000_000n]` — the second arg is `minMarginA` (0 = no min), third is `maxMarginB` (1M = generous cap). Do not change this without reading `MacroHedgeExecutor.sol:resolveFromMandate` param docs. |
+| `artifact-loader.ts` static import | Attempt to load a different artifact path at runtime (e.g., per-environment) | The static import is intentionally inflexible — it was chosen to avoid the Turbopack dynamic-require failure mode from Phase 2. If environment-specific artifacts are needed, use build-time env substitution at the JSON level, not runtime switching. |
+
+---
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| All locale messages in initial bundle | Slow LCP on Spanish pages; bundle analyzer shows large `messages/` chunk | Dynamic import: `import(./messages/${locale}.json)` per route | Day 1 if not configured |
-| Chart library (Recharts/Victory) loaded eagerly | 60–120kB added to initial bundle even on text-only pages | Dynamic import with `next/dynamic` and `ssr: false` for chart components | Pages without charts become slow |
-| wagmi imports in layout.tsx (not lazy) | All Web3 code in critical path even for non-wallet pages | Lazy-load wallet providers; don't import wagmi in `app/layout.tsx` unless required globally | Any page that doesn't need wallet |
-| Hero animation blocking LCP | LCP is the animated element itself; LCP time = animation duration | No animations on LCP element; static hero image served via Next.js Image | 100% of mobile page loads |
-| Uncompressed static JSON for iteration data | Each page load fetches a large JSON file | Use Vercel ISR with revalidation; gzip the JSON response | When iterations data exceeds ~50KB |
-| Multiple RPC reads without batching | N+1 RPC calls on dashboard page load | Use viem's `multicall` for batch reading multiple contracts in one request | Dashboard with >5 contract reads |
-| Sequential RPC + HuggingFace fetches in API route | Vercel function timeout at >10s under cold start | `Promise.all` for independent fetches; `multicall` for contract reads | Any API route aggregating >3 external sources |
+| No `pollingInterval` override on BuildBear `publicClient` | `waitForTransactionReceipt` takes 4s+ per poll; judges see a stuck "pending" spinner | Set `pollingInterval: 500` (ms) on the BuildBear public client factory in `buildbear.ts` | Immediately on first live run |
+| Reading `quoteMargin` before `PositionMinted` log is decoded | `readContract` reverts with `PositionNotOwned` | `runWorkflowLive` already has the correct guard (step i is strictly after step h) — do not refactor this ordering | Every run if ordering is changed |
+| Concurrent judge runs both calling `resolveFromMandate` simultaneously | Race condition — second tx reverts because first advanced `numberOfLegs`; harder to diagnose than sequential runs | Reset guard + a server-side mutex or a last-writer-wins re-provision step | Two judges opening the demo tab within seconds of each other |
+
+---
 
 ## Security Mistakes
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| ABI mismatch on transact paths | Silent wrong encoding → failed tx → user loses gas; in edge cases, funds sent to wrong address | wagmi CLI codegen from canonical ABI; diff check in CI |
-| `NEXT_PUBLIC_` on RPC API keys | Key scraped from browser; abuser runs RPC calls on your bill | Strict naming convention; CI grep check; all authed RPC calls via server-side API route |
-| No rate limiting on BFF routes | Demo day DDoS from bots; Vercel function invocation bill spikes | Add `upstash/ratelimit` or Vercel's built-in rate limiting to all public API routes |
-| Showing real on-chain tx without safety review | Transact path with protocol funds exposed before threat model review | Read-only mode until explicit security sign-off (stated in PROJECT.md) |
-| Wallet-connect modal over HTTP | WalletConnect requires HTTPS for deep links; mobile wallets refuse non-HTTPS origins | Always test on `vercel.app` preview URLs, never on `localhost` for mobile wallet testing |
-| No slippage/deadline on swap operations | MEV sandwich attacks; user gets worse execution with no explanation | `amountOutMin` and `deadline` required params; slippage tolerance UI element required |
+| Demo private key in `NEXT_PUBLIC_` env var | Key extractable from browser bundle; pattern normalizes client-side key handling in a real-funds codebase | Backend-only signer: key in `process.env.DEMO_SIGNER_KEY` (server env only), used in backend API route exclusively |
+| Demo private key committed to `buildbear-deployments.json` or any tracked file | Key in git history permanently; exfiltration via repo access | Never put key material in any committed file; use `.env.local` (gitignored) for local dev, Vercel env for deploy |
+| RPC URL from `buildbear-deployments.json` exposed to unauthenticated clients | BuildBear fork RPC accepts writes from any caller — exposes the fork to griefing (arbitrary state mutations) | The RPC URL for WRITE operations should be proxied through the backend API; the frontend public client for reads can use the URL directly (reads are harmless on an expiring fork) |
+
+---
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Three wallet states collapsed into one UI | User on wrong chain gets "Connect Wallet" button; clicks it; nothing helpful happens | Explicit state machine: DISCONNECTED / WRONG_CHAIN / UNSUPPORTED / READY, each with distinct action |
-| Requiring wallet connection before browsing research | Frontier-market user on first visit cannot read the iteration catalog; bounces | All research reads are unauthenticated; wallet required only for transact path |
-| "$X TVL" with no data source disclosure | Erodes trust for researchers who will verify; dishonest for a lab with anti-fishing discipline | Source label on every data point: "TVL as of [block] via [RPC]" |
-| PASS/FAIL in English only | Spanish-speaking users don't see localized status | Status labels are translatable strings in i18n messages, not hardcoded English |
-| Network switch prompt mid-transaction | Mobile users get interrupted; many abandon | Pre-flight chain check before showing transact UI; never interrupt mid-flow |
-| Chat that answers protocol questions from priors | Hallucinated state; user makes decisions on wrong data | System prompt mandates tool calls for all protocol-state questions |
-| Opaque gas estimation error | User sees "Transaction failed" with no actionable guidance | Typed viem error handling: distinguish revert vs insufficient funds vs user rejection |
+| Silent mode switch from `live` to `replay` on error | Judge believes live run succeeded; anti-fishing violation; invalidates the demo's scientific honesty | Render explicit `{ status: 'failed', reason }` terminal state; never auto-switch modes |
+| No visible TTL countdown or expiry warning | Judge opens demo on day 3, gets cryptic RPC errors with no explanation | Pre-flight `isExpired` check renders a `ForkExpiredBanner` before enabling the one-click button |
+| "Reset in progress" has no UI feedback | Judge clicks one-click button during reset; second `resolveFromMandate` races the re-provision | Disable one-click button while reset is in progress; show "Preparing demo fork..." state |
+| Pending hash shown as clickable explorer link on BuildBear | Judge clicks tx hash, gets 404 (BuildBear has no public explorer for private forks) | Show hash as monospace text, not a hyperlink, on BuildBear chain. Add a copy-to-clipboard affordance. |
+
+---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Iteration Catalog:** Check that FAIL and PARKED iterations appear with equal visual weight — filter for `status !== 'PASS'` and confirm they render correctly
-- [ ] **Replication Links:** Every iteration detail page must have a visible notebook link; grep `notebook_url` in the iteration data schema and verify it renders
-- [ ] **i18n:** Switch browser language to Spanish; verify no English strings are visible on P0 pages
-- [ ] **Mobile wallet connect:** Complete the full connect flow on a physical Android device, not a desktop emulator
-- [ ] **ABI sync:** Change one function signature in the mock ABI and verify the build fails or a type error appears
-- [ ] **Focus visibility:** Tab through the entire page from the address bar; every interactive element must have a visible focus indicator
-- [ ] **Color-blind check:** Open Chrome DevTools → Rendering → Emulate vision deficiency → Protanopia; PASS and FAIL must still be distinguishable
-- [ ] **LCP budget:** Run Lighthouse on a throttled 3G mobile profile; assert LCP < 2500ms
-- [ ] **Public reads unauthenticated:** Fetch the iteration API route without any auth header; assert 200 OK with data
-- [ ] **No `outline: none`:** `grep -rn "outline: none\|outline: 0" src/` must return zero non-excepted results
-- [ ] **No slop palette:** `npx impeccable detect` returns zero errors
-- [ ] **No slop fonts:** `npx impeccable detect` returns zero font errors; no Inter/Geist/Fraunces in font imports
-- [ ] **No hero eyebrow chip:** No `rounded-full` or `border-radius: 9999px` immediately preceding an `h1`
-- [ ] **No oversized italic serif h1:** No `font-style: italic` + serif font on any `h1` element
-- [ ] **No dark glow:** No `box-shadow` with blur > 40px + color on any production component
-- [ ] **No hardcoded English in JSX:** ESLint `react/jsx-no-literals` reports zero violations
-- [ ] **No `NEXT_PUBLIC_` on secrets:** Grep check passes
-- [ ] **No edge runtime on viem routes:** Grep check passes
-- [ ] **Preview RPC configured:** Vercel Preview environment has `RPC_URL` set to a testnet endpoint
-- [ ] **ISR revalidation tested:** Deploy a new static iteration JSON; verify updated status appears within `revalidate` seconds
-- [ ] **Heading hierarchy:** `document.querySelectorAll('h1,h2,h3,h4,h5,h6')` on every content page shows no skipped levels
-- [ ] **Chart accessibility:** Every chart has `aria-label` or `<figcaption>` with the core numeric finding
-- [ ] **Gas error handling:** Simulate a contract revert in tests; assert user sees decoded revert reason, not "Transaction failed"
-- [ ] **Slippage protection:** Any swap-involving transact call has `amountOutMin` and `deadline` in the encoded calldata
-- [ ] **Conversational interface uses tool calls:** Open chat, ask "What is the current COP/USD hedge status?", verify a tool call appears in the trace
+- [ ] **Live run un-deferred:** The `void writeContractAsync` stub is replaced with a real call — but verify `upstream` is NOT sourced from the live Somnia Agent-1 route (Pitfall 7).
+- [ ] **Pre-funded signer:** A funded account exists — but verify the key is NOT in `NEXT_PUBLIC_*` or any committed file (Pitfall 2).
+- [ ] **Reset guard implemented:** A `numberOfLegs == 0` pre-flight check exists in the UI — but verify the backend ALSO has a re-provision path, not just a frontend gate (Pitfall 1).
+- [ ] **Artifact synced:** `buildbear-deployments.json` has a recent `capturedAt` — but verify the `executor` address matches the LAST provision run's deploy log (Pitfall 6).
+- [ ] **`failed` state renders:** An error in `runWorkflowLive` produces visible UI — but verify it does NOT auto-switch to `replay` mode silently (Pitfall 4).
+- [ ] **Fork not expired:** `isExpired(Date.now())` returns `false` at judging time — but verify the pre-flight check is actually CALLED in the UI boot sequence (Pitfall 3).
+
+---
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| AI slop palette discovered post-launch | MEDIUM | Update design tokens in one file; rebuild; redeploy — if tokens were centralized, this is a 2-hour fix |
-| Oversized italic serif hero discovered post-launch | LOW | Font change in one token; rebuild. Trivial if typography tokens are centralized |
-| Hardcoded English strings throughout | HIGH | Extract all strings to i18n messages file; test every page; typically 1–2 days per 10 pages |
-| ABI drift causing failed transactions | HIGH | Identify mismatch via wagmi type errors or failed tx decode; update ABI; add CI check to prevent recurrence |
-| FAIL iterations hidden from catalog | LOW | Remove filter from data fetch; no UI change needed if the component handles all statuses |
-| Edge runtime + viem incompatibility | MEDIUM | Change `runtime` export in affected routes; may require refactoring server-side wallet reads to API routes |
-| Stale balances after tx | LOW | Add `queryClient.invalidateQueries` in write hook `onSuccess`; 30-minute fix per write hook |
-| MCP tools too coarse (hallucinated state) | HIGH | Redesign tool schemas; update system prompt; regression-test all agent flows |
-| Spanish copy is machine-translated | HIGH | Author Spanish copy from scratch for P0 pages; machine translation is a starting point, not a finish line |
-| Vercel function timeout | MEDIUM | Add `Promise.all` for parallel fetches; `multicall` for contract reads; add `Cache-Control` header |
-| ISR stale data at demo time | LOW | Trigger on-demand revalidation via `revalidatePath` API call; or lower `revalidate` to 60s |
-| Missing slippage protection (post-audit) | HIGH | Requires contract ABI review, new param encoding, UI change, and re-audit before re-enabling transact |
+| Fork expired mid-judging | MEDIUM | Re-run `provision-buildbear-demo.sh`, update `buildbear-deployments.json`, redeploy frontend to Vercel (or hot-swap artifact via env if build allows) |
+| Shared fork state corrupted (numberOfLegs > 0) | MEDIUM | Re-provision fresh executor via backend `--no-mint` variant; update artifact; judges can retry immediately |
+| Demo signer out of gas | LOW | Call `hardhat_setBalance` on the fork RPC directly (curl command in runbook) to top up; no redeploy needed |
+| Private key found in committed file | HIGH | Rotate key immediately (provision new funder wallet); git-filter-branch to remove key from history; audit all downstream forks |
+| Somnia re-coupled by mistake | LOW (if caught in dev) / HIGH (if caught live) | Identify the Somnia call site; replace with recorded-mandate path; re-test live run against fork only |
+| Artifact addresses stale (executor mismatch) | LOW | Re-run provision script with frontend output path; commit updated artifact; verify via `artifact-loader.ts` required-field check |
+
+---
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Inter Everywhere / AI font slop | Design System | `npx impeccable detect` returns 0 font errors |
-| Purple gradient / AI color palette | Design System | `npx impeccable detect` returns 0 color errors; no `#7c3aed` in codebase |
-| Cardocalypse / side-tab / icon tile | Design System | `npx impeccable detect` returns 0 layout errors; JSX grep |
-| Bounce/elastic easing | Design System | `npx impeccable detect` returns 0 motion errors |
-| Gray text on color / pure black | Design System | axe-core contrast scan passes; impeccable detect passes |
-| Dark glow halos | Design System | `npx impeccable detect` returns 0; no `box-shadow` blur > 40px + color |
-| Oversized italic serif hero | Design System (typography tokens) | `npx impeccable detect` returns 0; no italic serif on h1 |
-| Hero eyebrow chip | Landing Page | `npx impeccable detect` returns 0; no `rounded-full` before h1 |
-| Hero metric layout / gradient text | Landing Page | impeccable detect + manual design review |
-| Identical card grids / SaaS template | Iteration Catalog | Design review; no `repeat(3, 1fr)` over iteration list |
-| AI slop copy | Landing Page | Copy review checklist; banned-word grep |
-| PASS-only visibility (fishing) | Iteration Catalog (data schema) | Data model requires all statuses; filter grep returns 0 |
-| No replication path | Iteration Catalog + Research Presence | `notebook_url` required field; visible on detail pages |
-| Wrong chain context | Protocol Dashboard | Chain context test; all hooks use explicit `chainId` |
-| Wallet state UX hierarchy | Wallet + Transact | State machine test; real-device walkthrough |
-| ABI drift | Scaffold (CI setup) | wagmi CLI codegen; CI diff check passes |
-| Stale balances | Protocol Dashboard + Transact | Query invalidation in every write hook |
-| Token decimal mismatch | Scaffold (formatting utilities) | Unit test for 6-decimal USDC formatting |
-| Single RPC fallback | Scaffold (wagmi config) | wagmi config has `fallback([...])` transport |
-| Gas estimation opaque errors | Wallet + Transact | Typed error handling; revert reason visible in test |
-| Slippage / MEV missing | Wallet + Transact (threat-model review) | `amountOutMin` + `deadline` in all swap calldata |
-| MCP tool granularity | Agent Surface | Tool count 8–15; intent-oriented descriptions |
-| No llms.txt / JSON-LD / OpenAPI | Scaffold + Agent Surface | `curl /llms.txt` returns 200; JSON-LD present on detail pages |
-| Auth blocking public reads | Scaffold (middleware) | Unauthenticated fetch of API routes returns data |
-| Chat hallucination | Conversational Interface | Tool-call trace present on every protocol-state answer |
-| LCP > 2.5s on 3G | Scaffold (perf budget) + every phase | Lighthouse CI assertion `maxNumericValue: 2500` passes |
-| Mobile wallet assumes extension | Wallet + Transact | WalletConnect v2 configured; real Android device test passes |
-| Hero animation on mobile | Landing Page | No Framer Motion on LCP element; `prefers-reduced-motion` respected |
-| Spanish as afterthought | Scaffold (i18n infra) + every phase | `react/jsx-no-literals` lint passes; es-CO messages file has entries |
-| Scope creep before shell ships | Phase 1 (Scaffold) + Phase 2 | Demo critical path test passes on day 7 |
-| Custom indexer over static JSON | Phase 2 (data source decision) | Iteration data loads from static JSON at build time |
-| Vercel function timeout | Protocol Dashboard (route design) | `Promise.all` + `multicall`; `Cache-Control` on API routes |
-| Edge runtime + viem | Scaffold | No `runtime = 'edge'` on API routes importing viem |
-| `NEXT_PUBLIC_` secret leakage | Scaffold | CI grep check passes; `.env.example` commented |
-| Preview RPC not configured | Scaffold (Vercel env config) | Preview deployment shows dashboard data from testnet |
-| ISR stale data across deploys | Iteration Catalog (data fetching design) | On-demand revalidation webhook wired; revalidate ≤ 60s on status pages |
-| Color-only status indicators | Design System | Protanopia emulation test; axe-core scan passes |
-| `outline: none` removal | Design System | stylelint rule; grep returns 0 |
-| Keyboard trap in wallet modal | Wallet + Transact | Manual keyboard test; `@testing-library/user-event` test |
-| Skipped heading levels | Design System (heading component) + every content phase | axe-core heading order check passes; DOM hierarchy verified |
-| Charts without text alternatives | Econometric Results Surface | `aria-label` on every chart; `sr-only` data table present |
-| DeFi/leverage conflation | Landing Page | "hedge" in hero copy; "What this is not" on About page |
+| 1. Shared fork state corruption / numberOfLegs gate | Backend provisioning phase (reset guard + fresh-executor variant) | Run live path twice in sequence; confirm second run does not revert |
+| 2. Pre-funded key in client bundle or repo | Backend provisioning phase (signer API design) | `grep -r "NEXT_PUBLIC_.*KEY\|privateKeyToAccount" packages/frontend/` returns zero results |
+| 3. BuildBear TTL expiry mid-judging | Frontend live-run phase (pre-flight expiry check) + runbook | `isExpired` called in UI boot; `ForkExpiredBanner` visible when TTL passed in test |
+| 4. Silent fallback to replay (anti-fishing) | Frontend live-run phase (failed terminal state in RunState) | Force a RPC error in dev; confirm UI renders failed state, NOT replay mode |
+| 5. Demo signer out of funds | Backend provisioning phase (balance top-up in provision script) | After 5 consecutive test runs, demo signer balance is still above gas threshold |
+| 6. Artifact drift (stale addresses) | Backend provisioning phase (script outputs directly to frontend path) | `git diff packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` shows change after every provision run |
+| 7. Somnia re-coupling | Frontend live-run phase (decoupled upstream task, first in phase) | `grep -r "agent1\|somnia\|50312" packages/frontend/lib/apps/abrigo/cornerstone/workflow-engine.ts` returns zero live-path call sites |
+
+---
 
 ## Sources
 
-- [Impeccable Anti-Patterns](https://impeccable.style/anti-patterns/) — official list of 37 anti-patterns (27 deterministic, 12 LLM-review)
-- [Impeccable Slop](https://impeccable.style/slop/) — full slop rule catalog with descriptions including oversized italic serif and eyebrow chip rules added 2025
-- [Impeccable GitHub](https://github.com/pbakaus/impeccable) — CLI implementation and rule definitions
-- [wagmi FAQ / Troubleshooting](https://wagmi.sh/react/guides/faq) — chain context and multi-connection issues
-- [wagmi TanStack Query Guide](https://wagmi.sh/react/guides/tanstack-query) — query invalidation patterns
-- [Block Engineering: Designing MCP Servers](https://engineering.block.xyz/blog/blocks-playbook-for-designing-mcp-servers) — tool granularity case study (30+ → 2 tools); top-down workflow-first design principle
-- [MCP Tool Granularity](https://medium.com/@pyneuronaut/the-mcp-revolution-how-tool-granularity-can-make-or-break-your-ais-performance-and-cost-d9b5a66182b3) — tool count vs agent performance
-- [Your API Needs an llms.txt File](https://dev.to/vystartasv/your-api-needs-an-llmstxt-file-heres-how-to-write-one-and-why-agents-will-read-it-5epe) — agent-first discoverability
-- [Vercel Function Limitations and Timeouts](https://vercel.com/docs/functions/limitations) — 10s default, 60s max, Fluid Compute for longer operations
-- [Next.js ISR Documentation](https://nextjs.org/docs/app/guides/incremental-static-regeneration) — on-demand revalidation, cache persistence across deploys
-- [Core Web Vitals 2025 Mobile LCP](https://axzlead.com/blog/mastering-mobile-lcp-nextjs-2025) — 2.5s budget on mobile
-- [Opensignal Colombia Mobile Network Report Jan 2025](https://www.opensignal.com/reports/2025/01/colombia/mobile-network-experience) — operator speed benchmarks, coverage gaps
-- [RainbowKit Android deep-link issues](https://github.com/rainbow-me/rainbowkit/issues/892) — WalletConnect mobile pitfalls
-- [TanStack Query Optimistic Updates](https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates) — post-tx invalidation patterns
-- [viem parseUnits / formatUnits discussion](https://github.com/wevm/viem/discussions/490) — decimal handling edge cases
-- [next-intl App Router](https://next-intl.dev/) — i18n for App Router; locale-based routing
-- [WCAG 2.2 SC 1.4.1 Use of Color](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html) — color-only indicator failures
-- [WCAG 2.2 SC 2.4.11 Focus Appearance](https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html) — focus ring requirements
-- [Recharts accessibilityLayer](https://recharts.org/en-US/api) — accessible chart prop
+- Codebase: `packages/frontend/lib/apps/abrigo/cornerstone/` — `artifact-loader.ts`, `buildbear.ts`, `workflow-engine.ts`, `workflow-store.ts`, `mode.ts`
+- `.planning/PROJECT.md` — v3.0 milestone definition and key decisions (especially shared-fork reset guard, BuildBear-only decoupling, pre-funded one-click)
+- `.planning/MILESTONES.md` — v2.0 known gaps (live on-chain RUN deferred; backend cross-repo dep)
+- `packages/backend/docs/UI-AGENT-HANDOFF.md` — system integration context, chain addresses, Somnia/BuildBear split
+- Anti-fishing discipline: `PROJECT.md` context section; `mode.ts` governance comment ("never a silent substitution")
+- Phase-2/6 Turbopack burn (static import requirement): `packages/frontend/CLAUDE.md`
 
 ---
-*Pitfalls research for: Agent-first DeFi research-lab frontend (d2p Finance / DS2P Labs)*
-*Researched: 2026-05-11*
+*Pitfalls research for: shared-fork pre-funded live on-chain demo (v3.0 BuildBear Judge Demo)*
+*Researched: 2026-06-08*

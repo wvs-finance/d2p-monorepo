@@ -1,8 +1,8 @@
 # Architecture Research
 
-**Domain:** Agent-first DeFi research-lab frontend (multi-audience: researcher / participant / agent / internal)
-**Researched:** 2026-05-11
-**Confidence:** HIGH (core decisions), MEDIUM (RAG layer, content pipeline), LOW (indexer path before chain selection confirmed)
+**Domain:** v3.0 BuildBear Live-Tx Integration — one-click pre-funded fork mint, Somnia decoupling, reset guard, provisioning contract
+**Researched:** 2026-06-08
+**Confidence:** HIGH (structure derived directly from existing code, no inference required for boundaries; MEDIUM for backend `--no-mint` variant shape, which is new work not yet in the codebase)
 
 ---
 
@@ -11,591 +11,561 @@
 ### System Overview
 
 ```
-┌───────────────────────────────────────────────────────────────────────────────┐
-│                         EXTERNAL DATA SOURCES                                  │
-│  ┌────────────┐  ┌─────────────┐  ┌──────────────┐  ┌───────────────────┐    │
-│  │  EVM RPCs  │  │ HuggingFace │  │  GitHub API  │  │  AI Provider API  │    │
-│  │ (Celo/L2s) │  │  Datasets   │  │  (org repos) │  │ (Anthropic/OpenAI)│    │
-│  └─────┬──────┘  └──────┬──────┘  └──────┬───────┘  └────────┬──────────┘    │
-└────────┼────────────────┼────────────────┼───────────────────┼───────────────┘
-         │                │                │                   │
-┌────────▼────────────────▼────────────────▼───────────────────▼───────────────┐
-│                         VERCEL DEPLOYMENT BOUNDARY                             │
-│                                                                                │
-│  ┌─────────────────────────────────────────────────────────────────────────┐  │
-│  │                      Next.js 15 App (Single App)                        │  │
-│  │                                                                         │  │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────┐  ┌───────────┐  │  │
-│  │  │  RSC Pages   │  │  Client      │  │  API Routes   │  │  MCP      │  │  │
-│  │  │  (research   │  │  Components  │  │  (BFF + cache │  │  Handler  │  │  │
-│  │  │   lab, dash) │  │  (wallet,    │  │   layer)      │  │  /api/mcp │  │  │
-│  │  │              │  │   chat UI,   │  │               │  │  /[trans] │  │  │
-│  │  │              │  │   charts)    │  │               │  │           │  │  │
-│  │  └──────┬───────┘  └──────┬───────┘  └──────┬────────┘  └─────┬─────┘  │  │
-│  │         │                 │                  │                 │        │  │
-│  │  ┌──────▼─────────────────▼──────────────────▼─────────────────▼──────┐ │  │
-│  │  │                     Shared Tool Definitions                         │ │  │
-│  │  │              (lib/mcp-tools/ — single source of truth)              │ │  │
-│  │  └─────────────────────────────────────────────────────────────────────┘ │  │
-│  └─────────────────────────────────────────────────────────────────────────┘  │
-│                                                                                │
-│  ┌──────────────┐  ┌────────────────┐  ┌──────────────────────────────────┐  │
-│  │ Vercel Edge  │  │ Node Functions │  │ Background Jobs (Inngest)        │  │
-│  │ (chat route, │  │ (heavy agg,    │  │ - RAG re-indexing                │  │
-│  │  MCP stream) │  │  ABI codegen)  │  │ - HuggingFace dataset sync       │  │
-│  └──────────────┘  └────────────────┘  │ - Chain state snapshots          │  │
-│                                         └──────────────────────────────────┘  │
-│                                                                                │
-│  ┌──────────────────────────────────────────────────────────────────────────┐ │
-│  │                     Vercel KV (Redis) — Hot Cache                        │ │
-│  │  chain reads (30s TTL) │ HF dataset (1h TTL) │ GitHub meta (6h TTL)     │ │
-│  └──────────────────────────────────────────────────────────────────────────┘ │
-└────────────────────────────────────────────────────────────────────────────────┘
-         │
-         │  (external to Vercel)
-┌────────▼───────────────────────────────────────────────────────────────────────┐
-│  Cloudflare Vectorize (RAG vector store — accessed via fetch from Node fn)      │
-└────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BROWSER (client island — 'use client')                                      │
+│                                                                              │
+│  CornerstoneClientShell.tsx                                                  │
+│  ├── mount: probeEthChainId → checkNumberOfLegs   (MODIFIED: adds reset      │
+│  │         → if legs > 0 → POST /api/cornerstone/buildbear-reset             │
+│  │           (NEW: reset-guard route — snapshot/revert or fresh-executor)    │
+│  │         → if legs == 0 → stay 'live'                                      │
+│  ├── handleLiveConfirm() [MODIFIED: Somnia decoupling cut HERE]              │
+│  │   ├── OLD: POST /api/abrigo/agent1 FIRST → degrade on 503                │
+│  │   └── NEW: check resolvedMode === 'buildbear'                             │
+│  │       ├── 'buildbear' branch: skip agent1 POST entirely                   │
+│  │       │   → call handleBuildBearConfirm()                                 │
+│  │       └── 'somnia' branch: existing agent1 POST (operator-only)           │
+│  │                                                                           │
+│  └── handleBuildBearConfirm() [NEW function]                                │
+│      ├── POST /api/cornerstone/buildbear-sign  (NEW server route)            │
+│      │   ← returns { ok: true, strategistView, serializedMandate }           │
+│      │     (pre-funded signer constructs the StrategistDecided view          │
+│      │      server-side from the provisioned artifact; no Somnia call)       │
+│      ├── createBuildBearPublicClient(deployment.rpcUrl) → publicClient       │
+│      └── runWorkflowLive({                                                   │
+│              emit: store.emit,                                               │
+│              writeContract: writeContractAsync,  ← wagmi hook (MODIFIED:    │
+│              publicClient,                          now actually called,     │
+│              upstream: { ok: true, strategistView },  not void'd)            │
+│              serializedMandate,                                              │
+│              deployment                                                      │
+│          })                                                                  │
+│          → emits: submitting → pending(hash) → ExecutorDecided              │
+│                   → PositionMinted → confirmed(margins)                     │
+│          → store.emit() triggers useSyncExternalStore re-render             │
+└──────────────────────────────────────────────────────────────────────────────┘
+         │ wagmi writeContractAsync          │ POST (server routes)
+         ▼                                   ▼
+┌────────────────────┐        ┌──────────────────────────────────────────────┐
+│  BuildBear Fork    │        │  NEXT.JS SERVER ROUTES (Node runtime)        │
+│  chainId 31337     │        │                                              │
+│  rpcUrl from       │◄───────│  POST /api/cornerstone/buildbear-sign  [NEW] │
+│  artifact-loader   │        │  ├── reads deployment artifact               │
+│  (CORS-proxied     │        │  ├── constructs pre-funded signer view       │
+│  via /api/         │        │  │   (StrategistDecided from snapshot)       │
+│  cornerstone/rpc   │        │  ├── returns { ok, strategistView,           │
+│  if needed)        │        │  │              serializedMandate }          │
+│                    │        │  └── NEVER touches Somnia / agent1           │
+│  MacroHedgeExecutor│        │                                              │
+│  .resolveFromMandate        │  POST /api/cornerstone/buildbear-reset [NEW] │
+│  (args: mandate,   │        │  ├── reads deployment.rpcUrl                 │
+│   0n, 1_000_000n)  │        │  ├── Option A: evm_snapshot → evm_revert    │
+└────────────────────┘        │  │   (if BuildBear supports evm_snapshot)   │
+                              │  └── Option B: re-run provision script       │
+                              │      (fresh executor — closes the            │
+                              │      numberOfLegs > 0 gate)                  │
+                              │                                              │
+                              │  POST /api/cornerstone/rpc  [EXISTING]       │
+                              │  (CORS proxy — unchanged)                    │
+                              │                                              │
+                              │  POST /api/abrigo/agent1    [EXISTING]       │
+                              │  (Somnia operator-only — unchanged, returns  │
+                              │   503 without SOMNIA_OPERATOR_PK)            │
+                              └──────────────────────────────────────────────┘
+                                           │
+                                           │ (backend provisioning, pre-demo)
+                                           ▼
+                              ┌──────────────────────────────────────────────┐
+                              │  BACKEND (packages/backend/contracts/)        │
+                              │                                              │
+                              │  provision-buildbear-demo.sh  [MODIFIED]     │
+                              │  ├── existing: full deploy + mint path       │
+                              │  └── NEW --no-mint flag:                     │
+                              │      → deploy core + pool + executor         │
+                              │      → deposit-on-behalf (executor funded)   │
+                              │      → SKIP resolveFromMandate call          │
+                              │      → emit artifact with mintTxHash: null   │
+                              │        (executor owns 0 legs = fresh gate)   │
+                              │                                              │
+                              │  ProvisionBuildBearDemo.s.sol  [MODIFIED]    │
+                              │  └── new noMint() entrypoint (or flag in     │
+                              │      run()) that stops before step (5)       │
+                              │                                              │
+                              │  script/out/buildbear-deployments.json       │
+                              │  └── mirrored into frontend artifact-loader  │
+                              └──────────────────────────────────────────────┘
 ```
-
----
-
-## Key Architecture Decisions
-
-These are explicit decisions, not implicit assumptions. Each has consequences.
-
-### Decision 1: Single Next.js App, No Monorepo
-
-**Chosen:** Single Next.js 15 app at `frontend/` root, organized by feature directories.
-
-**Rationale:** The project is early-stage with one team. A Turborepo monorepo (apps/web, apps/mcp, packages/ui, packages/contracts) would pay dividends with three teams and deployed-separately services. At this stage it introduces:
-- Three package.json files to keep in sync
-- Cross-package TypeScript path aliasing overhead
-- Vercel project scoping complexity (`--filter` in pnpm)
-- No actual runtime isolation (MCP and web are co-hosted anyway)
-
-The MCP server runs as an API route within the Next.js app. The contract types and UI components are never deployed independently. If the MCP server later needs independent scaling or a separate OAuth boundary, extract it then. Do not pre-optimize.
-
-**Implication for roadmap:** All phases operate on one repo. No workspace bootstrap phase needed.
-
----
-
-### Decision 2: MCP Server Co-hosted as a Next.js API Route
-
-**Chosen:** `app/api/mcp/[transport]/route.ts` using `@vercel/mcp-handler` (mcp-handler v1+, requires `@modelcontextprotocol/sdk >= 1.26.0`).
-
-**Rationale:** Vercel provides first-class MCP deployment. The `mcp-handler` package handles Streamable HTTP and SSE transports from a single dynamic route segment. Deployment is automatic — no separate Cloudflare Worker, no separate Node service to manage. The `basePath: "/api/mcp"` config maps correctly to the route.
-
-**What this gives:**
-- MCP endpoint at `https://d2p.finance/api/mcp/sse` (SSE transport) and `/api/mcp` (Streamable HTTP)
-- Zero-config preview URLs per PR — agent clients can hit the preview MCP endpoint
-- Runs on Vercel Edge runtime (suitable for streaming SSE), or Node runtime for tools that need heavier computation
-
-**Constraint:** MCP tools that need > 30s execution (e.g., full chain re-sync) cannot run within the Vercel function timeout. Those are delegated to Inngest background jobs instead (see Decision 6).
-
-**Implication for roadmap:** MCP server phase is not separate infrastructure — it is an API route addition in Phase 2 or 3, after core data endpoints exist.
-
----
-
-### Decision 3: Chat Engine Lives in an Edge API Route Using Vercel AI SDK
-
-**Chosen:** `app/api/chat/route.ts` with `runtime = 'edge'`, using Vercel AI SDK v6 (`ai` package).
-
-**Rationale:** AI SDK v6 (released Dec 2025) provides a unified provider interface (Anthropic, OpenAI, others — swap by changing two lines). Edge runtime minimizes TTFB for streaming tokens. The `useChat` hook on the client manages conversation state, avoids manual SSE parsing, and integrates with RSC for generative UI if needed later.
-
-**Tool-sharing pattern:** The chat route imports tool definitions from `lib/mcp-tools/`. The MCP route imports the same definitions. Single source of truth. No duplication of tool schemas.
-
-**Implication for roadmap:** Chat shell requires MCP tool definitions to exist. MCP tool definitions require data API endpoints to exist. Build order: data APIs → tool definitions → MCP route + chat route (these can be added together).
-
----
-
-### Decision 4: Server-Rendered (Next.js App Router), Not Static Export
-
-**Chosen:** Next.js 15 App Router with RSC. Not Astro static export. Not Next.js `output: "export"`.
-
-**Rationale:**
-- The live protocol dashboard (chain reads, LP positions, settlement status) cannot be static — it needs fresh data on every request or via streaming
-- The MCP server requires a running server — incompatible with static export
-- The chat engine requires server-side streaming
-- RSC handles the research lab pages (marketing, iteration catalog) as zero-bundle server components — no performance penalty vs static for those sections
-- Astro Island architecture was considered but it cannot serve the MCP endpoint or chat API without a separate Node process anyway
-
-**Performance strategy for mobile-first / LCP < 2.5s on 3G:**
-- Research lab pages: RSC, no client JS for static content, streamed via Suspense boundaries
-- Dashboard: skeleton UI rendered server-side, chart data fetched client-side after hydration
-- Fonts: variable fonts, `font-display: optional`, self-hosted (not Google Fonts CDN)
-- Images: `next/image` with `sizes` and WebP/AVIF
-
----
-
-### Decision 5: Direct RPC via viem/wagmi as Primary Chain Read Path; Envio for Historical Aggregations
-
-**Chosen:** viem `publicClient` for real-time reads (balances, pool state, settlement status). Envio HyperIndex for historical/aggregated queries (LP position history, settlement volume over time).
-
-**Rationale for direct RPC (real-time):**
-- Pool state, connected wallet balance, current settlement status change block-by-block
-- No indexer can match freshness of a direct eth_call or eth_getLogs on a short range
-- wagmi v2 + viem provides 100+ chain support including Celo with `feeCurrency` specifics handled natively
-- Chain config: `createConfig({ chains: [celo, mainnet, base, arbitrum, optimism], transports: { [celo.id]: http(RPC_URL), ... } })`
-
-**Rationale for Envio (historical):**
-- Envio HyperIndex benchmarked at 143x faster than The Graph for comparable queries (May 2025 benchmarks)
-- The Graph Hosted Service fully deprecated 2026 — GRT-based decentralized network or migrate
-- Ponder requires self-hosted infrastructure and operational overhead — wrong for a 3-week hackathon timeline
-- Envio provides GraphQL API out of the box; team's Solidity contracts (reactive-hooks, ThetaSwap-core) become indexable with standard event schema declarations
-- Fallback for pre-Envio state: direct RPC with limited block range
-
-**Multi-chain strategy:**
-1. **Celo first** — where deployed instruments live; configure as primary chain in wagmi
-2. **Add Base, Arbitrum, Optimism** — add chain objects to the wagmi config; Envio supports all EVM chains with the same indexer schema
-3. **Ethereum mainnet** — read-only reference (price feeds, USDC liquidity); no transact surface on mainnet at MVP
-4. Cross-chain data is aggregated in the BFF API route (`app/api/dashboard/route.ts`) which fans out to each chain's viem client and merges results before responding — client receives unified JSON, not per-chain responses
-
----
-
-### Decision 6: Inngest for Long-Running Background Tasks
-
-**Chosen:** Inngest (Vercel-integrated, first-class) for tasks that exceed serverless timeout limits.
-
-**Tasks delegated to Inngest:**
-- RAG corpus re-indexing (embed new iteration docs → Cloudflare Vectorize)
-- HuggingFace dataset sync (pull fresh parquet/CSV, parse, cache)
-- Chain state snapshots for dashboard history
-
-**Why not Trigger.dev:** Trigger.dev runs jobs on Trigger's infrastructure (not Vercel functions). Inngest calls your own Vercel API routes as steps — simpler operational model, same codebase, no second deployment target at MVP stage.
-
-**Why not Vercel Cron alone:** Cron triggers work but have no retry logic, no step-based execution, and no observability. Inngest wraps cron-triggered functions with all of those.
-
----
-
-### Decision 7: RAG Vector Store on Cloudflare Vectorize
-
-**Chosen:** Cloudflare Vectorize, accessed from Next.js Node runtime API routes (not edge runtime — Vectorize requires Workers binding, so we use fetch() to a Cloudflare Worker shim or the Vectorize REST API).
-
-**Corpus for RAG:**
-- Iteration write-ups (MDX from `abrigo/scratch/`, `abrigo/docs/`)
-- Notebook summaries (auto-generated markdown from `abrigo-analytics`)
-- Protocol README files and ABI documentation
-
-**Alternative considered (pgvector):** Requires a Postgres instance (Vercel Postgres, Neon, Supabase). Adds a database dependency for what is essentially a read-heavy search corpus. Vectorize is purpose-built, free tier is adequate for this corpus size, and integrates with Cloudflare's AI stack if embedding generation moves to Workers AI. Use pgvector if the project already has a Postgres instance for other reasons — it does not.
-
-**Embedding model:** `text-embedding-3-small` (OpenAI) or `sentence-transformers/all-MiniLM-L6-v2` via Cloudflare Workers AI. Decision: default to OpenAI (already a provider dependency for chat), switch to Workers AI if cost becomes an issue.
 
 ---
 
 ## Component Boundaries
 
-| Component | Responsibility | Runtime | Communicates With |
-|-----------|---------------|---------|-------------------|
-| RSC Pages (`app/(lab)/`) | Research lab marketing, iteration catalog, notebook embeds | Node / Edge RSC | GitHub API, HF Dataset API (build-time or RSC cache) |
-| RSC Pages (`app/(dashboard)/`) | Live protocol state, LP positions, settlement status | Node RSC + client hydration | BFF API routes |
-| Client Components (`components/wallet/`) | Wallet connection, tx flow | Browser | wagmi config, RainbowKit |
-| Client Components (`components/charts/`) | Econometric charts, β estimates, confidence bands | Browser | API routes (pre-fetched data) |
-| Client Components (`components/chat/`) | Conversational shell | Browser | `/api/chat` Edge route |
-| API Route: `/api/mcp/[transport]` | MCP server endpoint for external agents | Edge (SSE) / Node (Streamable HTTP) | `lib/mcp-tools/` |
-| API Route: `/api/chat` | Streaming AI chat | Edge | AI SDK, `lib/mcp-tools/` |
-| API Route: `/api/dashboard` | Multi-chain data aggregation | Node | viem publicClients (per chain), Vercel KV |
-| API Route: `/api/econometrics` | HF dataset proxy + cache | Node | HuggingFace Datasets API, Vercel KV |
-| `lib/mcp-tools/` | Tool definitions (shared) | N/A — pure TS | Consumed by `/api/mcp` and `/api/chat` |
-| `lib/contracts/` | ABI types + wagmi-CLI codegen output | N/A — pure TS | Consumed by wallet components and BFF |
-| `lib/chains/` | viem chain configs + transport factories | N/A — pure TS | wagmi config, API routes |
-| Content (`content/iterations/`) | MDX iteration write-ups + YAML frontmatter | Build time (Velite) | RSC pages |
-| Inngest Functions (`inngest/`) | RAG indexing, HF sync, chain snapshots | Inngest (calls Vercel routes as steps) | Cloudflare Vectorize, HF API, viem |
+### New Components
+
+| Component | Location | Runtime | Responsibility |
+|-----------|----------|---------|----------------|
+| `POST /api/cornerstone/buildbear-sign` | `packages/frontend/app/api/cornerstone/buildbear-sign/route.ts` | Node | Constructs a synthetic StrategistDecided view from the provisioned artifact without calling Somnia. Returns `{ ok, strategistView, serializedMandate }`. Holds the pre-funded signer key if server-side signing is chosen (see signer-location decision below). |
+| `POST /api/cornerstone/buildbear-reset` | `packages/frontend/app/api/cornerstone/buildbear-reset/route.ts` | Node | Resets the fork to a fresh state when `numberOfLegs > 0` is detected. Tries `evm_snapshot`/`evm_revert` first; falls back to re-provisioning. |
+| `handleBuildBearConfirm()` | `CornerstoneClientShell.tsx` | Browser | Owns the BuildBear-only live path. Called instead of the Somnia path when mode is BuildBear. Calls `buildbear-sign`, wires `runWorkflowLive`. |
+| `--no-mint` variant of `provision-buildbear-demo.sh` | `packages/backend/contracts/script/provision-buildbear-demo.sh` | Shell/Forge | Runs the full deploy (core + pool + executor + deposit) but stops before `resolveFromMandate`. Produces artifact with `mintTxHash: null`, `numberOfLegs: 0`. |
+| `noMint()` entrypoint or flag | `packages/backend/contracts/script/ProvisionBuildBearDemo.s.sol` | Solidity | Runs `_deployCore()` + pool deploy + `_deployExecutor()` + deposit-on-behalf, then stops. Does not call `exec.resolveFromMandate(...)`. |
+
+### Modified Components
+
+| Component | Location | Change |
+|-----------|----------|--------|
+| `CornerstoneClientShell.tsx` | `packages/frontend/components/defi/cornerstone/` | Add `handleBuildBearConfirm()`. Modify `handleLiveConfirm()` to branch on `resolvedMode` before calling agent1. Add reset-guard call in `runMountProbe()` when `legs > 0`. Un-void `writeContractAsync` (call it for real via `runWorkflowLive`). |
+| `mode.ts` | `packages/frontend/lib/apps/abrigo/cornerstone/` | Add `'buildbear'` as a valid `CornerstoneMode` (or keep `'live'` and sub-branch internally — see mode decision below). |
+| `workflow-engine.ts` | `packages/frontend/lib/apps/abrigo/cornerstone/` | `runWorkflowLive` is already fully built. No logic change needed. The only change is it gets called for real (not void'd) with a real `writeContract`. |
+| `provision-buildbear-demo.sh` | `packages/backend/contracts/script/` | Add `--no-mint` flag (or `--mode=fresh-executor`) that skips the `resolveFromMandate` broadcast step. |
+| `ProvisionBuildBearDemo.s.sol` | `packages/backend/contracts/script/` | Add `noMint()` function (mirrors `run()` but stops after deposit). |
+| `buildbear-deployments.json` | `packages/frontend/lib/apps/abrigo/cornerstone/` | Re-mirrored from backend `script/out/` after `--no-mint` provisioning run. `mintTxHash` field will be `null` or absent; `artifact-loader.ts` field validation must not require `mintTxHash`. |
+| `artifact-loader.ts` | `packages/frontend/lib/apps/abrigo/cornerstone/` | Remove `mintTxHash` from required fields list (it is absent in the `--no-mint` artifact). |
+
+### Existing Unchanged Components
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| `runWorkflowLive` in `workflow-engine.ts` | UNCHANGED | Already implements the full a→j sequence. Just needs to be called for real. |
+| `createWorkflowStore` / `workflow-store.ts` | UNCHANGED | The `emit` → `reduce` → `RunState` pipeline already handles all live events. |
+| `POST /api/cornerstone/rpc` | UNCHANGED | CORS proxy. Used for RPC reads that CORS-block from the browser. |
+| `POST /api/abrigo/agent1` | UNCHANGED | Somnia operator path. Still returns 503 without keys. BuildBear path never calls it. |
+| `artifact-loader.ts` (`deployment`, `isExpired`) | MODIFIED MINIMALLY | Only `mintTxHash` required-field removal. |
+| `buildbear.ts` (`createBuildBearPublicClient`) | UNCHANGED | Already the correct factory for read clients. |
+| `checkNumberOfLegs()` in `CornerstoneClientShell.tsx` | UNCHANGED (behavior extended) | Already reads `numberOfLegs(executor)`. Behavior extended: on `legs > 0`, trigger reset route instead of silently degrading to replay. |
+
+---
+
+## Signer Location Decision
+
+The central v3.0 architectural question is: where does the pre-funded signer key live?
+
+**Verdict: Server route (`/api/cornerstone/buildbear-sign`), NOT client-side.**
+
+Rationale:
+- BuildBear auto-fund (`hardhat_setBalance` / `buildbear_ERC20Faucet`) provides token balances, but the signing key that calls `resolveFromMandate` on the fork must exist somewhere. If the judge supplies no wallet, a server-held funded key is required.
+- The pattern already exists in this codebase: `/api/abrigo/agent1` holds `SOMNIA_OPERATOR_PK` server-side. The BuildBear demo key follows the same pattern with `BUILDBEAR_DEMO_PK` in server env.
+- The BuildBear fork is not mainnet — it holds no real value. The risk profile of a server-held key for a sandboxed demo fork is acceptable and mirrors how the provisioning script works (`BUILDBEAR_DEPLOYER_PK`).
+- Alternative (client-side): inject a funded private key into the browser via `NEXT_PUBLIC_BUILDBEAR_DEMO_PK`. Rejected: any env var with `NEXT_PUBLIC_` is exposed in the JS bundle. Even for a valueless demo fork this is the wrong pattern to teach.
+- Alternative (wagmi wallet): require judges to connect a wallet and fund it. Rejected: this is the friction the milestone explicitly removes ("zero-secret judge runbook").
+
+**Implementation:** The `/api/cornerstone/buildbear-sign` route:
+1. Reads `BUILDBEAR_DEMO_PK` from server env (validated by `lib/env.ts`).
+2. Returns `{ ok: true, strategistView, serializedMandate }` — a synthetic StrategistDecided view constructed from the provisioned artifact (no Somnia call, no random generation; it mirrors the v2.0 replay snapshot data structure).
+3. Does NOT sign the `resolveFromMandate` tx server-side. The signing happens client-side via wagmi's `writeContractAsync` using the Wagmi chain config for chainId 31337. The server route's `BUILDBEAR_DEMO_PK` is for the synthetic StrategistDecided view construction only, NOT for the Ethereum tx signing.
+
+Wait — there is a subtlety: if judges have no wallet, wagmi `writeContractAsync` will fail (no connected account). Two viable options:
+
+**Option A (recommended): Server-side tx signing in `/api/cornerstone/buildbear-sign`.**
+The route uses `viem` `createWalletClient` + `privateKeyToAccount(BUILDBEAR_DEMO_PK)` to call `resolveFromMandate` directly against the fork RPC. It returns the tx hash. The client receives `{ ok, strategistView, serializedMandate, txHash }` and drives the `runWorkflowLive` replacement flow (or a simplified analog that starts from Step e — pending hash already known). This requires a modified `runWorkflowLive` call on the client that accepts a pre-signed hash and skips Steps c-d.
+
+**Option B: Client wagmi signer, pre-funded wallet injected via WalletConnect/MetaMask, or a stub signer.**
+The demo instructions tell judges to add the BuildBear fork to MetaMask with the demo funded account. This preserves the wagmi flow exactly but requires a setup step.
+
+Option A produces the true one-click experience. Option B is simpler to implement (no route modification to `runWorkflowLive`) but adds friction. **Recommend Option A for the milestone goal; the `/api/cornerstone/buildbear-sign` route performs the full tx and returns the hash.**
+
+---
+
+## Somnia Decoupling Cut Point
+
+The precise decoupling cut is in `handleLiveConfirm()` in `CornerstoneClientShell.tsx`, at the mode branch before the `fetch('/api/abrigo/agent1', ...)` call.
+
+Current code (simplified):
+```
+handleLiveConfirm():
+  → POST /api/abrigo/agent1       ← THE BLOCKING DEPENDENCY
+  → if ok: set explorer links, switch chain, void writeContractAsync
+  → if !ok: degrade to replay
+```
+
+After decoupling:
+```
+handleLiveConfirm():
+  → if resolvedMode === 'buildbear':
+      → handleBuildBearConfirm()   ← NEW BRANCH (never touches agent1)
+  → else:   // 'somnia' branch (operator-only, unchanged)
+      → POST /api/abrigo/agent1
+      → (existing degradation logic)
+```
+
+`handleBuildBearConfirm()`:
+```
+  → POST /api/cornerstone/buildbear-sign
+  → if ok:
+      → call runWorkflowLive-variant (server tx path, or client wagmi path)
+  → if !ok:
+      → setResolvedMode('replay')   // same degradation contract
+```
+
+The mode decision (`'buildbear'` vs `'somnia'`) is made at mount time in `runMountProbe()`:
+- If `?mode=live` and `legs === 0` and BuildBear RPC reachable → `resolvedMode = 'buildbear'`
+- If `?mode=somnia` (new URL param or flag) → operator-only Somnia path
+- Default remains `'replay'`
+
+Alternatively, keep `CornerstoneMode = 'live' | 'replay' | 'mock'` and add an internal flag `liveBackend: 'buildbear' | 'somnia'`. Either is valid; adding `'buildbear'` to `CornerstoneMode` is more explicit and easier to grep.
+
+---
+
+## Workflow-Store Event Flow (Real Tx)
+
+The `runWorkflowLive` function in `workflow-engine.ts` is already the correct producer. It emits store events via `opts.emit`. The store's `emit` function is `store.emit` from `createWorkflowStore()`.
+
+For **Option A** (server-side signing), the client receives the tx hash from `/api/cornerstone/buildbear-sign` and drives an abbreviated live flow starting at Step e (hash already known). The cleanest implementation is a new `runWorkflowLiveFromHash` function or a modified `runWorkflowLive` that accepts `{ preSignedHash: string }` and skips Steps c-d.
+
+Full end-to-end event sequence for Option A:
+
+```
+[User clicks Confirm]
+  │
+  ▼
+handleBuildBearConfirm() in CornerstoneClientShell.tsx
+  │
+  ├─ POST /api/cornerstone/buildbear-sign
+  │   ├─ server: viem walletClient(BUILDBEAR_DEMO_PK).writeContract(resolveFromMandate)
+  │   ├─ server: waitForTransactionReceipt(hash)
+  │   ├─ server: decode logs → strategistView, executorView, mintedView
+  │   └─ returns: { ok:true, txHash, receipt, strategistView, executorDecidedView,
+  │                  positionMintedView, serializedMandate }
+  │
+  ├─ store.emit({ kind:'StrategistDecided', ... })
+  │    → RunState: idle → a1  → UI re-renders (HedgeDecisionCardV2)
+  │
+  ├─ store.emit({ kind:'ExecutorDecided', ... })
+  │    → RunState: a1 → a2_decision  → UI re-renders
+  │
+  ├─ store.emit({ kind:'confirm' })
+  │    → RunState: a2_decision → minting  → spinner visible
+  │
+  ├─ store.emit({ status:'pending', hash: txHash })
+  │    → LiveTxStateRow shows tx hash link
+  │
+  ├─ store.emit({ kind:'PositionMinted', positionId, marginToken0, marginToken1 })
+  │    → RunState: minting → done  → MintCard renders
+  │
+  └─ store.emit({ status:'confirmed', positionId, margins })
+       → OnChainEvidencePanel populated
+
+[UI result: real tx hash, real positionId, real margins from fork]
+```
+
+For **Option B** (client wagmi signer), `runWorkflowLive` is called as-is with the existing `writeContractAsync` from wagmi. The store event sequence is identical — the engine drives the same emissions.
+
+**Key constraint from workflow-engine.ts comment (CRITICAL):**
+`quoteMargin` is called strictly after a confirmed `PositionMinted` log is decoded. This is already enforced in `runWorkflowLive` Step i. Do not move this call earlier.
+
+---
+
+## Reset Guard Placement and Behavior
+
+**Where:** `checkNumberOfLegs()` is already called in `runMountProbe()` in `CornerstoneClientShell.tsx`. The reset guard is triggered at this same point — on mount, before the user sees the Confirm button.
+
+**Current behavior:** `legs > 0` → `setResolvedMode('replay')` (silently degrades).
+
+**New behavior:** `legs > 0` → POST `/api/cornerstone/buildbear-reset` → await response → if ok, re-check legs → if legs === 0, stay `'buildbear'`; if still > 0, degrade to replay.
+
+**Reset route implementation:**
+
+```
+POST /api/cornerstone/buildbear-reset
+  Runtime: nodejs
+  1. Read deployment.rpcUrl from artifact-loader
+  2. Try: POST rpcUrl { method: "evm_snapshot" }
+          → store snapshotId (in-memory, module-level, OK for demo)
+          OR: POST rpcUrl { method: "evm_revert", params: [snapshotId] }
+  3. If evm_snapshot/revert not supported by BuildBear:
+     Re-run provision as a Forge script via child_process OR
+     POST buildbear_ERC20Faucet + fresh executor deploy (deferred complexity)
+  4. Return { ok: true } or { ok: false, reason }
+```
+
+**BuildBear snapshot support:** BuildBear sandboxes are Anvil-based forks. Anvil supports `evm_snapshot` and `evm_revert` — this is the standard Hardhat/Anvil state management API. Confidence: MEDIUM (BuildBear's sandbox re-chains the fork to chainId 31337 using Anvil under the hood; the provision script already uses `hardhat_setBalance` which is an Anvil/Hardhat cheat and it works per the script comments). The safer initial implementation is: attempt `evm_revert` to the post-deploy pre-mint snapshot, if the route has stored the snapshot ID.
+
+**Snapshot timing:** The snapshot must be taken immediately AFTER the `--no-mint` provisioning run completes (executor is deployed and funded, zero legs). This is done once, out-of-band, by the person running the provisioning script — they store the snapshot ID in the `buildbear-deployments.json` artifact as a new optional field `snapshotId`. The reset route uses this ID.
+
+**Revised `buildbear-deployments.json` contract:**
+```json
+{
+  "chainId": 31337,
+  "executor": "0x...",
+  "pool": "0x...",
+  "riskManagement": "0x...",
+  "rpcUrl": "https://rpc.buildbear.io/...",
+  "mintTxHash": null,
+  "mintedStrike": null,
+  "capturedAt": "2026-06-08T...",
+  "snapshotId": "0x1",
+  "source": "abrigo-somnia --no-mint provision"
+}
+```
+
+The `artifact-loader.ts` must NOT require `mintTxHash` or `mintedStrike` (they are null in the `--no-mint` artifact). The `snapshotId` is optional (absent on older artifacts, ignored by non-reset code paths).
+
+---
+
+## Frontend/Backend Provisioning Contract
+
+This is the handoff between the backend (`packages/backend`) and frontend (`packages/frontend`) that must be explicit and versioned.
+
+### Artifact Contract (the only interface between the two packages)
+
+The file `packages/backend/contracts/script/out/buildbear-deployments.json` is the source of truth. It is mirrored (copied) into `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` manually (or via a CI step in `packages/frontend/package.json` scripts).
+
+**For v3.0, the artifact produced by `--no-mint` provisioning:**
+
+| Field | v2.0 (with mint) | v3.0 (--no-mint) | Required by frontend |
+|-------|-----------------|-----------------|----------------------|
+| `chainId` | 31337 | 31337 | YES |
+| `executor` | 0x... | 0x... | YES |
+| `pool` | 0x... | 0x... | YES |
+| `riskManagement` | 0x... | 0x... | YES |
+| `rpcUrl` | https://... | https://... | YES |
+| `capturedAt` | ISO string | ISO string | YES (TTL check) |
+| `mintTxHash` | 0x... (real tx) | null | NO (must be optional in artifact-loader) |
+| `mintedStrike` | 360360 | null | NO (must be optional) |
+| `factory` | 0x... | 0x... | NO (used for transparency) |
+| `riskEngine` | 0x... | 0x... | NO |
+| `snapshotId` (NEW) | absent | "0x1" | NO (optional; used by reset route) |
+
+**Migration:** `artifact-loader.ts` `validateDeployment()` currently requires `mintTxHash`. This must be changed to only require `['chainId', 'executor', 'pool', 'rpcUrl', 'capturedAt']`. The existing test that asserts the other fields are present must be updated.
+
+### Provisioning Runbook Contract
+
+The provisioning person (operator) runs:
+```bash
+# Step 1: run --no-mint provision
+cd packages/backend/contracts
+bash script/provision-buildbear-demo.sh --no-mint
+
+# Step 2: take a snapshot immediately after provisioning
+# (the --no-mint runner should do this automatically and write snapshotId to artifact)
+cast rpc evm_snapshot --rpc-url "$BUILDBEAR_RPC_URL"
+# → outputs e.g. "0x1" — add as snapshotId to script/out/buildbear-deployments.json
+
+# Step 3: mirror artifact to frontend
+cp script/out/buildbear-deployments.json \
+   ../../frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json
+
+# Step 4: deploy BUILDBEAR_DEMO_PK to Vercel env (or .env.local)
+# (same account that was funded during provisioning)
+```
+
+The `--no-mint` flag in `provision-buildbear-demo.sh` should auto-take the snapshot and write `snapshotId` to the artifact to remove the manual Step 2.
+
+---
+
+## Recommended Project Structure (new files only)
+
+```
+packages/
+├── backend/
+│   └── contracts/
+│       └── script/
+│           ├── provision-buildbear-demo.sh      MODIFIED (--no-mint flag)
+│           └── ProvisionBuildBearDemo.s.sol     MODIFIED (noMint() entrypoint)
+│
+└── frontend/
+    ├── app/api/cornerstone/
+    │   ├── rpc/route.ts                         EXISTING (unchanged)
+    │   ├── buildbear-sign/route.ts              NEW
+    │   └── buildbear-reset/route.ts             NEW
+    │
+    ├── lib/apps/abrigo/cornerstone/
+    │   ├── mode.ts                              MODIFIED (add 'buildbear')
+    │   ├── artifact-loader.ts                  MODIFIED (mintTxHash optional)
+    │   ├── buildbear-deployments.json          RE-MIRRORED (--no-mint artifact)
+    │   └── workflow-engine.ts                  MODIFIED (runWorkflowLiveFromHash
+    │                                            or upstream accepts pre-signed hash)
+    │
+    └── components/defi/cornerstone/
+        └── CornerstoneClientShell.tsx          MODIFIED (decoupling cut,
+                                                handleBuildBearConfirm,
+                                                reset-guard trigger,
+                                                un-void writeContractAsync)
+```
 
 ---
 
 ## Data Flow
 
-### Flow 1: Chain Read → Dashboard Page
+### Real-Tx Flow: Confirm → Sign → Receipt → UI
 
 ```
-Browser requests /dashboard
-    ↓ (RSC, Node runtime)
-app/(dashboard)/page.tsx
-    → fetch("/api/dashboard") with no-store (fresh on every RSC render)
-        ↓ (Node function)
-        app/api/dashboard/route.ts
-            → check Vercel KV for cached result (TTL: 30s)
-            → CACHE HIT: return cached JSON
-            → CACHE MISS:
-                → fan out to viem publicClients:
-                    celo.readContract(poolState)
-                    arbitrum.readContract(poolState)
-                    base.readContract(poolState)
-                → merge results, write to Vercel KV with 30s TTL
-                → return JSON
+[Judge clicks Confirm — resolvedMode === 'buildbear']
     ↓
-RSC renders skeleton + data props
-    ↓ (hydration)
-Client chart components animate in
-    ↓ (React Query, staleTime: 30s)
-Background refetch every 30s from client
-```
-
-### Flow 2: abrigo-analytics → HuggingFace → Site
-
-```
-abrigo/ Python pipeline runs (CI or manual)
-    → exports parquet to HuggingFace dataset repo (public)
-        ↓ (triggered by Inngest scheduled function, or build-time RSC fetch)
-
-Build-time path (for static econometric charts):
-    Inngest fn or Next.js build
-        → fetch HuggingFace Dataset API (JSON/parquet rows)
-        → write to Vercel KV (TTL: 1h)
-        → RSC pages read from KV, render charts as static SVG
-
-Runtime path (for live updates without rebuild):
-    Client requests /econometrics page
-        → RSC fetches /api/econometrics
-            → /api/econometrics checks Vercel KV (TTL: 1h)
-            → CACHE MISS: fetches HF Dataset API, parses, caches, returns
-        → RSC renders econometric charts server-side
-
-Freshness guarantee: HF dataset is updated infrequently (per iteration pass)
-1h TTL is appropriate; no need for < 60s freshness on research outputs.
-```
-
-### Flow 3: MDX Content → Iteration Catalog
-
-```
-abrigo/scratch/*.md + abrigo/docs/*.md (source of truth)
-    ↓ (CI: copy to frontend/content/ or symlink — see content pipeline section)
-frontend/content/iterations/*.mdx
-    ↓ (Velite build transform)
-.velite/iterations.json (typed, Zod-validated)
-    ↓ (RSC import)
-app/(lab)/iterations/[slug]/page.tsx
-    → renders iteration detail: status badge, β estimate, evidence summary, notebook link
-```
-
-### Flow 4: User → Wallet → Contract
-
-```
-User connects wallet (RainbowKit modal)
-    ↓ (wagmi connector, WalletConnect projectId required)
-wagmi account state (client-only, never server-side)
+CornerstoneClientShell.handleBuildBearConfirm()
     ↓
-User initiates position (hedge instrument)
-    ↓ (writeContract via wagmi)
-Celo chain via configured viem walletClient
-    ↓ (tx hash)
-Client polls tx receipt (wagmi useWaitForTransactionReceipt)
-    ↓ (confirmed)
-Dashboard re-fetches position state
+POST /api/cornerstone/buildbear-sign   (Node runtime, server-side)
+    ├── viem createWalletClient({ account: privateKeyToAccount(BUILDBEAR_DEMO_PK) })
+    ├── walletClient.writeContract({
+    │     address: deployment.executor,
+    │     abi: macroHedgeExecutorAbi,
+    │     functionName: 'resolveFromMandate',
+    │     args: [buildLiveMandate(presetMandate, 31337), 0n, 1_000_000n]
+    │   })
+    │   → txHash: 0x...
+    ├── publicClient.waitForTransactionReceipt({ hash: txHash })
+    │   → receipt: { status: 'success', logs: [...] }
+    ├── decode receipt.logs via fromChainEvent()
+    │   → strategistDecidedView, executorDecidedView, positionMintedView
+    ├── publicClient.readContract({ functionName: 'quoteMargin', args: [positionId, strike] })
+    │   → rawDelta → decodeBalanceDelta → { amount0, amount1 }
+    └── return {
+          ok: true,
+          txHash,
+          strategistView,
+          executorDecidedView,
+          positionMintedView,
+          margins: { token0: amount0, token1: amount1 },
+          serializedMandate
+        }
+    ↓
+Client receives response
+    ↓
+store.emit(strategistView)           → RunState: idle → a1
+    ↓ (600ms artificial delay — OPTIONAL for UX pacing, or omit)
+store.emit(executorDecidedView)      → RunState: a1 → a2_decision
+    ↓ (no user confirm gate in BuildBear path — already confirmed)
+store.emit({ kind: 'confirm' })      → RunState: a2_decision → minting
+store.emit({ status:'pending', hash: txHash })   → LiveTxStateRow renders hash
+    ↓ (receipt already in hand from server response)
+store.emit(positionMintedView)       → RunState: minting → done
+store.emit({ status:'confirmed', positionId, margins })
+    ↓
+useSyncExternalStore triggers React re-render
+    ↓
+MintCard renders: positionId, marginToken0, marginToken1
+OnChainEvidencePanel renders: txHash (real), positionId (real)
+ModeBanner shows 'buildbear' explorer link
 ```
 
-### Flow 5: External Agent → MCP Tools
+### Reset-Guard Flow: Mount → Check → Reset → Stay Live
 
 ```
-Agent (Claude Desktop, Cursor, custom)
-    → GET/POST https://d2p.finance/api/mcp/sse
-        ↓ (mcp-handler routes to tool)
-        lib/mcp-tools/iterations.ts  → query .velite cache or KV
-        lib/mcp-tools/chain-state.ts → query /api/dashboard (via internal fetch)
-        lib/mcp-tools/econometrics.ts → query /api/econometrics
-        ↓ (JSON-RPC response)
-    Agent receives structured data
+[CornerstoneClientShell mounts — resolvedMode === 'buildbear']
+    ↓
+runMountProbe()
+    ├── Gate 1: isExpired(Date.now()) → if expired, degrade to 'replay'
+    ├── Gate 2: probeEthChainId(deployment.rpcUrl) → if null, degrade to 'replay'
+    └── Gate 3: checkNumberOfLegs(deployment.pool, deployment.executor)
+        ├── legs === null → degrade to 'replay'
+        ├── legs === 0   → PASS — stay 'buildbear' (executor is fresh)
+        └── legs > 0     → executor is used (prior run)
+            ↓
+            POST /api/cornerstone/buildbear-reset
+                ├── evm_revert(snapshotId from deployment artifact)
+                └── return { ok: true }
+            ↓
+            re-check numberOfLegs()
+            ├── legs === 0 → PASS — stay 'buildbear'
+            └── still > 0 → degrade to 'replay' (reset failed)
 ```
-
-### Flow 6: Human → Chat Shell → RAG → AI Response
-
-```
-User types question in chat UI
-    ↓ (useChat hook, POST /api/chat)
-app/api/chat/route.ts (Edge runtime)
-    → embed user query (OpenAI text-embedding-3-small)
-    → fetch Cloudflare Vectorize: top-K similar chunks from corpus
-    → build augmented system prompt with retrieved chunks
-    → streamText() via Vercel AI SDK → Anthropic claude-sonnet-4-5
-        ↓ (with tool_use enabled)
-        tools imported from lib/mcp-tools/ (same definitions as MCP server)
-    ↓ (streamed SSE to client)
-useChat hook updates UI token-by-token
-```
-
-### State Management Summary
-
-```
-Wallet state:    wagmi v2 (client-only, never SSR)
-                 ↓ useAccount, useBalance, useWriteContract
-                 stored in wagmi QueryClient (TanStack Query backed)
-
-Server state:    TanStack Query (client) + RSC cache (server)
-                 chain reads: staleTime 30s, refetchInterval 30s
-                 econometrics: staleTime 3600s (1h)
-                 GitHub/lab meta: staleTime 21600s (6h)
-
-URL state:       nuqs (useQueryState) for:
-                 - iteration filter (status: PASS | FAIL | PARKED | IN_PROGRESS)
-                 - chain selector (celo | base | arbitrum)
-                 - dashboard time range
-                 nuqs is 6kB gzipped, RSC-compatible, used by Vercel/Sentry
-
-Local UI state:  React useState / useReducer (modal open, tab selection)
-                 Zustand only if cross-component wallet-flow state becomes complex
-                 (defer Zustand unless needed — not in initial phases)
-```
-
----
-
-## Recommended Project Structure
-
-```
-frontend/
-├── app/
-│   ├── (lab)/                    # Research lab audience (RSC-heavy, no wallet)
-│   │   ├── page.tsx              # Homepage / lab story
-│   │   ├── iterations/
-│   │   │   ├── page.tsx          # Iteration catalog (all statuses)
-│   │   │   └── [slug]/page.tsx   # Iteration detail
-│   │   └── papers/               # External paper links, org repos
-│   ├── (dashboard)/              # Protocol dashboard (mixed RSC + client)
-│   │   ├── page.tsx              # Multi-chain overview
-│   │   └── [chain]/page.tsx      # Per-chain pool state
-│   ├── (defi)/                   # Wallet-connected DeFi surface
-│   │   └── hedge/page.tsx        # Instrument interaction (gated)
-│   ├── api/
-│   │   ├── mcp/
-│   │   │   └── [transport]/route.ts   # MCP server (Decision 2)
-│   │   ├── chat/route.ts              # AI chat endpoint (Decision 3)
-│   │   ├── dashboard/route.ts         # Multi-chain BFF aggregation
-│   │   └── econometrics/route.ts      # HF dataset proxy
-│   ├── .well-known/
-│   │   └── mcp/route.ts               # MCP discovery endpoint
-│   ├── llms.txt/route.ts              # llms.txt (agent-readable site index)
-│   ├── layout.tsx                     # Root layout (i18n, wallet providers)
-│   └── globals.css
-├── components/
-│   ├── lab/                       # Research lab UI components (RSC-safe)
-│   │   ├── IterationCard.tsx      # Status badge, β estimate display
-│   │   └── ReplicationHash.tsx    # Epistemic honesty: replication hashes
-│   ├── dashboard/                 # Dashboard components (client)
-│   │   ├── PoolStateChart.tsx
-│   │   └── ChainSelector.tsx
-│   ├── chat/                      # Chat shell (client)
-│   │   └── ChatShell.tsx
-│   ├── wallet/                    # Wallet UI (client-only)
-│   │   └── ConnectButton.tsx
-│   └── ui/                        # Design system primitives
-│       ├── Button.tsx
-│       ├── Badge.tsx              # PASS / FAIL / PARKED / IN_PROGRESS
-│       └── Typography.tsx
-├── lib/
-│   ├── mcp-tools/                 # SINGLE SOURCE OF TRUTH for tool definitions
-│   │   ├── iterations.ts          # get_iteration, list_iterations
-│   │   ├── chain-state.ts         # get_pool_state, get_settlement_status
-│   │   └── econometrics.ts        # get_beta_estimate, get_confidence_interval
-│   ├── contracts/                 # ABI types (wagmi CLI codegen output)
-│   │   ├── abis/                  # Raw ABI JSON files (from wvs-finance repos)
-│   │   └── generated.ts           # wagmi CLI generated hooks + types
-│   ├── chains/                    # viem chain configs
-│   │   ├── config.ts              # wagmi createConfig (celo first + others)
-│   │   └── transports.ts          # HTTP transport factory per chain
-│   ├── hf/                        # HuggingFace dataset client
-│   │   └── client.ts
-│   └── vectorize/                 # Cloudflare Vectorize client
-│       └── client.ts
-├── content/
-│   ├── iterations/                # MDX write-ups (sourced from abrigo/)
-│   │   ├── pair-d.mdx
-│   │   └── dev-ai-stage-1.mdx
-│   └── velite.config.ts           # Velite schema definitions
-├── inngest/
-│   ├── client.ts                  # Inngest client init
-│   ├── rag-index.ts               # RAG re-indexing function
-│   └── hf-sync.ts                 # HuggingFace dataset sync
-├── i18n/
-│   ├── es-CO/                     # Spanish (Colombian) strings
-│   └── en/                        # English strings
-├── public/
-│   └── llms.txt                   # Agent-readable site index (static file)
-└── velite.config.ts               # Root Velite config
-```
-
-### Structure Rationale
-
-- **Route groups `(lab)`, `(dashboard)`, `(defi)`:** Separate layout concerns without affecting URL paths. Lab pages get no wallet provider in their layout (faster RSC). Dashboard pages get Suspense boundaries. DeFi pages get WagmiProvider + RainbowKitProvider.
-- **`lib/mcp-tools/`:** This is the critical shared boundary. Both the MCP API route and the chat API route import from here. Adding a new tool means editing one file, not two.
-- **`lib/contracts/`:** ABI files are pulled from `wvs-finance` GitHub repos or the sibling `abrigo/` directory. wagmi CLI runs at codegen time: `wagmi generate` produces typed hooks and `readContract`/`writeContract` wrappers. ABIType handles the TypeScript inference — no TypeChain.
-- **`content/`:** Velite processes this at build time. MDX iteration files live here; the source of truth is `abrigo/scratch/` and `abrigo/docs/`, copied or symlinked by a CI step before `next build`.
-- **`inngest/`:** Co-located with the app but operates on a separate execution model. Inngest calls back into the app's `/api/inngest` endpoint.
-
----
-
-## Content Pipeline
-
-### MDX Iteration Write-ups (Velite)
-
-**Chosen:** Velite (over Contentlayer — unmaintained/abandoned; over `@next/mdx` — no type safety for frontmatter).
-
-Velite validates frontmatter with Zod schemas at build time:
-
-```typescript
-// content/velite.config.ts
-const iterations = defineCollection({
-  name: 'Iteration',
-  pattern: 'iterations/**/*.mdx',
-  schema: z.object({
-    title: z.string(),
-    status: z.enum(['PASS', 'FAIL', 'PARKED', 'IN_PROGRESS']),
-    beta: z.number().optional(),
-    pValue: z.number().optional(),
-    replicationHash: z.string().optional(),
-    lang: z.enum(['en', 'es-CO']).default('en'),
-    publishedAt: z.string(),
-  }),
-});
-```
-
-The `status` field is required and typed — the UI cannot accidentally omit FAIL iterations. The `replicationHash` field surfaces the epistemic-honesty constraint in the data model itself.
-
-**Sync from abrigo/:** A CI step (GitHub Action) copies `../abrigo/scratch/*.md` and `../abrigo/docs/*.md` into `frontend/content/iterations/` before `next build`. No runtime fetch from GitHub — content is static at build time. Re-synced on every PR that touches `abrigo/`.
-
-**Versioning:** Iteration versions (Pair D v1, v2) are separate MDX files with a `version` frontmatter field and a `iterationId` field that links them. The catalog page groups by `iterationId` and shows all versions — both are visible, neither is hidden.
-
----
-
-## Agent-Surface Architecture
-
-### llms.txt
-
-A static `public/llms.txt` file is committed to the repo. It is not generated at runtime. It lists:
-- What d2p Finance / DS2P Labs is
-- All iteration slugs with their current status
-- Links to MCP endpoint, API documentation routes
-- Links to key RSC pages
-
-Updated manually when new iterations ship. This is appropriate — it is a curated index, not a sitemap.
-
-### .well-known/mcp
-
-A Next.js route at `app/.well-known/mcp/route.ts` returns JSON describing the MCP server endpoint:
-
-```json
-{
-  "mcp_servers": [
-    {
-      "url": "https://d2p.finance/api/mcp",
-      "transport": ["streamable-http", "sse"],
-      "description": "d2p Finance protocol and research state"
-    }
-  ]
-}
-```
-
-This is the emerging agent-discovery standard. MCP adoption has hit 97M monthly SDK downloads as of 2026; agent clients increasingly check `.well-known/mcp` before manual configuration.
-
-### JSON-LD
-
-RSC pages for iterations include JSON-LD `SchemaApp` structured data:
-- `ResearchProject` type for the lab homepage
-- `ScholarlyArticle` for iteration write-ups with `status` as custom property
-- `FinancialProduct` for deployed instruments
-
-Pages with valid structured data are 2.3x more likely to appear in AI-generated summaries (LLM citation research, 2025). This is low-effort, high-value for an agent-first site.
-
-### Auth Model for Agents
-
-- **Anonymous read:** All MCP tools that read public on-chain data or published iteration results are unauthenticated. No API key required.
-- **Write / private ops:** Not in scope at MVP. The MCP server is read-only at launch.
-- **Rate limiting:** Vercel rate limiting (Edge Middleware) applies per IP. Sufficient for MVP; if agent traffic spikes, add token-bucket middleware.
-
----
-
-## Caching Strategy by Data Class
-
-| Data Class | Source | TTL | Cache Layer | Notes |
-|------------|--------|-----|-------------|-------|
-| Chain reads (pool state, balances) | EVM RPC | 30s | Vercel KV | Stale-while-revalidate; 30s is 2 Celo blocks |
-| Settlement status | EVM RPC | 60s | Vercel KV | Slower-moving than pool state |
-| HuggingFace dataset (econometrics) | HF Datasets API | 1h | Vercel KV | Research outputs update per iteration, not per block |
-| GitHub org metadata (repos, READMEs) | GitHub REST API | 6h | Vercel KV | Rarely changes; avoids GitHub rate limiting |
-| MDX content (iterations catalog) | Velite build output | Build-time | CDN edge | Re-built on every deploy; instant delivery |
-| RAG corpus embeddings | Cloudflare Vectorize | Persistent | Vectorize | Re-indexed by Inngest on new content push |
-| AI chat responses | None (streamed) | N/A | N/A | Stateless per session |
-| Wallet state | wagmi/browser | Session | Browser memory | Never server-cached — client-only |
-
----
-
-## ABI Codegen Pipeline
-
-**Chosen:** wagmi CLI (`@wagmi/cli`) with ABIType inference. No TypeChain.
-
-Workflow:
-1. ABI JSON files from `wvs-finance` org repos (ThetaSwap-core, reactive-hooks, clamm-squared) are stored in `lib/contracts/abis/`
-2. `wagmi.config.ts` points to these files
-3. `pnpm wagmi generate` outputs `lib/contracts/generated.ts` — typed hooks and viem action wrappers
-4. Committed to repo; re-run when ABIs change
-
-This provides:
-- `useReadThetaSwapPoolState()` — typed React hook
-- `readThetaSwapPoolState(config, { address, ... })` — typed viem action for server-side use
-- Full TypeScript inference for ABI function params and return types via ABIType — no code generation artifacts that can go stale if TypeChain's templates change
 
 ---
 
 ## Architectural Patterns
 
-### Pattern 1: BFF Aggregation Route (Backend-For-Frontend)
+### Pattern 1: Mode-Branched Confirm Handler
 
-**What:** Each complex data need has a dedicated API route that aggregates, normalizes, and caches data from multiple upstream sources before returning a single response to the client.
+**What:** `handleLiveConfirm()` branches on `resolvedMode` before touching any external service. The BuildBear branch and the Somnia branch are completely independent execution paths.
 
-**When to use:** Dashboard data (multi-chain reads), econometrics (HF parse + transform), any case where the client would otherwise make 3+ upstream calls.
+**When to use:** Whenever two live paths have different external dependencies — never let the BuildBear path call an endpoint that can 503 due to Somnia outage, not even as a fallback.
 
-**Trade-offs:** Slight additional latency hop vs. client-direct fetching. Eliminates CORS issues with RPC providers. Enables server-side caching (Vercel KV). Allows rate-limit management in one place.
+**Trade-offs:** Slight duplication of confirm-gating logic. The alternative (wrapping agent1 in a try/catch and falling through to BuildBear) would create silent coupling — a Somnia call that happens on every judge run. The branch makes the decoupling explicit and verifiable by grep.
 
-### Pattern 2: Shared Tool Definition Module
+### Pattern 2: Server-Side Pre-Funded Signing (demo fork only)
 
-**What:** `lib/mcp-tools/` contains pure TypeScript functions that are imported by both the MCP API route and the chat API route. Tools are defined once with full Zod schemas.
+**What:** A Node runtime API route holds a funded private key for a valueless demo fork, signs the `resolveFromMandate` tx server-side, and returns the result to the client.
 
-**When to use:** Every time a new data-fetching capability is added that should be accessible to both agents and the chat interface.
+**When to use:** Demo environments only, where wallet friction must be zero and the signer controls no real assets.
 
-**Trade-offs:** Requires discipline — resist the temptation to put tool logic directly in the route handler. The payoff is that every new MCP tool is automatically available in the chat shell without additional wiring.
+**Trade-offs:** The `BUILDBEAR_DEMO_PK` must be in the Vercel env (the same pattern as `SOMNIA_OPERATOR_PK`). The route must have rate limiting (token-bucket, same pattern as agent1 route) to prevent fork state drain from concurrent calls. The private key controls a BuildBear sandbox only — it is worthless outside that context.
 
-### Pattern 3: Route Group Layout Isolation
+### Pattern 3: Artifact-Driven Reset (snapshotId in deployment artifact)
 
-**What:** Next.js route groups `(lab)`, `(dashboard)`, `(defi)` each have their own `layout.tsx`. Only `(defi)` gets the wallet provider context. Only `(dashboard)` gets the TanStack Query provider for live chain data.
+**What:** The provisioning script captures the post-deploy fork state with `evm_snapshot` and stores the snapshot ID in the deployment artifact. The reset route reads this ID and calls `evm_revert(snapshotId)` to restore the fork to a pristine state without re-running the full provision.
 
-**When to use:** When different site sections have fundamentally different runtime requirements (wallet, live data, static).
+**When to use:** Any shared-fork demo where multiple concurrent runs must not observe each other's state.
 
-**Trade-offs:** Slightly more layout files. The benefit: RSC pages in `(lab)` never hydrate wallet state, eliminating an entire class of hydration errors and reducing bundle size for the research audience.
+**Trade-offs:** Snapshot IDs are ephemeral per sandbox session — they survive restarts only if the BuildBear sandbox persists its state (sandbox-dependent). If the sandbox is recreated, the snapshot ID in the artifact is stale and reset falls back to re-provisioning. This is acceptable for the 3-day TTL demo window.
 
 ---
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Wallet State in RSC or API Routes
+### Anti-Pattern 1: Calling agent1 as a Fallback in the BuildBear Path
 
-**What people do:** Try to read wagmi account state in a Server Component or API route.
+**What people do:** Add `try { POST /api/abrigo/agent1 } catch { fall through to BuildBear }`.
 
-**Why it's wrong:** Wallet state is browser-only. It is not knowable at render time on the server. Attempting to access it server-side causes hydration mismatches and crashes.
+**Why it's wrong:** The Somnia validator-callback outage is the exact reason v2.0 deferred the live run. Making the BuildBear path depend on agent1 — even via catch — means every judge run silently waits for a 120s timeout before the BuildBear mint starts. The "one-click" UX is destroyed.
 
-**Do this instead:** Keep all wallet-aware components under a `'use client'` boundary inside the `(defi)` route group. RSC pages for the dashboard read public chain state via API routes (no wallet required for reads).
+**Do this instead:** Hard branch at `resolvedMode`. The BuildBear path never imports, references, or calls anything from the agent1 route.
 
-### Anti-Pattern 2: Duplicating Tool Definitions
+### Anti-Pattern 2: NEXT_PUBLIC_ for the Demo Private Key
 
-**What people do:** Define an MCP tool in `app/api/mcp/[transport]/route.ts` and then write similar logic in `app/api/chat/route.ts` to make the chat shell do the same thing.
+**What people do:** Set `NEXT_PUBLIC_BUILDBEAR_DEMO_PK` to inject the funded key into the browser, avoiding the need for a server route.
 
-**Why it's wrong:** Two sources of truth diverge. The chat shell says the pool is in state X. The MCP tool says Y. Both are calling the same chain differently.
+**Why it's wrong:** Any `NEXT_PUBLIC_` env var is bundled into the client-side JS and readable by anyone with DevTools. Even for a valueless demo fork, shipping a private key in the public bundle is the wrong pattern to institutionalize. If this code is referenced in a future milestone for a mainnet-adjacent path, the pattern becomes dangerous.
 
-**Do this instead:** `lib/mcp-tools/` is the only place tool logic lives. Both routes import it.
+**Do this instead:** `BUILDBEAR_DEMO_PK` in a Node runtime server route only. Never `NEXT_PUBLIC_`.
 
-### Anti-Pattern 3: Fetching HuggingFace at Every Client Request
+### Anti-Pattern 3: Minting in the Provisioning Script (using the standard `run()`)
 
-**What people do:** Call the HuggingFace Datasets API directly from client-side React Query with no server cache.
+**What people do:** Run the existing `provision-buildbear-demo.sh` (which calls `resolveFromMandate` in step 5) and use that as the v3.0 demo artifact.
 
-**Why it's wrong:** HuggingFace is not an RPC — it does not expect 30-second polling. Rate limits apply. CORS headers on HF APIs are not guaranteed. Parquet parsing is expensive in the browser.
+**Why it's wrong:** The resulting artifact has `numberOfLegs > 0`. The mount-time freshness gate sees `legs > 0` and degrades to replay, blocking the live path immediately. The in-demo mint cannot happen against an executor that already holds a leg.
 
-**Do this instead:** The `/api/econometrics` BFF route fetches HF once, parses to JSON, caches in Vercel KV for 1h, and returns clean structured data. Clients poll the BFF, not HF directly.
+**Do this instead:** The `--no-mint` variant stops before `resolveFromMandate`. The executor is deployed and funded but clean. The in-demo call to `resolveFromMandate` (via `/api/cornerstone/buildbear-sign`) is the first and only mint.
 
-### Anti-Pattern 4: Monorepo Without the Teams to Justify It
+### Anti-Pattern 4: quoteMargin Before PositionMinted
 
-**What people do:** Create `apps/web`, `apps/mcp`, `packages/ui` at project start "to keep things clean."
+**What people do:** Read `quoteMargin` immediately after `writeContract` resolves, before waiting for the `PositionMinted` log.
 
-**Why it's wrong:** Cross-package TypeScript references, workspace-aware builds, and Vercel multi-project config add weeks of overhead at MVP stage. The MCP server is three files. The UI components are owned by one person. There is nothing to isolate.
+**Why it's wrong:** `MacroHedgeExecutor.quoteMargin` reverts with `PositionNotOwned` if the position does not yet exist. `waitForTransactionReceipt` resolves when the tx is mined, but log decoding must confirm `PositionMinted` before `quoteMargin` is safe. This constraint is already documented in `workflow-engine.ts` comments and enforced in `runWorkflowLive` Step i.
 
-**Do this instead:** Single Next.js app with clear directory boundaries. Extract to monorepo when (a) a second deployable service genuinely has different release cadence, or (b) a second team owns a package.
+**Do this instead:** Decode `receipt.logs` first; only call `quoteMargin(positionId, strike)` after `positionIdStr !== null` is confirmed.
+
+---
+
+## Build Order
+
+Dependencies drive the order. The backend provisioning work must produce the artifact before the frontend live wiring can be tested end-to-end. However, the two can be developed in parallel up to integration.
+
+```
+Dependency graph:
+
+[A] Backend: --no-mint provisioning variant (ProvisionBuildBearDemo.s.sol + shell)
+    │
+    └──[B] Run --no-mint against real BuildBear sandbox → artifact with snapshotId
+           │
+           └──[C] Mirror artifact into frontend (mintTxHash: null, snapshotId: "0x1")
+                  │
+                  └──[D] Frontend integration test: reset route + buildbear-sign route
+                         │
+                         └──[E] CornerstoneClientShell decoupling + un-void writeContractAsync
+
+[F] mode.ts: add 'buildbear' (no dependency, can do anytime)
+[G] artifact-loader.ts: make mintTxHash optional (unblock C)
+[H] /api/cornerstone/buildbear-sign route (can develop with mock artifact)
+[I] /api/cornerstone/buildbear-reset route (can develop with mock snapshot)
+```
+
+| Step | Component | Blocks | Parallel With |
+|------|-----------|--------|---------------|
+| 1 | `ProvisionBuildBearDemo.s.sol` `noMint()` | Step 2 | Step 5, 6, 7 |
+| 2 | `provision-buildbear-demo.sh --no-mint` + snapshot capture | Step 3 | Steps 5-7 |
+| 3 | Mirror artifact; update `artifact-loader.ts` (optional fields) | Step 4, 8 | Steps 5-7 |
+| 4 | Validate artifact shape in frontend type-check | Step 8 | — |
+| 5 | `mode.ts` add `'buildbear'` | Steps 7, 8 | Steps 1-4 |
+| 6 | `/api/cornerstone/buildbear-reset` route | Step 8 | Steps 1-5 |
+| 7 | `/api/cornerstone/buildbear-sign` route | Step 8 | Steps 1-5 |
+| 8 | `CornerstoneClientShell.tsx` decoupling cut + `handleBuildBearConfirm` | — | — |
+
+**Recommended execution order:**
+- Batch 1 (parallel): Steps 1, 5
+- Batch 2 (parallel): Steps 2, 6, 7
+- Batch 3: Step 3
+- Batch 4: Step 4 (automated by tsc + vitest)
+- Batch 5: Step 8 (final integration)
 
 ---
 
@@ -603,125 +573,53 @@ This provides:
 
 ### External Services
 
-| Service | Integration Pattern | Runtime | Cache TTL | Notes |
-|---------|---------------------|---------|-----------|-------|
-| Celo RPC | viem publicClient, http() transport | Node (API route) + Browser (wagmi) | 30s KV | Use Infura/Alchemy Celo endpoint; public Celo RPC is rate-limited |
-| Base / Arbitrum / Optimism RPC | Same as Celo | Node + Browser | 30s KV | Configure in `lib/chains/transports.ts` |
-| Ethereum mainnet | viem publicClient, read-only | Node (API route) | 60s KV | Price feeds only; no wallet tx on mainnet at MVP |
-| HuggingFace Datasets API | fetch() with Bearer token (public dataset = no token needed) | Node (API route + Inngest) | 1h KV | Dataset is public; token only needed for private datasets |
-| GitHub REST API | fetch() with PAT in env | Node (API route, RSC) | 6h KV | Avoid unauthenticated rate limit (60 req/hr) — use PAT |
-| Anthropic / OpenAI | Vercel AI SDK | Edge (chat route) | N/A | API key in env; AI SDK provider abstraction |
-| Cloudflare Vectorize | REST API or Workers binding via fetch | Node (Inngest, chat route) | Persistent | Not available on Vercel Edge runtime natively; use REST API |
-| WalletConnect Cloud | RainbowKit projectId | Browser | N/A | Free; required for WalletConnect v2 |
-| Inngest | SDK + /api/inngest endpoint | Node | N/A | Register functions at startup; Vercel integration handles deploy webhook |
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| BuildBear Sandbox RPC | `fetch(deployment.rpcUrl, { method:'POST', body: JSON-RPC })` | CORS-proxied via `/api/cornerstone/rpc` if browser blocks direct; server routes call directly |
+| BuildBear `evm_snapshot` / `evm_revert` | JSON-RPC call to sandbox RPC (same endpoint) | Anvil-compatible; BuildBear uses `hardhat_setBalance` (confirmed in provision script) — same cheat namespace |
+| BuildBear `buildbear_ERC20Faucet` | JSON-RPC call (provisioning only, not runtime) | Used in `provision-buildbear-demo.sh`; not called from Next.js routes |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Direction | Notes |
 |----------|---------------|-----------|-------|
-| `lib/mcp-tools/` ↔ `/api/mcp` | Direct TypeScript import | `mcp-tools` → route | Tools are pure functions; route wraps them in MCP transport |
-| `lib/mcp-tools/` ↔ `/api/chat` | Direct TypeScript import | `mcp-tools` → route | Same import, different consumer |
-| `lib/contracts/` ↔ wallet components | Direct TypeScript import | `contracts/generated.ts` → component | Generated hooks typed to specific ABIs |
-| `lib/contracts/` ↔ `/api/dashboard` | Direct TypeScript import | `contracts/generated.ts` → route | Server-side `readContract` wrappers |
-| `content/iterations/` ↔ RSC pages | Velite build output | `.velite/*.json` → RSC import | Type-safe; validated at build not runtime |
-| `inngest/` ↔ `/api/inngest` | Inngest SDK runtime | Inngest cloud → Next.js route | Inngest calls the route; route runs the step function |
-
----
-
-## Suggested Build Order (Phase Dependencies)
-
-This is the dependency-driven sequence that should inform roadmap phase structure.
-
-### Phase 0: Foundation (blocks everything else)
-- Next.js 15 app scaffold with App Router
-- Route group layout structure `(lab)`, `(dashboard)`, `(defi)`
-- `lib/chains/config.ts` — wagmi config with Celo as primary chain
-- i18n setup (`next-intl` or `next-i18next`) — retrofitting i18n is painful; do it first
-- Design system primitives (`components/ui/`) — typography, color tokens, Badge (PASS/FAIL/PARKED), Button
-- Velite setup with iteration schema — even with no content, the schema is the contract
-- Environment variable schema (Zod-validated at startup, fail fast on missing keys)
-
-**Why first:** Every other component needs the design system. Every page needs i18n. Every data fetch needs chain config. The iteration schema defines the data model for the entire research lab surface.
-
-### Phase 1: Research Lab Surface (parallelizable after Phase 0)
-- MDX content pipeline (copy from abrigo/, Velite transform)
-- Iteration catalog page (RSC, all statuses rendered)
-- Iteration detail page (β estimate, evidence, replication hash, notebook link)
-- Lab homepage (mission, team, org repos)
-- `public/llms.txt` (static, hand-written at launch)
-- JSON-LD on iteration pages
-
-**Dependency:** Phase 0 complete. Does NOT require wallet, chain reads, or MCP.
-
-### Phase 2: Data Layer + BFF (gates dashboard and MCP)
-- `/api/dashboard` route with multi-chain viem reads and Vercel KV caching
-- `/api/econometrics` route with HuggingFace fetch and caching
-- `/api/github` route for org metadata
-- wagmi CLI codegen pipeline (`lib/contracts/generated.ts`)
-- `lib/mcp-tools/` initial tool definitions (iterations, chain-state, econometrics)
-
-**Dependency:** Phase 0 + ABI files from wvs-finance repos. This phase must complete before Phase 3 and Phase 4 can start.
-
-### Phase 3: Dashboard (can start in parallel with Phase 2, needs it to complete)
-- Dashboard page (RSC skeleton + client chart hydration)
-- Per-chain page
-- ChainSelector (nuqs URL state)
-- Wallet connection (RainbowKit + wagmi, `(defi)` layout only)
-
-**Dependency:** Phase 2 BFF routes must exist for chart data. Wallet connection is independent of chain reads.
-
-### Phase 4: MCP Server + Chat Shell (gates agent-surface)
-- `/api/mcp/[transport]/route.ts` (mcp-handler, imports from `lib/mcp-tools/`)
-- `.well-known/mcp` route
-- `/api/chat/route.ts` (Vercel AI SDK Edge, imports from `lib/mcp-tools/`)
-- `components/chat/ChatShell.tsx` (useChat hook)
-- Inngest setup: RAG indexing function, HF sync function
-- Cloudflare Vectorize corpus load (initial embedding of iteration write-ups)
-
-**Dependency:** Phase 2 tool definitions. Phase 1 content (for RAG corpus). MCP and chat can be built together since they share the tool module.
-
-### Phase 5: DeFi Transaction Surface (last, gated by security review)
-- Instrument interaction page under `(defi)/hedge/`
-- `writeContract` flows (Celo first)
-- Transaction confirmation UX
-- Safety review gate (explicit threat model before shipping)
-
-**Dependency:** Phase 3 wallet connection. Protocol contracts deployed on Celo.
+| `CornerstoneClientShell` ↔ `/api/cornerstone/buildbear-sign` | HTTP POST | client → server | Returns full tx result (Option A) or synthetic strategistView (Option B) |
+| `CornerstoneClientShell` ↔ `/api/cornerstone/buildbear-reset` | HTTP POST | client → server | Called on mount when legs > 0; returns ok/fail |
+| `workflow-store` ↔ `CornerstoneClientShell` | `store.emit()` / `useSyncExternalStore` | bidirectional | Store is producer-consumer decoupled; emit is synchronous |
+| `artifact-loader` ↔ server routes | Static import | server routes → artifact | `deployment.rpcUrl`, `deployment.executor`, `deployment.snapshotId` |
+| `packages/backend/script/out/` ↔ `packages/frontend/lib/.../` | File copy (manual or CI) | backend → frontend | The single cross-package interface; no runtime dependency |
 
 ---
 
 ## Scalability Considerations
 
+This is a demo architecture, not a production scale concern. The relevant scale question is concurrent judge runs.
+
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 0–1k users / hackathon demo | Current architecture is correct. Vercel KV free tier. Vectorize free tier. Inngest free tier (1k runs/month). |
-| 1k–50k users | Increase Vercel KV TTLs for expensive chain reads. Add Envio historical indexer (removes repeated eth_getLogs). Consider Vercel Pro for longer function timeouts. |
-| 50k+ users | Extract MCP server to Cloudflare Workers (native Vectorize binding, no REST API hop). Add CDN-level caching for econometrics endpoint. Consider Ponder or dedicated Postgres for LP position history if Envio GraphQL becomes a bottleneck. |
-
-**First bottleneck:** EVM RPC rate limits. Free-tier Infura/Alchemy caps are hit fast with multiple concurrent users polling `/api/dashboard`. Fix: increase Vercel KV TTL from 30s → 60s for non-critical reads, or add a dedicated RPC endpoint (Infura paid tier).
-
-**Second bottleneck:** Vercel KV write amplification under concurrent cache misses. The same cache miss fires multiple simultaneous HF fetches. Fix: add a distributed lock pattern (Vercel KV `SET NX`) before the cache miss fetch.
+| 1 judge (intended) | Current architecture. One shared fork, one snapshot, serial mint. |
+| 2-5 concurrent judges | `evm_revert` is destructive (resets the entire fork state). Concurrent resets collide. Rate-limit `/api/cornerstone/buildbear-sign` to 1 in-flight at a time (mutex pattern, same as agent1 rate-limit). Queue resets. |
+| >5 concurrent | Per-judge provisioning (separate BuildBear sandboxes per session). Out of scope for v3.0; the milestone doc explicitly chooses shared-fork with reset guard. |
 
 ---
 
 ## Sources
 
-- [Next.js MCP Guide (official, 2026-05-07)](https://nextjs.org/docs/app/guides/mcp)
-- [vercel/mcp-handler GitHub](https://github.com/vercel/mcp-handler)
-- [Deploy MCP servers to Vercel](https://vercel.com/docs/mcp/deploy-mcp-servers-to-vercel)
-- [Vercel AI SDK Documentation](https://ai-sdk.dev/docs/introduction)
-- [Envio Best Blockchain Indexers 2026 benchmark](https://docs.envio.dev/blog/best-blockchain-indexers-2026)
-- [wagmi v2 multichain guide](https://wagmi.sh/core/guides/chain-properties)
-- [Celo + viem official docs](https://docs.celo.org/developer/viem)
-- [Velite with Next.js](https://velite.js.org/guide/with-nextjs)
-- [nuqs URL state (Next.js Conf 2025)](https://nextjs.org/conf/session/type-safe-url-state-in-nextjs-with-nuqs)
-- [Cloudflare Vectorize RAG](https://developers.cloudflare.com/vectorize/)
-- [Inngest + Vercel integration](https://www.inngest.com/blog/vercel-long-running-background-functions)
-- [llms.txt adoption analysis 2026](https://codersera.com/blog/llms-txt-complete-guide-2026/)
-- [ABIType strict TypeScript for ABIs](https://abitype.dev/)
-- [RainbowKit wagmi v2 migration](https://rainbowkit.com/docs/installation)
+All findings derived from direct code inspection of the codebase. No external research queries required — all architectural decisions are constrained by the existing code contracts.
+
+- `packages/frontend/lib/apps/abrigo/cornerstone/workflow-engine.ts` — `runWorkflowLive` interface, `buildLiveMandate`, PKE pin
+- `packages/frontend/components/defi/cornerstone/CornerstoneClientShell.tsx` — mode resolution, mount probe, `handleLiveConfirm` structure
+- `packages/frontend/app/api/abrigo/agent1/route.ts` — operator-only pattern (rate limit, env guard, Node runtime)
+- `packages/frontend/lib/apps/abrigo/cornerstone/artifact-loader.ts` — artifact field requirements, TTL contract
+- `packages/frontend/lib/apps/abrigo/cornerstone/workflow-store.ts` — `RunState` shape, `emit` contract
+- `packages/frontend/lib/apps/abrigo/cornerstone/buildbear.ts` — `createBuildBearPublicClient` factory
+- `packages/frontend/lib/apps/abrigo/cornerstone/mode.ts` — `CornerstoneMode` type
+- `packages/frontend/app/api/cornerstone/rpc/route.ts` — CORS proxy pattern
+- `packages/backend/contracts/script/provision-buildbear-demo.sh` — B1/B2 provisioning sequence, `--no-mint` gap
+- `packages/backend/contracts/script/ProvisionBuildBearDemo.s.sol` — `_provision()` body, `noMint()` gap, artifact field origins
+- `.planning/PROJECT.md` — v3.0 milestone scope, key decisions
 
 ---
 
-*Architecture research for: agent-first DeFi research-lab frontend (d2p Finance / DS2P Labs)*
-*Researched: 2026-05-11*
+*Architecture research for: v3.0 BuildBear Live-Tx Integration (d2p Finance / Abrigo cornerstone)*
+*Researched: 2026-06-08*
