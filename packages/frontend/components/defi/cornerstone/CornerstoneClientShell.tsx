@@ -20,6 +20,7 @@
 // compliance even though the real live RUN is ⊘ DEFERRED (09-05). The grep acceptance criteria
 // asserts these imports are present in this file (which is imported by page.tsx).
 
+import type { BuildBearSignResponse } from '@/app/api/cornerstone/buildbear-sign/route'
 import {
   AgentCostPlaceholder,
   type AgentCostPlaceholderStrings,
@@ -149,7 +150,8 @@ export function CornerstoneClientShell({ traceNodes, strings }: CornerstoneClien
   // Mount-time eth_chainId probe (spec §4a): runs BEFORE Confirm
   // Decides direct-vs-/api/cornerstone/rpc proxy for subsequent reads
   useEffect(() => {
-    if (resolvedMode !== 'live') return
+    // Phase 11: probe also runs for 'buildbear' (Phase 12 refines buildbear-specific probe logic)
+    if (resolvedMode !== 'live' && resolvedMode !== 'buildbear') return
 
     let cancelled = false
 
@@ -187,6 +189,30 @@ export function CornerstoneClientShell({ traceNodes, strings }: CornerstoneClien
   // Called by the page when user confirms in live mode
   // ok:false → degrade to replay (ModeBanner announces via aria-live)
   async function handleLiveConfirm() {
+    // ---- BUILDBEAR BRANCH — FIRST, before any /api/abrigo/agent1 reference (MINT-02) ----
+    // Decouple the judge live path from the operator-only Somnia leg: this branch calls
+    // /api/cornerstone/buildbear-sign and UNCONDITIONALLY returns, so control can never
+    // fall through to the agent1 fetch. Phase 12 builds the full one-click RunState wiring
+    // on top of this structural cut.
+    if (resolvedMode === 'buildbear') {
+      try {
+        const response = await fetch('/api/cornerstone/buildbear-sign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mandate: null }), // Phase 12 fills the replay-artifact mandate
+        })
+        const result = (await response.json()) as BuildBearSignResponse
+        // Phase 12 maps result.ok / result.reason → RunState transitions.
+        // Phase 11: ZERO replay degradation on ANY buildbear path (HONEST-01 — Phase 12
+        // wires the fork-used advisory; no silent replay flip is performed here).
+        void result
+      } catch {
+        // Phase 12 wires the error state; Phase 11 does NOT degrade to replay here.
+      }
+      return // ALWAYS return — never fall through to the agent1 block
+    }
+
+    // ---- ORIGINAL LIVE PATH — unchanged below this line ----
     try {
       const response = await fetch('/api/abrigo/agent1', {
         method: 'POST',
