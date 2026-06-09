@@ -63,6 +63,7 @@
 - [ ] **OPS-04**: The demo survives the BuildBear 3-day TTL: the runbook makes "re-provision within T-24h of judging" a **hard precondition** (the fork must show `numberOfLegs == 0` / `mintTxHash: null` before any live claim), and an expired/used fork degrades to a labeled advisory, never a silent or broken state. **The pre-EXEC-01 committed artifact and its guard-less executor address are explicitly retired** — they are poisoned (already-minted, no on-chain guard) and must never be used for a live claim; the `--no-mint` redeploy overwrites the artifact, and `replay`-mode pinned addresses are confirmed to either be address-independent or re-reconciled against the post-redeploy executor.
 - [ ] **OPS-05**: The runbook documents the **single-concurrent-judge** limitation (one shared fork + one signer + one snapshot): two judges minting in the same session is a known, stated constraint — the second sees the `"fork used"` advisory until the operator resets. The `buildbear-sign` route does a signer-balance pre-flight before submitting.
 - [ ] **OPS-06** *(cross-cutting governance — user NON-NEGOTIABLE 2026-06-08)*: Every command this milestone claims as working/on-rhythm is a step in `.github/workflows/ci.yml`, and merging to `main` happens **only via PR with that CI green**. New backend tests (incl. the EXEC-01 guard test) are covered by the existing `forge test` lane; new frontend route/unit tests by the `vitest` lane. The live BuildBear-fork spike/provisioning is **excluded by design and never claimed on-rhythm** (operator-manual, transcript-recorded — see `10-SPIKE-EVIDENCE.md`). Enforcement of the PR gate (branch protection / rulesets) is tracked separately because it depends on repo plan/visibility (see Phase 13 / project decision).
+- [ ] **OPS-07** *(Local demo mode — user directive 2026-06-09)*: A single **`pnpm demo`** command lets a judge `clone → one command → localhost → browser` and run the **full interactive live one-click simulation** on their own machine. **Default** `localhost` (`pnpm dev`/`pnpm build && pnpm start`) runs the **zero-secret snapshot/replay** sim; `pnpm demo` loads a **throwaway, fork-only `DEMO_SIGNER_PK`** — a funded BuildBear burner with **no real-asset value** — either shipped in a committed `.env.demo` (with a loud *public-burner / ephemeral-sandbox / anyone-can-grief → re-provision* disclaimer, since the repo is public) **or** pasted by the judge from a value we provide. This key is **distinct from the operator's real `DEMO_SIGNER_PK`**. The deployed (Vercel) URL also runs the live sim. *(Resolves the design tension: server-signed one-click needs a secret a cloning judge lacks. The `buildbear-sign` route is already env-driven (Phase 11), so this is mainly the `pnpm demo` script + `.env.demo` + the runbook — lands in Phase 13, on top of the Phase 11 routes + Phase 12 UI wiring. Security nuance flagged for the Phase 13 two-reviewer pass: a public burner key on a public shared sandbox.)*
 
 ---
 
@@ -124,10 +125,11 @@ Explicitly excluded for v3.0, with reasoning.
 | OPS-04 | Phase 13 | Pending |
 | OPS-05 | Phase 13 | Pending |
 | OPS-06 | Cross-cutting (CI from Phase 10; PR-gate per project decision) | Pending |
+| OPS-07 | Phase 13 (needs Phase 11 routes + Phase 12 UI) | Pending |
 
 **Coverage:**
-- v3.0 requirements: 27 total (added EXEC-01, EVID-06, OPS-05 in the two-reviewer revision; OPS-06 CI/PR governance per user directive 2026-06-08)
-- Mapped to phases: 27 (100%) — OPS-06 is cross-cutting (CI coverage grows each phase; PR-enforcement gated on repo plan/visibility)
+- v3.0 requirements: 28 total (added EXEC-01, EVID-06, OPS-05 in the two-reviewer revision; OPS-06 CI/PR governance 2026-06-08; OPS-07 local demo mode 2026-06-09)
+- Mapped to phases: 28 (100%) — OPS-06 is cross-cutting; OPS-07 lands in Phase 13 (depends on Phase 11 routes + Phase 12 UI)
 - Unmapped: 0
 
 ---
