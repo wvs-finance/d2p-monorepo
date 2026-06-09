@@ -1,23 +1,23 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: Judge-Runnable Live BuildBear Demo
-status: roadmap_complete
-stopped_at: Roadmap created — Phase 10 next
-last_updated: "2026-06-08T00:00:00.000Z"
+milestone_name: Phases — Judge-Runnable Live BuildBear Demo
+status: planning
+stopped_at: Phase 10 context gathered
+last_updated: "2026-06-09T01:12:08.328Z"
+last_activity: "2026-06-08 — Milestone v3.0 roadmap created + REVISED to v2 (26/26 requirements mapped, 4 phases). Passed the mandatory two-reviewer pass: Reality Checker (READY) + Solidity Smart Contract Engineer (READY after 3 final MAJORs folded — guard in shared `_resolveAndMintAtStrike` sink, spike on fresh stack, poisoned-artifact retirement)."
 progress:
-  total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 16
+  completed_phases: 10
+  total_plans: 57
+  completed_plans: 55
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-08
 **Session type:** Roadmap creation (v3.0 phases 10–13 derived and written)
-**Stopped at:** Roadmap complete — ready for `/gsd:plan-phase 10`
+**Stopped at:** Phase 10 context gathered
 
 ---
 
