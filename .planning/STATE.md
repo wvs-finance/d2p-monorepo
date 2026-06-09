@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases — Judge-Runnable Live BuildBear Demo
 status: planning
-stopped_at: Phase 10 planned (3 plans, reviewer-cleared) — ready to execute
-last_updated: "2026-06-09T02:32:08.299Z"
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-06-09T02:52:58.799Z"
 last_activity: "2026-06-08 — Milestone v3.0 roadmap created + REVISED to v2 (26/26 requirements mapped, 4 phases). Passed the mandatory two-reviewer pass: Reality Checker (READY) + Solidity Smart Contract Engineer (READY after 3 final MAJORs folded — guard in shared `_resolveAndMintAtStrike` sink, spike on fresh stack, poisoned-artifact retirement)."
 progress:
   total_phases: 16
   completed_phases: 10
   total_plans: 60
-  completed_plans: 55
+  completed_plans: 56
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-08
 **Session type:** Roadmap creation (v3.0 phases 10–13 derived and written)
-**Stopped at:** Phase 10 planned (3 plans, reviewer-cleared) — ready to execute
+**Stopped at:** Completed 10-01-PLAN.md
 
 ---
 
@@ -33,10 +33,14 @@ progress:
 
 ## Current Position
 
-**Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — not started
-**Active plan:** —
-**Status:** Roadmap complete (v2, two-reviewer-cleared), ready to plan Phase 10
-**Last activity:** 2026-06-08 — Milestone v3.0 roadmap created + REVISED to v2 (26/26 requirements mapped, 4 phases). Passed the mandatory two-reviewer pass: Reality Checker (READY) + Solidity Smart Contract Engineer (READY after 3 final MAJORs folded — guard in shared `_resolveAndMintAtStrike` sink, spike on fresh stack, poisoned-artifact retirement).
+**Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — in progress (1/3 plans)
+**Active plan:** 10-02 (next) — insert the EXEC-01 guard (turns the RED test GREEN) + `--no-mint` shell variant + direct frontend artifact write
+**Status:** Plan 10-01 complete (Wave 0 test-first foundation) on branch `phase-10-backend-single-use-guard`
+**Last activity:** 2026-06-09 — Plan 10-01 executed: artifact-loader nullable/snapshotId migration + exported validateDeployment (tsc green); EXEC-01 RED guard test via vm.mockCall (numberOfLegs 0->1, fork-free CI lane, RED for the right reason); 10-SPIKE-EVIDENCE.md operator-manual scaffold (a-d + fork-liveness pre-flight + OPS-06 honesty header). 3 atomic commits (a02e444, e58e1ce, 2cf5f45).
+
+**Decisions (Plan 10-01):**
+- Placeholder pool literal must be EIP-55 checksummed (`0x...c0Fe`) — Solidity 0.8.24 rejects non-checksummed address literals at compile time.
+- `vm.mockCall` on a placeholder pool address is the sole mock strategy for the non-virtual concrete `PanopticPoolV2.numberOfLegs` view (a mock subclass cannot compile or cast to the immutable ctor param).
 
 **v3.0 phase structure:**
 - Phase 10: Backend Provisioning Variant (PROV-01–04) — critical-path blocker; parallel with Phase 11
@@ -105,6 +109,7 @@ progress:
 | Phase 09 P03 | 25 | 3 tasks | 8 files |
 | Phase 09 P04 | 45 | 2 tasks | 9 files |
 | Phase 09 P05 | 15 | 1 tasks | 2 files |
+| Phase 10 P01 | 4 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
