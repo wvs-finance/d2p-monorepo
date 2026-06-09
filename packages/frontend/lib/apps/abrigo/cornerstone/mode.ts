@@ -10,7 +10,11 @@
 //   - 'mock' is the always-works degradation (fromMockEvent), shown under an explicit
 //     "modo demostración (sin cadena)" label — never a silent substitution.
 
-export type CornerstoneMode = 'live' | 'replay' | 'mock'
+// Phase 11: 'buildbear' is the URL-opted-in live path against the shared BuildBear fork.
+// Activation requires BOTH ?mode=buildbear (parsed here) AND DEMO_SIGNER_PK server-side
+// (the buildbear-sign route returns 'not-configured' when the key is absent — no accidental
+// live mode on a plain clone).
+export type CornerstoneMode = 'live' | 'replay' | 'mock' | 'buildbear'
 
 /**
  * The guaranteed default mode — replay (frozen first, RPC-independent).
@@ -29,5 +33,6 @@ export const DEFAULT_MODE: CornerstoneMode = 'replay'
 export function parseMode(raw: string | null | undefined): CornerstoneMode {
   if (raw === 'live') return 'live'
   if (raw === 'mock') return 'mock'
+  if (raw === 'buildbear') return 'buildbear' // Phase 11: URL opt-in for the BuildBear live path
   return DEFAULT_MODE
 }
