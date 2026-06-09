@@ -3,21 +3,21 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases — Judge-Runnable Live BuildBear Demo
 status: executing
-stopped_at: Completed 11-01-PLAN.md (Wave-0 RED scaffold) — next 11-02 (buildbear routes)
-last_updated: "2026-06-09T14:27:56.391Z"
-last_activity: "2026-06-09 — Plan 11-01 executed: 'buildbear' mode + DEMO_SIGNER_PK server env (mode.test 8/8 GREEN, zero NEXT_PUBLIC_ leak); 4 RED scaffolds pinning the full reason-code contract (buildbear-sign 9 cases incl. M1 no-rpc-leak + M2 body-cap; buildbear-reset 6 cases incl. B1 undici fetch-failed shape; workflow-engine buildUpstream) — all RED_CONFIRMED (route/helper absent), tsconfig-excluded; GREEN non-vacuous arch test enforcing DEMO_SIGNER_PK + privateKeyToAccount path-scope; tsc+biome green. 3 atomic commits (6ce5b6b, 81575d0, 6443eb9). NOTE: MINT-01/02/03 remain In Progress — scaffold only; routes/decoupling land in 11-02/11-03."
+stopped_at: Completed 11-02-PLAN.md (buildbear-sign + buildbear-reset routes GREEN)
+last_updated: "2026-06-09T14:43:49.538Z"
+last_activity: "2026-06-09 — Plan 11-02 executed: buildbear-sign + buildbear-reset routes implemented GREEN. Sign route (MINT-01): nodejs runtime, discriminated reasons (not-configured/fork-used/rpc-unreachable/signer-gas/reverted/ok), getBalance pre-flight, simulate-before-write, 16 KiB body cap, redact-every-detail (M1) — 9/9 GREEN. Reset route (OPEN): evm_revert→evm_snapshot, no-snapshot/revert-failed/rpc-unreachable, B1 undici classifier, m6 0x validation, documented shared-sandbox limitation, no auth — 6/6 GREEN. BuildBearSignResponse exported; both test files un-excluded. Fix: Wave-0 reset test fetch mock vi.spyOn→vi.stubGlobal (MSW interceptor defeats spyOn). tsc+biome clean; full suite 634 passed (only the 11-03 workflow-engine-buildbear scaffold stays excluded/RED). 2 atomic commits (14caf83, d3515c5). MINT-01 implemented + unit-verified; finalization deferred to 11-03 + verifier per plan."
 progress:
   total_phases: 16
   completed_phases: 11
   total_plans: 63
-  completed_plans: 59
+  completed_plans: 60
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-08
 **Session type:** Roadmap creation (v3.0 phases 10–13 derived and written)
-**Stopped at:** Completed 11-01-PLAN.md
+**Stopped at:** Completed 11-02-PLAN.md (buildbear-sign + buildbear-reset routes GREEN)
 
 ---
 
@@ -33,10 +33,15 @@ progress:
 
 ## Current Position
 
-**Active phase:** Phase 11 (Frontend Server Routes — MINT-01/02/03) — in progress (1/3 plans; runs parallel with Phase 10)
-**Active plan:** 11-02 (next) — implement `/api/cornerstone/buildbear-sign` + `/api/cornerstone/buildbear-reset` routes (turn the 11-01 RED suites GREEN, un-exclude from tsconfig)
-**Status:** Ready to execute 11-02
-**Last activity:** 2026-06-09 — Plan 11-01 executed (Wave-0 RED scaffold): 'buildbear' mode + DEMO_SIGNER_PK server env (mode.test 8/8 GREEN); 4 RED test scaffolds pinning the full buildbear-sign/reset/buildUpstream reason-code contract (all RED_CONFIRMED, tsconfig-excluded); GREEN non-vacuous path-scope arch test; tsc+biome green. 3 atomic commits (6ce5b6b, 81575d0, 6443eb9). MINT-01/02/03 remain In Progress — scaffold only.
+**Active phase:** Phase 11 (Frontend Server Routes — MINT-01/02/03) — in progress (2/3 plans; runs parallel with Phase 10)
+**Active plan:** 11-03 (next) — `buildUpstreamFromReplayArtifact` (MINT-03) in workflow-engine.ts + Somnia decoupling cut (MINT-02) in CornerstoneClientShell.tsx; un-exclude `tests/unit/workflow-engine-buildbear.test.ts`
+**Status:** Ready to execute 11-03
+**Last activity:** 2026-06-09 — Plan 11-02 executed: buildbear-sign + buildbear-reset routes GREEN. Sign (MINT-01): 9/9 — nodejs, discriminated reasons, getBalance pre-flight, simulate-before-write, 16 KiB cap, redact-every-detail. Reset (OPEN): 6/6 — evm_revert→evm_snapshot, B1 undici classifier, m6 0x validation, documented limitation, no auth. BuildBearSignResponse exported; both tests un-excluded; tsc+biome clean; full suite 634 passed (only 11-03 workflow-engine-buildbear scaffold stays excluded/RED). 2 atomic commits (14caf83, d3515c5). MINT-01 implemented + unit-verified; finalization deferred to 11-03 + verifier.
+
+**Decisions (Plan 11-02):**
+- buildbear-sign route lifted verbatim from 11-RESEARCH §Pattern 1+2 (ABI tuple + classifyViemError + findInCauseChain + redact); `not-configured` guard precedes any client construction; `getBalance()===0n` pre-flight precedes `simulateContract`; `simulateContract` precedes `writeContract` so reverts pre-classify into reason codes; every `detail` routed through `redact()` (RPC URL = bearer credential). `BuildBearSignResponse` exported for 11-03 + Phase 12.
+- buildbear-reset is OPEN: `POST(_req)` never reads body/headers, reads only `deployment.snapshotId`; fixed `evm_revert`→`evm_snapshot` method set; B1 catch classifies thrown fetch errors (`instanceof TypeError` / `cause.code` ECONNREFUSED/ENOTFOUND/ECONNRESET) as `rpc-unreachable`, reserving `revert-failed` for a genuine non-true `evm_revert`; m6 validates `newSnapshotId.startsWith('0x')`. Shared-sandbox griefable limitation + rejected-auth documented in the header (no auth added).
+- **Wave-0 reset test fetch mock corrected: `vi.spyOn(globalThis,'fetch')` → `vi.stubGlobal('fetch', fn)`.** `tests/setup.ts` runs an MSW server (`onUnhandledRequest:'error'`) whose global fetch interceptor defeats `vi.spyOn` — the route's fetch calls reported as 0 and the MSW unhandled-request throw mis-classified as `revert-failed`. `vi.stubGlobal` replaces the binding MSW reads. Route unchanged; only the test's mock mechanism. This is now the required raw-fetch mock pattern for node-env route tests in this repo.
 
 **Decisions (Plan 11-01):**
 - `'buildbear'` added to `CornerstoneMode` union + `parseMode` (after the `'mock'` check); `DEFAULT_MODE`/`parseMode(null)` stays `'replay'` — zero-secret default preserved.
@@ -125,6 +130,7 @@ progress:
 | Phase 10 P02 | 9 | 4 tasks | 5 files |
 | Phase 10 P02 | 9 | 4 tasks | 5 files |
 | Phase 11 P01 | 8 | 3 tasks | 9 files |
+| Phase 11 P02 | 10 | 2 tasks | 4 files |
 
 ## Accumulated Context
 

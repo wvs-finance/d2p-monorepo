@@ -215,7 +215,7 @@ Plans:
 | 5. Read-First Wallet and DeFi Surface | 3/4 | In Progress|  |
 | **v3.0 — Judge-Runnable Live BuildBear Demo** | | | |
 | 10. Backend Single-Use Guard + `--no-mint` Provisioning | 2/3 | Complete    | 2026-06-09 |
-| 11. Frontend Server Routes | 1/3 | In Progress|  |
+| 11. Frontend Server Routes | 2/3 | In Progress|  |
 | 12. Live Path Integration | 0/3 | Not started | - |
 | 13. Evidence Polish and Judge Runbook | 0/2 | Not started | - |
 
