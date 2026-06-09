@@ -1,8 +1,8 @@
 ---
 phase: 11
 slug: frontend-server-routes
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-06-09
 ---
@@ -81,4 +81,4 @@ All new route/transport tests use `// @vitest-environment node` (pattern from `t
 - [ ] Decoupling line-order + key-leak greps wired as CI-checkable steps
 - [ ] `nyquist_compliant: true` set after the planner wires per-task `<automated>` fields
 
-**Approval:** pending
+**Approval:** approved 2026-06-09 (plan-checker PASS + two-step gate: Reality Checker + Security Engineer both PASS)

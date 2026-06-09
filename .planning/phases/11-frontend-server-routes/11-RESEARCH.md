@@ -138,14 +138,12 @@ export const runtime = 'nodejs'
 import { deployment } from '@/lib/apps/abrigo/cornerstone/artifact-loader'
 import { createBuildBearChain } from '@/lib/apps/abrigo/cornerstone/buildbear'
 import { env } from '@/lib/env'
-import {
-  type ContractFunctionRevertedError,
-  type HttpRequestError,
-  type InsufficientFundsError,
-  http,
-  createPublicClient,
-  createWalletClient,
-} from 'viem'
+// NOTE: copy this import block VERBATIM, then run `biome check --fix` to sort.
+// The 3 viem error TYPES (ContractFunctionRevertedError / HttpRequestError /
+// InsufficientFundsError) are intentionally NOT imported — classifyViemError keys
+// off `constructor.name` / `instanceof`, so importing the types is dead code that
+// biome would flag.
+import { http, createPublicClient, createWalletClient } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 // Pinned ABI (from spike-viem-sign.ts — VERIFIED against HedgeMandate.sol)
@@ -190,6 +188,17 @@ export type BuildBearSignResponse =
       detail?: string
     }
 
+// SECURITY: viem BaseError / HttpRequestError messages embed the full request URL,
+// and a BuildBear RPC URL `https://rpc.buildbear.io/<sandbox-secret-id>` is effectively
+// a bearer credential for the fork. EVERY `detail:` value MUST be passed through redact().
+function redact(s: string): string {
+  return s.replace(/https?:\/\/[^\s"')]+/g, '[rpc-redacted]')
+}
+
+// OPS-05 limitation: no rate limit; shared-sandbox signer is griefable/drainable
+// — re-provision per OPS-03/04 (runbook, Phase 13). Unlike /api/abrigo/agent1 this
+// buildbear-sign route is intentionally OPEN with NO rate limit (accepted v3.0 trade-off,
+// CONTEXT.md). Do NOT add auth — documented-limitation only.
 export async function POST(req: Request): Promise<Response> {
   // Guard: key absent → not-configured (zero-secret default on plain clone)
   if (!env.DEMO_SIGNER_PK) {
@@ -199,14 +208,28 @@ export async function POST(req: Request): Promise<Response> {
     )
   }
 
+  // M2: body-size cap BEFORE req.json() — reject oversized payloads (16 KiB).
+  const contentLength = Number(req.headers.get('content-length') ?? '0')
+  if (contentLength > 16384) {
+    return Response.json(
+      { ok: false, reason: 'reverted', detail: 'body too large' } satisfies BuildBearSignResponse,
+      { status: 413 },
+    )
+  }
+
   // Body: mandate sourced from recorded replay artifact (MINT-03)
   // Phase 11 route accepts the serialized mandate in the POST body;
   // the client (Phase 12) sends the artifact mandate, NOT a live agent1 response.
+  // M2: on parse failure / missing mandate, return a GENERIC detail — never echo the
+  // raw parse error (it can carry attacker-controlled content; redact() covers URLs).
   let body: { mandate: unknown } = { mandate: null }
   try {
     body = await req.json()
   } catch {
-    return Response.json({ ok: false, reason: 'reverted', detail: 'invalid JSON body' }, { status: 400 })
+    return Response.json(
+      { ok: false, reason: 'reverted', detail: 'invalid request body' } satisfies BuildBearSignResponse,
+      { status: 400 },
+    )
   }
 
   try {
@@ -278,6 +301,12 @@ export async function POST(req: Request): Promise<Response> {
 //         viem/errors/node.ts (InsufficientFundsError, ExecutionRevertedError)
 //         viem/errors/request.ts (HttpRequestError)
 
+// M1 (Security): viem HttpRequestError/BaseError messages embed the full request URL.
+// A BuildBear RPC URL `https://rpc.buildbear.io/<secret-id>` is a bearer credential
+// for the fork, so EVERY `detail:` value below is passed through redact() (defined in
+// the route file) which strips any `https?://...` URL → '[rpc-redacted]'.
+// The classifier keys on `constructor.name` / `instanceof` — NOT on imported viem error
+// types — so no viem error TYPE imports are needed (see the import-block note above).
 function classifyViemError(err: unknown): BuildBearSignResponse {
   if (err instanceof Error) {
     // Check the full cause chain for ContractFunctionRevertedError
@@ -287,9 +316,9 @@ function classifyViemError(err: unknown): BuildBearSignResponse {
       // revertErr.reason is the decoded revert string (e.g. "fork used")
       const reason = (revertErr as { reason?: string }).reason ?? ''
       if (reason.includes('fork used')) {
-        return { ok: false, reason: 'fork-used', detail: reason }
+        return { ok: false, reason: 'fork-used', detail: redact(reason) }
       }
-      return { ok: false, reason: 'reverted', detail: reason }
+      return { ok: false, reason: 'reverted', detail: redact(reason) }
     }
 
     // Insufficient funds (signer has no gas)
@@ -297,7 +326,7 @@ function classifyViemError(err: unknown): BuildBearSignResponse {
       err.constructor.name === 'InsufficientFundsError' ||
       findInCauseChain(err, (e) => e.constructor.name === 'InsufficientFundsError')
     ) {
-      return { ok: false, reason: 'signer-gas', detail: err.message }
+      return { ok: false, reason: 'signer-gas', detail: redact(err.message) }
     }
 
     // HttpRequestError = network/RPC unreachable
@@ -305,15 +334,15 @@ function classifyViemError(err: unknown): BuildBearSignResponse {
       err.constructor.name === 'HttpRequestError' ||
       findInCauseChain(err, (e) => e.constructor.name === 'HttpRequestError')
     ) {
-      return { ok: false, reason: 'rpc-unreachable', detail: err.message }
+      return { ok: false, reason: 'rpc-unreachable', detail: redact(err.message) }
     }
 
     // Generic revert (unknown reason)
     if (err.message.includes('revert') || err.message.includes('reverted')) {
-      return { ok: false, reason: 'reverted', detail: err.message }
+      return { ok: false, reason: 'reverted', detail: redact(err.message) }
     }
   }
-  return { ok: false, reason: 'reverted', detail: String(err) }
+  return { ok: false, reason: 'reverted', detail: redact(String(err)) }
 }
 
 function findInCauseChain(err: unknown, pred: (e: Error) => boolean): Error | null {
@@ -354,6 +383,13 @@ export const runtime = 'nodejs'
 
 import { deployment } from '@/lib/apps/abrigo/cornerstone/artifact-loader'
 
+// M1 (Security): deployment.rpcUrl is `https://rpc.buildbear.io/<sandbox-secret-id>`,
+// effectively a bearer credential for the fork. A thrown fetch/undici error embeds the
+// full URL in its message — strip any URL from EVERY `detail:` value before returning.
+function redact(s: string): string {
+  return s.replace(/https?:\/\/[^\s"')]+/g, '[rpc-redacted]')
+}
+
 async function jsonRpc(rpcUrl: string, method: string, params: unknown[] = []): Promise<unknown> {
   const res = await fetch(rpcUrl, {
     method: 'POST',
@@ -370,7 +406,11 @@ export async function POST(_req: Request): Promise<Response> {
   const snapshotId = deployment.snapshotId
   if (!snapshotId) {
     return Response.json(
-      { ok: false, reason: 'no-snapshot', detail: 'artifact has no snapshotId — re-provision with --no-mint' },
+      {
+        ok: false,
+        reason: 'no-snapshot',
+        detail: 'artifact has no snapshotId — re-provision with --no-mint',
+      },
       { status: 409 },
     )
   }
@@ -378,16 +418,27 @@ export async function POST(_req: Request): Promise<Response> {
   try {
     // Step 1: evm_revert(snapshotId) — consumes the snapshot
     const reverted = await jsonRpc(deployment.rpcUrl, 'evm_revert', [snapshotId])
+    // revert-failed is reserved for a genuine non-true evm_revert result (NOT a thrown
+    // network error — those are rpc-unreachable, classified in the catch below).
     if (reverted !== true) {
       return Response.json({
         ok: false,
         reason: 'revert-failed',
-        detail: `evm_revert returned ${JSON.stringify(reverted)}`,
+        detail: redact(`evm_revert returned ${JSON.stringify(reverted)}`),
       })
     }
 
     // Step 2: evm_snapshot — produces a NEW snapshot id
     const newSnapshotId = await jsonRpc(deployment.rpcUrl, 'evm_snapshot', [])
+
+    // m6: validate the new id is a 0x… hex string before returning.
+    if (typeof newSnapshotId !== 'string' || !newSnapshotId.startsWith('0x')) {
+      return Response.json({
+        ok: false,
+        reason: 'revert-failed',
+        detail: redact(`evm_snapshot returned ${JSON.stringify(newSnapshotId)}`),
+      })
+    }
 
     return Response.json({
       ok: true,
@@ -396,12 +447,32 @@ export async function POST(_req: Request): Promise<Response> {
       // to newSnapshotId. No KV persistence in v3.0 (RESET-01 Future).
     })
   } catch (err: unknown) {
+    // B1: a thrown fetch error is ALWAYS rpc-unreachable, never revert-failed.
+    // undici throws `TypeError: fetch failed` with `err.cause.code` set to the OS
+    // socket error (ECONNREFUSED / ENOTFOUND / ECONNRESET). A naive message-substring
+    // check misses `new Error('network error')`-style mocks, so inspect ALL of:
+    //   (a) err instanceof TypeError (undici fetch-failed),
+    //   (b) String(err?.cause?.code) ∈ {ECONNREFUSED, ENOTFOUND, ECONNRESET},
+    //   (c) the legacy message substrings (HTTP / fetch / ECONNREFUSED).
+    // Only a genuine non-true evm_revert result (handled above, NOT here) is revert-failed.
     const message = err instanceof Error ? err.message : String(err)
-    const rpcUnreachable = message.includes('HTTP') || message.includes('fetch') || message.includes('ECONNREFUSED')
+    const causeCode = String(
+      (err as { cause?: { code?: unknown } } | null)?.cause?.code ?? '',
+    )
+    const rpcUnreachable =
+      err instanceof TypeError ||
+      causeCode.includes('ECONNREFUSED') ||
+      causeCode.includes('ENOTFOUND') ||
+      causeCode.includes('ECONNRESET') ||
+      message.includes('HTTP') ||
+      message.includes('fetch') ||
+      message.includes('ECONNREFUSED')
     return Response.json({
       ok: false,
+      // Any thrown network error → rpc-unreachable; revert-failed is reserved for
+      // the explicit non-true evm_revert branch above.
       reason: rpcUnreachable ? 'rpc-unreachable' : 'revert-failed',
-      detail: message,
+      detail: redact(message),
     })
   }
 }
