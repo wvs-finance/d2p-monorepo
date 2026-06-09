@@ -25,7 +25,7 @@
 
 ### Backend Provisioning (PROV)
 
-- [ ] **PROV-01**: Operator can run a `--no-mint` / `SKIP_MINT=true` provisioning variant that deploys a fresh `MacroHedgeExecutor` on the BuildBear fork with `numberOfLegs == 0`
+- [x] **PROV-01**: Operator can run a `--no-mint` / `SKIP_MINT=true` provisioning variant that deploys a fresh `MacroHedgeExecutor` on the BuildBear fork with `numberOfLegs == 0`
 - [ ] **PROV-02**: The provisioning run funds the **dedicated `DEMO_SIGNER_PK` address** (distinct from the deployer) with enough native gas to sign `resolveFromMandate`, via `hardhat_setBalance`, and the funding happens **inside the captured snapshot** so a later `evm_revert` restores the funded balance (basefee zeroed before any `buildbear_ERC20Faucet`). Collateral/approvals for the executor are deposited as part of the deploy so the signer's **first** mint cannot revert for missing collateral.
 - [ ] **PROV-03**: The provisioning run captures an `evm_snapshot` id **after** deploy + collateral deposit + signer funding but **before** any mint, and records it in the deployment artifact (`snapshotId` field). Verified by a round-trip: `evm_revert(snapshotId)` then a fresh `resolveFromMandate` succeeds (legs, collateral, and signer gas all restored).
 - [x] **PROV-04**: The provisioning run writes `buildbear-deployments.json` directly to the frontend artifact path (computed from a stable anchor, with `mkdir -p`) with `mintTxHash` serialized as JSON `null` (not `""`) on the `--no-mint` path, so committed addresses cannot drift from the fork
@@ -98,7 +98,7 @@ Explicitly excluded for v3.0, with reasoning.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | EXEC-01 | Phase 10 | Complete |
-| PROV-01 | Phase 10 | Pending |
+| PROV-01 | Phase 10 | Complete |
 | PROV-02 | Phase 10 | Pending |
 | PROV-03 | Phase 10 | Pending |
 | PROV-04 | Phase 10 | Complete |
