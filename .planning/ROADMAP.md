@@ -37,6 +37,11 @@
   - [ ] 10-02-PLAN.md — Wave 1: EXEC-01 guard insertion (GREEN) + SKIP_MINT gate + --no-mint shell variant (signer-in-snapshot, direct frontend artifact write) (EXEC-01, PROV-01, PROV-04) [wave 1]
   - [ ] 10-03-PLAN.md — Wave 2 (operator-manual, not CI): live --no-mint spike + provision producing 10-SPIKE-EVIDENCE.md (EXEC-01, PROV-01, PROV-02, PROV-03, PROV-04) [wave 2]
 - [ ] **Phase 11: Frontend Server Routes** — New `buildbear-sign` and `buildbear-reset` API routes with server-side viem signing and Somnia mode decoupling; the `'buildbear'` mode variant in `mode.ts`; runs in parallel with Phase 10
+
+  **Plans:** 3 plans
+  - [ ] 11-01-PLAN.md — Wave 0: RED test scaffolds (sign reason-codes + reset + upstream) + `mode.ts` 'buildbear' + `lib/env.ts` DEMO_SIGNER_PK + key-leak arch test (MINT-01, MINT-02, MINT-03) [wave 0]
+  - [ ] 11-02-PLAN.md — Wave 1: `buildbear-sign` route (discriminated reason codes + signer pre-flight) + OPEN `buildbear-reset` route (evm_revert+evm_snapshot, documented limitation) (MINT-01) [wave 1]
+  - [ ] 11-03-PLAN.md — Wave 1: Somnia decoupling cut in `handleLiveConfirm` (before agent1) + `buildUpstreamFromReplayArtifact` mandate swap + line-order arch test (MINT-02, MINT-03) [wave 1]
 - [ ] **Phase 12: Live Path Integration** — Converges Phase 10 artifact and Phase 11 routes in `CornerstoneClientShell`: Somnia decoupling cut FIRST, then `handleBuildBearConfirm()`, un-void `writeContractAsync`, reset-guard mount flow, `RunState: 'failed'` terminal state, and `RunState: 'fork-used'` advisory
 - [ ] **Phase 13: Evidence Polish and Judge Runbook** — Real on-chain evidence surfaces (tx hash, explorer link, block number, positionId, margin delta), anti-fishing disclosures, `ForkVerifiedPill` relabeling, the zero-secret judge runbook with corrected `.env.example` and operator reset procedure, **and the `pnpm demo` local-demo-mode command (OPS-07: throwaway fork-burner key → full live one-click sim on the judge's own localhost; replay by default)**
 
@@ -210,7 +215,7 @@ Plans:
 | 5. Read-First Wallet and DeFi Surface | 3/4 | In Progress|  |
 | **v3.0 — Judge-Runnable Live BuildBear Demo** | | | |
 | 10. Backend Single-Use Guard + `--no-mint` Provisioning | 2/3 | Complete    | 2026-06-09 |
-| 11. Frontend Server Routes | 0/3 | Not started | - |
+| 11. Frontend Server Routes | 0/3 | Planned     | - |
 | 12. Live Path Integration | 0/3 | Not started | - |
 | 13. Evidence Polish and Judge Runbook | 0/2 | Not started | - |
 
