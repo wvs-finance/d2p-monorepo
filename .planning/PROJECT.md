@@ -134,6 +134,7 @@ The user explicitly questions whether traditional web UI is the right primary su
 - **Design discipline**: Apply `impeccable` anti-pattern rules — no Inter-for-everything, no purple-to-blue gradients, no card-nested-in-card, no gray-on-color text
 - **Epistemic honesty**: Failures (FAIL / PARKED iterations) must render with the same visual weight as passes; no marketing-style success-selection
 - **Deadline awareness**: From user memory — Proof of Ship MVP ~May 2 (already past), Uniswap Hook Incubator Cohort 9 Hookathon ~June 2 (~3 weeks out) — first milestone must align with hackathon demo readiness
+- **CI/PR governance (NON-NEGOTIABLE, user directive 2026-06-08)**: Every command that is *claimed to work / be on-rhythm* MUST be a step in the GitHub Actions CI workflow (`.github/workflows/ci.yml`). All code reaches the repo **only via Pull Requests**, and every PR must run that CI workflow (merge gated on green). Corollary (anti-fishing): any command that genuinely CANNOT run in CI — e.g. the live BuildBear-fork spike/provisioning (secret-gated, 3-day TTL) — must NOT be claimed as on-rhythm; it is explicitly operator-manual with recorded transcripts. CI/`ci.yml` changes themselves land via PR and take the DevOps Automator as Reviewer 2 in the two-step review.
 
 ## Key Decisions
 

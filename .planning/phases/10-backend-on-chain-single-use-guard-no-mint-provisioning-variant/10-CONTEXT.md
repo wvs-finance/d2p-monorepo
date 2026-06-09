@@ -29,6 +29,12 @@ Out of scope: the frontend server routes (Phase 11), the live-path integration /
 - Must contain: (a) the pre-guard 2nd-`resolveFromMandate` outcome on a **freshly-provisioned** `--no-mint` stack (clean baseline, not the dirty committed pool), (b) the `evm_snapshot`→`evm_revert` round-trip showing `numberOfLegs == 0` + collateral + signer gas restored, (c) a viem server-side signing dry-run of `resolveFromMandate` succeeding against the fork chain config, (d) the **on-fork** `cast` transcript showing the redeployed (guarded) executor reverts `"fork used"` on the 2nd attempt.
 - The phase is not "done" until this file exists with passing transcripts (ties to `/gsd:verify-work`).
 
+### CI / PR governance (user NON-NEGOTIABLE, 2026-06-08 — OPS-06)
+- The **EXEC-01 Foundry guard test** must be a CI step — it is auto-covered by the existing `forge test --no-match-path 'test/**/*[Ff]ork*'` lane in `.github/workflows/ci.yml` (no workflow edit needed for it to run; just ensure the test isn't named `*fork*`).
+- Any frontend unit tests added downstream ride the existing `vitest` lane.
+- The **live BuildBear-fork spike + `--no-mint` provisioning are NOT CI-runnable** (secret-gated, 3-day TTL) and must **never be claimed as on-rhythm/green**. They are operator-manual, proven only by the recorded `10-SPIKE-EVIDENCE.md` transcripts. This is the honest reconciliation of the CI rule, not an exception to it.
+- All Phase 10 code lands via **PR** with CI green. Any `ci.yml` change takes the DevOps Automator as Reviewer 2.
+
 ### Claude's Discretion
 - **Demo signer key lifecycle** (not discussed → my default): `DEMO_SIGNER_PK` is a **fixed** key generated once, stored in gitignored `contracts/.env` + the frontend server env (Vercel, non-`NEXT_PUBLIC_`), and reused across provisions; the provisioning script prints the funded signer **address** (never the key). The signer is distinct from `BUILDBEAR_DEPLOYER_PK`.
 - Exact `--no-mint` shell arg-parsing mechanism (simple `$1`/`case`), collateral funding amounts (reuse existing `DEFAULT_FUND_USD`/`DEFAULT_FUND_COP` unless the spike shows the first mint under-margins), and the precise `jq` reshaping for `mintTxHash: null` (`--argjson`).
