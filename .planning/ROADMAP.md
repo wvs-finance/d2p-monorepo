@@ -23,6 +23,20 @@
 
 ---
 
+## v3.0 Phases — Judge-Runnable Live BuildBear Demo
+
+**Milestone:** v3.0 — Judge-Runnable Live BuildBear Demo
+**Created:** 2026-06-08
+**Granularity:** Coarse (4 phases derived from two parallel tracks converging at integration)
+**Coverage:** 26/26 v3.0 requirements mapped (v2 — two-reviewer revision)
+
+- [ ] **Phase 10: Backend On-Chain Single-Use Guard + `--no-mint` Provisioning** — adds `require(numberOfLegs==0, "fork used")` to `MacroHedgeExecutor` (EXEC-01) + a `--no-mint` variant that redeploys a clean stack/executor, funds a dedicated signer inside an `evm_snapshot`, and writes the artifact (`snapshotId`, `mintTxHash:null`) directly to the frontend path. Gated by a live-fork empirical spike; not CI-verifiable.
+- [ ] **Phase 11: Frontend Server Routes** — New `buildbear-sign` and `buildbear-reset` API routes with server-side viem signing and Somnia mode decoupling; the `'buildbear'` mode variant in `mode.ts`; runs in parallel with Phase 10
+- [ ] **Phase 12: Live Path Integration** — Converges Phase 10 artifact and Phase 11 routes in `CornerstoneClientShell`: Somnia decoupling cut FIRST, then `handleBuildBearConfirm()`, un-void `writeContractAsync`, reset-guard mount flow, `RunState: 'failed'` terminal state, and `RunState: 'fork-used'` advisory
+- [ ] **Phase 13: Evidence Polish and Judge Runbook** — Real on-chain evidence surfaces (tx hash, explorer link, block number, positionId, margin delta), anti-fishing disclosures, `ForkVerifiedPill` relabeling, and the zero-secret judge runbook with corrected `.env.example` and operator reset procedure
+
+---
+
 ## Phase Details
 
 ### Phase 1: Foundation and Scaffold
@@ -189,6 +203,11 @@ Plans:
 | 3. Data Layer and On-Chain Dashboard | 3/3 | Complete   | 2026-05-29 |
 | 4. Agent Surface (MCP) | 0/? | Not started | - |
 | 5. Read-First Wallet and DeFi Surface | 3/4 | In Progress|  |
+| **v3.0 — Judge-Runnable Live BuildBear Demo** | | | |
+| 10. Backend Single-Use Guard + `--no-mint` Provisioning | 0/5 | Not started | - |
+| 11. Frontend Server Routes | 0/3 | Not started | - |
+| 12. Live Path Integration | 0/3 | Not started | - |
+| 13. Evidence Polish and Judge Runbook | 0/2 | Not started | - |
 
 ---
 
@@ -208,11 +227,41 @@ Phase 3: Data Layer and On-Chain Dashboard
     └──gates──> Phase 5 (instrument state from BFF)
 
 Phase 4 and Phase 5: Parallel after Phase 3 completes
+
+--- v3.0 Dependency Graph ---
+
+Wave 0 (shared, owned by Phase 10): artifact-loader.ts type migration
+    └──adds──> snapshotId?: string ; mintTxHash?: string | null
+    └──required by──> BOTH Phase 10 (artifact write) and Phase 11 (reset route reads snapshotId)
+
+Phase 10: Backend Single-Use Guard + --no-mint Provisioning (packages/backend)
+    └──empirical SPIKE first──> 2nd-mint behavior + evm_snapshot round-trip + viem server-sign dry-run (live fork)
+    └──adds──> EXEC-01 require(numberOfLegs==0,"fork used") + Foundry test + redeploy
+    └──produces──> buildbear-deployments.json with snapshotId + mintTxHash: null (direct to frontend path)
+    └──gates──> Phase 12 end-to-end integration testing
+    [parallel with Phase 11 after Wave-0; converge at Phase 12; NOT CI-verifiable]
+
+Phase 11: Frontend Server Routes (parallel with Phase 10 after Wave-0)
+    └──builds──> /api/cornerstone/buildbear-sign (+ signer-balance pre-flight) + /api/cornerstone/buildbear-reset
+    └──builds──> mode.ts 'buildbear' variant + Somnia decoupling + CORS-proxied freshness reads
+    └──gates──> Phase 12 (routes must exist before CornerstoneClientShell can call them)
+
+Phase 12: Live Path Integration (converges Phase 10 + Phase 11)
+    └──requires──> Phase 10 artifact (numberOfLegs == 0, snapshotId present)
+    └──requires──> Phase 11 routes (buildbear-sign + buildbear-reset deployed)
+    └──gates──> Phase 13 (confirmed receipt must exist before evidence surfaces)
+    [Somnia decoupling cut is the FIRST task within Phase 12]
+
+Phase 13: Evidence Polish and Judge Runbook
+    └──requires──> Phase 12 (confirmed receipt required for EVID-* wiring)
+    └──no blocking dependencies for OPS-*/HONEST-04/HONEST-05 (string/copy work)
 ```
 
 ---
 
 ## Coverage Validation
+
+### v1.0 Requirements (60/60)
 
 | Category | Requirements | Phase |
 |----------|-------------|-------|
@@ -225,6 +274,20 @@ Phase 4 and Phase 5: Parallel after Phase 3 completes
 | Wallet / DeFi | DEFI-01 through DEFI-07 (7 reqs) | Phase 5 |
 
 **Total mapped: 60/60 v1 requirements. No orphans.**
+
+### v3.0 Requirements (26/26)
+
+| Category | Requirements | Phase |
+|----------|-------------|-------|
+| Backend Single-Use Guard + Provisioning | EXEC-01, PROV-01, PROV-02, PROV-03, PROV-04 (5 reqs) | Phase 10 |
+| Live Mint Path (server routes + decoupling) | MINT-01, MINT-02, MINT-03 (3 reqs) | Phase 11 |
+| Live Mint Path (integration + store) | MINT-04, MINT-05 (2 reqs) | Phase 12 |
+| Anti-Fishing (integration-time) | HONEST-01, HONEST-02, HONEST-03 (3 reqs) | Phase 12 |
+| On-Chain Evidence | EVID-01, EVID-02, EVID-03, EVID-04, EVID-05, EVID-06 (6 reqs) | Phase 13 |
+| Anti-Fishing (polish) | HONEST-04, HONEST-05 (2 reqs) | Phase 13 |
+| Judge Runbook and Reset Ops | OPS-01, OPS-02, OPS-03, OPS-04, OPS-05 (5 reqs) | Phase 13 |
+
+**Total mapped: 26/26 v3.0 requirements. No orphans.** *(v2 — two-reviewer revision: added EXEC-01, EVID-06, OPS-05.)*
 
 ---
 
@@ -378,5 +441,99 @@ Plans:
 - [ ] 09-05-PLAN.md — Wave 2: T7 operator runbook + env (.env.example SOMNIA_OPERATOR_PK/AGENT1_ROUTE_SECRET/BuildBear RPC+addrs/dataKey/consensus; two-explorer expectation) + Evidence Collector live-DOM gate (replay/mock verified now; live two-leg DEFERRED to the cross-repo strategist deploy) (MOD5-AGENT1LIVE, MOD5-LIVE) [wave 2]
 
 ---
+
+### Phase 10: Backend — On-Chain Single-Use Guard + `--no-mint` Provisioning Variant
+
+**Milestone**: v3.0 — Judge-Runnable Live BuildBear Demo
+
+**Goal**: `MacroHedgeExecutor` gains a real on-chain single-use guard (`require(pool.numberOfLegs(address(this)) == 0, "fork used")`), and the `packages/backend` provisioning toolchain gains a `--no-mint`/`SKIP_MINT=true` variant that redeploys a clean Panoptic stack + fresh executor (numberOfLegs == 0), funds a **dedicated** demo signer inside a captured snapshot, and writes `buildbear-deployments.json` (with `snapshotId`, `mintTxHash: null`) directly to the frontend artifact path. **This phase is gated by an empirical spike against the live fork; it is NOT CI-verifiable** (it depends on a live, secret-gated, TTL-limited BuildBear sandbox).
+
+**Depends on**: Phase 9 (frontend artifact contract / `artifact-loader.ts` exist). The `artifact-loader.ts` type migration (`snapshotId?: string`, `mintTxHash?: string | null`) is a shared **Wave-0** task this phase owns and Phase 11 depends on.
+
+**Requirements**: EXEC-01, PROV-01, PROV-02, PROV-03, PROV-04
+
+**Security invariant**: `DEMO_SIGNER_PK` is a **dedicated** server-only key (distinct from `BUILDBEAR_DEPLOYER_PK`), funded by the provisioning script but never written to the artifact JSON and never `NEXT_PUBLIC_`. The artifact may carry the signer's funded *address* for transparency; never the key.
+
+**Why re-scoped (two-reviewer pass):** (a) the `numberOfLegs == 0` "freshness gate" did NOT exist in the contract — EXEC-01 adds it on-chain; (b) `--no-mint` is not a one-line flag: the executor's immutables bind pool→factory→the whole Panoptic core, so a fresh executor redeploys the full stack minus the final two `dispatch` calls; (c) the snapshot must be taken AFTER deploy+collateral+signer-funding but BEFORE any mint; (d) PROV-02 must fund the *dedicated signer*, not the deployer.
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. **Spike recorded (Wave 0):** a recorded transcript shows, against a **freshly-provisioned `--no-mint` throwaway stack** (NOT the dirty committed pool, so the baseline is unambiguous) — (a) the real outcome of a 2nd `resolveFromMandate` *before* the guard (`cast send`; a clean fresh-stack mint, then a 2nd attempt), (b) an `evm_snapshot`→`evm_revert` round-trip that restores `numberOfLegs == 0` + collateral + signer gas (probe-before-use; persistence is otherwise unverified), and (c) a viem server-side signing dry-run of `resolveFromMandate` succeeding against the fork's chain config. *(This means a minimal `--no-mint` provision capability must land before/with the spike.)*
+  2. **EXEC-01:** the `require(pool.numberOfLegs(address(this)) == 0, "fork used")` is placed in the **shared sink `_resolveAndMintAtStrike`** (covers all three mint entrypoints) and **before any `pool.dispatch`** (else the `numberOfLegs` view reverts `Reentrancy()`); proven by a Foundry unit/fuzz test (1st call succeeds, 2nd reverts — including via `resolveAndMint`) AND a recorded **on-fork** `cast` transcript showing the redeployed executor reverts `"fork used"` on the 2nd attempt.
+  3. `bash script/provision-buildbear-demo.sh --no-mint` produces a fresh executor reporting `numberOfLegs() == 0`, redeploying the Panoptic stack minus the final mint; the dedicated `DEMO_SIGNER_PK` address holds sufficient native gas (post-fund `eth_getBalance` assertion) and collateral/approvals are deposited so the signer's **first** mint cannot revert for missing collateral.
+  4. The frontend artifact at `packages/frontend/lib/apps/abrigo/cornerstone/buildbear-deployments.json` is written automatically (stable anchor, `mkdir -p`), carries a valid `snapshotId`, and serializes `mintTxHash` as JSON `null` (via `jq --argjson`, not `""`); `artifact-loader.ts` exposes `deployment.snapshotId` with no type errors. **The pre-EXEC-01 committed artifact + guard-less executor address are retired** (overwritten; never used for a live claim); `replay`-mode pinned addresses are confirmed address-independent or re-reconciled against the redeploy.
+  5. An `evm_revert(snapshotId)` followed by a fresh `resolveFromMandate` succeeds (legs, collateral, signer gas all restored) — proving the snapshot boundary is correct. **Phase completion ties to these recorded live-run transcripts, not a CI-green test.**
+
+**Plans**: TBD (4–5 expected — Wave-0 artifact-loader migration + minimal `--no-mint` capability + empirical spike → EXEC-01 guard in `_resolveAndMintAtStrike` + Foundry test → full `--no-mint` variant + snapshot/funding ordering → direct-write + on-fork redeploy/guard transcript + replay reconciliation)
+
+---
+
+### Phase 11: Frontend Server Routes
+
+**Milestone**: v3.0 — Judge-Runnable Live BuildBear Demo
+
+**Goal**: Two new Node-runtime API routes (`buildbear-sign` and `buildbear-reset`) and the `'buildbear'` mode variant in `mode.ts` exist, are unit-testable against a mock artifact, and the Somnia decoupling cut is in place in `handleLiveConfirm()` — so the BuildBear branch can never call `/api/abrigo/agent1` regardless of error paths. This phase develops in parallel with Phase 10 and requires no live BuildBear fork for its own unit tests.
+
+**Depends on**: Phase 9 (`/api/cornerstone/rpc` CORS proxy pattern, `workflow-store` seam, `CornerstoneClientShell` architecture); Phase 11 can proceed in parallel with Phase 10 but convergence at Phase 12 requires Phase 10's live artifact.
+
+**Requirements**: MINT-01, MINT-02, MINT-03
+
+**Security invariant**: `DEMO_SIGNER_PK` is server-only (`process.env.DEMO_SIGNER_PK`, no `NEXT_PUBLIC_`); route runtime is `nodejs` (not `edge`). Verified by a **scoped** grep: zero `DEMO_SIGNER_PK`/key references in client-bundled files (outside `app/api/`). *(Note: `privateKeyToAccount` legitimately exists in the server-only `app/api/abrigo/agent1` route — the gate must be path-scoped, not a blanket repo grep, which would false-positive.)*
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. `POST /api/cornerstone/buildbear-sign` exists with `runtime = 'nodejs'`, reads `DEMO_SIGNER_PK` from server env, signs `resolveFromMandate` via viem `privateKeyToAccount` + `createWalletClient` against the fork RPC, does a **signer-balance pre-flight** before submitting, waits for the receipt, decodes logs, reads `quoteMargin` strictly after `PositionMinted`, and returns the full view objects — verifiable via a unit test against a mock artifact (with a locally-mocked `snapshotId`).
+  2. `POST /api/cornerstone/buildbear-reset` calls `evm_revert(deployment.snapshotId)` then immediately `evm_snapshot` for the next id, and returns `{ ok, reason }` — verifiable by mocking the RPC fetch.
+  3. `mode.ts` exports a `'buildbear'` `CornerstoneMode` variant and `handleLiveConfirm()` hard-branches on `resolvedMode === 'buildbear'` BEFORE any `/api/abrigo/agent1` reference — verified by grep returning zero live-path Somnia call sites.
+  4. **CORS resolved:** the freshness/`numberOfLegs` reads route through the `/api/cornerstone/rpc` proxy (not a direct browser `deployment.rpcUrl` call), so a CORS block cannot cause a silent replay; an unreachable proxy surfaces an explicit advisory.
+
+**Plans**: TBD (3 expected — server routes + signer pre-flight; `'buildbear'` mode + Somnia decoupling; CORS-proxied freshness reads). Depends on Phase 10's Wave-0 `artifact-loader` migration for the `snapshotId` type.
+
+---
+
+### Phase 12: Live Path Integration
+
+**Milestone**: v3.0 — Judge-Runnable Live BuildBear Demo
+
+**Goal**: `CornerstoneClientShell` wires the two tracks into a judge-runnable one-click live mint. This is **net-new integration**, not "un-voiding": today `runWorkflowLive` is never called and `void writeContractAsync` is a no-op. This phase builds the **shell → `buildbear-sign` route → `store.emit()`** pipeline, EXTENDS the `RunState` state machine, and REPLACES the existing silent degradation.
+
+**Depends on**: Phase 10 (live `--no-mint` artifact with `snapshotId`, EXEC-01 deployed); Phase 11 (`buildbear-sign`/`buildbear-reset` routes + `'buildbear'` mode). **Somnia decoupling is the FIRST task** within this phase, before any write wiring (reversing this reproduces the v2.0 outage failure).
+
+**Requirements**: MINT-04, MINT-05, HONEST-01, HONEST-02, HONEST-03
+
+**State-machine work (HONEST-02/03 — extension, NOT additive):** `workflow-store.ts` `RunState` (currently `idle|a1|a2_decision|minting|done`) is extended with `submitting`/`pending`/`reverted`/`confirmed`/`failed`/`fork-used`; the engine↔store event-shape contract is reconciled so no `runWorkflowLive` emit is dropped; and the **three existing silent `setResolvedMode('replay')` flips** in `handleLiveConfirm` are removed in favor of explicit announced states.
+
+**Security invariant**: After this phase, `DEMO_SIGNER_PK` appears in zero client-bundle files; the `void writeContractAsync` stub is absent. Verified by Evidence Collector live-DOM gate.
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. A judge navigating to `/apps/abrigo/cornerstone?mode=live` with a fresh BuildBear fork (numberOfLegs == 0) sees a single "Confirm" button — no wallet connection prompt, no funding step, no secret required — and clicking it triggers a real `resolveFromMandate` transaction on the BuildBear fork, as evidenced by a non-null tx hash appearing in `LiveTxStateRow`.
+  2. When the shared fork has already been used (`numberOfLegs > 0`), the judge sees an explicit advisory state — labeled "fork already used — operator reset needed" or equivalent — rather than a silent fallback to replay mode; the UI never silently substitutes a replay run for a failed live run.
+  3. Any error in the live path (RPC unreachable, tx reverted, route 500) renders a visible `{ status: 'failed', reason }` terminal state in the UI — not a mode switch to replay — and the error reason is announced via `aria-live`; the mode indicator in `ModeBanner` is never removed or silently changed.
+  4. `grep -r "agent1\|somnia\|50312" packages/frontend/lib/apps/abrigo/cornerstone/workflow-engine.ts` returns zero live-path call sites — confirming the Somnia decoupling is complete and the BuildBear path cannot be re-coupled by accident.
+
+**Plans**: TBD (3 expected — RunState extension + engine↔store reconciliation; shell→`buildbear-sign`→store pipeline + remove silent flips + reset-guard mount; e2e honesty gate)
+
+---
+
+### Phase 13: Evidence Polish and Judge Runbook
+
+**Milestone**: v3.0 — Judge-Runnable Live BuildBear Demo
+
+**Goal**: The confirmed on-chain mint surfaces all real evidence fields (tx hash with copy button, BuildBear explorer link, block number, positionId, margin delta) and every anti-fishing invariant is polished (demo signer disclosure, `ForkVerifiedPill` neutral labeling, Somnia operator-only advisory). The judge runbook is corrected: `.env.example` documents all v3.0 env vars, `pnpm build` and `forge test --no-match-path '*fork*'` are green from a clean clone, and the operator reset procedure is documented.
+
+**Depends on**: Phase 12 (confirmed receipt must exist for EVID-* evidence field wiring; the live path must be operational before evidence surfaces can be verified honest).
+
+**Requirements**: EVID-01, EVID-02, EVID-03, EVID-04, EVID-05, EVID-06, HONEST-04, HONEST-05, OPS-01, OPS-02, OPS-03, OPS-04, OPS-05
+
+**Note on requirement co-location**: HONEST-04/05 are copy updates (demo-signer + **PKE-path** disclosure that the school/strategist label is cosmetic on the live path; `ForkVerifiedPill` neutral label). EVID-06 adds the honest "not-yet-minted" empty state. OPS-03/04/05 are runbook entries (one-use snapshot reset, TTL provision-morning-of precondition, single-concurrent-judge limitation). OPS-01 also fixes the `.env.example` forward-reference to the previously-nonexistent `--no-mint` flag. All low-risk once Phase 12 is operational.
+
+**Success Criteria** (what must be TRUE when this phase completes):
+  1. After a confirmed live mint, `LiveTxStateRow` displays the real transaction hash with a copy-to-clipboard button, the real BuildBear explorer link rendered only when a real receipt URL exists (never a placeholder), and the real block number from the receipt — all visible without scrolling on a 360px viewport.
+  2. The `OnChainEvidencePanel` shows the minted position token ID and the strike/tick derived from the real `positionId`, plus the margin delta decoded from the real mint receipt — with no `$` PnL claim, no fabricated values, no raw `0x000…0` token IDs; and when no live receipt exists (mint not yet run / reverted / fork unavailable) it renders an honest "not yet minted" empty state (EVID-06).
+  3. The `ModeBanner` discloses in both `es-CO` and `en` that the tx was signed by a pre-funded **dedicated** demo signer (not the judge's wallet, not the deployer), that the Somnia Agent-1 leg is operator-only, and that the live mint always uses the **PKE** path (so the school/strategist label is cosmetic on the live path); the `ForkVerifiedPill` reads "BuildBear sandbox · fork-verified" in neutral styling (never `status-pass`/green).
+  4. A developer with no prior context can run `git clone … && pnpm install && pnpm build` and `forge test --no-match-path '*fork*'` from a clean clone and see both pass with zero secrets and no wallet funding — confirmed by the corrected `.env.example` (every v3.0 env var; no forward-reference to a nonexistent flag) and the README test lane.
+  5. The runbook documents the **single-concurrent-judge** limitation and the **one-use snapshot** reset procedure (each `evm_snapshot` id is good for exactly one `evm_revert`; re-snapshot or re-provision for the next session), and makes "re-provision within T-24h of judging" a hard precondition (OPS-03/04/05).
+
+**Plans**: TBD (2 expected — evidence surfaces + empty state; runbook/disclosures + `.env.example` fix)
+
+---
 *Roadmap created: 2026-05-11*
-*Last updated: 2026-06-02 — Phase 7 (agent reasoning + position-execution surface, Module 3) planned: 4 plans (07-00 data layer → 07-01/02 trace+position parallel → 07-03 detail-route wire + live-verify); MOD3-HONKER deferred to 7.x*
+*Last updated: 2026-06-08 — v3.0 phases 10–13 (Judge-Runnable Live BuildBear Demo) REVISED to v2 after the two-reviewer pass (Reality Checker + Solidity Smart Contract Engineer); 26/26 v3.0 requirements mapped. Re-review pending before commit.*

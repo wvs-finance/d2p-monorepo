@@ -10,17 +10,25 @@
 2. Judge action is **one-click pre-funded** (no bring-your-own-funded-wallet; a server-side demo signer signs).
 3. **Shared fork + operator reset guard** (no per-judge provisioning, no KV-backed auto-reset for v3.0).
 4. Backend BuildBear provisioning variant is **in scope** (`packages/backend`).
+5. **Single-use is enforced on-chain.** A real `require(pool.numberOfLegs(address(this)) == 0, "fork used")` is added to `MacroHedgeExecutor.resolveFromMandate` (contract change + redeploy on the fork). The frontend `numberOfLegs` read is then a true reflection of an on-chain guarantee, not a UI-only convention. *(Resolves two-reviewer BLOCKER: the freshness gate did not exist in the contract.)*
+6. The demo signer is a **dedicated** server-only `DEMO_SIGNER_PK`, **distinct from the deployer key**, funded via `hardhat_setBalance` **inside** the captured snapshot. *(Resolves two-reviewer BLOCKER: PROV-02 funded the deployer, not the signer.)*
+
+> **Review status:** v1 of this requirement set + roadmap failed the mandatory two-reviewer pass (Reality Checker + Solidity Smart Contract Engineer — both NEEDS WORK). This revision (v2) encodes the BLOCKER/MAJOR resolutions. Re-review required before commit/execution.
 
 ---
 
 ## v3.0 Requirements
 
+### Backend Contract — Single-Use Guard (EXEC)
+
+- [ ] **EXEC-01**: `MacroHedgeExecutor` reverts with `"fork used"` when `pool.numberOfLegs(address(this)) != 0`. The guard is placed in the **shared sink `_resolveAndMintAtStrike`** (not only `resolveFromMandate`) so all three mint entrypoints (`resolveFromMandate`, `resolveAndMint`, `_onResult`) are covered and single-use is unbypassable. The check must sit **before any `pool.dispatch`** (the `numberOfLegs` view reverts `Reentrancy()` if called while the pool guard is active). Verified by a Foundry unit/fuzz test (first call succeeds, second reverts `"fork used"`, including via `resolveAndMint`) **and** by a recorded **on-fork** `cast call`/`cast send` showing the redeployed executor reverts `"fork used"` on the 2nd attempt. *(Prerequisite spike runs against a freshly-provisioned `--no-mint` stack — see PROV — so the pre-guard 2nd-mint baseline is unambiguous, not a dirty-pool revert.)*
+
 ### Backend Provisioning (PROV)
 
 - [ ] **PROV-01**: Operator can run a `--no-mint` / `SKIP_MINT=true` provisioning variant that deploys a fresh `MacroHedgeExecutor` on the BuildBear fork with `numberOfLegs == 0`
-- [ ] **PROV-02**: The provisioning run funds the demo signer address with enough native gas (and any required tokens) to sign `resolveFromMandate` (uses `hardhat_setBalance`; basefee zeroed before any `buildbear_ERC20Faucet`)
-- [ ] **PROV-03**: The provisioning run captures an `evm_snapshot` id and records it in the deployment artifact (`snapshotId` field)
-- [ ] **PROV-04**: The provisioning run writes `buildbear-deployments.json` directly to the frontend artifact path (no manual copy step) so committed addresses cannot drift from the fork
+- [ ] **PROV-02**: The provisioning run funds the **dedicated `DEMO_SIGNER_PK` address** (distinct from the deployer) with enough native gas to sign `resolveFromMandate`, via `hardhat_setBalance`, and the funding happens **inside the captured snapshot** so a later `evm_revert` restores the funded balance (basefee zeroed before any `buildbear_ERC20Faucet`). Collateral/approvals for the executor are deposited as part of the deploy so the signer's **first** mint cannot revert for missing collateral.
+- [ ] **PROV-03**: The provisioning run captures an `evm_snapshot` id **after** deploy + collateral deposit + signer funding but **before** any mint, and records it in the deployment artifact (`snapshotId` field). Verified by a round-trip: `evm_revert(snapshotId)` then a fresh `resolveFromMandate` succeeds (legs, collateral, and signer gas all restored).
+- [ ] **PROV-04**: The provisioning run writes `buildbear-deployments.json` directly to the frontend artifact path (computed from a stable anchor, with `mkdir -p`) with `mintTxHash` serialized as JSON `null` (not `""`) on the `--no-mint` path, so committed addresses cannot drift from the fork
 
 ### Live Mint Path (MINT)
 
@@ -37,21 +45,23 @@
 - [ ] **EVID-03**: The confirmed state displays the real block number from the receipt
 - [ ] **EVID-04**: The evidence panel shows the minted position token ID and the strike/tick derived from the real `positionId`
 - [ ] **EVID-05**: The evidence panel shows the margin delta (hedge cost) decoded from the real mint
+- [ ] **EVID-06**: When no live receipt exists (mint not yet run, reverted, or fork unavailable), the evidence panel renders an honest "not yet minted" empty state — never fabricated/placeholder values (no `0x000…`, no fake `$` PnL)
 
 ### Anti-Fishing & Mode Integrity (HONEST)
 
-- [ ] **HONEST-01**: When `numberOfLegs > 0` (fork already used), the judge sees an explicit "fork used — reset needed" advisory state, never a silent fallback to replay
-- [ ] **HONEST-02**: The workflow store exposes a `failed` terminal `RunState` so live errors surface explicitly instead of silently degrading
-- [ ] **HONEST-03**: Every live→replay degradation is announced via `aria-live` with a specific reason (TTL expired / fork used / RPC unreachable)
-- [ ] **HONEST-04**: Live mode discloses that the transaction was signed by a pre-funded demo signer (not the judge's wallet) and that the Somnia Agent-1 leg is operator-only in this build
+- [ ] **HONEST-01**: When the fork is already used — detected by the frontend `numberOfLegs(executor) > 0` read AND/OR an on-chain `"fork used"` revert (EXEC-01) — the judge sees an explicit "fork used — reset needed" advisory state, never a silent fallback to replay
+- [ ] **HONEST-02**: The workflow store's `RunState` is extended with the live states the engine already emits (`submitting`/`pending`/`reverted`/`confirmed`) plus terminal `failed` and `fork-used`, and the engine↔store event-shape contract is reconciled so no emitted event is dropped. *(This is a state-machine extension, not an additive field.)*
+- [ ] **HONEST-03**: The three existing silent `setResolvedMode('replay')` flips in `handleLiveConfirm` are removed; every live→replay degradation is instead announced via `aria-live` with a specific reason (TTL expired / fork used / RPC-or-CORS unreachable / mint reverted)
+- [ ] **HONEST-04**: Live mode discloses (a) the tx was signed by a pre-funded **dedicated** demo signer (not the judge's wallet, not the deployer), (b) the Somnia Agent-1 leg is operator-only in this build, and (c) the live mint always uses the **PKE** economic-theory path, so the displayed school/strategist label is cosmetic on the live path
 - [ ] **HONEST-05**: The "BuildBear sandbox · fork-verified" provenance pill is labeled precisely and styled neutral (never pass/green)
 
 ### Judge Runbook & Reset Ops (OPS)
 
 - [ ] **OPS-01**: A judge can go clone → build → see the live demo with zero secrets and no wallet funding (corrected `.env.example`, documented runbook)
 - [ ] **OPS-02**: A fresh clone is green: keyless `forge test --no-match-path '*fork*'` and `pnpm build` both pass (carry-forward of the `.env.example`/README fixes)
-- [ ] **OPS-03**: An operator can reset the shared fork between judge sessions via a documented procedure (`evm_revert` + re-snapshot, or re-run the provisioning variant)
-- [ ] **OPS-04**: The demo survives the BuildBear 3-day TTL via a documented provision-morning-of procedure; an expired fork degrades to a labeled advisory, never a silent or broken state
+- [ ] **OPS-03**: An operator can reset the shared fork between judge sessions via a documented procedure. The runbook states the one-use snapshot limitation loudly: each `evm_snapshot` id is good for exactly one `evm_revert`; the operator must re-snapshot (and refresh `snapshotId`) or re-run the provisioning variant for the next session.
+- [ ] **OPS-04**: The demo survives the BuildBear 3-day TTL: the runbook makes "re-provision within T-24h of judging" a **hard precondition** (the fork must show `numberOfLegs == 0` / `mintTxHash: null` before any live claim), and an expired/used fork degrades to a labeled advisory, never a silent or broken state. **The pre-EXEC-01 committed artifact and its guard-less executor address are explicitly retired** — they are poisoned (already-minted, no on-chain guard) and must never be used for a live claim; the `--no-mint` redeploy overwrites the artifact, and `replay`-mode pinned addresses are confirmed to either be address-independent or re-reconciled against the post-redeploy executor.
+- [ ] **OPS-05**: The runbook documents the **single-concurrent-judge** limitation (one shared fork + one signer + one snapshot): two judges minting in the same session is a known, stated constraint — the second sees the `"fork used"` advisory until the operator resets. The `buildbear-sign` route does a signer-balance pre-flight before submitting.
 
 ---
 
@@ -84,39 +94,40 @@ Explicitly excluded for v3.0, with reasoning.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROV-01 | — | Pending |
-| PROV-02 | — | Pending |
-| PROV-03 | — | Pending |
-| PROV-04 | — | Pending |
-| MINT-01 | — | Pending |
-| MINT-02 | — | Pending |
-| MINT-03 | — | Pending |
-| MINT-04 | — | Pending |
-| MINT-05 | — | Pending |
-| EVID-01 | — | Pending |
-| EVID-02 | — | Pending |
-| EVID-03 | — | Pending |
-| EVID-04 | — | Pending |
-| EVID-05 | — | Pending |
-| HONEST-01 | — | Pending |
-| HONEST-02 | — | Pending |
-| HONEST-03 | — | Pending |
-| HONEST-04 | — | Pending |
-| HONEST-05 | — | Pending |
-| OPS-01 | — | Pending |
-| OPS-02 | — | Pending |
-| OPS-03 | — | Pending |
-| OPS-04 | — | Pending |
+| EXEC-01 | Phase 10 | Pending |
+| PROV-01 | Phase 10 | Pending |
+| PROV-02 | Phase 10 | Pending |
+| PROV-03 | Phase 10 | Pending |
+| PROV-04 | Phase 10 | Pending |
+| MINT-01 | Phase 11 | Pending |
+| MINT-02 | Phase 11 | Pending |
+| MINT-03 | Phase 11 | Pending |
+| MINT-04 | Phase 12 | Pending |
+| MINT-05 | Phase 12 | Pending |
+| HONEST-01 | Phase 12 | Pending |
+| HONEST-02 | Phase 12 | Pending |
+| HONEST-03 | Phase 12 | Pending |
+| EVID-01 | Phase 13 | Pending |
+| EVID-02 | Phase 13 | Pending |
+| EVID-03 | Phase 13 | Pending |
+| EVID-04 | Phase 13 | Pending |
+| EVID-05 | Phase 13 | Pending |
+| EVID-06 | Phase 13 | Pending |
+| HONEST-04 | Phase 13 | Pending |
+| HONEST-05 | Phase 13 | Pending |
+| OPS-01 | Phase 13 | Pending |
+| OPS-02 | Phase 13 | Pending |
+| OPS-03 | Phase 13 | Pending |
+| OPS-04 | Phase 13 | Pending |
+| OPS-05 | Phase 13 | Pending |
 
 **Coverage:**
-- v3.0 requirements: 23 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 23 ⚠️
+- v3.0 requirements: 26 total (added EXEC-01, EVID-06, OPS-05 in the two-reviewer revision)
+- Mapped to phases: 26 (100%) — finalized by roadmapper revision
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-06-08*
-*Last updated: 2026-06-08 after milestone v3.0 definition*
+*Last updated: 2026-06-08 — traceability populated after v3.0 roadmap creation (phases 10–13)*
