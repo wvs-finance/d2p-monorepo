@@ -1,13 +1,14 @@
 {
   "chainId": 31337,
-  "executor": "0xa95Ffdf51f71fE9C8861Fdbb1cAA664FA78A5FE3",
-  "pool": "0x0cc08e6ea0C37368Ab38e571BdE90C31Cc7Aab4A",
-  "riskManagement": "0x15Ff6De9Ca03c2e63c3Cb8cDBd396a60FCa6711E",
-  "factory": "0x1860336ce4D4836A0FdDE095450A9aB07EAc657D",
-  "riskEngine": "0x123a97B1C55c512998801285965E6e4C78762fE5",
+  "executor": "0xE1903A4cc5Ecc87EC212A1cAEC8cd11a2A4d5ac4",
+  "pool": "0x3062252A94d85835ed8AA1CCeb50010a92596480",
+  "riskManagement": "0x9495E9BC7e4829810Dd4fF6C492fe18720840D8b",
+  "factory": "0x78D160d8A3F51C09Ade2beCb7658469E054F432B",
+  "riskEngine": "0x78967FB725D9203c71d70A6f9374AC3021e2BD5E",
   "rpcUrl": "https://rpc.buildbear.io/colossal-groot-e8ea55ce",
-  "mintTxHash": "0xfce415a600488617180eea9379bc3b117b0967faa1bcfcbd3dff94a61de42bbd",
-  "mintedStrike": 360360,
-  "capturedAt": "2026-06-08T00:15:09.000Z",
-  "source": "abrigo-somnia 15-01 provision-buildbear-demo.sh"
+  "mintTxHash": null,
+  "mintedStrike": null,
+  "capturedAt": "2026-06-09T03:28:32.000Z",
+  "snapshotId": "0x1",
+  "source": "abrigo-somnia --no-mint provision-buildbear-demo.sh"
 }

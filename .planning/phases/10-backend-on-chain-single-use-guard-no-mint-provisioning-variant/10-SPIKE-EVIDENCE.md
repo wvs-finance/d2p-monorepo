@@ -169,10 +169,38 @@ cast send <guarded-executor> "resolveFromMandate(...)" <mandate...> 0 1000000 \
 
 Phase 10 is complete only when ALL of the following hold:
 
-- [ ] (a) Pre-guard 2nd-mint baseline recorded
-- [ ] (b) `evm_snapshot`→`evm_revert` round-trip recorded (legs==0 + signer gas + fresh mint)
-- [ ] (c) viem server-sign dry-run recorded
-- [ ] (d) On-fork post-guard `"fork used"` revert recorded
-- [ ] The fresh executor address ≠ poisoned `0xa95Ffdf51f71fE9C8861Fdbb1cAA664FA78A5FE3`
-- [ ] `git diff` shows the frontend artifact (`buildbear-deployments.json`) changed (no manual-copy drift)
-- [ ] Fork-liveness pre-flight (`cast chain-id`) succeeded immediately before each recorded section
+- [~] (a) Pre-guard 2nd-mint baseline — covered KEYLESS by the 10-01/10-02 mutation test (guard removed → 2nd `resolveAndMint` does NOT revert "fork used"); the live executor was deployed WITH the guard, so the unguarded baseline is not separately observable on it (would require deploying a stashed pre-guard build — redundant given the mutation proof).
+- [x] (b) `evm_snapshot`→`evm_revert` round-trip recorded (legs 2→0 + signer gas restored + fresh mint succeeds)
+- [~] (c) viem server-sign dry-run — script is **tsc-green** (its acceptance); live standalone run blocked by the `@/` path alias (needs tsx/vitest path-resolution). §(c) is a Phase 11 dependency; the real server route is built in Phase 11.
+- [x] (d) On-fork post-guard `"fork used"` revert recorded
+- [x] The fresh executor `0xE1903A4cc5Ecc87EC212A1cAEC8cd11a2A4d5ac4` ≠ poisoned `0xa95Ffdf51f71fE9C8861Fdbb1cAA664FA78A5FE3`
+- [x] `git diff` shows the frontend artifact (`buildbear-deployments.json`) changed (poisoned retired)
+- [x] Fork-liveness pre-flight (`cast chain-id` → 31337) succeeded before the run
+
+---
+
+## AUTOMATED LIVE-RUN EVIDENCE (2026-06-08, operator-authorized run)
+
+**Sandbox:** `https://rpc.buildbear.io/colossal-groot-e8ea55ce` (chainId 31337, alive) — creds rescued from `abrigo-somnia/contracts/.env`.
+**Fresh stack:** executor `0xE1903A4cc5Ecc87EC212A1cAEC8cd11a2A4d5ac4`, pool `0x3062252A94d85835ed8AA1CCeb50010a92596480`, demo signer `0x6aBe11EDAa7eD3A36d3932E790b6F99b66A2122d` (dedicated, distinct from deployer), snapshotId `0x1`.
+
+**Provision (`./provision-buildbear-demo.sh --no-mint`):** `NUMBER_OF_LEGS=0`, `mintTxHash: null`, `snapshotId: 0x1`, artifact written directly to the frontend path; "executor is FRESH … overwrites/retires the poisoned committed artifact." → **PROV-01/02/03/04**
+
+**On-chain reads:** `numberOfLegs(executor)` = `0` (fresh); `cast balance <signer>` = `1000000000000000000000000` (funded in-snapshot). → **PROV-01, PROV-02**
+
+**§(d) EXEC-01 on-fork (`forge script ProveGuardOnFork --broadcast`, signed by demo signer):**
+```
+MINT_1_OK (resolveFromMandate succeeded on fresh executor)
+MINT_2_REVERT_REASON: fork used
+```
+
+**§(b) snapshot round-trip:**
+```
+legs before revert: 2          # one resolveFromMandate mints a long+short leg pair
+cast rpc evm_revert 0x1 -> true
+legs after revert:  0          # restored
+signer balance after revert: 1000000000000000000000000   # gas restored (funding was inside the snapshot)
+fresh mint after revert -> MINT_1_OK ; 2nd -> "fork used"
+```
+
+**Note (one-use snapshot):** snapshot `0x1` was consumed by this test's `evm_revert`. Before an actual judge demo, re-run `./provision-buildbear-demo.sh --no-mint` to capture a fresh snapshot (OPS-03/04).
