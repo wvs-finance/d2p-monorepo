@@ -103,9 +103,9 @@ Explicitly excluded for v3.0, with reasoning.
 | PROV-02 | Phase 10 | Pending |
 | PROV-03 | Phase 10 | Pending |
 | PROV-04 | Phase 10 | Complete |
-| MINT-01 | Phase 11 | Pending |
-| MINT-02 | Phase 11 | Pending |
-| MINT-03 | Phase 11 | Pending |
+| MINT-01 | Phase 11 | In Progress (11-01 scaffold; route in 11-02) |
+| MINT-02 | Phase 11 | In Progress (decoupling cut in 11-03) |
+| MINT-03 | Phase 11 | In Progress (helper in 11-03) |
 | MINT-04 | Phase 12 | Pending |
 | MINT-05 | Phase 12 | Pending |
 | HONEST-01 | Phase 12 | Pending |

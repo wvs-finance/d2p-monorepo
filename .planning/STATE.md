@@ -2,22 +2,22 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Phases — Judge-Runnable Live BuildBear Demo
-status: planning
-stopped_at: Phase 11 planned (3 plans, two-step-cleared) — ready to execute
-last_updated: "2026-06-09T14:14:48.547Z"
-last_activity: "2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271)."
+status: executing
+stopped_at: Completed 11-01-PLAN.md (Wave-0 RED scaffold) — next 11-02 (buildbear routes)
+last_updated: "2026-06-09T14:27:56.391Z"
+last_activity: "2026-06-09 — Plan 11-01 executed: 'buildbear' mode + DEMO_SIGNER_PK server env (mode.test 8/8 GREEN, zero NEXT_PUBLIC_ leak); 4 RED scaffolds pinning the full reason-code contract (buildbear-sign 9 cases incl. M1 no-rpc-leak + M2 body-cap; buildbear-reset 6 cases incl. B1 undici fetch-failed shape; workflow-engine buildUpstream) — all RED_CONFIRMED (route/helper absent), tsconfig-excluded; GREEN non-vacuous arch test enforcing DEMO_SIGNER_PK + privateKeyToAccount path-scope; tsc+biome green. 3 atomic commits (6ce5b6b, 81575d0, 6443eb9). NOTE: MINT-01/02/03 remain In Progress — scaffold only; routes/decoupling land in 11-02/11-03."
 progress:
   total_phases: 16
   completed_phases: 11
   total_plans: 63
-  completed_plans: 58
+  completed_plans: 59
 ---
 
 # Project State: d2p Finance Frontend (d2p/frontend)
 
 **Last updated:** 2026-06-08
 **Session type:** Roadmap creation (v3.0 phases 10–13 derived and written)
-**Stopped at:** Phase 11 planned (3 plans, two-step-cleared) — ready to execute
+**Stopped at:** Completed 11-01-PLAN.md
 
 ---
 
@@ -33,10 +33,17 @@ progress:
 
 ## Current Position
 
-**Active phase:** Phase 10 (Backend Single-Use Guard + `--no-mint` Provisioning) — in progress (2/3 plans)
-**Active plan:** 10-03 (next) — operator-manual live `--no-mint` run + fill `10-SPIKE-EVIDENCE.md` §(a)-(d) (live BuildBear fork, secret-gated)
-**Status:** Ready to plan
-**Last activity:** 2026-06-08 — Plan 10-02 executed: EXEC-01 guard inserted at MacroHedgeExecutor.sol:370 (RED test GREEN, mutation-proven non-vacuous; full secret-free suite 97/97); SKIP_MINT gate in ProvisionBuildBearDemo (mint extracted to _mint(), gated in run()); --no-mint shell variant (signer-funded-before-snapshot, !NO_MINT-gated receipt parse, MONO_ROOT-asserted direct frontend artifact write with mintTxHash:null + snapshotId); artifact-null-roundtrip vitest (4/4) replaces tsx; type-checked viem simulate-only spike-viem-sign.ts. 4 atomic commits (19b5ff9, 6a7eea7, 7e52fef, 73cc271).
+**Active phase:** Phase 11 (Frontend Server Routes — MINT-01/02/03) — in progress (1/3 plans; runs parallel with Phase 10)
+**Active plan:** 11-02 (next) — implement `/api/cornerstone/buildbear-sign` + `/api/cornerstone/buildbear-reset` routes (turn the 11-01 RED suites GREEN, un-exclude from tsconfig)
+**Status:** Ready to execute 11-02
+**Last activity:** 2026-06-09 — Plan 11-01 executed (Wave-0 RED scaffold): 'buildbear' mode + DEMO_SIGNER_PK server env (mode.test 8/8 GREEN); 4 RED test scaffolds pinning the full buildbear-sign/reset/buildUpstream reason-code contract (all RED_CONFIRMED, tsconfig-excluded); GREEN non-vacuous path-scope arch test; tsc+biome green. 3 atomic commits (6ce5b6b, 81575d0, 6443eb9). MINT-01/02/03 remain In Progress — scaffold only.
+
+**Decisions (Plan 11-01):**
+- `'buildbear'` added to `CornerstoneMode` union + `parseMode` (after the `'mock'` check); `DEFAULT_MODE`/`parseMode(null)` stays `'replay'` — zero-secret default preserved.
+- `DEMO_SIGNER_PK` mirrors `SOMNIA_OPERATOR_PK` in `lib/env.ts` (server schema + runtimeEnv, `z.string().min(1).optional()`); never `NEXT_PUBLIC_`.
+- Architecture key-leak test matches REAL code reads (`env.DEMO_SIGNER_PK` / `process.env.DEMO_SIGNER_PK` / `privateKeyToAccount(`) and excludes itself from its own scan — so `mode.ts`'s documentation comment about the key doesn't false-positive; proven non-vacuous via a temporary injected leak.
+- `tsconfig.json` Wave-0 stub excludes kept comment-free (strict-JSON tsc gate); the per-line note lives in 11-01-SUMMARY instead.
+- The well-known Hardhat #0 test key is defined ONCE in `tests/fixtures/test-signer.ts` with a single `gitleaks:allow`; tests import it, never re-inline.
 
 **Decisions (Plan 10-02):**
 - EXEC-01 guard at `MacroHedgeExecutor.sol:370` (after the chainId require :365, before the first `pool.dispatch` ~:405, above the dispatch gate) — string revert `"fork used"`; the mutation check (remove -> RED `next call did not revert as expected` -> restore -> GREEN) proves the GREEN is non-vacuous.
@@ -117,6 +124,7 @@ progress:
 | Phase 10 P01 | 4 | 3 tasks | 3 files |
 | Phase 10 P02 | 9 | 4 tasks | 5 files |
 | Phase 10 P02 | 9 | 4 tasks | 5 files |
+| Phase 11 P01 | 8 | 3 tasks | 9 files |
 
 ## Accumulated Context
 
